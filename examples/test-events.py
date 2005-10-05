@@ -1,0 +1,80 @@
+#!/usr/bin/env python
+# Dogtail demo script
+__author__ = 'David Malcolm <dmalcolm@redhat.com>'
+
+import atspi
+import dogtail
+
+# Test of event callbacks
+# Under construction
+
+def callback(event): 
+    source = event.source
+    if isinstance(source, atspi.Accessible):
+        sourceStr = " source:%s"%(str(dogtail.tree.Node(source)))
+    else:
+        sourceStr = ""
+    print "Got event: %s%s"%(event.type, sourceStr)
+
+#listener = atspi.EventListener(callback, ["window:create"])
+#listener = atspi.EventListener(callback, ["focus:", "object:", "window:"])
+#listener = atspi.EventListener(callback, ["window:"])
+#listener = atspi.EventListener(callback, ["object:"])
+#listener = atspi.EventListener(callback, ["focus:"])
+
+# explicit list of all events, taken from at-spi/test/event-listener-test.c:
+eventNames = [
+    "focus:",
+    "mouse:rel",
+    "mouse:button",
+    "mouse:abs",
+    "keyboard:modifiers",
+    "object:property-change",
+    "object:property-change:accessible-name",
+    "object:property-change:accessible-description",
+    "object:property-change:accessible-parent",
+    "object:state-changed",
+    "object:state-changed:focused",
+    "object:selection-changed",
+    "object:children-changed",
+    "object:active-descendant-changed",
+    "object:visible-data-changed",
+    "object:text-selection-changed",
+    "object:text-caret-moved",
+    "object:text-changed",
+    "object:column-inserted",
+    "object:row-inserted",
+    "object:column-reordered",
+    "object:row-reordered",
+    "object:column-deleted",
+    "object:row-deleted",
+    "object:model-changed",
+    "object:link-selected",
+    #"object:bounds-changed", # avoid swamping log
+    "window:minimize",
+    "window:maximize",
+    "window:restore",
+    "window:activate",
+    "window:create",
+    "window:deactivate",
+    "window:close",
+    "window:lower",
+    "window:raise",
+    "window:resize",
+    "window:shade",
+    "window:unshade",
+    "object:property-change:accessible-table-summary",
+    "object:property-change:accessible-table-row-header",
+    "object:property-change:accessible-table-column-header",
+    "object:property-change:accessible-table-summary",
+    "object:property-change:accessible-table-row-description",
+    "object:property-change:accessible-table-column-description",
+    "object:test"
+    ]
+
+#for eventName in eventNames:
+#    listener = atspi.EventListener(callback, [eventName])
+listener = atspi.EventListener(callback, eventNames)
+
+#listener = atspi.EventListener(callback, [""])
+atspi.event_main()

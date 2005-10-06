@@ -22,6 +22,16 @@ class TimeStamp:
 	def __init__(self):
 		self.now = "0"
 		self.timetup = time.localtime()
+	
+	def zeroPad(self, int, width = 1):
+		"""
+		Pads an integer 'int' with zeroes, up to width 'width'.
+		Returns a string.
+		"""
+		if int < 10 ** width:
+			return ("0" * width) + str(int)
+		else: 
+			return str(int)
 
 	# file stamper
 	def fileStamp(self, filename):
@@ -34,17 +44,7 @@ class TimeStamp:
 		# Should produce rel-eng style filestamps
 		# format it all pretty by chopping the tuple
 		for i in range(3):
-			# pop in the year
-			if i == 0:
-				self.now = self.now + str(self.timetup[i])
-
-			# format single digit month and day to 2 digit
-			else:
-				x = self.timetup[i]
-				if x < 10:
-					self.now = self.now + "0" + str(self.timetup[i])
-				else:
-					self.now = self.now + str(self.timetup[i])
+			self.now = self.now + self.zeroPad(self.timetup[i])
 		return self.now
 
 	# Log entry stamper
@@ -61,25 +61,15 @@ class TimeStamp:
 				self.now = str(self.timetup[i])
 			# Format Month and Day
 			elif i == 1 or i == 2:
-				x = self.timetup[i]
-				if x < 10:
-					self.now = self.now +  "." + "0" + str(self.timetup[i])
-				else:
-					self.now = self.now + "." + str(self.timetup[i])
+				self.now = self.now + "." + self.zeroPad(self.timetup[i])
 			else:
 				x = self.timetup[i]
 				# make the " " between Day and Hour and put in the hour
 				if i == 3:
-					if x < 10:
-						self.now = self.now + "	" + "0" + str(self.timetup[i])
-					else:
-						self.now = self.now + "	" + str(self.timetup[i])
+					self.now = self.now + " " + self.zeroPad(self.timetup[i])
 				# Otherwise Use the ":" divider
 				else:
-					if x < 10:
-						self.now = self.now + ":" + "0" + str(self.timetup[i])
-					else:
-						self.now = self.now + ":" + str(self.timetup[i])
+					self.now = self.now + ":" + self.zeroPad(self.timetup[i])
 		return self.now
 
 

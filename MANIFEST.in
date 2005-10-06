@@ -1,4 +1,6 @@
+include COPYING
 include Makefile
+include HACKING
 include INSTALL
 recursive-include docs *
 recursive-include debian *

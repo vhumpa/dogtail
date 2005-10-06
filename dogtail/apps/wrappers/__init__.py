@@ -6,7 +6,7 @@ Author: David Malcolm <dmalcolm@redhat.com>
 """
 
 __author__ = "David Malcolm <dmalcolm@redhat.com>"
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 __copyright__ = "Copyright © 2005 Red Hat, Inc."
 __license__ = "GPL"
 

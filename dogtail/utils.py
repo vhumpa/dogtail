@@ -13,6 +13,7 @@ David Malcolm <dmalcolm@redhat.com>
 import os
 from config import Config
 from time import sleep
+from logging import debugLogger as logger
 
 def screenshot(windowname='', file='', args=''):
 	"""
@@ -50,6 +51,7 @@ def screenshot(windowname='', file='', args=''):
 	# and our mouse is now probably unusable
 	if answer:
 		raise ValueError, "Screenshot failed: " + answer[-1]
+	else: logger.log("Screenshot taken: " + path)
 
 def run(string, timeout=Config.runTimeout, interval=Config.runInterval, desktop=None, dumb=False, appName=None):
 	"""
@@ -88,7 +90,6 @@ def run(string, timeout=Config.runTimeout, interval=Config.runInterval, desktop=
 			sleep(interval)
 	return pid
 
-from logging import debugLogger as logger
 def doDelay(delay=None):
 	"""
 	Utility function to insert a delay (with logging and a configurable

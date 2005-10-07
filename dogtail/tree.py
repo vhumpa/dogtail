@@ -82,7 +82,7 @@ try:
 	import wnck
 	gotWnck = True
 except ImportError:
-	print "wnck could not be imported"	
+	print "Warning: Dogtail could not import the Python bindings for libwnck.  Window-manager manipulation will not be available."
 	gotWnck = False
 
 SearchError = "Couldn't find"
@@ -804,13 +804,14 @@ class Root (Node):
 
 	def application(self, appName):
 		"""
-		Gets an application by name.
+		Gets an application by name, returning an Application instance 
+		or raising an exception.
 
 		This is implemented using findChild, and hence will automatically retry
 		if no such child is found, and will eventually raise an exception.  It
 		also logs the search.
 		"""
-		return root.findChild(predicate.IsAnApplicationNamed(appName),recursive=False)
+		return Application(root.findChild(predicate.IsAnApplicationNamed(appName),recursive=False))
 
 class Application (Node):
 	def dialog(self, dialogName, recursive=False):

@@ -64,17 +64,17 @@ def __makeAptPackageDb():
 	Manufacture a PackageDb for an APT system: Debian/Ubuntu/etc.
 	"""
 	class AptPackageDb(PackageDb):
-			def getVersion(self, packageName):
-				import apt_pkg
-				apt_pkg.init()
-				cache = apt_pkg.GetCache()
-				packages = cache.Packages
-				for package in packages:
-					if package.Name == packageName:
-						import re
-						verString = re.match('.*Ver:\'(.*)-.*\' Section:', str(package.CurrentVer)).group(1)
-						return Version.fromString(verString)
-				raise "Package not found: %s"%packageName
+		def getVersion(self, packageName):
+			import apt_pkg
+			apt_pkg.init()
+			cache = apt_pkg.GetCache()
+			packages = cache.Packages
+			for package in packages:
+				if package.Name == packageName:
+					import re
+					verString = re.match('.*Ver:\'(.*)-.*\' Section:', str(package.CurrentVer)).group(1)
+					return Version.fromString(verString)
+			raise "Package not found: %s"%packageName
 	return AptPackageDb()
 
 print "Detecting distribution: ",

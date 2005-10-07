@@ -6,7 +6,7 @@ __author__ = 'Zack Cerza <zcerza@redhat.com'
 from dogtail import tree
 from dogtail.utils import run
 from time import sleep
-from os import environ, path
+from os import environ, path, remove
 environ['LANG']='en_US.UTF-8'
 
 # Remove the output file, if it's still there from a previous run
@@ -17,10 +17,10 @@ if path.isfile(path.join(path.expandvars("$HOME"), "Desktop", "UTF8demo.txt")):
 run("gedit")
 
 # Get a handle to gedit's application object.
-gedit = tree.root.findChild(name = 'gedit', roleName = 'application')
+gedit = tree.root.application('gedit')
 
 # Get a handle to gedit's text object.
-textbuffer = gedit.findChild(roleName = 'text')
+textbuffer = gedit.child(roleName = 'text')
 
 # Load the UTF-8 demo file.
 from sys import path
@@ -30,29 +30,26 @@ utfdemo = file(path[0] + '/data/UTF-8-demo.txt')
 textbuffer.text = utfdemo.read()
 
 # Get a handle to gedit's File menu.
-filemenu = gedit.findChild(name = 'File', roleName = 'menu')
+filemenu = gedit.menu('File')
 
 # Get a handle to gedit's Save button.
-savebutton = gedit.findChild(name = 'Save', roleName = 'push button')
+savebutton = gedit.button('Save')
 
-# Click the button and wait a second.
+# Click the button
 savebutton.click()
-sleep(1)
 
 # Get a handle to gedit's Save As... dialog.
-saveas = gedit.findChild(name = 'Save as...', roleName = 'dialog')
+saveas = gedit.dialog('Save as...')
 
 # We want to save to the file name 'UTF8demo.txt'.
-saveas.findChild(roleName = 'text').text = 'UTF8demo.txt'
+saveas.child(roleName = 'text').text = 'UTF8demo.txt'
 
 # Let's save it to the desktop.
-saveas.findChild(name = 'Desktop', roleName = 'menu item').click()
-sleep(0.25)
+saveas.menuItem('Desktop').click()
 
 # Click the Save button.
-saveas.findChild(name = 'Save', roleName = 'push button').click()
-sleep(0.5)
+saveas.button('Save').click()
 
 # Let's quit now.
-filemenu.findChild(name = 'Quit').click() 
+filemenu.menuItem('Quit').click() 
 

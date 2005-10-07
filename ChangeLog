@@ -1,5 +1,10 @@
 2005-10-07  David Malcolm  <dmalcolm@redhat.com>
 
+	* examples/gedit-test-utf8-tree-api.py:
+	Fix the example against changes to the API
+
+2005-10-07  David Malcolm  <dmalcolm@redhat.com>
+
 	* dogtail/tree.py: 
 	Provide a better warning for when import wnck fails (it's a warning, 
 	not an error).  Make Root.application() return an Application instance,

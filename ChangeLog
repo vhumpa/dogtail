@@ -1,3 +1,8 @@
+2005-10-17 19:33  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py: Add patch from Brent Smith, adding Gentoo
+	support. Closes: #318225
+
 2005-10-07 19:10  Zack Cerza <zcerza@redhat.com>
 
 	* ChangeLog: Add history since import, tweak formatting. Also add

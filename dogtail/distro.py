@@ -44,6 +44,11 @@ class Suse(Distro):
 	Class representing one of the SuSE or SuSE-derived distributions
 	"""
 
+class Gentoo(Distro):
+	"""
+	Class representing one of the Gentoo or Gentoo-derived distributions
+	"""
+
 def __makeRpmPackageDb():
 	"""
 	Manufacture a PackageDb for an RPM system.  We hide this inside a factory method so that we only import the RPM Python bindings if we're on a platform likely to have them
@@ -77,6 +82,25 @@ def __makeAptPackageDb():
 			raise "Package not found: %s"%packageName
 	return AptPackageDb()
 
+def __makePortagePackageDb():
+	"""
+	Manufacture a PackageDb for a portage based system, i.e. Gentoo.
+	"""
+	class PortagePackageDb(PackageDb):
+		def getVersion(self, packageName):
+			# the portage utilities are almost always going to be in /usr/lib/portage/pym
+			import sys
+			sys.path.append ('/usr/lib/portage/pym')
+			import portage
+			# FIXME: this takes the first package returned in the list, in the case that there are
+			# slotted packages, and removes the leading category such as 'sys-apps'
+			gentooPackageName = portage.db["/"]["vartree"].dbapi.match(packageName)[0].split('/')[1];
+			# this removes the distribution specific versioning returning only the upstream version
+			upstreamVersion = portage.pkgsplit(gentooPackageName)[1]
+			#print "Version of package is: " + upstreamVersion
+			return Version.fromString(upstreamVersion);
+	return PortagePackageDb()
+
 print "Detecting distribution: ",
 if os.path.exists ("/etc/redhat-release"):
 	print "Red Hat/Fedora/derived distribution"
@@ -95,7 +119,8 @@ elif os.path.exists ("/etc/debian_version"):
 	packageDb = __makeAptPackageDb()
 elif os.path.exists ("/etc/gentoo-release"):
 	print "Gentoo (or derived distribution)"
-	raise "Gentoo support not yet implemented.	" + PATCH_MESSAGE
+	distro = Gentoo()
+	packageDb = __makePortagePackageDb()
 elif os.path.exists ("/etc/slackware-version"):
 	print "Slackware"
 	raise "Slackware support not yet implemented.  " + PATCH_MESSAGE

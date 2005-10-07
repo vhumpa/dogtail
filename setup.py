@@ -24,7 +24,7 @@ def examples_data():
 
 setup (
 	name = 'dogtail',
-	version = '0.4.1',
+	version = '0.4.2',
 	description = """GUI test tool and automation framework that uses Accessibility (a11y) technologies to communicate with desktop applications.""",
 	author = """Zack Cerza <zcerza@redhat.com>,
 Ed Rousseau <rousseau@redhat.com>, 

@@ -17,11 +17,14 @@ export StudlyCaps='[a-zA-Z_][a-zA-Z0-9_]*$$'
 check:
 	pylint --indent-string="	" --class-rgx=${StudlyCaps} --function-rgx=${camelCAPS} --method-rgx=${camelCAPS} --variable-rgx=${camelCAPS} --argument-rgx=${camelCaps} dogtail sniff/sniff examples/*.py
 
+tarball:
+	python setup.py sdist
+
 rpm:
 	python setup.py bdist_rpm
 
 deb:
-	fakeroot debian/rules binary
+	dpkg-buildpackage -rfakeroot -us -uc
 
 apidocs:
 	rm -rf website/doc/*

@@ -4,6 +4,24 @@ __author__ = "Zack Cerza <zcerza@redhat.com>"
 from distutils.core import setup
 from distutils.command.bdist_rpm import bdist_rpm
 
+def examples():
+	import os
+	exList = os.listdir(os.curdir + '/examples/')
+	result = []
+	for ex in exList:
+		if ex.split('.')[-1] == 'py' and ex != 'crack.py':
+			result = result + ['examples/' + ex]
+	return result
+
+def examples_data():
+	import os
+	dataList = os.listdir(os.curdir + '/examples/data/')
+	result = []
+	for data in dataList:
+		if data != 'CVS':
+			result = result + ['examples/data/' + data]
+	return result
+
 setup (
 	name = 'dogtail',
 	version = '0.4.1',
@@ -17,9 +35,9 @@ David Malcolm <dmalcolm@redhat.com>""",
 	scripts = ['sniff/sniff'],
 	data_files = [
 				('share/doc/dogtail/examples',
-					['examples/gedit-test-utf8-procedural-api.py']),
+					examples() ),
 				('share/doc/dogtail/examples/data', 
-					['examples/data/UTF-8-demo.txt']),
+					examples_data() ),
 				('share/dogtail/glade', ['sniff/sniff.glade']),
 				('share/applications', ['sniff/sniff.desktop'])
 				],

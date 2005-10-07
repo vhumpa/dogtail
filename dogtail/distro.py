@@ -49,6 +49,11 @@ class Gentoo(Distro):
 	Class representing one of the Gentoo or Gentoo-derived distributions
 	"""
 
+class Conary(Distro):
+	"""
+	Class representing a Conary-based distribution
+	"""
+
 def __makeRpmPackageDb():
 	"""
 	Manufacture a PackageDb for an RPM system.  We hide this inside a factory method so that we only import the RPM Python bindings if we're on a platform likely to have them
@@ -101,6 +106,21 @@ def __makePortagePackageDb():
 			return Version.fromString(upstreamVersion);
 	return PortagePackageDb()
 
+def __makeConaryPackageDb():
+	"""
+	Manufacture a PackageDb for a Conary-based system: rPath Linux, Foresight, etc.
+	"""
+	class ConaryPackageDb(PackageDb):
+		def getVersion(self, packageName):
+			import conary
+			from conaryclient import ConaryClient
+			client = ConaryClient()
+			dbVersions = client.db.getTroveVersionList(packageName)
+			if not len(dbVersions):
+				raise "Package not found: %s" % packageName
+			return dbVersions[0].trailingRevision().asString().split("-")[0]
+	return ConaryPackageDb()
+
 print "Detecting distribution: ",
 if os.path.exists ("/etc/redhat-release"):
 	print "Red Hat/Fedora/derived distribution"
@@ -124,6 +144,10 @@ elif os.path.exists ("/etc/gentoo-release"):
 elif os.path.exists ("/etc/slackware-version"):
 	print "Slackware"
 	raise "Slackware support not yet implemented.  " + PATCH_MESSAGE
+elif os.path.exists ("/var/lib/conarydb/conarydb"):
+    print "Conary-based distribution"
+    distro = Conary()
+    packageDb = __makeConaryPackageDb()
 else:
 	print "Unrecognised"
 	raise "Your distribution was not recognised.  " + PATCH_MESSAGE

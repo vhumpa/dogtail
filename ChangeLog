@@ -1,3 +1,8 @@
+2005-10-17 19:40  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py: Add patch from Tim Gerla, adding Conary
+	support. Closes: #318224
+
 2005-10-17 19:33  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/distro.py: Add patch from Brent Smith, adding Gentoo

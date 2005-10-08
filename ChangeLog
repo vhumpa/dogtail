@@ -1,3 +1,7 @@
+2005-10-08 17:07  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Expand the root node of the TreeView on startup.
+
 2005-10-08 15:40  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail.spec: Added, from Jeremy Katz.

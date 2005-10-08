@@ -230,6 +230,9 @@ def main():
 	view.set_model(model)
 
 	resetModel()
+
+	rootPath = model.get_path(model.get_iter_root())
+	view.expand_row(rootPath, False)
 	
 	gtk.main()
 

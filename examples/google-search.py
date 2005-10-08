@@ -41,7 +41,7 @@ gfp.searchButton.press()
 
 # Scrape out the results:
 frame = gfp.child(roleName='frame')
-results = frame.findAllChildrenSatisfying(GenericPredicate(roleName='text'), recursive=False)
+results = frame.findChildren(predicate.GenericPredicate(roleName='text'), recursive=False)
 for result in results:
     print "Result:"
     print result.text

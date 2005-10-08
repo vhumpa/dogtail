@@ -1,3 +1,8 @@
+2005-10-08 11:29  Zack Cerza <zcerza@redhat.com>
+
+	* examples/google-search.py: Fix call to findChildren(). Fix reference
+	to predicate.GenericPredicate.
+
 2005-10-08 11:20  Zack Cerza <zcerza@redhat.com>
 	* examples/firefox-test-browsing-local-html-file.py, 
 	examples/gnome-panel-test-starting-every-app.py,

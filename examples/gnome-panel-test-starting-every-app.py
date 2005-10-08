@@ -8,7 +8,7 @@ __author__ = 'David Malcolm <dmalcolm@redhat.com>'
 from dogtail.apps.wrappers.gnomepanel import *
 
 import dogtail.config
-dogtail.Config.debugSearching=True
+dogtail.config.Config.debugSearching=True
 
 panel = GnomePanel()
 for launcher in panel.applications():

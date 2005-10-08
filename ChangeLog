@@ -1,3 +1,10 @@
+2005-10-08 11:20  Zack Cerza <zcerza@redhat.com>
+	* examples/firefox-test-browsing-local-html-file.py, 
+	examples/gnome-panel-test-starting-every-app.py,
+	examples/google-search.py,
+	examples/nautilus-test-icon-view-collage.py:
+	s/dogtail\.Config/dogtail.config.Config/
+
 2005-10-17 19:40  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/distro.py: Add patch from Tim Gerla, adding Conary

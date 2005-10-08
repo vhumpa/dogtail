@@ -17,11 +17,17 @@ export StudlyCaps='[a-zA-Z_][a-zA-Z0-9_]*$$'
 check:
 	pylint --indent-string="	" --class-rgx=${StudlyCaps} --function-rgx=${camelCAPS} --method-rgx=${camelCAPS} --variable-rgx=${camelCAPS} --argument-rgx=${camelCaps} dogtail sniff/sniff examples/*.py
 
-tarball:
+tarball: clean
 	python setup.py sdist
 
-rpm:
-	python setup.py bdist_rpm
+rpm: tarball
+ifneq ($(id -u),0)
+	echo "Attempting to use sudo to build the RPM..."
+	sudo rpmbuild -ta dist/dogtail-*.tar.gz
+else
+	rpmbuild -ta dist/dogtail-*.tar.gz
+endif
+
 
 deb:
 	dpkg-buildpackage -rfakeroot -us -uc

@@ -1,3 +1,13 @@
+2005-10-08 15:40  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail.spec: Added, from Jeremy Katz.
+
+	* MANIFEST.in: Add dogtail.spec.
+
+	* Makefile: Rework 'rpm' target to call the 'tarball' target first,
+	then build the rpm using dogtail.spec, using sudo if necessary. Also,
+	make the 'tarball' target call the 'clean' target.
+
 2005-10-08 11:29  Zack Cerza <zcerza@redhat.com>
 
 	* examples/google-search.py: Fix call to findChildren(). Fix reference

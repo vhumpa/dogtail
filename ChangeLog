@@ -1,3 +1,18 @@
+2005-10-09  David Malcolm  <dmalcolm@redhat.com>
+
+	* sniff/button.xpm, sniff/checkbutton.xpm, sniff/checkmenuitem.xpm, 
+	sniff/colorselection.xpm, sniff/combo.xpm, sniff/dialog.xpm, 
+	sniff/image.xpm, sniff/label.xpm, sniff/menubar.xpm, 
+	sniff/menuitem.xpm, sniff/notebook.xpm, sniff/scrolledwindow.xpm, 
+	sniff/spinbutton.xpm, sniff/statusbar.xpm, sniff/table.xpm, 
+	sniff/text.xpm, sniff/toolbar.xpm, sniff/tree.xpm, sniff/treeitem.xpm, 
+	sniff/unknown.xpm, sniff/viewport.xpm, sniff/vscrollbar.xpm, 
+	sniff/vseparator.xpm, sniff/window.xpm:  Add icons, copied from at-poke
+
+	* sniff/sniff: add constants to represent the tree model columns; use 
+	icons for nodes, based on code in at-poke.  Requires up-to-date pyspi
+	(for the role attribute)
+
 2005-10-08  David Malcolm  <dmalcolm@redhat.com>
 
 	* examples/recorder.py: Fix the imports so this works again.

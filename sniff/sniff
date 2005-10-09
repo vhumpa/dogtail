@@ -7,6 +7,7 @@ appAuthors = ['Zack Cerza <zcerza@redhat.com>']
 from dogtail import tree
 import gobject
 import gnome
+import atspi
 program = gnome.program_init(appName, '0.1')
 import gtk.glade
 try:
@@ -23,6 +24,13 @@ descTextLabel = x.get_widget('descTextLabel')
 actionsTextLabel = x.get_widget('actionsTextLabel')
 textLabel = x.get_widget('textLabel')
 textTextView = x.get_widget('textTextView')
+
+# Indices of the various fields of the tree model:
+MODEL_FIELD_NODE = 0
+MODEL_FIELD_NAME = 1
+MODEL_FIELD_ROLENAME = 2
+MODEL_FIELD_DESCRIPTION = 3
+MODEL_FIELD_PIXBUF = 4
 
 def quit(*args):
 	gtk.main_quit()
@@ -164,10 +172,10 @@ def populate(model, newChild, oldParent = None):
 	import pdb
 	#pdb.set_trace()
 	iter = model.insert_before(oldParent, None)
-	model.set_value(iter, 0, newChild)
-	model.set_value(iter, 1, newChild.name)
-	model.set_value(iter, 2, newChild.roleName)
-	model.set_value(iter, 3, newChild.description)
+	model.set_value(iter, MODEL_FIELD_NODE, newChild)
+	model.set_value(iter, MODEL_FIELD_NAME, newChild.name)
+	model.set_value(iter, MODEL_FIELD_ROLENAME, newChild.roleName)
+	model.set_value(iter, MODEL_FIELD_DESCRIPTION, newChild.description)
 	
 	try: 
 		for grandChild in newChild.children:
@@ -177,7 +185,7 @@ def populate(model, newChild, oldParent = None):
 def addNodeToModel(node, parentInTreeView = None):
 	global model
 	iter = model.insert_before(parentInTreeView, None)
-	model.set_value(iter, 0, node)
+	model.set_value(iter, MODEL_FIELD_NODE, node)
 	return iter
 
 def addChildren(node, parentInTreeView = None):
@@ -197,9 +205,135 @@ def resetModel():
 	model.clear()
 	showNode(tree.root)	
 
+def loadIcon(iconName):
+	return gtk.gdk.pixbuf_new_from_file(iconName)
+
+button_xpm = loadIcon("button.xpm")
+checkbutton_xpm = loadIcon("checkbutton.xpm")
+checkmenuitem_xpm = loadIcon("checkmenuitem.xpm")
+colorselection_xpm = loadIcon("colorselection.xpm")
+combo_xpm = loadIcon("combo.xpm")
+dialog_xpm = loadIcon("dialog.xpm")
+image_xpm = loadIcon("image.xpm")
+label_xpm = loadIcon("label.xpm")
+menubar_xpm = loadIcon("menubar.xpm")
+menuitem_xpm = loadIcon("menuitem.xpm")
+notebook_xpm = loadIcon("notebook.xpm")
+scrolledwindow_xpm = loadIcon("scrolledwindow.xpm")
+spinbutton_xpm = loadIcon("spinbutton.xpm")
+statusbar_xpm = loadIcon("statusbar.xpm")
+table_xpm = loadIcon("table.xpm")
+text_xpm = loadIcon("text.xpm")
+toolbar_xpm = loadIcon("toolbar.xpm")
+tree_xpm = loadIcon("tree.xpm")
+treeitem_xpm = loadIcon("treeitem.xpm")
+unknown_xpm = loadIcon("unknown.xpm")
+viewport_xpm = loadIcon("viewport.xpm")
+vscrollbar_xpm = loadIcon("vscrollbar.xpm")
+vseparator_xpm = loadIcon("vseparator.xpm")
+window_xpm = loadIcon("window.xpm")
+
+iconForRole = { \
+	atspi.SPI_ROLE_INVALID : None, \
+	atspi.SPI_ROLE_ACCEL_LABEL : label_xpm, \
+	atspi.SPI_ROLE_ALERT : None, \
+	atspi.SPI_ROLE_ANIMATION : None, \
+	atspi.SPI_ROLE_ARROW : None, \
+	atspi.SPI_ROLE_CALENDAR : None, \
+	atspi.SPI_ROLE_CANVAS : None, \
+	atspi.SPI_ROLE_CHECK_BOX : checkbutton_xpm, \
+	atspi.SPI_ROLE_CHECK_MENU_ITEM : checkmenuitem_xpm, \
+	atspi.SPI_ROLE_COLOR_CHOOSER : colorselection_xpm, \
+	atspi.SPI_ROLE_COLUMN_HEADER : None, \
+	atspi.SPI_ROLE_COMBO_BOX : combo_xpm, \
+	atspi.SPI_ROLE_DATE_EDITOR : None, \
+	atspi.SPI_ROLE_DESKTOP_ICON : None, \
+	atspi.SPI_ROLE_DESKTOP_FRAME : None, \
+	atspi.SPI_ROLE_DIAL : None, \
+	atspi.SPI_ROLE_DIALOG : dialog_xpm, \
+	atspi.SPI_ROLE_DIRECTORY_PANE : None, \
+	atspi.SPI_ROLE_DRAWING_AREA : None, \
+	atspi.SPI_ROLE_FILE_CHOOSER : None, \
+	atspi.SPI_ROLE_FILLER : None, \
+	atspi.SPI_ROLE_FONT_CHOOSER : None, \
+	atspi.SPI_ROLE_FRAME : window_xpm, \
+	atspi.SPI_ROLE_GLASS_PANE : None, \
+	atspi.SPI_ROLE_HTML_CONTAINER : None, \
+	atspi.SPI_ROLE_ICON : image_xpm, \
+	atspi.SPI_ROLE_IMAGE : image_xpm, \
+	atspi.SPI_ROLE_INTERNAL_FRAME : None, \
+	atspi.SPI_ROLE_LABEL : label_xpm, \
+	atspi.SPI_ROLE_LAYERED_PANE : viewport_xpm, \
+	atspi.SPI_ROLE_LIST : None, \
+	atspi.SPI_ROLE_LIST_ITEM : None, \
+	atspi.SPI_ROLE_MENU : menuitem_xpm, \
+	atspi.SPI_ROLE_MENU_BAR : menubar_xpm, \
+	atspi.SPI_ROLE_MENU_ITEM : menuitem_xpm, \
+	atspi.SPI_ROLE_OPTION_PANE : None, \
+	atspi.SPI_ROLE_PAGE_TAB : notebook_xpm, \
+	atspi.SPI_ROLE_PAGE_TAB_LIST : notebook_xpm, \
+	atspi.SPI_ROLE_PANEL : viewport_xpm, \
+	atspi.SPI_ROLE_PASSWORD_TEXT : None, \
+	atspi.SPI_ROLE_POPUP_MENU : None, \
+	atspi.SPI_ROLE_PROGRESS_BAR : None, \
+	atspi.SPI_ROLE_PUSH_BUTTON : button_xpm, \
+	atspi.SPI_ROLE_RADIO_BUTTON : None, \
+	atspi.SPI_ROLE_RADIO_MENU_ITEM : None, \
+	atspi.SPI_ROLE_ROOT_PANE : viewport_xpm, \
+	atspi.SPI_ROLE_ROW_HEADER : None, \
+	atspi.SPI_ROLE_SCROLL_BAR : vscrollbar_xpm, \
+	atspi.SPI_ROLE_SCROLL_PANE : scrolledwindow_xpm, \
+	atspi.SPI_ROLE_SEPARATOR : vseparator_xpm, \
+	atspi.SPI_ROLE_SLIDER : None, \
+	atspi.SPI_ROLE_SPIN_BUTTON : spinbutton_xpm, \
+	atspi.SPI_ROLE_SPLIT_PANE : None, \
+	atspi.SPI_ROLE_STATUS_BAR : statusbar_xpm, \
+	atspi.SPI_ROLE_TABLE : table_xpm, \
+	atspi.SPI_ROLE_TABLE_CELL : treeitem_xpm, \
+	atspi.SPI_ROLE_TABLE_COLUMN_HEADER : None, \
+	atspi.SPI_ROLE_TABLE_ROW_HEADER : None, \
+	atspi.SPI_ROLE_TEAROFF_MENU_ITEM : None, \
+	atspi.SPI_ROLE_TERMINAL : None, \
+	atspi.SPI_ROLE_TEXT : text_xpm, \
+	atspi.SPI_ROLE_TOGGLE_BUTTON : None, \
+	atspi.SPI_ROLE_TOOL_BAR : toolbar_xpm, \
+	atspi.SPI_ROLE_TOOL_TIP : None, \
+	atspi.SPI_ROLE_TREE : tree_xpm, \
+	atspi.SPI_ROLE_TREE_TABLE : tree_xpm, \
+	atspi.SPI_ROLE_UNKNOWN : unknown_xpm, \
+	atspi.SPI_ROLE_VIEWPORT : viewport_xpm, \
+	atspi.SPI_ROLE_WINDOW : window_xpm, \
+	atspi.SPI_ROLE_EXTENDED : None, \
+	atspi.SPI_ROLE_HEADER : None, \
+	atspi.SPI_ROLE_FOOTER : None, \
+	atspi.SPI_ROLE_PARAGRAPH : None, \
+	atspi.SPI_ROLE_RULER : None, \
+	atspi.SPI_ROLE_APPLICATION : None, \
+	atspi.SPI_ROLE_AUTOCOMPLETE : None, \
+	atspi.SPI_ROLE_EDITBAR : None, \
+	atspi.SPI_ROLE_EMBEDDED : None, \
+	atspi.SPI_ROLE_LAST_DEFINED: None }
+
+def getPixbufForNode(node):
+	if node.role==atspi.SPI_ROLE_APPLICATION:
+		# FIXME: Use the pixbuf from libwcnk (if available):
+		# wnckApp = Application(node).getWnckApplication()
+		# if wnckApp
+		return None
+	elif node.parent:
+		return iconForRole[node.role]
+	else:
+		# Don't give the root an icon; it gets unknown_xpm otherwise:
+		return None
+
 def getNodeAttr(column, cell, model, iter, attr):
-	node = model.get_value(iter, 0)
+	node = model.get_value(iter, MODEL_FIELD_NODE)
 	cell.set_property('text', getattr(node, attr))
+
+def getCellPixbufForNode(column, cell, model, iter):
+	node = model.get_value(iter, MODEL_FIELD_NODE)	
+	pixbuf = getPixbufForNode(node)
+	cell.set_property('pixbuf', pixbuf)
 
 def main():
 	connectSignals()
@@ -213,8 +347,18 @@ def main():
 
 	global sniff, view, model
 
-	view.insert_column_with_data_func(-1, "Name", \
-			gtk.CellRendererText(), getNodeAttr, 'name')
+	col = gtk.TreeViewColumn()
+	cellRenderer = gtk.CellRendererPixbuf()
+	col.pack_start(cellRenderer)
+	col.set_cell_data_func(cellRenderer, getCellPixbufForNode)
+
+	cellRenderer = gtk.CellRendererText()
+	col.pack_end(cellRenderer)
+	col.set_cell_data_func(cellRenderer, getNodeAttr, 'name')
+
+	col.set_title('Name')
+
+	view.insert_column(col, -1)
 	view.insert_column_with_data_func(-1, "Role Name", \
 			gtk.CellRendererText(), getNodeAttr, 'roleName')
 	view.insert_column_with_data_func(-1, "Description", \

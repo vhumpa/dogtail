@@ -1,5 +1,13 @@
 2005-10-09  Zack Cerza <zcerza@redhat.com>
 
+	* setup.py: Include sniff/*.xpm in the distribution.
+
+	* sniff/sniff: modify loadIcon() to first search the current
+	directory, then /usr/share/dogtail/icons. If distributions need to put
+	them elsewhere, we can certainly accommodate them.
+
+2005-10-09  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tree.py: Revert API change - rename Action.doThisAction() to
 	Action.do(). Add documentation in Node.__getattr__(), the only place
 	it is used, to make it clear what is happening.

@@ -205,7 +205,12 @@ def resetModel():
 	showNode(tree.root)	
 
 def loadIcon(iconName):
-	return gtk.gdk.pixbuf_new_from_file(iconName)
+	try:
+		pixbuf = gtk.gdk.pixbuf_new_from_file(iconName)
+	except gobject.GError:
+		iconName = '/usr/share/dogtail/icons/' + iconName
+		pixbuf = gtk.gdk.pixbuf_new_from_file(iconName)
+	return pixbuf
 
 button_xpm = loadIcon("button.xpm")
 checkbutton_xpm = loadIcon("checkbutton.xpm")

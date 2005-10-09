@@ -22,6 +22,15 @@ def examples_data():
 			result = result + ['examples/data/' + data]
 	return result
 
+def icons():
+	import os
+	list = os.listdir(os.curdir + '/sniff/')
+	result = []
+	for file in list:
+		if file.split('.')[-1] in ('xpm'):
+			result = result + ['sniff/' + file]
+	return result
+
 setup (
 	name = 'dogtail',
 	version = '0.4.2',
@@ -39,6 +48,7 @@ David Malcolm <dmalcolm@redhat.com>""",
 				('share/doc/dogtail/examples/data', 
 					examples_data() ),
 				('share/dogtail/glade', ['sniff/sniff.glade']),
+				('share/dogtail/icons', icons() ),
 				('share/applications', ['sniff/sniff.desktop'])
 				],
 	cmdclass = {

@@ -2,7 +2,7 @@
 # -*- coding: UTF8 -*-
 
 appName = 'Sniff'
-appAuthors = ['Zack Cerza <zcerza@redhat.com>']
+appAuthors = ['Zack Cerza <zcerza@redhat.com>', 'David Malcolm <dmalcolm@redhat.com']
 
 from dogtail import tree
 import gobject
@@ -45,8 +45,7 @@ def showAbout(*args):
 	about.set_name(appName)
 	about.set_authors(appAuthors)
 	about.set_comments('Explore your desktop with Dogtail')
-	about.set_license('GPL')
-	about.set_website('http://no.site.yet/')
+	about.set_website('http://people.redhat.com/zcerza/dogtail/')
 	about.show_all()
 
 def connectSignals():
@@ -169,13 +168,13 @@ def refreshAll(menuItem, *userParams):
 	resetModel()
 
 def populate(model, newChild, oldParent = None):
-	import pdb
+	#import pdb
 	#pdb.set_trace()
 	iter = model.insert_before(oldParent, None)
 	model.set_value(iter, MODEL_FIELD_NODE, newChild)
 	model.set_value(iter, MODEL_FIELD_NAME, newChild.name)
-	model.set_value(iter, MODEL_FIELD_ROLENAME, newChild.roleName)
-	model.set_value(iter, MODEL_FIELD_DESCRIPTION, newChild.description)
+	#model.set_value(iter, MODEL_FIELD_ROLENAME, newChild.roleName)
+	#model.set_value(iter, MODEL_FIELD_DESCRIPTION, newChild.description)
 	
 	try: 
 		for grandChild in newChild.children:
@@ -349,20 +348,20 @@ def main():
 
 	col = gtk.TreeViewColumn()
 	cellRenderer = gtk.CellRendererPixbuf()
-	col.pack_start(cellRenderer)
+	col.pack_start(cellRenderer, expand = False)
 	col.set_cell_data_func(cellRenderer, getCellPixbufForNode)
 
 	cellRenderer = gtk.CellRendererText()
-	col.pack_end(cellRenderer)
+	col.pack_end(cellRenderer, expand = False)
 	col.set_cell_data_func(cellRenderer, getNodeAttr, 'name')
 
 	col.set_title('Name')
 
 	view.insert_column(col, -1)
-	view.insert_column_with_data_func(-1, "Role Name", \
-			gtk.CellRendererText(), getNodeAttr, 'roleName')
-	view.insert_column_with_data_func(-1, "Description", \
-			gtk.CellRendererText(), getNodeAttr, 'description')
+	#view.insert_column_with_data_func(-1, "Role Name", \
+	#		gtk.CellRendererText(), getNodeAttr, 'roleName')
+	#view.insert_column_with_data_func(-1, "Description", \
+	#		gtk.CellRendererText(), getNodeAttr, 'description')
 	for column in view.get_columns():
 		column.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
 		column.set_resizable(True)

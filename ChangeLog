@@ -1,3 +1,27 @@
+2005-10-09  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Revert API change - rename Action.doThisAction() to
+	Action.do(). Add documentation in Node.__getattr__(), the only place
+	it is used, to make it clear what is happening.
+
+2005-10-09  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff.glade: Give the TreeView default focus.
+	Really remove the Edit menu.
+	
+2005-10-09  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Add Dave as an author. 
+	Correct the website URL and remove the License button in the About box.
+	Remove 'Role name  and 'Description' fields from the TreeView. 
+	Change the packing on the TreeView to disable expanding.
+	Stop importing pdb without using it.
+
+	* sniff/sniff.glade: Change the 'Snoop' menu item name to 'Sniff' - 
+	sniff used to be called snoop.
+	Add keyboard shortcuts to all menu items.
+	Remove Edit menu.
+
 2005-10-09  David Malcolm  <dmalcolm@redhat.com>
 
 	* dogtail/tree.py: added role attribute to Node (forgot to commit this
@@ -27,11 +51,11 @@
 	* examples/evolution-test-switching-components.py:  New example which
 	repeatedly cycles through Evolution's components.
 
-2005-10-08 17:07  Zack Cerza <zcerza@redhat.com>
+2005-10-08  Zack Cerza <zcerza@redhat.com>
 
 	* sniff/sniff: Expand the root node of the TreeView on startup.
 
-2005-10-08 15:40  Zack Cerza <zcerza@redhat.com>
+2005-10-08  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail.spec: Added, from Jeremy Katz.
 
@@ -41,40 +65,40 @@
 	then build the rpm using dogtail.spec, using sudo if necessary. Also,
 	make the 'tarball' target call the 'clean' target.
 
-2005-10-08 11:29  Zack Cerza <zcerza@redhat.com>
+2005-10-08  Zack Cerza <zcerza@redhat.com>
 
 	* examples/google-search.py: Fix call to findChildren(). Fix reference
 	to predicate.GenericPredicate.
 
-2005-10-08 11:20  Zack Cerza <zcerza@redhat.com>
+2005-10-08  Zack Cerza <zcerza@redhat.com>
 	* examples/firefox-test-browsing-local-html-file.py, 
 	examples/gnome-panel-test-starting-every-app.py,
 	examples/google-search.py,
 	examples/nautilus-test-icon-view-collage.py:
 	s/dogtail\.Config/dogtail.config.Config/
 
-2005-10-17 19:40  Zack Cerza <zcerza@redhat.com>
+2005-10-17  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/distro.py: Add patch from Tim Gerla, adding Conary
 	support. Closes: #318224
 
-2005-10-17 19:33  Zack Cerza <zcerza@redhat.com>
+2005-10-17  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/distro.py: Add patch from Brent Smith, adding Gentoo
 	support. Closes: #318225
 
-2005-10-07 19:10  Zack Cerza <zcerza@redhat.com>
+2005-10-07  Zack Cerza <zcerza@redhat.com>
 
 	* ChangeLog: Add history since import, tweak formatting. Also add
 	commit times (maybe we don't actually want them though, I'm not sure I
 	care).
 
-2005-10-07 17:45  David Malcolm <dmalcolm@redhat.com>
+2005-10-07  David Malcolm <dmalcolm@redhat.com>
 
 	* examples/gedit-test-utf8-tree-api.py: Fix the example against
 	changes to the API.
 
-2005-10-07 17:35  David Malcolm <dmalcolm@redhat.com>
+2005-10-07  David Malcolm <dmalcolm@redhat.com>
 
 	* dogtail/tree.py: Provide a better warning for when import wnck 
 	fails (it's a warning, not an error).  Make Root.application() return
@@ -82,23 +106,23 @@
 
 	* ChangeLog: Created.
 
-2005-10-07 12:40  Zack Cerza <zcerza@redhat.com>
+2005-10-07  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/distro.py: Minor indentation fix.
 
-2005-10-06 23:26  Zack Cerza <zcerza@redhat.com>
+2005-10-06  Zack Cerza <zcerza@redhat.com>
 
 	* setup.py, debian/changelog, dogtail/__init__.py,
 	  dogtail/apps/__init__.py, dogtail/apps/wrappers/__init__.py:
 	Bump version numbers.
 
-2005-10-06 23:22  Zack Cerza <zcerza@redhat.com>
+2005-10-06  Zack Cerza <zcerza@redhat.com>
 
 	* MANIFEST.in: add MANIFEST.in. (Why do I have to do this again?)
 	* setup.py: Add more examples and example data to distribution.
 	* Makefile: Add 'tarball' target. Fix 'deb' target.
 
-2005-10-06 17:23  Zack Cerza <zcerza@redhat.com>
+2005-10-06  Zack Cerza <zcerza@redhat.com>
 
 	* setup.py, debian/changelog, dogtail/__init__.py,
 	  dogtail/apps/__init__.py, dogtail/apps/wrappers/__init__.py:
@@ -106,28 +130,28 @@
 
 	* MANIFEST.in: Add missing files.
 
-2005-10-06 16:56  Zack Cerza <zcerza@redhat.com>
+2005-10-06  Zack Cerza <zcerza@redhat.com>
 
 	* setup.py, debian/changelog, dogtail/__init__.py,
 	  dogtail/apps/__init__.py, dogtail/apps/wrappers/__init__.py: Minor
 	  corrections to version numbers.
 
-2005-10-06 12:42  Zack Cerza <zcerza@redhat.com>
+2005-10-06  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/utils.py: Make screenshot() log the filename of the
 	screenshot via the debug logger.
 
-2005-10-06 11:25  Zack Cerza <zcerza@redhat.com>
+2005-10-06  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/logging.py: Add TimeStamp.zeroPad() to pad integers with
 	zeroes to a specified width. Make TimeStamp.{file,entry}Stamp use the
 	new zeroPad() function.
 
-2005-10-05 17:54  Zack Cerza <zcerza@redhat.com>
+2005-10-05  Zack Cerza <zcerza@redhat.com>
 
 	* MAINTAINERS: Created.
 
-2005-10-05 17:43  Zack Cerza <zcerza@redhat.com>
+2005-10-05  Zack Cerza <zcerza@redhat.com>
 
 	* COPYING, HACKING, INSTALL, MANIFEST.in, Makefile, setup.cfg,
 	  setup.py, debian/changelog, debian/compat, debian/control,

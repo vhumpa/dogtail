@@ -124,7 +124,7 @@ class Action:
 		string = "Action node='%s' name='%s' description='%s' keybinding='%s'" % (self.node, self.name, self.description, self.keyBinding)
 		return string
 
-	def doThisAction (self):
+	def do (self):
 		"""
 		Performs the given tree.Action, with appropriate delays and logging.
 		
@@ -376,7 +376,10 @@ class Node:
 			# synthesize a function named after each Action supported by this Node (e.g. "click"):
 			actions = self.actions
 			for action in actions:
-				if action.name == attr: return action.doThisAction
+				# action.do() is a function that, when called, executes the AT-SPI
+				# action associated with the Action instance. Here, we're simply
+				# returning a copy of the function, with a different name.
+				if action.name == attr: return action.do
 				else: raise AttributeError, attr
 
 		# Attributes from the Component object
@@ -416,9 +419,9 @@ class Node:
 			self.__editableText.setTextContents (value)
 			doDelay()
 
-			resultText = self.text
-			if resultText != value:
-				raise "%s failed to have its text set to '%s'; value is '%s'"%(self.getLogString(), value, resultText)
+			#resultText = self.text
+			#if resultText != value:
+			#	raise "%s failed to have its text set to '%s'; value is '%s'"%(self.getLogString(), value, resultText)
 
 		elif attr=='passwordText':
 			"""

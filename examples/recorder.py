@@ -8,7 +8,7 @@ __author__ = 'David Malcolm <dmalcolm@redhat.com>'
 # kill the python process via some other means
 
 import atspi
-import dogtail
+import dogtail.tree
 
 def logEvent(event):
     source = event.source

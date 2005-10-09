@@ -1,4 +1,8 @@
-2005-10-09  David Malcolm  <dmalcolm@redhat.com>
+2005-10-08  David Malcolm  <dmalcolm@redhat.com>
+
+	* examples/recorder.py: Fix the imports so this works again.
+
+2005-10-08  David Malcolm  <dmalcolm@redhat.com>
 
 	* examples/evolution-test-switching-components.py:  New example which
 	repeatedly cycles through Evolution's components.

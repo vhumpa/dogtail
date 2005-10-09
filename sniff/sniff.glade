@@ -62,26 +62,6 @@
 	      </child>
 
 	      <child>
-		<widget class="GtkMenuItem" id="edit1">
-		  <property name="visible">True</property>
-		  <property name="stock_item">GNOMEUIINFO_MENU_EDIT_TREE</property>
-
-		  <child>
-		    <widget class="GtkMenu" id="edit1_menu">
-
-		      <child>
-			<widget class="GtkImageMenuItem" id="properties1">
-			  <property name="visible">True</property>
-			  <property name="stock_item">GNOMEUIINFO_MENU_PROPERTIES_ITEM</property>
-			  <signal name="activate" handler="on_properties1_activate" last_modification_time="Tue, 26 Jul 2005 14:21:44 GMT"/>
-			</widget>
-		      </child>
-		    </widget>
-		  </child>
-		</widget>
-	      </child>
-
-	      <child>
 		<widget class="GtkMenuItem" id="view1">
 		  <property name="visible">True</property>
 		  <property name="stock_item">GNOMEUIINFO_MENU_VIEW_TREE</property>
@@ -189,6 +169,7 @@
 		<widget class="GtkTreeView" id="treeTreeView">
 		  <property name="visible">True</property>
 		  <property name="can_focus">True</property>
+		  <property name="has_focus">True</property>
 		  <property name="headers_visible">True</property>
 		  <property name="rules_hint">False</property>
 		  <property name="reorderable">False</property>

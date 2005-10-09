@@ -1,5 +1,10 @@
 2005-10-09  David Malcolm  <dmalcolm@redhat.com>
 
+	* dogtail/tree.py: added role attribute to Node (forgot to commit this
+	earlier)
+
+2005-10-09  David Malcolm  <dmalcolm@redhat.com>
+
 	* sniff/button.xpm, sniff/checkbutton.xpm, sniff/checkmenuitem.xpm, 
 	sniff/colorselection.xpm, sniff/combo.xpm, sniff/dialog.xpm, 
 	sniff/image.xpm, sniff/label.xpm, sniff/menubar.xpm, 

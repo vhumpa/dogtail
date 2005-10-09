@@ -157,6 +157,9 @@ class Node:
 	'roleName' (read-only string):
 	Wraps Accessible_getRoleName on the Node's underlying Accessible
 	
+	'role' (read-only atspi role enum):
+	Wraps Accessible_getRole on the Node's underlying Accessible
+
 	'description' (read-only string):
 	Wraps Accessible_getDescription on the Node's underlying Accessible
 	
@@ -310,6 +313,8 @@ class Node:
 		# Attributes from the Accessible object
 		elif attr == "name":
 			return self.__accessible.getName()
+		elif attr == "role":
+			return self.__accessible.getRole()
 		elif attr == "roleName":
 			return self.__accessible.getRoleName()
 		elif attr == "description":

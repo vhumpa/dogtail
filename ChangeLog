@@ -1,3 +1,11 @@
+2005-10-09  David Malcolm  <dmalcolm@redhat.com>
+
+	* examples/gcalctool-test-fibonacci.py: New file: another test
+	example.  Drives gcalctool to calculate the Fibonacci series.
+
+	* dogtail/apps/wrappers/gcalctool.py: New file: wrapper to help when
+	writing gcalctool tests
+
 2005-10-09  Zack Cerza <zcerza@redhat.com>
 
 	* setup.py: Include sniff/*.xpm in the distribution.

@@ -1,3 +1,7 @@
+2005-10-10  Zack Cerza <zcerza@redhat.com>
+
+	* examples/filechooser-stress-test.py: Port to procedural API.
+
 2005-10-10  David Malcolm  <dmalcolm@redhat.com>
 
 	* examples/filechooser-stress-test.py: New file: repeatedly open and

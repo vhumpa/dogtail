@@ -1,3 +1,8 @@
+2005-10-10  David Malcolm  <dmalcolm@redhat.com>
+
+	* examples/filechooser-stress-test.py: New file: repeatedly open and
+	close the filechooser, for testing perfomance/profiling
+
 2005-10-09  David Malcolm  <dmalcolm@redhat.com>
 
 	* examples/gcalctool-test-fibonacci.py: New file: another test
@@ -98,7 +103,7 @@
 	* dogtail/distro.py: Add patch from Tim Gerla, adding Conary
 	support. Closes: #318224
 
-2005-10-17  Zack Cerza <zcerza@redhat.com>
+2005-10-07  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/distro.py: Add patch from Brent Smith, adding Gentoo
 	support. Closes: #318225

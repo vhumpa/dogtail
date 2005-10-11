@@ -119,6 +119,7 @@ class Focus (FocusBase):
 		else:
 			raise AttributeError, name
 	
+	desktop = tree.root
 	application = FocusApplication()
 	app = application # shortcut :)
 	dialog = FocusDialog()

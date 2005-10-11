@@ -1,0 +1,36 @@
+#!/bin/sh
+# dogtail-run-headless
+#
+# Usage: dogtail-run-headless ./some-dogtail-script.py
+#
+# This script launches an X server using the virtual framebuffer, allowing 
+# dogtail scripts to be run on headless servers. The server starts a minimal
+# GNOME session, based on Nat Friedman's notes here: 
+#  http://nat.org/2005/october/#Keep-It-Simple-Stupid
+# Dogtail scripts are run in the current directory. After the script 
+# terminates, so does the X server.
+#
+# The X server can be connected to using VNC via the following steps:
+#
+#  port=`"x11vnc -display :1 -viewonly -bg" | grep PORT)`
+#  port=`echo "$port" | sed -e's/PORT=//'`
+#  port=`expr $port - 5900`
+#
+#  vncviewer localhost:$port
+#
+# Author: Zack Cerza <zcerza@redhat.com>
+#
+
+cat << EOF > ~/.xinitrc
+#!/bin/sh
+gnome-settings-daemon &
+gnome-panel &
+nautilus -n &
+metacity &
+sleep 5
+cd $PWD && ../dogtail-detect-session && $@
+EOF
+
+echo "Starting GNOME Session..."
+xinit -- /usr/X11R6/bin/Xvfb :1 -screen 0 1024x768x24 -fbdir /tmp :1
+

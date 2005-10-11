@@ -1,5 +1,25 @@
 2005-10-11  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/procedural.py: Add focus.desktop (just a copy of tree.root).
+	Later, I'll probably want to replace it with a FocusDesktop instance,
+	but for now it's really just to make FocusApplication not break as
+	horribly when there are no applications running.
+
+	* scripts/: Created to hold scripts to be installed into /usr/bin/.
+
+	* scripts/dogtail-detect-session: Add a script to detect if an
+	accessibility-enabled session is currently running. Right now it
+	obviously only looks for a GNOME session, but KDE support can be added
+	when available.
+	
+	* scripts/dogtail-run-headless: Add a script to run a given dogtail
+	script in a headless setup. Currently launches a minimalistic GNOME
+	"session" under Xvfb, calls dogtail-detect-session, and if a session
+	is detected, executes the dogtail script. Once the script terminates,
+	so does the X server - Boom! Closes: #318537
+
+2005-10-11  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/procedural.py: Add Focus.icon(). Add open() for opening
 	icons on nautilus' desktop.
 

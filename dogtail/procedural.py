@@ -237,5 +237,5 @@ def run(application, arguments = ""):
 focus = Focus()
 click = Click()
 activate = Action('activate')
-open = Action('open')
+openItem = Action('open')
 

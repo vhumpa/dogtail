@@ -1,5 +1,14 @@
 2005-10-11  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/procedural.py: rename open() to openItem() to avoid
+	namespace collision.
+
+	* scripts/dogtail-run-headless: Ignore errors when restoring
+	~/.xinitrc. If there was no previous ~/.xinitrc, make sure the
+	temporary one isn't left behind. Increase hardcoded sleep delay.
+
+2005-10-11  Zack Cerza <zcerza@redhat.com>
+
 	* MANIFEST.in: Add scripts/ to tarball distribution.
 	
 	* setup.py: Install scripts/* .

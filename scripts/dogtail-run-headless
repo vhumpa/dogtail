@@ -31,13 +31,14 @@ gnome-settings-daemon &
 gnome-panel &
 nautilus -n &
 metacity &
-sleep 5
+sleep 10
 cd $PWD && dogtail-detect-session && $@
 EOF
 
 echo "Starting GNOME Session..."
 xinit -- /usr/X11R6/bin/Xvfb :1 -screen 0 1024x768x24 -fbdir /tmp :1
 
-mv -f ~/.xinitrc-user ~/.xinitrc && \
+rm -f ~/.xinitrc
+mv -f ~/.xinitrc-user ~/.xinitrc 2>/dev/null && \
  echo "Restored ~/.xinitrc"
 

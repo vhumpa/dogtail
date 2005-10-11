@@ -1,3 +1,9 @@
+2005-10-10  David Malcolm  <dmalcolm@redhat.com>
+
+	* sniff/sniff: Move initial expansion from main to resetModel, so that
+	we get the sane one-deep expansion on a Refresh, as well as when sniff
+	starts. 
+
 2005-10-10  Zack Cerza <zcerza@redhat.com>
 
 	* examples/filechooser-stress-test.py: Port to procedural API.

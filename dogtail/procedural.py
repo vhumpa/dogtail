@@ -130,6 +130,12 @@ class Focus (FocusBase):
 		"""
 		self.widget(name = name, roleName = 'push button')
 	
+	def icon (self, name):
+		"""
+		A shortcut to self.widget(name, roleName = 'icon')
+		"""
+		self.widget(name = name, roleName = 'icon')
+	
 	def menu (self, name):
 		"""
 		A shortcut to self.widget(name, roleName = 'menu')
@@ -230,4 +236,5 @@ def run(application, arguments = ""):
 focus = Focus()
 click = Click()
 activate = Action('activate')
+open = Action('open')
 

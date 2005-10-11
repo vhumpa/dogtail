@@ -1,3 +1,8 @@
+2005-10-11  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Add Focus.icon(). Add open() for opening
+	icons on nautilus' desktop.
+
 2005-10-10  David Malcolm  <dmalcolm@redhat.com>
 
 	* sniff/sniff: Move initial expansion from main to resetModel, so that

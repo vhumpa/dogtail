@@ -21,6 +21,10 @@
 # Author: Zack Cerza <zcerza@redhat.com>
 #
 
+mv -f ~/.xinitrc ~/.xinitrc-user 2>/dev/null && \
+ echo "Moving ~/.xinitrc to ~/.xinitrc-user temporarily"
+
+# xinit doesn't allow specifying an alternate xinitrc
 cat << EOF > ~/.xinitrc
 #!/bin/sh
 gnome-settings-daemon &
@@ -33,4 +37,7 @@ EOF
 
 echo "Starting GNOME Session..."
 xinit -- /usr/X11R6/bin/Xvfb :1 -screen 0 1024x768x24 -fbdir /tmp :1
+
+mv -f ~/.xinitrc-user ~/.xinitrc && \
+ echo "Restored ~/.xinitrc"
 

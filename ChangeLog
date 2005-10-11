@@ -1,5 +1,10 @@
 2005-10-11  Zack Cerza <zcerza@redhat.com>
 
+	* scripts/dogtail-run-headless: Restore the original ~/.xinitrc after
+	the X server terminates.
+
+2005-10-11  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/procedural.py: Add focus.desktop (just a copy of tree.root).
 	Later, I'll probably want to replace it with a FocusDesktop instance,
 	but for now it's really just to make FocusApplication not break as

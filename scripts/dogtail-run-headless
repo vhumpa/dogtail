@@ -32,7 +32,7 @@ gnome-panel &
 nautilus -n &
 metacity &
 sleep 5
-cd $PWD && ../dogtail-detect-session && $@
+cd $PWD && dogtail-detect-session && $@
 EOF
 
 echo "Starting GNOME Session..."

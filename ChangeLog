@@ -1,5 +1,9 @@
 2005-10-11  Zack Cerza <zcerza@redhat.com>
 
+	* scripts/dogtail-run-headless: Correct typo.
+
+2005-10-11  Zack Cerza <zcerza@redhat.com>
+
 	* scripts/dogtail-run-headless: Restore the original ~/.xinitrc after
 	the X server terminates.
 

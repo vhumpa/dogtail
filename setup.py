@@ -31,6 +31,15 @@ def icons():
 			result = result + ['sniff/' + file]
 	return result
 
+def scripts():
+	import os
+	list = os.listdir(os.curdir + '/scripts/')
+	result = ['sniff/sniff']
+	for file in list:
+		if file != 'CVS':
+			result = result + ['scripts/' + file]
+	return result
+
 setup (
 	name = 'dogtail',
 	version = '0.4.2',
@@ -41,7 +50,7 @@ David Malcolm <dmalcolm@redhat.com>""",
 	author_email = 'dogtail-maint@gnome.org',
 	url = 'http://gnome.org/projects/dogtail/',
 	packages = ['dogtail', 'dogtail.apps', 'dogtail.apps.wrappers'],
-	scripts = ['sniff/sniff'],
+	scripts = scripts(),
 	data_files = [
 				('share/doc/dogtail/examples',
 					examples() ),

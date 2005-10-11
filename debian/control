@@ -8,7 +8,7 @@ Standards-Version: 3.6.1.1
 Package: python-dogtail
 Architecture: all
 Depends: python-at-spi
-Recommends: imagemagick, python-celementtree | python-elementtree, python-apt
+Recommends: imagemagick, python-celementtree | python-elementtree, python-apt, xvfb
 Description: Automated desktop testing framework
  Insert better long description here
 

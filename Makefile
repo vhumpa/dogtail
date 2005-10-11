@@ -28,8 +28,8 @@ else
 	rpmbuild -ta dist/dogtail-*.tar.gz
 endif
 
-
 deb:
+	fakeroot debian/rules clean
 	dpkg-buildpackage -rfakeroot -us -uc
 
 apidocs:

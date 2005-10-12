@@ -1,3 +1,8 @@
+2005-10-11  David Malcolm  <dmalcolm@redhat.com>
+
+	* dogtail/tree.py: Replaced a stray reference to "Search" with 
+	"Predicate"
+
 2005-10-11  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/procedural.py: rename open() to openItem() to avoid

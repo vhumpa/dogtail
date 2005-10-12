@@ -22,7 +22,7 @@ performable on a specific node, such as clicking on it.  It's a wrapper around
 AccessibleAction.
 
 We often want to look for a node, based on some criteria, and this is provided
-by the Search class.
+by the Predicate class.
 
 Dogtail implements a high-level searching system, for finding a node (or
 nodes) satisfying whatever criteria you are interested in.	It does this with

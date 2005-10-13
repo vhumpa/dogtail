@@ -1,3 +1,8 @@
+2005-10-12  David Malcolm  <dmalcolm@redhat.com>
+
+	* dogtail/apps/wrappers/gedit.py: Initial version, taken from Paolo 
+	Borelli's home page.
+
 2005-10-11  David Malcolm  <dmalcolm@redhat.com>
 
 	* dogtail/tree.py: Replaced a stray reference to "Search" with 

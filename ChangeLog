@@ -1,3 +1,13 @@
+2005-10-13  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/trayicon.py: Added from jhbuild's jhbuild/utils/.
+
+	* dogtail/logging.py: Add IconLogger class, a stripped-down version of
+	jhbuild's TerminalBuildScript in jhbuild/frontends/terminal.py. Modify
+	the DebugLogger class to additionally write messages to the
+	IconLogger's tooltip. If zenity is not installed or not working
+	properly, the DebugLogger should work exactly as before.
+
 2005-10-13  David Malcolm  <dmalcolm@redhat.com>
 
 	* examples/no-help-at-all.py: script which generates parodies of bad

@@ -147,12 +147,61 @@ class LogWriter:
 		except IOError:
 			print "Could not write to file " + self.logfile
 
+class IconLogger:
+	"""
+	Writes entries to the tooltip of an icon in the notification area or the desktop.
+	"""
+	def __init__(self, config = None, module_list = None):
+		from trayicon import TrayIcon
+		self.trayicon = TrayIcon()
+		if self.trayicon.proc: self.works = True
+		else: self.works = False
+		self.message('dogtail running...')
+
+	def message(self, msg, module_num=-1):
+		'''Display a message to the user'''
+		
+		#if is_xterm:
+		#		 print '\033]0;dogtail: %s\007' % (msg)
+		self.trayicon.set_tooltip('%s' % (msg))
+
+	def set_action(self, action, module, module_num=-1, action_target=None):
+		if module_num == -1:
+			module_num = self.module_num
+		if not action_target:
+			action_target = module.name
+		self.message('%s %s' % (action, action_target), module_num)
+
+	def execute(self, command, hint=None):
+		'''executes a command, and returns the error code'''
+		if isinstance(command, (str, unicode)):
+			print command
+		else:
+			print ' '.join(command)
+
+		# get rid of hint if pretty printing is disabled.
+		if not self.config.pretty_print: hint = None
+		if hint == 'cvs':
+			stdout = subprocess.PIPE
+			stderr = subprocess.STDOUT
+		else:
+			stdout = stderr = None
+
 class DebugLogger:
+	"""
+	Writes entries to standard out, and to an IconLogger if possible.
+	"""
+	def __init__(self):
+		self.iconLogger = IconLogger()
+
 	def log(self, message):
 		"""
 		Hook used for logging messages.  Might eventually be a virtual
 		function, but nice and simple for now.
 		"""
+		# Try to use the IconLogger.
+		if self.iconLogger.works: self.iconLogger.message(message)
+		# Also write to standard out.
 		print message
 
 debugLogger = DebugLogger()

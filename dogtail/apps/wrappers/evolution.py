@@ -151,25 +151,7 @@ class EvolutionApp(Application, EmailClient):
 		# FIXME: now view it and see if we're still alive
 		# use PrintPreview as well
 
-	def createAccount(self, account, accountName):
-		"""
-		Add a new account, running the Evolution Account Assistant, filling in
-		the values given.
-		"""
-		
-		self.getConfigMenuItem().click()
-		settingsDlg = self.child("Evolution Settings", recursive=False)
-		#pageTabs = settingsDlg.child(roleName="page tab list")
-		# page tabs don't seem to be labelled in the tree... how do we get at this?
-
-		# for now, assume Mail Accounts tab is selected..
-		# Account wizard takes a while to appear...
-		settingsDlg.child("Add").click()
-		# this one needs a watch, I guess
-
-		accountWiz = Wizard(self.child("Evolution Account Assistant", recursive=False),"Evolution Account Assistant")
-		accountWiz.clickForward()
-
+	def __doIdentityPage(self, accountWiz, account):	
 		# "Identity" page:
 		accountWiz.child(label="Full Name:").text = account.fullName
 		accountWiz.child(label="Email Address:").text = account.emailAddress
@@ -177,6 +159,7 @@ class EvolutionApp(Application, EmailClient):
 		accountWiz.child(label="Organization:").text = account.organisation
 		accountWiz.clickForward()
 
+	def __doReceivingEmailPage(self, accountWiz, account):	
 		# "Receiving Email" page:
 		accountWiz.child(label="Server Type: ").combovalue=account.getReceivingComboValue()
 
@@ -209,17 +192,21 @@ class EvolutionApp(Application, EmailClient):
 
 		accountWiz.clickForward()
 
+	def __doReceivingOptionsPage(self, accountWiz, account):	
 		# "Receiving Options" page:
 		# FIXME: implement
 		accountWiz.clickForward()
 
+	def __doSendingEmailPage(self, accountWiz, account):	
 		# "Sending Email" page:
 		# FIXME: this fails; it picks up on the "Server Type:" from the earlier page
 		# and hence can't find the value it wants in the combo.  Should use the correct page for all of this...
-		accountWiz.child(label="Server Type: ").combovalue = account.getSendingComboValue()
+		sendingEmailPage = accountWiz.currentPage()
+		sendingEmailPage.child(label="Server Type: ").combovalue = account.getSendingComboValue()
+		print sendingEmailPage
 		if isinstance(account,MixedAccount):
 			if isinstance(account.sendMethod,SMTPSettings):
-				accountWiz.child("SMTP").text = account.sendMethod.server
+				sendingEmailPage.child(label="Server:").text = account.sendMethod.server
 				# FIXME: "Server requires authentication"
 				# etc etc
 
@@ -231,15 +218,59 @@ class EvolutionApp(Application, EmailClient):
 			raise NotImplementedError
 		accountWiz.clickForward()
 
+	def __doAccountManagementPage(self, accountWiz, accountName):	
 		# "Account Management" page:
 		accountWiz.child(label="Name:").text = accountName
 		accountWiz.clickForward()
+
+	def createAccount(self, account, accountName):
+		"""
+		Add a new account, running the Evolution Account Assistant, filling in
+		the values given.
+		"""
+		
+		self.getConfigMenuItem().click()
+		settingsDlg = self.child("Evolution Settings", recursive=False)
+		#pageTabs = settingsDlg.child(roleName="page tab list")
+		# page tabs don't seem to be labelled in the tree... how do we get at this?
+
+		# for now, assume Mail Accounts tab is selected..
+		# Account wizard takes a while to appear...
+		settingsDlg.child("Add").click()
+		# this one needs a watch, I guess
+
+		accountWiz = Wizard(self.child("Evolution Account Assistant", recursive=False),"Evolution Account Assistant")
+		accountWiz.clickForward()
+
+		self.__doIdentityPage(accountWiz, account)
+		self.__doReceivingEmailPage(accountWiz, account)
+		self.__doReceivingOptionsPage(accountWiz, account)
+		self.__doSendingEmailPage(accountWiz, account)
+		self.__doAccountManagementPage(accountWiz, accountName)
 
 		# "Done" page:
 		accountWiz.child("Apply").click()
 
 		# FIXME: we should add a review stage where we check that all widgets have the correct settings.  (But why should that even be necessary? Can our framework implement that on the script's behalf? perhaps with a UITransaction class or somesuch?)
 
+	def doFirstTimeWizard(self, account, accountName, timezoneName):
+		setupWiz = Wizard(self.window('Evolution Setup Assistant'))
+		setupWiz.clickForward()
+
+		self.__doIdentityPage(setupWiz, account)
+		self.__doReceivingEmailPage(setupWiz, account)
+		self.__doReceivingOptionsPage(setupWiz, account)
+		self.__doSendingEmailPage(setupWiz, account)
+		self.__doAccountManagementPage(setupWiz, accountName)
+		
+		# Timezone page:
+		# FIXME: timezone selection doesn't yet work
+		#self.child("TimeZone Combobox").child(timezoneName).click()
+		setupWiz.clickForward()
+
+		# "Done" page:
+		setupWiz.child("Apply").click()
+		
 	def composeEmail(self):
 		"""
 		Utility function to start composing a new email.
@@ -480,3 +511,38 @@ def TestFocus():
 	focus.dialog("Evolution Import Assistant")
 	click("Forward") # grrr... selects the Forward menu item, rather than the Forward button
 
+def blowAwayEvolution():
+	"""
+	Helper function for testing Evolution.
+
+	Use with caution.
+
+	This forcibly shuts down evolution, then blows away all Evolution settings.
+	(FIXME: first copy the GConf data first to ./evolution-gconf-backup.xml ???)	
+	"""
+	os.system ('evolution --force-shutdown')
+	sleep(5)
+	os.system ('gconftool-2 --recursive-unset /apps/evolution')
+
+
+def doFirstTimeWizard(account, accountName, timezoneName):
+	"""
+	Helper function for testing Evolution.
+
+	Use with caution.
+
+	This forcibly shuts down evolution, then blows away all Evolution settings.
+	(FIXME: first copy the GConf data first to ./evolution-gconf-backup.xml ???)
+
+	It then runs the first time wizard with the given settings.
+
+	Returns an EvolutionApp instance.
+	"""
+	blowAwayEvolution()
+	
+	run('evolution')
+	evo = EvolutionApp()
+	evo.doFirstTimeWizard(account, accountName, timezoneName)
+
+	return evo
+	

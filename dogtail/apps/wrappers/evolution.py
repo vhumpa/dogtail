@@ -49,22 +49,15 @@ class EvolutionApp(Application, EmailClient):
 			self.gtkhtmlVersion = packageDb.getVersion(self.gtkhtmlPackageName)
 			print "%s version %s"%(self.gtkhtmlPackageName, self.gtkhtmlVersion)
 
-		# In theory there can be more than one main window but we don't normally care:
-		self.mainWindow = self.window("Evolution - Mail") # FIXME: make this support other components
-		self.fileMenu = self.mainWindow.menu("File")
-		self.editMenu = self.mainWindow.menu("Edit")
-		if self.evoVersion<Version([2,3,0]):
-			self.toolsMenu = self.mainWindow.menu("Tools")
-
 	def getConfigMenuItem(self):
 		"""
 		Get the menu item that triggers the Settings/Preferences dialog,
 		handling version-specific differences
 		"""
 		if self.evoVersion<Version([2,1,0]):
-			return self.toolsMenu.menuItem("Settings...")
+			return self.menu("Tools").menuItem("Settings...")
 		else:
-			return self.editMenu.menuItem("Preferences")
+			return self.menu("Edit").menuItem("Preferences")
 
 	def doPasswordDialog(self, password, rememberPassword):
 		"""
@@ -100,7 +93,7 @@ class EvolutionApp(Application, EmailClient):
 		"""
 		Open the File->Import wizard and navigate to the second page
 		"""
-		self.fileMenu.menuItem("Import...").click()
+		self.menu("File").menuItem("Import...").click()
 		importAssistant = Wizard(self.child("Evolution Import Assistant", recursive=False), "Import Assistant")
 		importAssistant.clickForward()
 		return importAssistant
@@ -253,7 +246,7 @@ class EvolutionApp(Application, EmailClient):
 
 		Returns a Composer instance wrapping the new email composer window.
 		"""
-		self.fileMenu.child("Mail Message").click()
+		self.menu("File").child("Mail Message").click()
 		composer = self.window("Compose a message")
 		return Composer(composer)
 

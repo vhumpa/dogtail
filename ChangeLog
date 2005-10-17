@@ -1,3 +1,12 @@
+2005-10-17  David Malcolm  <dmalcolm@redhat.com>
+
+	* dogtail/apps/wrappers/predicate.py: add IsATabNamed class
+	
+	* dogtail/tree.py: add Node.tab() method
+
+	* dogtail/apps/wrappers/evolution.py: add Evolution.createMeeting()
+	method; add AppointmentWindow and MeetingWindow subclasses
+
 2005-10-14  David Malcolm  <dmalcolm@redhat.com>
 
 	* dogtail/apps/wrappers/evolution.py: Refactor createAccount, add 

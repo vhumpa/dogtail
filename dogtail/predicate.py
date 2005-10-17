@@ -318,6 +318,23 @@ class IsAButtonNamed(Predicate):
 	def makeScriptVariableName(self):
 		return makeCamel(self.buttonName)+"Button"
 
+class IsATabNamed(Predicate):
+	"""Predicate subclass that looks for a tab by name"""
+	def __init__(self, tabName):
+		self.tabName = tabName
+	
+	def satisfiedByNode(self, node):
+		return node.roleName=='page tab' and node.name==self.tabName
+
+	def describeSearchResult(self):
+		return '"%s" tab'%(self.tabName)
+
+	def makeScriptMethodCall(self, isRecursive):
+		return "tab('%s'%s)"%(self.tabName, makeScriptRecursiveArgument(isRecursive, True))
+
+	def makeScriptVariableName(self):
+		return makeCamel(self.tabName)+"Tab"
+
 class PredicateTests(unittest.TestCase):
 	def testCapitalization(self):
 			self.assertEquals(makeCamel("gnome-terminal"),"gnomeTerminal")

@@ -800,6 +800,16 @@ class Node:
 		"""
 		return self.findChild (predicate.IsNamed(childName), recursive)
 
+	def tab(self, tabName, recursive=True):
+		"""
+		Search below this node for a tab with the given name.
+
+		This is implemented using findChild, and hence will automatically retry
+		if no such child is found, and will eventually raise an exception.  It
+		also logs the search.
+		"""
+		return self.findChild (predicate.IsATabNamed(tabName=tabName), recursive)
+		
 class Root (Node):
 	"""
 	FIXME:

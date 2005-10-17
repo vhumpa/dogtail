@@ -280,6 +280,17 @@ class EvolutionApp(Application, EmailClient):
 		self.menu("File").child("Mail Message").click()
 		composer = self.window("Compose a message")
 		return Composer(composer)
+		
+	def createMeeting(self):
+		"""
+		Utility function to start creating a new meeting.
+
+		Returns a MeetingWindow instance wrapping the new meeting window.
+		"""
+		self.menu("File").child("Meeting").click()
+		meetingWin = self.dialog("Meeting - No summary")
+		return MeetingWindow(meetingWin)
+		
 
 class Composer(Window):
 	"""
@@ -376,6 +387,35 @@ class UndoRedoException(Exception):
 
 	def __str__(self):
 		return "Original value %s not equal to new value %s"%(originalValue, newValue)
+
+class AppointmentWindow(Window):
+	"""
+	Subclass of Window wrapping an Evolution appointment window, with utility functions
+	"""
+	def __init__(self, node):
+		Window.__init__(self, node)
+
+	def __setattr__(self, name, value):
+		if name=="summary":
+			self.tab("Appointment").child(label="Summary:").text = value
+		else:
+			# otherwise, use normal Python attribute-handling:
+			self.__dict__[name]=value
+
+class MeetingWindow(AppointmentWindow):
+	"""
+	Subclass of AppointmentWindow wrapping an Evolution meeting window, with utility functions
+	"""
+	def __init__(self, node):
+		AppointmentWindow.__init__(self, node)
+		self.invitationsTab = self.tab("Invitations")
+		self.attendeeTable = self.invitationsTab.child(roleName='table')
+		
+	def addAttendee(self, attendee, attendeeType, role, rsvp, status):
+		"""
+		Add an attendeee to this meeting.  Doesn't fully work yet.
+		"""
+		self.invitationsTab.button('Add').click()
 
 class SelectFolderDialog(Window):
 	"""

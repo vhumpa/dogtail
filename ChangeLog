@@ -1,5 +1,13 @@
 2005-10-19  Zack Cerza <zcerza@redhat.com>
 
+	* sniff/icons: Create directory.
+	
+	* sniff/*.xpm, sniff/icons/*.xpm: Move icons.
+	
+	* MANIFEST.in, setup.py, sniff/sniff: Update the icon locations.
+
+2005-10-19  Zack Cerza <zcerza@redhat.com>
+
 	* MANIFEST.in: Add sniff/*.xpm.
 
 2005-10-19  Zack Cerza <zcerza@redhat.com>

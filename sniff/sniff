@@ -208,7 +208,7 @@ def resetModel():
 
 def loadIcon(iconName):
 	try:
-		pixbuf = gtk.gdk.pixbuf_new_from_file(iconName)
+		pixbuf = gtk.gdk.pixbuf_new_from_file('icons/' + iconName)
 	except gobject.GError:
 		iconName = '/usr/share/dogtail/icons/' + iconName
 		pixbuf = gtk.gdk.pixbuf_new_from_file(iconName)

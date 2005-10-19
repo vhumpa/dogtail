@@ -24,11 +24,11 @@ def examples_data():
 
 def icons():
 	import os
-	list = os.listdir(os.curdir + '/sniff/')
+	list = os.listdir(os.curdir + '/sniff/icons/')
 	result = []
 	for file in list:
 		if file.split('.')[-1] in ('xpm'):
-			result = result + ['sniff/' + file]
+			result = result + ['sniff/icons/' + file]
 	return result
 
 def scripts():

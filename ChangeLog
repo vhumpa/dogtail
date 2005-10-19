@@ -1,5 +1,9 @@
 2005-10-19  Zack Cerza <zcerza@redhat.com>
 
+	* MANIFEST.in: Add sniff/*.xpm.
+
+2005-10-19  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/procedural.py: Add table() and tableCell() to Action and 
 	FocusWidget. Allow run() to use utils.run()'s optional 'appName' 
 	argument, for cases where the application's name is different from the

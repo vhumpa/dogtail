@@ -1,3 +1,10 @@
+2005-10-19  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Add table() and tableCell() to Action and 
+	FocusWidget. Allow run() to use utils.run()'s optional 'appName' 
+	argument, for cases where the application's name is different from the
+	binary's name.
+
 2005-10-17  David Malcolm <dmalcolm@redhat.com>
 
 	* dogtail/apps/wrappers/yelp.py: new file, wrapper for Yelp.

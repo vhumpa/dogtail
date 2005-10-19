@@ -149,6 +149,18 @@ class Focus (FocusBase):
 		"""
 		self.widget(name = name, roleName = 'menu item')
 	
+	def table (self, name = ''):
+		"""
+		A shortcut to self.widget(name, roleName 'table')
+		"""
+		self.widget(name = name, roleName = 'table')
+	
+	def tableCell (self, name = ''):
+		"""
+		A shortcut to self.widget(name, roleName 'table cell')
+		"""
+		self.widget(name = name, roleName = 'table cell')
+	
 	def text (self, name = ''):
 		"""
 		A shortcut to self.widget(name, roleName = 'text')
@@ -202,6 +214,18 @@ class Action (FocusWidget):
 		"""
 		self.__call__(name = name, roleName = 'menu item')
 	
+	def table (self, name = ''):
+		"""
+		A shortcut to self(name, roleName 'table')
+		"""
+		self.__call__(name = name, roleName = 'table')
+	
+	def tableCell (self, name = ''):
+		"""
+		A shortcut to self(name, roleName 'table cell')
+		"""
+		self.__call__(name = name, roleName = 'table cell')
+	
 	def text (self, name = ''):
 		"""
 		A shortcut to self(name, roleName = 'text')
@@ -228,9 +252,9 @@ class Click (Action):
 		else:
 			Action.__call__(self, name = name, roleName = roleName, description = description, delay = delay)
 
-def run(application, arguments = ""):
+def run(application, arguments = None, appName = None):
 	from utils import run as utilsRun
-	utilsRun(application + arguments)
+	utilsRun(application + arguments, appName = appName)
 	focus.application(application)
 	
 

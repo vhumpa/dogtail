@@ -1,8 +1,8 @@
-2005-10-17  David Malcolm  <dmalcolm@redhat.com>
+2005-10-17  David Malcolm <dmalcolm@redhat.com>
 
 	* dogtail/apps/wrappers/yelp.py: new file, wrapper for Yelp.
 
-2005-10-17  David Malcolm  <dmalcolm@redhat.com>
+2005-10-17  David Malcolm <dmalcolm@redhat.com>
 
 	* dogtail/apps/wrappers/predicate.py: add IsATabNamed class
 	
@@ -11,17 +11,17 @@
 	* dogtail/apps/wrappers/evolution.py: add Evolution.createMeeting()
 	method; add AppointmentWindow and MeetingWindow subclasses
 
-2005-10-14  David Malcolm  <dmalcolm@redhat.com>
+2005-10-14  David Malcolm <dmalcolm@redhat.com>
 
 	* dogtail/apps/wrappers/evolution.py: Refactor createAccount, add 
 	functions to run the first-time wizard (sharing code with account
-	creation).  Add a blowAwayEvolution function
+	creation). Add a blowAwayEvolution function
 	
 	* examples/evolution-test-first-time-wizard.py: New example, testing
-	the above.  Blows away your evolution configuration, so use with 
+	the above. Blows away your evolution configuration, so use with 
 	caution...
 	 
-2005-10-14  David Malcolm  <dmalcolm@redhat.com>
+2005-10-14  David Malcolm <dmalcolm@redhat.com>
 
 	* dogtail/apps/wrappers/evolution.py: Fix wrapper so that it does not
 	require a window, in preparation for wrapping the first-time assistant.
@@ -36,18 +36,18 @@
 	IconLogger's tooltip. If zenity is not installed or not working
 	properly, the DebugLogger should work exactly as before.
 
-2005-10-13  David Malcolm  <dmalcolm@redhat.com>
+2005-10-13  David Malcolm <dmalcolm@redhat.com>
 
 	* examples/no-help-at-all.py: script which generates parodies of bad
 	end-user documentation by simply converting reading the UI back in 
 	DocBook form.
 
-2005-10-12  David Malcolm  <dmalcolm@redhat.com>
+2005-10-12  David Malcolm <dmalcolm@redhat.com>
 
 	* dogtail/apps/wrappers/gedit.py: Initial version, taken from Paolo 
 	Borelli's home page.
 
-2005-10-11  David Malcolm  <dmalcolm@redhat.com>
+2005-10-11  David Malcolm <dmalcolm@redhat.com>
 
 	* dogtail/tree.py: Replaced a stray reference to "Search" with 
 	"Predicate"
@@ -108,7 +108,7 @@
 	* dogtail/procedural.py: Add Focus.icon(). Add open() for opening
 	icons on nautilus' desktop.
 
-2005-10-10  David Malcolm  <dmalcolm@redhat.com>
+2005-10-10  David Malcolm <dmalcolm@redhat.com>
 
 	* sniff/sniff: Move initial expansion from main to resetModel, so that
 	we get the sane one-deep expansion on a Refresh, as well as when sniff
@@ -118,15 +118,15 @@
 
 	* examples/filechooser-stress-test.py: Port to procedural API.
 
-2005-10-10  David Malcolm  <dmalcolm@redhat.com>
+2005-10-10  David Malcolm <dmalcolm@redhat.com>
 
 	* examples/filechooser-stress-test.py: New file: repeatedly open and
 	close the filechooser, for testing perfomance/profiling
 
-2005-10-09  David Malcolm  <dmalcolm@redhat.com>
+2005-10-09  David Malcolm <dmalcolm@redhat.com>
 
 	* examples/gcalctool-test-fibonacci.py: New file: another test
-	example.  Drives gcalctool to calculate the Fibonacci series.
+	example. Drives gcalctool to calculate the Fibonacci series.
 
 	* dogtail/apps/wrappers/gcalctool.py: New file: wrapper to help when
 	writing gcalctool tests
@@ -154,7 +154,7 @@
 
 	* sniff/sniff: Add Dave as an author. 
 	Correct the website URL and remove the License button in the About box.
-	Remove 'Role name  and 'Description' fields from the TreeView. 
+	Remove 'Role name and 'Description' fields from the TreeView. 
 	Change the packing on the TreeView to disable expanding.
 	Stop importing pdb without using it.
 
@@ -163,12 +163,12 @@
 	Add keyboard shortcuts to all menu items.
 	Remove Edit menu.
 
-2005-10-09  David Malcolm  <dmalcolm@redhat.com>
+2005-10-09  David Malcolm <dmalcolm@redhat.com>
 
 	* dogtail/tree.py: added role attribute to Node (forgot to commit this
 	earlier)
 
-2005-10-09  David Malcolm  <dmalcolm@redhat.com>
+2005-10-09  David Malcolm <dmalcolm@redhat.com>
 
 	* sniff/button.xpm, sniff/checkbutton.xpm, sniff/checkmenuitem.xpm, 
 	sniff/colorselection.xpm, sniff/combo.xpm, sniff/dialog.xpm, 
@@ -177,19 +177,19 @@
 	sniff/spinbutton.xpm, sniff/statusbar.xpm, sniff/table.xpm, 
 	sniff/text.xpm, sniff/toolbar.xpm, sniff/tree.xpm, sniff/treeitem.xpm, 
 	sniff/unknown.xpm, sniff/viewport.xpm, sniff/vscrollbar.xpm, 
-	sniff/vseparator.xpm, sniff/window.xpm:  Add icons, copied from at-poke
+	sniff/vseparator.xpm, sniff/window.xpm: Add icons, copied from at-poke
 
 	* sniff/sniff: add constants to represent the tree model columns; use 
-	icons for nodes, based on code in at-poke.  Requires up-to-date pyspi
+	icons for nodes, based on code in at-poke. Requires up-to-date pyspi
 	(for the role attribute)
 
-2005-10-08  David Malcolm  <dmalcolm@redhat.com>
+2005-10-08  David Malcolm <dmalcolm@redhat.com>
 
 	* examples/recorder.py: Fix the imports so this works again.
 
-2005-10-08  David Malcolm  <dmalcolm@redhat.com>
+2005-10-08  David Malcolm <dmalcolm@redhat.com>
 
-	* examples/evolution-test-switching-components.py:  New example which
+	* examples/evolution-test-switching-components.py: New example which
 	repeatedly cycles through Evolution's components.
 
 2005-10-08  Zack Cerza <zcerza@redhat.com>
@@ -242,7 +242,7 @@
 2005-10-07  David Malcolm <dmalcolm@redhat.com>
 
 	* dogtail/tree.py: Provide a better warning for when import wnck 
-	fails (it's a warning, not an error).  Make Root.application() return
+	fails (it's a warning, not an error). Make Root.application() return
 	an Application instance, rather than a mere Node.
 
 	* ChangeLog: Created.

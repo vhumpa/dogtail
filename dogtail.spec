@@ -4,7 +4,7 @@ Version: 0.4.2
 Release: 1
 License: GPL
 Group: User Interface/X
-URL: http://gnome.org/projects/dogtail/
+URL: http://people.redhat.com/zcerza/dogtail/
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildArchitectures: noarch

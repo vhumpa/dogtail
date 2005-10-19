@@ -1,5 +1,10 @@
 2005-10-19  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail.spec, setup.py, debian/changelog, debian/copyright: Correct
+	website URL.
+
+2005-10-19  Zack Cerza <zcerza@redhat.com>
+
 	* sniff/icons: Create directory.
 	
 	* sniff/*.xpm, sniff/icons/*.xpm: Move icons.

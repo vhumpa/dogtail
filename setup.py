@@ -48,7 +48,7 @@ setup (
 Ed Rousseau <rousseau@redhat.com>, 
 David Malcolm <dmalcolm@redhat.com>""",
 	author_email = 'dogtail-maint@gnome.org',
-	url = 'http://gnome.org/projects/dogtail/',
+	url = 'http://people.redhat.com/zcerza/dogtail/',
 	packages = ['dogtail', 'dogtail.apps', 'dogtail.apps.wrappers'],
 	scripts = scripts(),
 	data_files = [

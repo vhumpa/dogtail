@@ -1,3 +1,9 @@
+dogtail (0.4.2-3) unstable; urgency=low
+
+  * Correct website URL.
+
+ -- Zack Cerza <zcerza@coe.neu.edu>  Wed, 19 Oct 2005 19:16:14 -0400
+
 dogtail (0.4.2-2) unstable; urgency=low
 
   * Add Recommends for xvfb. 

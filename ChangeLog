@@ -253,6 +253,10 @@
 
 2005-10-06  Zack Cerza <zcerza@redhat.com>
 
+	 Released 0.4.2.
+
+2005-10-06  Zack Cerza <zcerza@redhat.com>
+
 	* setup.py, debian/changelog, dogtail/__init__.py,
 	  dogtail/apps/__init__.py, dogtail/apps/wrappers/__init__.py:
 	Bump version numbers.
@@ -265,11 +269,19 @@
 
 2005-10-06  Zack Cerza <zcerza@redhat.com>
 
+	Released 0.4.1.
+
+2005-10-06  Zack Cerza <zcerza@redhat.com>
+
 	* setup.py, debian/changelog, dogtail/__init__.py,
 	  dogtail/apps/__init__.py, dogtail/apps/wrappers/__init__.py:
 	Bump version numbers.
 
 	* MANIFEST.in: Add missing files.
+
+2005-10-06  Zack Cerza <zcerza@redhat.com>
+
+	Released 0.4.0.
 
 2005-10-06  Zack Cerza <zcerza@redhat.com>
 

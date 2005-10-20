@@ -5,7 +5,7 @@ Author: David Malcolm <dmalcolm@redhat.com>"""
 __author__ = 'David Malcolm <dmalcolm@redhat.com>'
 
 from dogtail.tree import *
-from dogtail.distro import packageDb
+from dogtail.distro import *
 from dogtail.apps.categories import *
 
 class EpiphanyApp(Application, WebBrowser):
@@ -13,8 +13,12 @@ class EpiphanyApp(Application, WebBrowser):
 
 	def __init__(self):
 		Application.__init__(self, root.application("epiphany"))
-	
-		self.epiVersion = packageDb.getVersion("epiphany")
+
+		if isinstance(distro, Debian):
+			self.epiPackageName="epiphany-browser"
+		else:
+			self.epiPackageName="epiphany"
+		self.epiVersion = packageDb.getVersion(self.epiPackageName)
 		print "Epiphany version %s"%self.epiVersion
 
 	def browseToUrl(self, urlString):

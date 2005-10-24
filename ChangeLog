@@ -1,3 +1,10 @@
+2005-10-21  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/trayicon.py: Instead of totally bailing out if Python is
+	older than 2.4, just make TrayIcon useless, as is currently the case
+	if TrayIcon._runZenity() fails. What should really happen is for
+	TrayIcon to actually work under older Python versions, I think.
+
 2005-10-20  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/apps/wrappers/epiphany.py: Use the package name

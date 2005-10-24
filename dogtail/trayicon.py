@@ -19,7 +19,19 @@
 
 import sys
 import os
-import subprocess
+try:
+	import subprocessa
+except ImportError:
+	# I know, let's add an ugly hack!
+	# Don't totally bail when not using python2.4 or newer.
+	# FIXME: since we aren't using any new functionality of subprocess, we
+	#        could just use the deprecated methods.
+	class subprocess:
+		PIPE = None
+		def Popen(cmd, close_fds, preexec_fn, stdin): return None
+		Popen = staticmethod(Popen)
+
+	
 
 class TrayIcon:
 	def __init__(self):

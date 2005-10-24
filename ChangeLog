@@ -1,5 +1,11 @@
 2005-10-24  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/__init__.py, dogtail/apps/__init__.py, 
+	dogtail/apps/wrappers/__init__.py, setup.py: Post-release version
+	bump.
+
+2005-10-24  Zack Cerza <zcerza@redhat.com>
+
 	Released 0.4.3.
 
 2005-10-24  Zack Cerza <zcerza@redhat.com>

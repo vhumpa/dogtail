@@ -39,6 +39,7 @@ def screenshot(windowname='', file='', args=''):
 			# If path doesn't exist raise an exception
 			raise IOError
 			print "Specified filepath does not exist or is not a directory"
+	else: path = Config.scratch + file
 
 	# Generate the command and redirect STDERR to STDOUT
 	# This really needs window manipulation and pyspi state binding to be done

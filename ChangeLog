@@ -1,5 +1,10 @@
 2005-10-24  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/utils.py: Don't break if a filename is passed to
+	screenshot().
+
+2005-10-24  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/__init__.py, dogtail/apps/__init__.py, 
 	dogtail/apps/wrappers/__init__.py, setup.py: Post-release version
 	bump.

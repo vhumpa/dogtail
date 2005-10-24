@@ -1,5 +1,14 @@
 2005-10-24  Zack Cerza <zcerza@redhat.com>
 
+	* NEWS: Created with major changes since 0.4.2.
+	
+	* dogtail/__init__.py, dogtail/apps/__init__.py, 
+	dogtail/apps/wrappers/__init__.py, setup.py: Bump version numbers.
+
+	* dogtail.spec, debian/changelog: Add changelog entries for 0.4.3.
+
+2005-10-24  Zack Cerza <zcerza@redhat.com>
+
 	* icons/dogtail-head-48.png, icons/dogtail-head.svg, 
 	icons/dogtail-tail-48.png, icons/dogtail-tail.svg: Add icons.
 

@@ -1,3 +1,9 @@
+dogtail (0.4.3-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Zack Cerza <zcerza@coe.neu.edu>  Mon, 24 Oct 2005 02:32:14 -0400
+
 dogtail (0.4.2-3) unstable; urgency=low
 
   * Correct website URL.

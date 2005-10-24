@@ -9,7 +9,10 @@ from predicate import GenericPredicate, IsADialogNamed
 from config import Config
 from time import sleep
 
-FocusError = "FocusError: %s not found"
+#FocusError = "FocusError: %s not found"
+class FocusError(Exception):
+	pass
+
 ENOARGS = "At least one argument is needed"
 
 class FocusBase:
@@ -51,7 +54,7 @@ class FocusApplication (FocusBase):
 				FocusWidget.node = None
 				matched = True
 				break
-		if not matched: raise FocusError % name
+		if not matched: raise FocusError, name
 
 class FocusDesktop (FocusBase):
 	"""
@@ -76,7 +79,7 @@ class FocusDialog (FocusBase):
 		if result: 
 			self.__class__.node = result
 			FocusWidget.node = None
-		else: raise FocusError % name
+		else: raise FocusError, name
 
 class FocusWidget (FocusBase):
 	"""
@@ -104,7 +107,7 @@ class FocusWidget (FocusBase):
 			try:
 				result = FocusApplication.node.findChild(GenericPredicate(name = name, roleName = roleName, description = description), requireResult = False, retry = False)
 				if result: self.__class__.node = result
-			except AttributeError: raise FocusError % name
+			except AttributeError: raise FocusError, name
 
 class Focus (FocusBase):
 	"""

@@ -156,6 +156,10 @@ class IconLogger:
 		self.trayicon = TrayIcon()
 		if self.trayicon.proc: self.works = True
 		else: self.works = False
+		iconName = 'dogtail-tail-48.png'
+		iconPath = '/usr/share/pixmaps/' + iconName
+		if os.path.exists(iconPath):
+			self.trayicon.set_icon(iconPath)
 		self.message('dogtail running...')
 
 	def message(self, msg, module_num=-1):

@@ -9,6 +9,6 @@ Comment[en_GB]=Browse your Assistive Technology-enabled desktop
 Exec=sniff
 Terminal=false
 Type=Application
-Icon=gnome-gmenu.png
+Icon=dogtail-head.svg
 StartupNotify=true
 Categories=GNOME;Application;System;

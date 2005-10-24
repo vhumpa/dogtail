@@ -9,3 +9,4 @@ recursive-include debian *
 recursive-include scripts *
 include sniff/sniff.glade sniff/sniff.desktop sniff/icons/*.xpm
 recursive-include examples *.py *.txt *.png *.cfg
+include icons/*.svg icons/*.png

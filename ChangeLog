@@ -1,5 +1,22 @@
 2005-10-24  Zack Cerza <zcerza@redhat.com>
 
+	* icons/dogtail-head-48.png, icons/dogtail-head.svg, 
+	icons/dogtail-tail-48.png, icons/dogtail-tail.svg: Add icons.
+
+	* MANIFEST.in, setup.py: Add new icons to distribution.
+	
+	* dogtail/logging.py: Make IconLogger use the dogtail-tail icon.
+
+	* sniff/sniff: Use the dogtail-head icon for the application. Use the
+	theme's	desktop icon for the root node in the TreeView. If the then
+	has an icon for any application displayed in the TreeView, use it.
+	
+	* sniff/sniff.desktop: Use the dogtail-head icon in the menu.
+	
+	* dogtail/trayicon.py: Fix typo.
+
+2005-10-24  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/procedural.py: Implement the FocusError exception properly.
 
 2005-10-21  Zack Cerza <zcerza@redhat.com>

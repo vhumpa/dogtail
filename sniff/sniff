@@ -10,11 +10,18 @@ import gnome
 import atspi
 program = gnome.program_init(appName, '0.1')
 import gtk.glade
+
 try:
 	x = gtk.glade.XML('sniff.glade')
 except RuntimeError:
 	x = gtk.glade.XML('/usr/share/dogtail/glade/sniff.glade')
+
 sniff = x.get_widget(appName)
+
+try:
+	sniff.set_icon_from_file('../icons/dogtail-head.svg')
+except:
+	sniff.set_icon_from_file('/usr/share/pixmaps/dogtail-head.svg')
 
 view = x.get_widget('treeTreeView')
 
@@ -321,16 +328,19 @@ iconForRole = { \
 	atspi.SPI_ROLE_LAST_DEFINED: None }
 
 def getPixbufForNode(node):
+	theme = gtk.icon_theme_get_default()
 	if node.role==atspi.SPI_ROLE_APPLICATION:
 		# FIXME: Use the pixbuf from libwcnk (if available):
 		# wnckApp = Application(node).getWnckApplication()
 		# if wnckApp
-		return None
+		try: return theme.load_icon(node.name, 24, gtk.ICON_LOOKUP_USE_BUILTIN)
+		except gobject.GError: 
+			try: return theme.load_icon(node.name.lower(), 24, gtk.ICON_LOOKUP_USE_BUILTIN)
+			except gobject.GError: return None
 	elif node.parent:
 		return iconForRole[node.role]
 	else:
-		# Don't give the root an icon; it gets unknown_xpm otherwise:
-		return None
+		return theme.load_icon("gnome-fs-desktop", 24, gtk.ICON_LOOKUP_USE_BUILTIN)
 
 def getNodeAttr(column, cell, model, iter, attr):
 	node = model.get_value(iter, MODEL_FIELD_NODE)

@@ -20,7 +20,7 @@
 import sys
 import os
 try:
-	import subprocessa
+	import subprocess
 except ImportError:
 	# I know, let's add an ugly hack!
 	# Don't totally bail when not using python2.4 or newer.

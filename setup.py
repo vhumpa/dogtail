@@ -22,13 +22,22 @@ def examples_data():
 			result = result + ['examples/data/' + data]
 	return result
 
-def icons():
+def sniff_icons():
 	import os
 	list = os.listdir(os.curdir + '/sniff/icons/')
 	result = []
 	for file in list:
 		if file.split('.')[-1] in ('xpm'):
 			result = result + ['sniff/icons/' + file]
+	return result
+
+def icons():
+	import os
+	list = os.listdir(os.curdir + '/icons/')
+	result = []
+	for file in list:
+		if file.split('.')[-1] in ('svg', 'png'):
+			result = result + ['icons/' + file]
 	return result
 
 def scripts():
@@ -57,8 +66,9 @@ David Malcolm <dmalcolm@redhat.com>""",
 				('share/doc/dogtail/examples/data', 
 					examples_data() ),
 				('share/dogtail/glade', ['sniff/sniff.glade']),
-				('share/dogtail/icons', icons() ),
-				('share/applications', ['sniff/sniff.desktop'])
+				('share/dogtail/icons', sniff_icons() ),
+				('share/applications', ['sniff/sniff.desktop']),
+				('share/pixmaps', icons())
 				],
 	cmdclass = {
 		'bdist_rpm': bdist_rpm

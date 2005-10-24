@@ -1,5 +1,9 @@
 2005-10-24  Zack Cerza <zcerza@redhat.com>
 
+	Released 0.4.3.
+
+2005-10-24  Zack Cerza <zcerza@redhat.com>
+
 	* NEWS: Created with major changes since 0.4.2.
 	
 	* dogtail/__init__.py, dogtail/apps/__init__.py, 

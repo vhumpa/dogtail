@@ -17,10 +17,10 @@ class GoogleFrontPage(Node):
         self.textEntry = self.searchButton.parent.child(roleName='text', debugName='Search String Text Entry')
 
 import dogtail.config
-dogtail.config.Config.debugSearching=True
+dogtail.config.config.debugSearching=True
 
 # Epiphany doesn't seem to set the sensitivity state on buttons in web pages:
-dogtail.config.Config.ensureSensitivity=False
+dogtail.config.config.ensureSensitivity=False
 
 wb = EpiphanyApp()
 

@@ -14,8 +14,8 @@ from math import sin, cos, pi
 import os
 
 import dogtail.config
-#dogtail.config.Config.debugSearching=True
-#dogtail.config.Config.debugSleep = True
+#dogtail.config.config.debugSearching=True
+#dogtail.config.config.debugSleep = True
 
 n = NautilusApp()
 

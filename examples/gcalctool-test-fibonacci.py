@@ -9,7 +9,7 @@ dogtail.utils.run('gcalctool')
 gcalctool = GCalcTool(dogtail.tree.root.application('gcalctool'))
 
 import dogtail.config
-dogtail.config.Config.defaultDelay = 0.3
+dogtail.config.config.defaultDelay = 0.3
 
 a = 1
 b = 1

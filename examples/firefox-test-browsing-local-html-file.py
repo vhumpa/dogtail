@@ -9,7 +9,7 @@ __author__ = 'David Malcolm <dmalcolm@redhat.com>'
 from dogtail.apps.wrappers.mozilla import *
 
 import dogtail.config
-dogtail.config.Config.debugSearching=True
+dogtail.config.config.debugSearching=True
 
 ff = FirefoxApp()
 wnd = ff.newWindow()

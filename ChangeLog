@@ -1,3 +1,40 @@
+2005-10-27  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/config.py: Rewrite. Rename the Config class to _Config, and
+	provide a singleton instance named config. It is no longer necessary
+	to instantiate a _Config instance in any script, whereas previously it
+	was necessary to do so if any values needed to be changed. Also rename 
+	logdir to logDir, scratch to scratchDir, and data to dataDir. When the
+	*Dir values are changed, the new directory is created instantly if it 
+	does not exist.	NOTE: this is an API change. Updating any scripts
+	should be as simple as replacing 'Config' with 'config', 'logdir' with
+	'logDir', 'scratch' with 'scratchDir', 'data' with 'dataDir' and
+	removing any instantiations of the old Config class. Also, the old way
+	of loading configuration values from a file is no longer supported.
+	The current preferred method is to create a Python file that contains
+	something like: "from dogtail.config import config; config.logDir =
+	'../logs/'; config.debugSearching = True" and then import that file
+	from whatever scripts need it.
+
+	* dogtail/logging.py, dogtail/tc.py, dogtail/tree.py, 
+	examples/firefox-test-browsing-local-html-file.py, 
+	examples/gcalctool-test-fibonacci.py, 
+	examples/gedit-test-utf8-procedural-api.py, 
+	examples/gnome-panel-test-starting-every-app.py, 
+	examples/google-search.py,
+	examples/nautilus-test-icon-view-collage.py, examples/data/sample.cfg:
+	Update to new config API.
+
+	* dogtail/procedural.py: Update to new config API. Also, change "def
+	run(application, arguments = None, appName = None):" to "def
+	run(application, arguments = '', appName = ''):".
+	
+	* dogtail/utils.py: Update to new config API. Also, make run()'s appName
+	argument default to "''" instead of "None", just like
+	dogtail.procedural.run(). Also, make run() use doDelay() instead of
+	sleep() to get logging for free via the config.config.debugSearching
+	option.
+
 2005-10-24  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/utils.py: Don't break if a filename is passed to

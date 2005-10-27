@@ -6,7 +6,7 @@ __author__ = 'Zack Cerza <zcerza@redhat.com>'
 
 import tree
 from predicate import GenericPredicate, IsADialogNamed
-from config import Config
+from config import config
 from time import sleep
 
 #FocusError = "FocusError: %s not found"
@@ -180,7 +180,7 @@ class Action (FocusWidget):
 		"""
 		self.action = action
 	
-	def __call__ (self, name = '', roleName = '', description = '', delay = Config.actionDelay):
+	def __call__ (self, name = '', roleName = '', description = '', delay = config.actionDelay):
 		"""
 		If name, roleName or description are specified, first search for a widget that matches and refocus on it.
 		Then execute the action.
@@ -245,7 +245,7 @@ class Click (Action):
 	def __init__ (self):
 		Action.__init__(self, 'click')
 	
-	def __call__ (self, name = '', roleName = '', description = '', coords = None, button = primary, delay = Config.actionDelay):
+	def __call__ (self, name = '', roleName = '', description = '', coords = None, button = primary, delay = config.actionDelay):
 		"""
 		If coords or button are specified, execute a raw mouse event. If not, just pass the rest of the arguments to Action.
 		"""
@@ -255,7 +255,7 @@ class Click (Action):
 		else:
 			Action.__call__(self, name = name, roleName = roleName, description = description, delay = delay)
 
-def run(application, arguments = None, appName = None):
+def run(application, arguments = '', appName = ''):
 	from utils import run as utilsRun
 	utilsRun(application + arguments, appName = appName)
 	focus.application(application)

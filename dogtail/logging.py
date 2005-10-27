@@ -12,7 +12,7 @@ David Malcolm <dmalcolm@redhat.com>
 import os
 import time
 import datetime
-from config import Config
+from config import config
 
 # Timestamp class for file logs
 class TimeStamp:
@@ -80,18 +80,18 @@ class LogWriter:
 	"""
 	def __init__(self):
 		self.entry = {}
-		# Set the logdir - maybe we want to use mktemp(1) for this later.
-		self.logdir = Config.logdir #'/tmp/dogtail-' + os.environ['LOGNAME'] + '/'
-		if not os.path.isdir(self.logdir): os.makedirs(self.logdir)
+		# Set the logDir - maybe we want to use mktemp(1) for this later.
+		self.logDir = config.logDir #'/tmp/dogtail-' + os.environ['LOGNAME'] + '/'
+		if not os.path.isdir(self.logDir): os.makedirs(self.logDir)
 		self.logfile = ''
-		self.scriptname = Config.scriptname 
-		if not self.scriptname: self.scriptname = 'log'
+		self.scriptName = config.scriptName 
+		if not self.scriptName: self.scriptName = 'log'
 		self.loghandle = "" # Handle to the logfile
 		self.stamper = TimeStamp()
-		# check to see if we can write to the logdir
-		if os.path.isdir(self.logdir):
+		# check to see if we can write to the logDir
+		if os.path.isdir(self.logDir):
 			# generate a logfile name and check if it already exists
-			self.logfile = self.logdir + self.stamper.fileStamp(self.scriptname)
+			self.logfile = self.logDir + self.stamper.fileStamp(self.scriptName)
 			i = 0
 			while os.path.exists(self.logfile):
 				# Append the pathname
@@ -104,13 +104,13 @@ class LogWriter:
 				i += 1
 		else:
 			# If path doesn't exist, raise an exception
-			raise IOError, "Log path %s does not exist or is not a directory" % self.logdir
+			raise IOError, "Log path %s does not exist or is not a directory" % self.logDir
 
 		# Try to create the file and write the header info
 		try:
 			date = datetime.datetime.strftime(datetime.datetime.now(), '%d %b %Y %H:%M:%S')
 			self.loghandle = open(self.logfile, 'w')
-			self.loghandle.write("##### " + self.scriptname + " Created on: " + date + "\n")
+			self.loghandle.write("##### " + self.scriptName + " Created on: " + date + "\n")
 			self.loghandle.flush()
 			self.loghandle.close()
 		except IOError:

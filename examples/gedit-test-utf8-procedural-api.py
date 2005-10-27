@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 # Dogtail demo script
 
-import dogtail.config
 import dogtail.tc
 from dogtail.procedural import *
 from dogtail.utils import screenshot
+
+from dogtail.config import config
+config.debugSearching = True
 
 from os import environ, path, remove
 environ['LANG']='en_US.UTF-8'
 
 # Load our persistent Dogtail objects
-DemoConfig = dogtail.config.Config()
 TestString = dogtail.tc.TCString()
 TestImage = dogtail.tc.TCImage()
 

@@ -10,7 +10,7 @@ import os
 import time
 import datetime
 import os.path
-from config import Config
+from config import config
 from logging import LogWriter, TimeStamp
 
 
@@ -22,13 +22,13 @@ class TC:
 	def __init__(self):
 		self.baseline = self.label = self.undertest = "empty"
 		self.result = {"empty": "empty"}
-		self.encoding = Config.encoding
+		self.encoding = config.encoding
 		# ascii + unicode. 8 bit extended char has been ripped out
 		self.supportedtypes = ("ascii", "utf-8", "utf-16", "utf-16-be", "utf-16-le", "unicode-escape", "raw-unicode-escape",
 		"big5", "gb18030", "eucJP", "eucKR", "shiftJIS")
 
 	# String comparison function
-	def compare(self, label, baseline, undertest, encoding=Config.encoding):
+	def compare(self, label, baseline, undertest, encoding=config.encoding):
 		"""
 		Compares 2 strings to see if they are the same. The user may specify
 		the encoding to which the two strings are to be normalized for the
@@ -78,7 +78,7 @@ class TCImage(TC):
 	def __init__(self):
 		TC.__init__(self)
 		self.supportedmetrics = ("MAE", "MSE", "PSE", "PSNR","RMSE", "none")
-		self.scratch = Config.scratch
+		self.scratchDir = config.scratchDir
 		self.deldfile = 0
 
 	# Use ImageMagick to compare 2 files
@@ -101,7 +101,7 @@ class TCImage(TC):
 			# Remove all whitespace from the label since IM chokes on it
 			splabel = label.split(" ")
 			label = "".join(splabel)
-			self.dfile = self.scratch + x.fileStamp(label)
+			self.dfile = self.scratchDir + x.fileStamp(label)
 			self.deldfile = 1
 		else: # or use the supplied one with no deletion
 			self.dfile = dfile

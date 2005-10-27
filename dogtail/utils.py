@@ -11,7 +11,7 @@ David Malcolm <dmalcolm@redhat.com>
 """
 
 import os
-from config import Config
+from config import config
 from time import sleep
 from logging import debugLogger as logger
 
@@ -24,28 +24,28 @@ def screenshot(windowname='', file='', args=''):
 
 	if file == '':
 		# generate a filename 
-		if os.path.isdir(Config.scratch):
+		if os.path.isdir(config.scratchDir):
 			file = "screenshot.png"
-			path = Config.scratch + file
+			path = config.scratchDir + file
 			i = 1
 			while os.path.exists(path):
 				# Append the filename
 				filesplit = file.split(".")
 				filesplit[0] = filesplit[0] + str(i)
 				file = ".".join(filesplit)
-				path = Config.scratch + file
+				path = config.scratchDir + file
 				i += 1
 		else:
 			# If path doesn't exist raise an exception
 			raise IOError
 			print "Specified filepath does not exist or is not a directory"
-	else: path = Config.scratch + file
+	else: path = config.scratchDir + file
 
 	# Generate the command and redirect STDERR to STDOUT
 	# This really needs window manipulation and pyspi state binding to be done
 	# to actually be really useful
 	answer = []
-	cmd = "import -window '" + windowname + "' " + Config.scratch + '/' + file + " " + args + " 2>&1"
+	cmd = "import -window '" + windowname + "' " + config.scratchDir + '/' + file + " " + args + " 2>&1"
 	answer = os.popen(cmd).readlines()
 
 	# If successful we should get nothing back. If not something went wrong
@@ -54,7 +54,7 @@ def screenshot(windowname='', file='', args=''):
 		raise ValueError, "Screenshot failed: " + answer[-1]
 	else: logger.log("Screenshot taken: " + path)
 
-def run(string, timeout=Config.runTimeout, interval=Config.runInterval, desktop=None, dumb=False, appName=None):
+def run(string, timeout=config.runTimeout, interval=config.runInterval, desktop=None, dumb=False, appName=''):
 	"""
 	Runs an application. [For simple command execution such as 'rm *', use os.popen() or os.system()]
 	If dumb is omitted or is False, polls at interval seconds until the application is finished starting, or until timeout is reached.
@@ -66,12 +66,12 @@ def run(string, timeout=Config.runTimeout, interval=Config.runInterval, desktop=
 	name = args[0]
 	pid = spawnvpe (P_NOWAIT, name, args, environ)
 
-	if appName==None:
+	if not appName:
 		appName=args[0]
 	
 	if dumb:
 		# We're starting a non-AT-SPI-aware application. Disable startup detection.
-		sleep(timeout)
+		doDelay(timeout)
 	else:
 		# Startup detection code
 		# The timing here is not totally precise, but it's good enough for now.
@@ -85,10 +85,10 @@ def run(string, timeout=Config.runTimeout, interval=Config.runInterval, desktop=
 							if grandchild.roleName == 'frame':
 								from procedural import focus
 								focus.application.node = child
-								sleep(interval)
+								doDelay(interval)
 								return pid
 			except AttributeError: pass
-			sleep(interval)
+			doDelay(interval)
 	return pid
 
 def doDelay(delay=None):
@@ -97,8 +97,8 @@ def doDelay(delay=None):
 	default delay)
 	"""
 	if delay is None:
-		delay = Config.defaultDelay
-	if Config.debugSleep:
+		delay = config.defaultDelay
+	if config.debugSleep:
 		logger.log("sleeping for %f"%delay)
 	sleep(delay)
 

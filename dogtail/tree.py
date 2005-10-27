@@ -29,15 +29,15 @@ nodes) satisfying whatever criteria you are interested in.	It does this with
 a 'backoff and retry' algorithm. This fixes most timing problems e.g. when a
 dialog is in the process of opening but hasn't yet done so.
 
-If a search fails, it waits 'Config.searchBackoffDuration' seconds, and then
+If a search fails, it waits 'config.searchBackoffDuration' seconds, and then
 tries again, repeatedly.  After several failed attempts (determined by
-Config.searchWarningThreshold) it will start sending warnings about the search
-to the debug log.  If it still can't succeed after 'Config.searchCutoffCount'
+config.searchWarningThreshold) it will start sending warnings about the search
+to the debug log.  If it still can't succeed after 'config.searchCutoffCount'
 attempts, it raises an exception containing details of the search. You can see
-all of this process in the debug log by setting 'Config.debugSearching' to True
+all of this process in the debug log by setting 'config.debugSearching' to True
 
 We also automatically add a short delay after each action
-('Config.defaultDelay' gives the time in seconds).	We'd hoped that the search
+('config.defaultDelay' gives the time in seconds).	We'd hoped that the search
 backoff and retry code would eliminate the need for this, but unfortunately we
 still run into timing issues.	 For example, Evolution (and probably most
 other apps) set things up on new dialogs and wizard pages as they appear, and
@@ -52,7 +52,7 @@ insensitive UI element and raise a specific exception for this.
 
 Unfortunately, some applications do not set up the 'sensitive' state
 correctly on their buttons (e.g. Epiphany on form buttons in a web page).  The
-current workaround for this is to set Config.ensureSensitivity=False, which
+current workaround for this is to set config.ensureSensitivity=False, which
 disables the sensitivity testing. 
 
 Authors: Zack Cerza <zcerza@redhat.com>, David Malcolm <dmalcolm@redhat.com>
@@ -65,7 +65,7 @@ import re
 import predicate
 from datetime import datetime
 from time import sleep
-from config import Config
+from config import config
 from utils import doDelay
 import path
 
@@ -134,7 +134,7 @@ class Action:
 		"""
 		assert isinstance(self, Action)
 		logger.log("%s on %s"%(self.name, self.node.getLogString()))
-		if Config.ensureSensitivity:
+		if config.ensureSensitivity:
 			if not self.node.sensitive:
 				raise "Cannot %s on %s: it is not sensitive"%(self.name, self.node.getLogString())
 		result = self.__action.doAction (self.__index)
@@ -498,9 +498,9 @@ class Node:
 	def getLogString(self):
 		"""
 		Get a string describing this node for the logs,
-		respecting the Config.absoluteNodePaths boolean.
+		respecting the config.absoluteNodePaths boolean.
 		"""
-		if Config.absoluteNodePaths:
+		if config.absoluteNodePaths:
 			return self.getAbsoluteSearchPath()
 		else:
 			return str(self)
@@ -537,7 +537,7 @@ class Node:
 		FIXME: need some heuristics to get 'good' searches, whatever
 		that means
 		"""
-		if Config.debugSearchPaths:
+		if config.debugSearchPaths:
 			print "getAbsoluteSearchPath(%s)"%self
 			
 		if self.roleName=='application':
@@ -547,7 +547,7 @@ class Node:
 		else:
 			if self.parent:
 				(ancestor, pred, isRecursive) = self.getRelativeSearch()
-				if Config.debugSearchPaths:
+				if config.debugSearchPaths:
 					print "got ancestor: %s"%ancestor
 				
 				ancestorPath = ancestor.getAbsoluteSearchPath()
@@ -565,7 +565,7 @@ class Node:
 		FIXME: may need to make this more robust
 		FIXME: should this be private?
 		"""
-		if Config.debugSearchPaths:
+		if config.debugSearchPaths:
 			print "getRelativeSearchPath(%s)"%self
 			
 		assert self
@@ -667,8 +667,8 @@ class Node:
 		
 		assert isinstance(pred, predicate.Predicate)
 		numAttempts = 0
-		while numAttempts<Config.searchCutoffCount:
-			if numAttempts>=Config.searchWarningThreshold or Config.debugSearching:
+		while numAttempts<config.searchCutoffCount:
+			if numAttempts>=config.searchWarningThreshold or config.debugSearching:
 				print "searching for %s (attempt %i)"%(describeSearch(self, pred, recursive, debugName), numAttempts)
 			
 			result = findFirstChildSatisfying(self, pred, recursive)
@@ -682,9 +682,9 @@ class Node:
 			else:
 				if not retry: break
 				numAttempts+=1
-				if Config.debugSearching or Config.debugSleep:
-					print "sleeping for %f"%Config.searchBackoffDuration
-				sleep(Config.searchBackoffDuration)
+				if config.debugSearching or config.debugSleep:
+					print "sleeping for %f"%config.searchBackoffDuration
+				sleep(config.searchBackoffDuration)
 		if requireResult:
 			raise SearchError, describeSearch(self, pred, recursive, debugName)
 
@@ -1006,5 +1006,5 @@ if __name__ == '__main__':
 	print case.result
 
 # Convenient place to set some debug variables:
-#Config.debugSearching = True
-#Config.absoluteNodePaths = True
+#config.debugSearching = True
+#config.absoluteNodePaths = True

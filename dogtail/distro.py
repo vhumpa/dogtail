@@ -18,7 +18,22 @@ class PackageDb:
 		Method to get the version of an installed package as a Version instance (or raise an exception if not found)
 		Note: does not know about distributions' internal revision numbers.
 		"""
-		raise NotImplemented
+		raise NotImplementedError
+
+	def getFiles(self, packageName):
+		"""
+		Method to get a list of filenames owned by the package, or 
+		raise an exception if not found.
+		"""
+		raise NotImplementedError
+
+	def getDependencies(self, packageName):
+		"""
+		Method to get a list of unique package names that this package 
+		is dependent on, or raise an exception if the package is not 
+		found.
+		"""
+		raise NotImplementedError
 
 class Distro:
 	"""
@@ -56,7 +71,9 @@ class Conary(Distro):
 
 def __makeRpmPackageDb():
 	"""
-	Manufacture a PackageDb for an RPM system.  We hide this inside a factory method so that we only import the RPM Python bindings if we're on a platform likely to have them
+	Manufacture a PackageDb for an RPM system.  We hide this inside a 
+	factory method so that we only import the RPM Python bindings if we're
+	on a platform likely to have them
 	"""
 	class RpmPackageDb(PackageDb):
 		def getVersion(self, packageName):
@@ -65,9 +82,40 @@ def __makeRpmPackageDb():
 			for header in ts.dbMatch("name", packageName):
 				return Version.fromString(header["version"])
 			raise "Package not found: %s"%packageName
+
+		def getFiles(self, packageName):
+			import rpm
+			ts = rpm.TransactionSet()
+			for header in ts.dbMatch("name", packageName):
+				return header["filenames"]
+			raise "Package not found: %s"%packageName
+	
+		def getDependencies(self, packageName):
+			import rpm
+			ts = rpm.TransactionSet()
+			for header in ts.dbMatch("name", packageName):
+				# Simulate a set using a hash (to a dummy value);
+				# sets were only added in Python 2.4
+				result = {}
+
+				# Get the list of requirements; these are 
+				# sometimes package names, but can also be
+				# so-names of libraries, and invented virtual 
+				# ids
+				for requirement in header[rpm.RPMTAG_REQUIRES]:
+					# Get the name of the package providing
+					# this requirement:
+					for depPackageHeader in ts.dbMatch("provides", requirement):
+						depName = depPackageHeader['name']
+						if depName!=packageName:
+							# Add to the Hash with a dummy value
+							result[depName]=None
+				return result.keys()
+			raise "Package not found: %s"%packageName
+
 	return RpmPackageDb()
 
-PATCH_MESSAGE = "Please send patches to the mailing list." # FIXME: add mailing list address
+PATCH_MESSAGE = "Please send patches to dogtail-devel-list@gnome.org"
 
 def __makeAptPackageDb():
 	"""

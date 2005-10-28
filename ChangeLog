@@ -1,3 +1,8 @@
+2005-10-28  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py: Implement getFiles() and getDependencies() in
+	AptPackageDb.
+
 2005-10-28  David Malcolm <dmalcolm@redhat.com>
 
 	* dogtail/i18n.py: New file, providing i18n facilities.

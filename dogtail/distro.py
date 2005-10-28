@@ -133,6 +133,39 @@ def __makeAptPackageDb():
 					verString = re.match('.*Ver:\'(.*)-.*\' Section:', str(package.CurrentVer)).group(1)
 					return Version.fromString(verString)
 			raise "Package not found: %s"%packageName
+
+		def getFiles(self, packageName):
+			files = []
+			list = os.popen('dpkg -L %s' % packageName).readlines()
+			if not list:
+				raise "Package not found: %s" % packageName
+			else:
+				for line in list:
+					file = line.strip()
+					if file: files.append(file)
+				return files
+		
+		def getDependencies(self, packageName):
+			# Simulate a set using a hash (to a dummy value);
+			# sets were only added in Python 2.4
+			result = {}
+			import apt_pkg
+			apt_pkg.init()
+			cache = apt_pkg.GetCache()
+			packages = cache.Packages
+			for package in packages:
+				if package.Name == packageName:
+					current = package.CurrentVer
+					if not current:
+						raise "Package not found: %s" % packageName
+					depends = current.DependsList
+					list = depends['Depends']
+					for dependency in list:
+						name = dependency[0].TargetPkg.Name
+						# Add to the hash using a dummy value
+						result[name] = None
+			return result.keys()
+
 	return AptPackageDb()
 
 def __makePortagePackageDb():

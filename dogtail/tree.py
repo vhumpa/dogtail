@@ -809,6 +809,24 @@ class Node:
 		also logs the search.
 		"""
 		return self.findChild (predicate.IsATabNamed(tabName=tabName), recursive)
+
+	def getUserVisibleStrings(self):
+		"""
+		Get all user-visible strings in this node and its descendents.
+		
+		(Could be implemented as an attribute)
+		"""
+		result=[]
+		if self.name:
+			result.append(self.name)
+		if self.description:
+			result.append(self.description)
+		try: 
+			children = self.children
+		except: return result
+		for child in children:
+				result.extend(child.getUserVisibleStrings())
+		return result
 		
 class Root (Node):
 	"""

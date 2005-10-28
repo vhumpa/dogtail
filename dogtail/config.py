@@ -49,6 +49,10 @@ class _Config(object):
 	debugSearchPaths (boolean):
 	Whether we should write out debug info when running the SearchPath
 	routines.
+	
+	debugTranslation (boolean):
+	Whether we should write out debug information from the translation/i18n
+	subsystem.
 	"""
 	__scriptName = staticmethod(_scriptName)
 	__encoding = staticmethod(_encoding)
@@ -77,7 +81,8 @@ class _Config(object):
 		'debugSleep' : False,
 		'debugSearchPaths' : False,
 		'absoluteNodePaths' : False,
-		'ensureSensitivity' : True
+		'ensureSensitivity' : True,
+		'debugTranslation' : False
 	}
 	
 	options = {}

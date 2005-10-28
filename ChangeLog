@@ -1,5 +1,25 @@
 2005-10-28  David Malcolm <dmalcolm@redhat.com>
 
+	* dogtail/i18n.py: New file, providing i18n facilities.
+	
+	* dogtail/config.py: Add debugTranslation boolean
+	
+	* examples/i18n-test.py: New example, demonstrating the i18n hooks
+	
+	* dogtail/tree.py: Add a getUserVisibleStrings() method to Node
+	
+	* dogtail/predicate.py: Rewrite all string matching within predicates to
+	use the dogtail.i18n.TranslatableString class, and rewriting as
+	necessary.
+
+	* dogtail/apps/wrappers/evolution.py: Use the evolution-connector
+	package's translations by default.
+	
+	* examples/evolution-test-switching-components.py: Use the evolution
+	package's translations
+	
+2005-10-28  David Malcolm <dmalcolm@redhat.com>
+
 	* dogtail/distro.py: Use correct exceptions for unimplemented functions.
 	Add getFiles and getDependencies methods to PackageDb; implement them
 	for RpmPackageDb.   Fix the PATCH_MESSAGE to give the mailing list

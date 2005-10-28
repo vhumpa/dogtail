@@ -18,8 +18,10 @@ from dogtail.apps.categories import *
 # The table rows have NODE_CHILD_OF relations (with paths, in at-poke)
 # 
 
-
-
+# Use the gettext translations sniffed from the package db:
+import dogtail.i18n
+#dogtail.i18n.loadTranslationsFromPackageMoFiles('evolution')
+dogtail.i18n.loadTranslationsFromPackageMoFiles('evolution-connector')
 
 # App-specific wrapper classes:
 

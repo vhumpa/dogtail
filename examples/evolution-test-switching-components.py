@@ -7,6 +7,10 @@ __author__ = 'David Malcolm <dmalcolm@redhat.com>'
 # Assumes evolution is configured and is running
 #
 
+# Use the gettext translations sniffed from the package db:
+import dogtail.i18n
+dogtail.i18n.loadTranslationsFromPackageMoFiles('evolution')
+
 import dogtail.tree
 
 evo = dogtail.tree.root.application('evolution')

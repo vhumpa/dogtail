@@ -1,5 +1,10 @@
 2005-10-28  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/distro.py: Implement proper Exceptions PackageNotFoundError
+	and DistributionNotSupportedError.
+
+2005-10-28  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/distro.py: Implement getFiles() and getDependencies() in
 	AptPackageDb.
 

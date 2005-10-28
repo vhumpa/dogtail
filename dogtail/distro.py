@@ -6,6 +6,28 @@ __author__ = "Dave Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.com>
 import os
 from version import Version
 
+
+class DistributionNotSupportedError(Exception):
+	"""
+	This distribution is not supported.
+
+	Arguments:
+		distro: the distribution that is not supported.
+	"""
+	PATCH_MESSAGE = "Please send patches to dogtail-devel-list@gnome.org"
+
+	def __init__(self, distro):
+		self.distro = distro
+
+	def __str__(self):
+		return self.distro + ". " + DistributionNotSupportedError.PATCH_MESSAGE
+
+class PackageNotFoundError(Exception):
+	"""
+	Error finding the requested package.
+	"""
+	pass
+
 global packageDb
 global distro
 
@@ -81,14 +103,14 @@ def __makeRpmPackageDb():
 			ts = rpm.TransactionSet()
 			for header in ts.dbMatch("name", packageName):
 				return Version.fromString(header["version"])
-			raise "Package not found: %s"%packageName
+			raise PackageNotFoundError, packageName
 
 		def getFiles(self, packageName):
 			import rpm
 			ts = rpm.TransactionSet()
 			for header in ts.dbMatch("name", packageName):
 				return header["filenames"]
-			raise "Package not found: %s"%packageName
+			raise PackageNotFoundError, packageName
 	
 		def getDependencies(self, packageName):
 			import rpm
@@ -111,11 +133,9 @@ def __makeRpmPackageDb():
 							# Add to the Hash with a dummy value
 							result[depName]=None
 				return result.keys()
-			raise "Package not found: %s"%packageName
+			raise PackageNotFoundError, packageName
 
 	return RpmPackageDb()
-
-PATCH_MESSAGE = "Please send patches to dogtail-devel-list@gnome.org"
 
 def __makeAptPackageDb():
 	"""
@@ -132,13 +152,13 @@ def __makeAptPackageDb():
 					import re
 					verString = re.match('.*Ver:\'(.*)-.*\' Section:', str(package.CurrentVer)).group(1)
 					return Version.fromString(verString)
-			raise "Package not found: %s"%packageName
+			raise PackageNotFoundError, packageName
 
 		def getFiles(self, packageName):
 			files = []
 			list = os.popen('dpkg -L %s' % packageName).readlines()
 			if not list:
-				raise "Package not found: %s" % packageName
+				raise PackageNotFoundError, packageName
 			else:
 				for line in list:
 					file = line.strip()
@@ -157,7 +177,7 @@ def __makeAptPackageDb():
 				if package.Name == packageName:
 					current = package.CurrentVer
 					if not current:
-						raise "Package not found: %s" % packageName
+						raise PackageNotFoundError, packageName
 					depends = current.DependsList
 					list = depends['Depends']
 					for dependency in list:
@@ -198,7 +218,7 @@ def __makeConaryPackageDb():
 			client = ConaryClient()
 			dbVersions = client.db.getTroveVersionList(packageName)
 			if not len(dbVersions):
-				raise "Package not found: %s" % packageName
+				raise PackageNotFoundError, packageName
 			return dbVersions[0].trailingRevision().asString().split("-")[0]
 	return ConaryPackageDb()
 
@@ -224,11 +244,11 @@ elif os.path.exists ("/etc/gentoo-release"):
 	packageDb = __makePortagePackageDb()
 elif os.path.exists ("/etc/slackware-version"):
 	print "Slackware"
-	raise "Slackware support not yet implemented.  " + PATCH_MESSAGE
+	raise DistributionNotSupportedError("Slackware")
 elif os.path.exists ("/var/lib/conarydb/conarydb"):
     print "Conary-based distribution"
     distro = Conary()
     packageDb = __makeConaryPackageDb()
 else:
-	print "Unrecognised"
-	raise "Your distribution was not recognised.  " + PATCH_MESSAGE
+	print "Unknown"
+	raise DistributionNotSupportedError("Unknown")

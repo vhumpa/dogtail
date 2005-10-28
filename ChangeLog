@@ -1,3 +1,10 @@
+2005-10-28  David Malcolm <dmalcolm@redhat.com>
+
+	* dogtail/distro.py: Use correct exceptions for unimplemented functions.
+	Add getFiles and getDependencies methods to PackageDb; implement them
+	for RpmPackageDb.   Fix the PATCH_MESSAGE to give the mailing list
+	address.
+
 2005-10-27  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/config.py: Rewrite. Rename the Config class to _Config, and

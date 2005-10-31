@@ -1,5 +1,10 @@
 2005-10-31  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/i18n.py: Add URL to bug filed at bugzilla.redhat.com to the 
+	note about popt making gettext.dgettext() bail.
+
+2005-10-31  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/distro.py: Add an Ubuntu subclass of Debian, since Ubuntu in
 	some cases does things wildly different. For a good example, see
 	dogtail/i18n.py.

@@ -192,8 +192,10 @@ def loadTranslationsFromPackageMoFiles(packageName, getDependencies=True):
 	the package (and its dependencies) to the translation database list.
 	"""
 	# Keep a list of domains that are already in use to avoid duplicates.
+	#
 	# The list also acts as a blacklist. For example, searching the popt
 	# domain for translations makes gettext bail out, so we ignore it here.
+	# This is https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=172155 .
 	domains = ['popt']
 	def load(packageName, getDependencies = True):
 		for domainName in getTranslationDomainsForPackage(packageName, getDependencies):

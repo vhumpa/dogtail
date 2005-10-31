@@ -1,3 +1,10 @@
+2005-10-31  Zack Cerza <zcerza@redhat.com>
+
+	* examples/gedit-test-utf8-procedural-api.py: Add automatic
+	translation support (it's a one-liner!). Don't set $LANG from inside 
+	the script. Add a line for config.debugTranslation, but comment both 
+	debug lines out.
+
 2005-10-28  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/distro.py: Implement proper Exceptions PackageNotFoundError

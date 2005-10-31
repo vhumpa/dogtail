@@ -1,15 +1,18 @@
 #!/usr/bin/env python
 # Dogtail demo script
 
+from dogtail.config import config
+#config.debugSearching = True
+#config.debugTranslation = True
+
 import dogtail.tc
 from dogtail.procedural import *
 from dogtail.utils import screenshot
 
-from dogtail.config import config
-config.debugSearching = True
+import dogtail.i18n
+dogtail.i18n.loadTranslationsFromPackageMoFiles('gedit')
 
 from os import environ, path, remove
-environ['LANG']='en_US.UTF-8'
 
 # Load our persistent Dogtail objects
 TestString = dogtail.tc.TCString()

@@ -415,7 +415,7 @@ class Node:
 			Set the text of the node to the given value, with
 			appropriate delays and logging, then test the result:
 			"""
-			logger.log("Setting text of %s to '%s'"%(self.getLogString(), value))
+			if config.debugSearching: logger.log("Setting text of %s to '%s'"%(self.getLogString(), value))
 			self.__editableText.setTextContents (value)
 			doDelay()
 

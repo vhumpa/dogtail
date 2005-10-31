@@ -1,5 +1,18 @@
 2005-10-31  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/distro.py: Add an Ubuntu subclass of Debian, since Ubuntu in
+	some cases does things wildly different. For a good example, see
+	dogtail/i18n.py.
+
+	* dogtail/i18n.py: Make automatic translation work on Ubuntu with a 
+	special-case: If a script needing automatic translation is running on 
+	Ubuntu, look for translations in the language-pack-gnome-$LANGUAGE 
+	package before the actual package under test. Note that this makes 
+	automatic translation significantly slower. Also, remove the 
+	'dogtail' prefix from references to dogtail.config and dogtail.distro.
+
+2005-10-31  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tree.py: Only be verbose about setting a Node.text attribute
 	if config.debugSearching is turned on.
 

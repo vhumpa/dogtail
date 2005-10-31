@@ -7,8 +7,8 @@ Authors: David Malcolm <dmalcolm@redhat.com>
 
 __author__ = """David Malcolm <dmalcolm@redhat.com>"""
 
-import dogtail.distro
-import dogtail.config
+import distro
+import config
 
 import re
 import gettext
@@ -51,7 +51,7 @@ class GettextTranslationDb(TranslationDb):
 		# Use a dict to get uniqueness:
 		results = {}
 		result = gettext.dgettext(self.domainName, srcName)
-		# print "result in domain %s is %s"%(self.domainName, result)
+		#print "result in domain %s is %s"%(self.domainName, result)
 		if result!=srcName:
 			results[result]=None
 
@@ -92,7 +92,7 @@ def translate(srcString):
 
 	# No translations found:
 	if len(results)==0:
-		if dogtail.config.config.debugTranslation:
+		if config.config.debugTranslation:
 			logger.log('Translation not found for "%s"'%srcString)
 	return results.keys()
 		
@@ -150,13 +150,13 @@ def getMoFilesForPackage(packageName, getDependencies=True):
 	dependencies)
 	"""
 	result = []
-	for filename in dogtail.distro.packageDb.getFiles(packageName):
+	for filename in distro.packageDb.getFiles(packageName):
 		if isMoFile(filename):
 			result.append(filename)
 
 	if getDependencies:
 		# Recurse:
-		for dep in dogtail.distro.packageDb.getDependencies(packageName):
+		for dep in distro.packageDb.getDependencies(packageName):
 			# We pass False to the inner call because getDependencies has already 
 			# walked the full tree
 			result.extend(getMoFilesForPackage(dep, False))
@@ -174,10 +174,10 @@ def getTranslationDomainsForPackage(packageName, getDependencies=True):
 	for filename in getMoFilesForPackage(packageName, getDependencies):
 		# We assume they're of the format:
 		# /usr/share/locale/name-of-locale/LC_MESSAGES/filename.mo
-		m = re.match('/usr/share/locale/([a-zA-Z@_\.0-9]*)/LC_MESSAGES/(.*)\\.mo', filename)
+		m = re.match('/usr/share/locale(.*)/([a-zA-Z@_\.0-9]*)/LC_MESSAGES/(.*)\\.mo', filename)
 		if m:
 			# Insert the translation domain into the hash:
-				result[m.group(2)]=None
+				result[m.group(3)]=None
 		else:
 			# somehow the initial regex is letting this file through:
 			# /etc/pango/i386-redhat-linux-gnu/pango.modules
@@ -191,9 +191,27 @@ def loadTranslationsFromPackageMoFiles(packageName, getDependencies=True):
 	Helper function which appends all of the gettext translation domains used by 
 	the package (and its dependencies) to the translation database list.
 	"""
-	for domainName in getTranslationDomainsForPackage(packageName, getDependencies):
-		if dogtail.config.config.debugTranslation:
-			logger.log('Using translation domain "%s"'%domainName)
-		translationDbs.append(GettextTranslationDb(domainName))
+	# Keep a list of domains that are already in use to avoid duplicates.
+	# The list also acts as a blacklist. For example, searching the popt
+	# domain for translations makes gettext bail out, so we ignore it here.
+	domains = ['popt']
+	def load(packageName, getDependencies = True):
+		for domainName in getTranslationDomainsForPackage(packageName, getDependencies):
+			if domainName not in domains:
+				#if config.config.debugTranslation:
+				#	logger.log('Using translation domain "%s"'%domainName)
+				translationDbs.append(GettextTranslationDb(domainName))
+				domains.append(domainName)
+				
+	# Hack alert:
+	#
+	# The following special-case is necessary for Ubuntu, since their 
+	# translations are shipped in a single huge package. The downside to
+	# this special case, aside from the simple fact that there is one, 
+	# is that it makes automatic translations much slower.
 
+	if isinstance(distro.distro, distro.Ubuntu):
+		import os
+		load('language-pack-gnome-%s' % os.environ['LANG'][0:2])
+	load(packageName, getDependencies)
 

@@ -76,6 +76,11 @@ class Debian(Distro):
 	Class representing one of the Debian or Debian-derived distributions
 	"""
 
+class Ubuntu(Debian):
+	"""
+	Class representing one of the Debian or Debian-derived distributions
+	"""
+
 class Suse(Distro):
 	"""
 	Class representing one of the SuSE or SuSE-derived distributions
@@ -234,6 +239,10 @@ elif os.path.exists ("/etc/fedora-release"):
 	print "Fedora (or derived distribution)"
 	distro = RedHatOrFedora()
 	packageDb = __makeRpmPackageDb()
+elif os.path.exists ("/usr/share/doc/ubuntu-minimal"):
+	print "Ubuntu (or derived distribution)"
+	distro = Ubuntu()
+	packageDb = __makeAptPackageDb()
 elif os.path.exists ("/etc/debian_version"):
 	print "Debian (or derived distribution)"
 	distro = Debian()

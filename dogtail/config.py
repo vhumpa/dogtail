@@ -81,7 +81,7 @@ class _Config(object):
 		'debugSleep' : False,
 		'debugSearchPaths' : False,
 		'absoluteNodePaths' : False,
-		'ensureSensitivity' : True,
+		'ensureSensitivity' : False,
 		'debugTranslation' : False
 	}
 	

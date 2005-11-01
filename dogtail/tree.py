@@ -145,9 +145,12 @@ class Action:
 		"""
 		assert isinstance(self, Action)
 		logger.log("%s on %s"%(self.name, self.node.getLogString()))
-		if config.ensureSensitivity:
-			if not self.node.sensitive:
+		if not self.node.sensitive:
+			if config.ensureSensitivity:
 				raise NotSensitiveError, self
+			else:
+				nSE = NotSensitiveError(self)
+				print "Warning: " + str(nSE)
 		result = self.__action.doAction (self.__index)
 		doDelay()
 		return result

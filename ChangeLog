@@ -1,5 +1,12 @@
 2005-11-01  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/config.py: Make config.ensureSensitivity False by default.
+
+	* dogtail/tree.py: Make Action.do() spit out a warning if the Node
+	instance is not sensitive and config.ensureSensitivity is False.
+
+2005-11-01  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tree.py: Implement a proper NotSensitiveError exception.
 	Make Action.do() raise it instead of a string literal when the
 	action's Node instance is not sensitive, and config.ensureSensitivity

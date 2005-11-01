@@ -87,6 +87,17 @@ except ImportError:
 
 SearchError = "Couldn't find"
 
+class NotSensitiveError(Exception):
+	"""
+	The widget is not sensitive.
+	"""
+	message = "Cannot %s %s. It is not sensitive."
+	def __init__(self, action):
+		self.action = action
+	
+	def __str__(self):
+		return self.message % (self.action.name, self.action.node.getLogString())
+
 class Action:
 	"""
 	Class representing an action that can be performed on a specific node
@@ -136,7 +147,7 @@ class Action:
 		logger.log("%s on %s"%(self.name, self.node.getLogString()))
 		if config.ensureSensitivity:
 			if not self.node.sensitive:
-				raise "Cannot %s on %s: it is not sensitive"%(self.name, self.node.getLogString())
+				raise NotSensitiveError, self
 		result = self.__action.doAction (self.__index)
 		doDelay()
 		return result

@@ -1,3 +1,21 @@
+2005-11-01  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/logging.py: Change format of TimeStamp.fileStamp() to
+	filename_YYYYMMDD-hhmmss or just filename_YYYYMMDD, controlled by the
+	new optional argument 'long'. Fix docstrings of TimeStamp.fileStamp()
+	and TimeStamp.entryStamp().
+
+	* dogtail/utils.py: Rewrite most of screenshot(), and add assertions
+	that config.scratchDir exists before the screenshot is taken, and that
+	the screenshot file exists before the function returns. Generate
+	screenshot filenames using logging.TimeStamp.entryStamp() by default. 
+	A call like "screenshot(file='foo') will name the file
+	'foo_YYYYMMDD-hhmmss.png', but the timestamping can be disabled with a
+	call like "screenshot(file='foo', timeStamp=False)", naming the file
+	just 'foo.png'. Additionally, the file argument may specify an
+	extension, e.g. 'foo.png' or 'foo.jpg'. Make screenshot() return the 
+	full path to the screenshot taken. Clarify screenshot()'s docstring.
+
 2005-10-31  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/i18n.py: Add URL to bug filed at bugzilla.redhat.com to the 

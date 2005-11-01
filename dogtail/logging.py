@@ -34,23 +34,27 @@ class TimeStamp:
 			return str(int)
 
 	# file stamper
-	def fileStamp(self, filename):
+	def fileStamp(self, filename, long = True):
 		"""
-		Generates a temp filename of YYYYMMDD. If the file already exists, it appends a .0 and will increment by 1 until there is a unique name
+		Generates a filename stamp in the format of filename_YYYYMMDD-hhmmss.
+		A format of filename_YYYYMMDD can be used instead by specifying long = False.
 		"""
-		self.now = filename.strip() + "-"
+		self.now = filename.strip() + "_"
 		self.timetup = time.localtime()
 
 		# Should produce rel-eng style filestamps
 		# format it all pretty by chopping the tuple
-		for i in range(3):
+		fieldCount = 3
+		if long: fieldCount = fieldCount + 3
+		for i in range(fieldCount):
+			if i == 3: self.now = self.now + '-'
 			self.now = self.now + self.zeroPad(self.timetup[i])
 		return self.now
 
 	# Log entry stamper
 	def entryStamp(self):
 		"""
-		Generates a logfile entry stamp of YYYYMMDD HH:MM:SS
+		Generates a logfile entry stamp of YYYY.MM.DD HH:MM:SS
 		"""
 		self.timetup = time.localtime()
 

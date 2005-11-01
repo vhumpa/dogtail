@@ -14,45 +14,55 @@ import os
 from config import config
 from time import sleep
 from logging import debugLogger as logger
+from logging import TimeStamp
 
-def screenshot(windowname='', file='', args=''):
+def screenshot(windowname = 'root', file = 'screenshot.png', timeStamp = True, args = ''):
 	"""
-	This function wraps the ImageMagick import command. It is not very useful for anything except the root window right now.
+	This function wraps the ImageMagick import command to take a screenshot. 
+	
+	The file argument may be specified as 'foo', 'foo.png', or using any other 
+	extension that ImageMagick supports. PNG is the default.
+	
+	By default, screenshot filenames are in the format of foo_YYYYMMDD-hhmmss.png .
+	The timeStamp argument may be set to False to name the file foo.png.
 	"""
+	# config is supposed to create this for us. If it's not there, bail.
+	assert os.path.isdir(config.scratchDir)
+	
 	if windowname == '':
 		windowname = "root"
 
-	if file == '':
-		# generate a filename 
-		if os.path.isdir(config.scratchDir):
-			file = "screenshot.png"
-			path = config.scratchDir + file
-			i = 1
-			while os.path.exists(path):
-				# Append the filename
-				filesplit = file.split(".")
-				filesplit[0] = filesplit[0] + str(i)
-				file = ".".join(filesplit)
-				path = config.scratchDir + file
-				i += 1
-		else:
-			# If path doesn't exist raise an exception
-			raise IOError
-			print "Specified filepath does not exist or is not a directory"
-	else: path = config.scratchDir + file
-
+	baseName = ''.join(file.split('.')[0:-1])
+	fileExt = file.split('.')[-1]
+	if not baseName: 
+		baseName = file
+		fileExt = 'png'
+	print baseName, fileExt
+	
+	if timeStamp:
+		ts = TimeStamp()
+		newFile = ts.fileStamp(baseName) + '.' + fileExt
+		path = config.scratchDir + newFile
+	else:
+		newFile = baseName + '.' + fileExt
+		path = config.scratchDir + newFile
+	
+	print path
+	
 	# Generate the command and redirect STDERR to STDOUT
 	# This really needs window manipulation and pyspi state binding to be done
 	# to actually be really useful
 	answer = []
-	cmd = "import -window '" + windowname + "' " + config.scratchDir + '/' + file + " " + args + " 2>&1"
+	cmd = "import -window '%s' %s %s 2>&1" % (windowname, path, args)
 	answer = os.popen(cmd).readlines()
 
 	# If successful we should get nothing back. If not something went wrong
 	# and our mouse is now probably unusable
 	if answer:
 		raise ValueError, "Screenshot failed: " + answer[-1]
-	else: logger.log("Screenshot taken: " + path)
+	assert os.path.exists(path)
+	logger.log("Screenshot taken: " + path)
+	return path
 
 def run(string, timeout=config.runTimeout, interval=config.runInterval, desktop=None, dumb=False, appName=''):
 	"""

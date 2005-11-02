@@ -21,6 +21,8 @@
 # Author: Zack Cerza <zcerza@redhat.com>
 #
 
+EXIT_CODE_FILE=/tmp/dogtail-run-headless.exitcode
+
 mv -f ~/.xinitrc ~/.xinitrc-user 2>/dev/null && \
  echo "Moving ~/.xinitrc to ~/.xinitrc-user temporarily"
 
@@ -31,8 +33,9 @@ gnome-settings-daemon &
 gnome-panel &
 nautilus -n &
 metacity &
+gconftool-2 --set --type bool /desktop/gnome/interface/accessibility true
 sleep 10
-cd $PWD && dogtail-detect-session && $@
+cd $PWD && dogtail-detect-session && sh -c "$@"; echo -n \$? > $EXIT_CODE_FILE
 EOF
 
 echo "Starting GNOME Session..."
@@ -42,3 +45,4 @@ rm -f ~/.xinitrc
 mv -f ~/.xinitrc-user ~/.xinitrc 2>/dev/null && \
  echo "Restored ~/.xinitrc"
 
+exit `cat $EXIT_CODE_FILE`

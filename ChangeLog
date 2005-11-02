@@ -1,3 +1,8 @@
+2005-11-02  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Preserve the return code of the script
+	being exectued. Closes: #320535.
+
 2005-11-01  David Malcolm <dmalcolm@redhat.com>
 
 	* dogtail/apps/wrappers/evolution.py: added setBogusGConfAccountData()

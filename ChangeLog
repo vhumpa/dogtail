@@ -1,3 +1,8 @@
+2005-11-01  David Malcolm <dmalcolm@redhat.com>
+
+	* dogtail/apps/wrappers/evolution.py: added setBogusGConfAccountData()
+	function as a way of bypassing the first-time wizard 
+
 2005-11-01  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/config.py: Make config.ensureSensitivity False by default.

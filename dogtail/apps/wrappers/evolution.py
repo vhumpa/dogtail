@@ -588,3 +588,15 @@ def doFirstTimeWizard(account, accountName, timezoneName):
 
 	return evo
 	
+def setBogusGConfAccountData():
+	"""
+	Helper function for testing Evolution.
+
+	Use with caution.
+	
+	This writes totally bogus account data into the GConf key 
+	"/apps/evolution/mail/accounts", in order to hack past the first-time
+	wizard.
+	"""
+	os.system('gconftool-2 --type list --list-type=string --set /apps/evolution/mail/accounts ["This is bogus data that is not even an attempt at well-formed XML"]')
+

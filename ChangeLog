@@ -1,5 +1,12 @@
 2005-11-02  Zack Cerza <zcerza@redhat.com>
 
+	* scripts/dogtail-run-headless: Save the value of the GConf key
+	/desktop/gnome/interface/accessibility, then set it to true before
+	running the test. After the test is run, restore the old value.
+	Closes: #320548.
+
+2005-11-02  Zack Cerza <zcerza@redhat.com>
+
 	* scripts/dogtail-run-headless: Preserve the return code of the script
 	being exectued. Closes: #320535.
 

@@ -21,6 +21,13 @@
 # Author: Zack Cerza <zcerza@redhat.com>
 #
 
+A11Y_ENABLED=`gconftool-2 --get /desktop/gnome/interface/accessibility`
+
+if test x$A11Y_ENABLED = xfalse; then 
+	echo "Enabling accessibility support for GNOME"
+	gconftool-2 --set --type bool /desktop/gnome/interface/accessibility true
+fi
+
 EXIT_CODE_FILE=/tmp/dogtail-run-headless.exitcode
 
 mv -f ~/.xinitrc ~/.xinitrc-user 2>/dev/null && \
@@ -40,6 +47,11 @@ EOF
 
 echo "Starting GNOME Session..."
 xinit -- /usr/X11R6/bin/Xvfb :1 -screen 0 1024x768x24 -fbdir /tmp :1
+
+if test x$A11Y_ENABLED = xfalse; then
+	echo "Re-disabling accessibility support for GNOME"
+	gconftool-2 --set --type bool /desktop/gnome/interface/accessibility false
+fi
 
 rm -f ~/.xinitrc
 mv -f ~/.xinitrc-user ~/.xinitrc 2>/dev/null && \

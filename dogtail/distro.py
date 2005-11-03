@@ -117,11 +117,15 @@ class Debian(Distro):
 	"""
 	def __init__(self):
 		class AptPackageDb(PackageDb):
+			def __init__(self):
+				self.cache = None
+			
 			def getVersion(self, packageName):
-				import apt_pkg
-				apt_pkg.init()
-				cache = apt_pkg.GetCache()
-				packages = cache.Packages
+				if not self.cache:
+					import apt_pkg
+					apt_pkg.init()
+					self.cache = apt_pkg.GetCache()
+				packages = self.cache.Packages
 				for package in packages:
 					if package.Name == packageName:
 						import re
@@ -144,10 +148,11 @@ class Debian(Distro):
 				# Simulate a set using a hash (to a dummy value);
 				# sets were only added in Python 2.4
 				result = {}
-				import apt_pkg
-				apt_pkg.init()
-				cache = apt_pkg.GetCache()
-				packages = cache.Packages
+				if not self.cache:
+					import apt_pkg
+					apt_pkg.init()
+					self.cache = apt_pkg.GetCache()
+				packages = self.cache.Packages
 				for package in packages:
 					if package.Name == packageName:
 						current = package.CurrentVer

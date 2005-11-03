@@ -1,5 +1,11 @@
 2005-11-03  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/distro.py: Make AptPackageDb only call apt_pkg.GetCache()
+	once and save the cache object, to save time in the case where 
+	multiple calls to getVersion() or getDependencies() need to be made.
+
+2005-11-03  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/distro.py: Move *PackageDb class declarations and
 	instantiations into their Distro classes' __init__() methods. Remove
 	all __make*PackageDb() functions. Make dogtail.distro.packageDb a

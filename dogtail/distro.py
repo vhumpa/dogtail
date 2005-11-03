@@ -70,11 +70,98 @@ class RedHatOrFedora(Distro):
 	"""
 	Class representing one of Red Hat Linux, Fedora, Red Hat Enterprise Linux, or one of the rebuild-style derivatives
 	"""
+	def __init__(self):
+		class RpmPackageDb(PackageDb):
+			def getVersion(self, packageName):
+				import rpm
+				ts = rpm.TransactionSet()
+				for header in ts.dbMatch("name", packageName):
+					return Version.fromString(header["version"])
+				raise PackageNotFoundError, packageName
+
+			def getFiles(self, packageName):
+				import rpm
+				ts = rpm.TransactionSet()
+				for header in ts.dbMatch("name", packageName):
+					return header["filenames"]
+				raise PackageNotFoundError, packageName
+		
+			def getDependencies(self, packageName):
+				import rpm
+				ts = rpm.TransactionSet()
+				for header in ts.dbMatch("name", packageName):
+					# Simulate a set using a hash (to a dummy value);
+					# sets were only added in Python 2.4
+					result = {}
+
+					# Get the list of requirements; these are 
+					# sometimes package names, but can also be
+					# so-names of libraries, and invented virtual 
+					# ids
+					for requirement in header[rpm.RPMTAG_REQUIRES]:
+						# Get the name of the package providing
+						# this requirement:
+						for depPackageHeader in ts.dbMatch("provides", requirement):
+							depName = depPackageHeader['name']
+							if depName!=packageName:
+								# Add to the Hash with a dummy value
+								result[depName]=None
+					return result.keys()
+				raise PackageNotFoundError, packageName
+
+		self.packageDb = RpmPackageDb()
 
 class Debian(Distro):
 	"""
 	Class representing one of the Debian or Debian-derived distributions
 	"""
+	def __init__(self):
+		class AptPackageDb(PackageDb):
+			def getVersion(self, packageName):
+				import apt_pkg
+				apt_pkg.init()
+				cache = apt_pkg.GetCache()
+				packages = cache.Packages
+				for package in packages:
+					if package.Name == packageName:
+						import re
+						verString = re.match('.*Ver:\'(.*)-.*\' Section:', str(package.CurrentVer)).group(1)
+						return Version.fromString(verString)
+				raise PackageNotFoundError, packageName
+
+			def getFiles(self, packageName):
+				files = []
+				list = os.popen('dpkg -L %s' % packageName).readlines()
+				if not list:
+					raise PackageNotFoundError, packageName
+				else:
+					for line in list:
+						file = line.strip()
+						if file: files.append(file)
+					return files
+			
+			def getDependencies(self, packageName):
+				# Simulate a set using a hash (to a dummy value);
+				# sets were only added in Python 2.4
+				result = {}
+				import apt_pkg
+				apt_pkg.init()
+				cache = apt_pkg.GetCache()
+				packages = cache.Packages
+				for package in packages:
+					if package.Name == packageName:
+						current = package.CurrentVer
+						if not current:
+							raise PackageNotFoundError, packageName
+						depends = current.DependsList
+						list = depends['Depends']
+						for dependency in list:
+							name = dependency[0].TargetPkg.Name
+							# Add to the hash using a dummy value
+							result[name] = None
+				return result.keys()
+
+		self.packageDb = AptPackageDb()
 
 class Ubuntu(Debian):
 	"""
@@ -90,174 +177,64 @@ class Gentoo(Distro):
 	"""
 	Class representing one of the Gentoo or Gentoo-derived distributions
 	"""
+	def __init__(self):
+		class PortagePackageDb(PackageDb):
+			def getVersion(self, packageName):
+				# the portage utilities are almost always going to be in /usr/lib/portage/pym
+				import sys
+				sys.path.append ('/usr/lib/portage/pym')
+				import portage
+				# FIXME: this takes the first package returned in the list, in the case that there are
+				# slotted packages, and removes the leading category such as 'sys-apps'
+				gentooPackageName = portage.db["/"]["vartree"].dbapi.match(packageName)[0].split('/')[1];
+				# this removes the distribution specific versioning returning only the upstream version
+				upstreamVersion = portage.pkgsplit(gentooPackageName)[1]
+				#print "Version of package is: " + upstreamVersion
+				return Version.fromString(upstreamVersion);
+		self.packageDb = PortagePackageDb()
 
 class Conary(Distro):
 	"""
 	Class representing a Conary-based distribution
 	"""
-
-def __makeRpmPackageDb():
-	"""
-	Manufacture a PackageDb for an RPM system.  We hide this inside a 
-	factory method so that we only import the RPM Python bindings if we're
-	on a platform likely to have them
-	"""
-	class RpmPackageDb(PackageDb):
-		def getVersion(self, packageName):
-			import rpm
-			ts = rpm.TransactionSet()
-			for header in ts.dbMatch("name", packageName):
-				return Version.fromString(header["version"])
-			raise PackageNotFoundError, packageName
-
-		def getFiles(self, packageName):
-			import rpm
-			ts = rpm.TransactionSet()
-			for header in ts.dbMatch("name", packageName):
-				return header["filenames"]
-			raise PackageNotFoundError, packageName
-	
-		def getDependencies(self, packageName):
-			import rpm
-			ts = rpm.TransactionSet()
-			for header in ts.dbMatch("name", packageName):
-				# Simulate a set using a hash (to a dummy value);
-				# sets were only added in Python 2.4
-				result = {}
-
-				# Get the list of requirements; these are 
-				# sometimes package names, but can also be
-				# so-names of libraries, and invented virtual 
-				# ids
-				for requirement in header[rpm.RPMTAG_REQUIRES]:
-					# Get the name of the package providing
-					# this requirement:
-					for depPackageHeader in ts.dbMatch("provides", requirement):
-						depName = depPackageHeader['name']
-						if depName!=packageName:
-							# Add to the Hash with a dummy value
-							result[depName]=None
-				return result.keys()
-			raise PackageNotFoundError, packageName
-
-	return RpmPackageDb()
-
-def __makeAptPackageDb():
-	"""
-	Manufacture a PackageDb for an APT system: Debian/Ubuntu/etc.
-	"""
-	class AptPackageDb(PackageDb):
-		def getVersion(self, packageName):
-			import apt_pkg
-			apt_pkg.init()
-			cache = apt_pkg.GetCache()
-			packages = cache.Packages
-			for package in packages:
-				if package.Name == packageName:
-					import re
-					verString = re.match('.*Ver:\'(.*)-.*\' Section:', str(package.CurrentVer)).group(1)
-					return Version.fromString(verString)
-			raise PackageNotFoundError, packageName
-
-		def getFiles(self, packageName):
-			files = []
-			list = os.popen('dpkg -L %s' % packageName).readlines()
-			if not list:
-				raise PackageNotFoundError, packageName
-			else:
-				for line in list:
-					file = line.strip()
-					if file: files.append(file)
-				return files
-		
-		def getDependencies(self, packageName):
-			# Simulate a set using a hash (to a dummy value);
-			# sets were only added in Python 2.4
-			result = {}
-			import apt_pkg
-			apt_pkg.init()
-			cache = apt_pkg.GetCache()
-			packages = cache.Packages
-			for package in packages:
-				if package.Name == packageName:
-					current = package.CurrentVer
-					if not current:
-						raise PackageNotFoundError, packageName
-					depends = current.DependsList
-					list = depends['Depends']
-					for dependency in list:
-						name = dependency[0].TargetPkg.Name
-						# Add to the hash using a dummy value
-						result[name] = None
-			return result.keys()
-
-	return AptPackageDb()
-
-def __makePortagePackageDb():
-	"""
-	Manufacture a PackageDb for a portage based system, i.e. Gentoo.
-	"""
-	class PortagePackageDb(PackageDb):
-		def getVersion(self, packageName):
-			# the portage utilities are almost always going to be in /usr/lib/portage/pym
-			import sys
-			sys.path.append ('/usr/lib/portage/pym')
-			import portage
-			# FIXME: this takes the first package returned in the list, in the case that there are
-			# slotted packages, and removes the leading category such as 'sys-apps'
-			gentooPackageName = portage.db["/"]["vartree"].dbapi.match(packageName)[0].split('/')[1];
-			# this removes the distribution specific versioning returning only the upstream version
-			upstreamVersion = portage.pkgsplit(gentooPackageName)[1]
-			#print "Version of package is: " + upstreamVersion
-			return Version.fromString(upstreamVersion);
-	return PortagePackageDb()
-
-def __makeConaryPackageDb():
-	"""
-	Manufacture a PackageDb for a Conary-based system: rPath Linux, Foresight, etc.
-	"""
-	class ConaryPackageDb(PackageDb):
-		def getVersion(self, packageName):
-			import conary
-			from conaryclient import ConaryClient
-			client = ConaryClient()
-			dbVersions = client.db.getTroveVersionList(packageName)
-			if not len(dbVersions):
-				raise PackageNotFoundError, packageName
-			return dbVersions[0].trailingRevision().asString().split("-")[0]
-	return ConaryPackageDb()
+	def __init__(self):
+		class ConaryPackageDb(PackageDb):
+			def getVersion(self, packageName):
+				import conary
+				from conaryclient import ConaryClient
+				client = ConaryClient()
+				dbVersions = client.db.getTroveVersionList(packageName)
+				if not len(dbVersions):
+					raise PackageNotFoundError, packageName
+				return dbVersions[0].trailingRevision().asString().split("-")[0]
+		self.packageDb = ConaryPackageDb()
 
 print "Detecting distribution: ",
 if os.path.exists ("/etc/redhat-release"):
 	print "Red Hat/Fedora/derived distribution"
 	distro = RedHatOrFedora()
-	packageDb = __makeRpmPackageDb()
 elif os.path.exists ("/etc/SuSE-release"):
 	print "SuSE (or derived distribution)"
-	packageDb = __makeRpmPackageDb()
 elif os.path.exists ("/etc/fedora-release"): 
 	print "Fedora (or derived distribution)"
 	distro = RedHatOrFedora()
-	packageDb = __makeRpmPackageDb()
 elif os.path.exists ("/usr/share/doc/ubuntu-minimal"):
 	print "Ubuntu (or derived distribution)"
 	distro = Ubuntu()
-	packageDb = __makeAptPackageDb()
 elif os.path.exists ("/etc/debian_version"):
 	print "Debian (or derived distribution)"
 	distro = Debian()
-	packageDb = __makeAptPackageDb()
 elif os.path.exists ("/etc/gentoo-release"):
 	print "Gentoo (or derived distribution)"
 	distro = Gentoo()
-	packageDb = __makePortagePackageDb()
 elif os.path.exists ("/etc/slackware-version"):
 	print "Slackware"
 	raise DistributionNotSupportedError("Slackware")
 elif os.path.exists ("/var/lib/conarydb/conarydb"):
-    print "Conary-based distribution"
-    distro = Conary()
-    packageDb = __makeConaryPackageDb()
+	print "Conary-based distribution"
+	distro = Conary()
 else:
 	print "Unknown"
 	raise DistributionNotSupportedError("Unknown")
+
+packageDb = distro.packageDb

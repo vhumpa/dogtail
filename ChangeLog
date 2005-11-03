@@ -1,3 +1,11 @@
+2005-11-03  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py: Move *PackageDb class declarations and
+	instantiations into their Distro classes' __init__() methods. Remove
+	all __make*PackageDb() functions. Make dogtail.distro.packageDb a
+	reference to dogtail.distro.distro.packageDb, where the second
+	'distro' is the Distro subclass instance to preserve the API.
+
 2005-11-02  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail.spec: Bump version number.

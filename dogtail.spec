@@ -1,6 +1,6 @@
 Summary: GUI test tool and automation framework
 Name: dogtail
-Version: 0.4.3
+Version: 0.4.4
 Release: 1
 License: GPL
 Group: User Interface/X

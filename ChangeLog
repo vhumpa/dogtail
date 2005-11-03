@@ -1,5 +1,9 @@
 2005-11-02  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail.spec: Bump version number.
+
+2005-11-02  Zack Cerza <zcerza@redhat.com>
+
 	* scripts/dogtail-run-headless: Save the value of the GConf key
 	/desktop/gnome/interface/accessibility, then set it to true before
 	running the test. After the test is run, restore the old value.

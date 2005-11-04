@@ -1,5 +1,18 @@
 2005-11-03  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/distro.py: Add PackageDb.getMoFiles(), returning (mostly) 
+	all the .mo files in the distro, optionally for just one locale. Move
+	all PackageDb subclasses into the top level of the module, and prefix
+	their names with a '_' so it is possible to subclass them. Add
+	UbuntuAptPackageDb to make it possible for getMoFiles() to search in
+	/usr/share/locale and /usr/share/locale-langpack. Add JHBuild class, a
+	subclass of Distro, and JhBuildPackageDB class, a subclass of
+	PackageDb. JhBuildPackageDB.getFiles() and
+	JhBuildPackageDB.getVersion() are not implemented yet, as I haven't
+	figured out just how they should work yet.
+
+2005-11-03  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/distro.py: Make AptPackageDb only call apt_pkg.GetCache()
 	once and save the cache object, to save time in the case where 
 	multiple calls to getVersion() or getDependencies() need to be made.

@@ -11,10 +11,7 @@ BuildArchitectures: noarch
 
 # hrm, the brp-python-bytecompile will byte-compile docs stuff too
 # which is probably not what we want
-%define __os_install_post \
-  [ -x /usr/lib/rpm/brp-python-bytecompile ] && /usr/lib/rpm/brp-python-bytecompile \
-  find $RPM_BUILD_ROOT/%{_docdir}/dogtail -name *.py[co] |xargs rm -f \
-%{nil}
+%define __os_install_post [ -x /usr/lib/rpm/brp-python-bytecompile ] && /usr/lib/rpm/brp-python-bytecompile find $RPM_BUILD_ROOT/%{_docdir}/dogtail -name *.py[co] |xargs rm -f 
 
 %description
 GUI test tool and automation framework that uses Accessibility (a11y) 

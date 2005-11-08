@@ -21,12 +21,15 @@ tarball: clean
 	python setup.py sdist
 
 rpm: tarball
-ifneq ($(id -u),0)
-	echo "Attempting to use sudo to build the RPM..."
-	sudo rpmbuild -ta dist/dogtail-*.tar.gz
-else
-	rpmbuild -ta dist/dogtail-*.tar.gz
-endif
+	mkdir -p rpms/{BUILD,RPMS/noarch,SOURCES,SPECS,SRPMS}
+	# Create an rpmrc that will include our custom rpmmacros file
+	echo "%_topdir `pwd`/rpms/" > rpms/tmp.rpmmacros
+	echo "macrofiles: /usr/lib/rpm/macros:/usr/lib/rpm/%{_target}/macros:/usr/lib/rpm/redhat/macros:/etc/rpm/macros.*:/etc/rpm/macros:/etc/rpm/%{_target}/macros:~/.rpmmacros:`pwd`/rpms/tmp.rpmmacros" > rpms/tmp.rpmrc
+	# Build using the custom rpmrc in the rpms/ sub-dir
+	rpmbuild --rcfile /usr/lib/rpm/rpmrc:/usr/lib/rpm/redhat/rpmrc:`pwd`/rpms/tmp.rpmrc  -ta dist/dogtail-*.tar.gz
+	# Move the source and binary RPMs to dist/
+	mv rpms/SRPMS/* rpms/RPMS/noarch/* dist/
+	rm -rf rpms/
 
 deb:
 	fakeroot debian/rules clean

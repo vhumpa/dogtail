@@ -1,5 +1,10 @@
 2005-11-08  Zack Cerza <zcerza@redhat.com>
 
+	* Makefile: Build RPMs as a normal user. Thanks again to Bastien 
+	Nocera for the patch!
+
+2005-11-08  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail.spec: Make __os_install_post macro one line to fix building
 	RPMs on RHEL4 and earlier. Thanks to Bastien Nocera for the patch. 
 	Closes: #320978.

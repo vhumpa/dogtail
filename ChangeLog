@@ -1,5 +1,12 @@
 2005-11-08  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/tree.py: Fix bogus logic in Node.__getattr__() where if, for
+	example, a Node had multiple actions such that 
+	node.actions[0].name == 'activate' and node.actions[1].name == 'menu',
+	calling node.menu() would fail.
+
+2005-11-08  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tree.py: Remove "various wrapper/helper search methods": 
 	Node.{child, menu, menuItem, textentry, button, childLabelled, 
 	childNamed, tab}(). Node.menu() conflicted with the other Node.menu(),

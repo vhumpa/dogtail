@@ -394,7 +394,7 @@ class Node:
 				# action associated with the Action instance. Here, we're simply
 				# returning a copy of the function, with a different name.
 				if action.name == attr: return action.do
-				else: raise AttributeError, attr
+			raise AttributeError, attr
 
 		# Attributes from the Component object
 		elif attr == "extents":

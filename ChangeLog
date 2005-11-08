@@ -1,7 +1,7 @@
 2005-11-08  Zack Cerza <zcerza@redhat.com>
 
 	* Makefile: Build RPMs as a normal user. Thanks again to Bastien 
-	Nocera for the patch!
+	Nocera for the patch! Closes: #320983.
 
 2005-11-08  Zack Cerza <zcerza@redhat.com>
 

@@ -1,5 +1,11 @@
 2005-11-08  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/procedural.py: Fix "maximum recursion depth exceeded" error 
+	in FocusBase.__getattr__() when 'help(dogtail.procedural)' is called 
+	right after 'import dogtail.procedural'.
+
+2005-11-08  Zack Cerza <zcerza@redhat.com>
+
 	* Makefile: Build RPMs as a normal user. Thanks again to Bastien 
 	Nocera for the patch! Closes: #320983.
 

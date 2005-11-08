@@ -1,5 +1,12 @@
 2005-11-08  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/tree.py: Remove "various wrapper/helper search methods": 
+	Node.{child, menu, menuItem, textentry, button, childLabelled, 
+	childNamed, tab}(). Node.menu() conflicted with the other Node.menu(),
+	which is needed to execute the AccessibleAction's 'menu' action.
+
+2005-11-08  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/procedural.py: Fix "maximum recursion depth exceeded" error 
 	in FocusBase.__getattr__() when 'help(dogtail.procedural)' is called 
 	right after 'import dogtail.procedural'.

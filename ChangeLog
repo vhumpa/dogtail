@@ -1,5 +1,10 @@
 2005-11-10  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/tree.py: Add Node.position, Node.size, and Node.grabFocus()
+	for those Nodes wrapping an AccessibleComponent.
+
+2005-11-10  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tc.py: Don't initialize TC's self.{baseline,undertest,result} so
 	that TC.compare() defaults to failing. Make sure to assign
 	self.{baseline,undertest} to the value of the arguments passed to

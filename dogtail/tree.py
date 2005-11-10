@@ -245,6 +245,17 @@ class Node:
 	For instances wrapping a Component, the (x,y,w,h) screen extents of the
 	component.
 
+	'position' (readonly tuple):
+	For instances wrapping a Component, the (x,y) screen position of the
+	component.
+
+	'size' (readonly tuple):
+	For instances wrapping a Component, the (w,h) screen size of the component.
+
+	'grabFocus':
+	For instances wrapping a Component, attempt to set the keyboard input focus 
+	to that Node.
+
 	'toolkit' (readonly string):
 	For instances wrapping an application, the name of the toolkit.
 	
@@ -399,6 +410,14 @@ class Node:
 		# Attributes from the Component object
 		elif attr == "extents":
 			return self.__component.getExtents ()
+		elif attr == "position":
+			return self.__component.getPosition ()
+		elif attr == "size":
+			return self.__component.getSize ()
+		elif attr == "grabFocus":
+			def grabFocus(self):
+				self.__component.grabFocus()
+			return grabFocus
 		
 		# Attributes from the Text object
 		elif attr == "text":

@@ -1,3 +1,8 @@
+2005-11-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tc.py: s@scripts/pound@examples/data@g to reflect the
+	directory naming that occured a while back.
+
 2005-11-08  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/tree.py: Fix bogus logic in Node.__getattr__() where if, for

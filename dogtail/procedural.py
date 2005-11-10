@@ -137,6 +137,12 @@ class Focus (FocusBase):
 		"""
 		self.widget(name = name, roleName = 'push button')
 	
+	def frame (self, name):
+		"""
+		A shortcut to self.widget(name, roleName = 'frame')
+		"""
+		self.widget(name = name, roleName = 'frame')
+	
 	def icon (self, name):
 		"""
 		A shortcut to self.widget(name, roleName = 'icon')
@@ -172,6 +178,12 @@ class Focus (FocusBase):
 		A shortcut to self.widget(name, roleName = 'text')
 		"""
 		self.widget(name = name, roleName = 'text')
+	
+	def window (self, name):
+		"""
+		A shortcut to self.widget(name, roleName = 'window')
+		"""
+		self.widget(name = name, roleName = 'window')
 
 class Action (FocusWidget):
 	"""
@@ -268,4 +280,5 @@ focus = Focus()
 click = Click()
 activate = Action('activate')
 openItem = Action('open')
+menu = Action('menu')
 

@@ -1,5 +1,9 @@
 2005-11-10  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/procedural.py: Add menu(), Focus.frame(), Focus.window().
+
+2005-11-10  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tree.py: Add Node.position, Node.size, and Node.grabFocus()
 	for those Nodes wrapping an AccessibleComponent.
 

@@ -20,7 +20,7 @@ def click (x, y, button = 1):
 	"""
 	logger.log("Mouse button %s click at (%s,%s)"%(button,x,y))
 	ev = atspi.EventGenerator()
-	ev.click(x,y,button)
+	ev.click(x, y, button)
 	doDelay()
 	
 def doubleClick (x, y, button = 1):
@@ -87,3 +87,10 @@ def drag(fromXY, toXY, button = 1):
 	ev.release (x, y, button)
 	doDelay()
 
+def typeText(string):
+	ev = atspi.EventGenerator()
+	ev.injectKeyboardString(string)
+
+def pressKey(keycode, arg):
+	ev = atspi.EventGenerator()
+	ev.generateKeyboardEvent(keycode, "", arg)

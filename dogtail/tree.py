@@ -293,6 +293,35 @@ class Node:
 		component = self.__accessible.getComponent()
 		if component is not None:
 			self.__component = component
+
+			def grabFocus():
+				self.__component.grabFocus()
+			self.grabFocus = grabFocus
+
+			def rawClick(button = 1):
+				"""
+				Generates a raw mouse click event whether or not the Node has a 'click' action, using the specified button.
+				1 is left,
+				2 is middle,
+				3 is right.
+				"""
+				import rawinput
+				extents = self.extents
+				position = (extents[0], extents[1])
+				size = (extents[2], extents[3])
+				clickX = position[0] + 0.5 * size[0]
+				clickY = position[1] + 0.5 * size[1]
+				rawinput.click(clickX, clickY, button)
+			self.rawClick = rawClick
+
+			def rawType(text):
+				"""
+				Generates raw keyboard events to type text into the Node.
+				"""
+				import rawinput
+				self.grabFocus()
+				rawinput.typeText(text)
+			self.rawType = rawType
 			
 		# Swallow the Text object, if it exists
 		text = self.__accessible.getText()
@@ -414,11 +443,7 @@ class Node:
 			return self.__component.getPosition ()
 		elif attr == "size":
 			return self.__component.getSize ()
-		elif attr == "grabFocus":
-			def grabFocus(self):
-				self.__component.grabFocus()
-			return grabFocus
-		
+
 		# Attributes from the Text object
 		elif attr == "text":
 			return self.__text.getText (0, 32767)

@@ -1,5 +1,17 @@
 2005-11-10  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/rawinput.py: Add typeText() and pressKey(). For now 
+	pressKey() takes an integer keycode argument, but I'd like to enable
+	something like "pressKey('Return')" in the future.
+
+	* dogtail/tree.py: Make Node.grabFocus() get added to the object in 
+	Node.__init__(), but only of the node wraps a Component. Also add 
+	Node.rawClick() and Node.rawType().
+
+	* dogtail/procedural.py: Implement click(raw=True).
+
+2005-11-10  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/procedural.py: Make FocusWidget.__call__() actually raise a 
 	FocusError if it can't find what it's looking for.
 

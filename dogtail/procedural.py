@@ -259,19 +259,22 @@ class Click (Action):
 	"""
 	A special case of Action, Click will eventually handle raw mouse events.
 	"""
-	primary = 0
-	middle = 1
-	secondary = 2
+	primary = 1
+	middle = 2
+	secondary = 3
 	def __init__ (self):
 		Action.__init__(self, 'click')
 	
-	def __call__ (self, name = '', roleName = '', description = '', coords = None, button = primary, delay = config.actionDelay):
+	def __call__ (self, name = '', roleName = '', description = '', raw = False, button = primary, delay = config.actionDelay):
 		"""
 		If coords or button are specified, execute a raw mouse event. If not, just pass the rest of the arguments to Action.
 		"""
-		if coords or button:
+		if raw and button:
 			# We're doing a raw mouse click
-			raise NotImplementedError, "Sorry! Not done yet!"
+			FocusWidget.__call__(self, name = name, roleName = roleName, description = description)
+			print str(self.__class__.node)
+			self.__class__.node.rawClick(button)
+			sleep(delay)
 		else:
 			Action.__call__(self, name = name, roleName = roleName, description = description, delay = delay)
 

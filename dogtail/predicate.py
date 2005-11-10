@@ -5,8 +5,7 @@ __author__ = 'David Malcolm <dmalcolm@redhat.com>'
 
 import unittest
 
-import dogtail.i18n
-from dogtail.i18n import TranslatableString
+from i18n import TranslatableString
 
 def stringMatches(scriptName, reportedName):
 	assert isinstance(scriptName, TranslatableString)

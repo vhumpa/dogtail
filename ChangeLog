@@ -1,5 +1,9 @@
 2005-11-10  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/predicate.py, dogtail/rawinput.py: Clean up imports.
+
+2005-11-10  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/rawinput.py: Add typeText() and pressKey(). For now 
 	pressKey() takes an integer keycode argument, but I'd like to enable
 	something like "pressKey('Return')" in the future.

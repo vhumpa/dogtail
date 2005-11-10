@@ -11,8 +11,8 @@ Zack Cerza <zcerza@redhat.com>
 """
 
 import atspi
-from tree import doDelay
-from tree import logger
+from utils import doDelay
+from logging import debugLogger as logger
 
 def click (x, y, button = 1):
 	"""

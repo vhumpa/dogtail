@@ -20,8 +20,6 @@ class TC:
 	"""
 	writer = LogWriter()
 	def __init__(self):
-		self.baseline = self.label = self.undertest = "empty"
-		self.result = {"empty": "empty"}
 		self.encoding = config.encoding
 		# ascii + unicode. 8 bit extended char has been ripped out
 		self.supportedtypes = ("ascii", "utf-8", "utf-16", "utf-16-be", "utf-16-le", "unicode-escape", "raw-unicode-escape",
@@ -36,6 +34,8 @@ class TC:
 		8 bit charactersets is not supported.
 		"""
 		self.label = label.strip()
+		self.baseline = baseline
+		self.undertest = undertest
 		for string in [self.baseline, self.undertest]:
 			try: string = unicode(string, 'utf-8')
 			except TypeError: pass
@@ -253,7 +253,7 @@ if __name__ == '__main__':
 	label = " unit test case 2.0"
 	encoding = "utf-8"
 	baseline = u"groß"
-	undertest = "gro\xc3\xa1"
+	undertest = u"gro\xc3\xa1"
 	result = {}
 
 	# Fire off a UTF-8 compare
@@ -289,7 +289,7 @@ if __name__ == '__main__':
 	# Reset variables for unmatched utf-8 strings 
 	label = " unit test case 2.3"
 	encoding = "utf-8"
-	baseline = "groß"
+	baseline = u"groß"
 	undertest = "nomatch"
 	result = {}
 
@@ -315,8 +315,8 @@ if __name__ == '__main__':
 	# For this first test case, we are comparing same JA characters
 	label = " unit test case 2.5"
 	encoding = "utf-8"
-	baseline = "あか"
-	undertest = "あか"
+	baseline = u"あか"
+	undertest = u"あか"
 	result = {}
 
 	result = case2.compare(label, baseline, undertest, encoding)
@@ -328,8 +328,8 @@ if __name__ == '__main__':
 	# Testing different JA characters
 	label = " unit test case 2.6"
 	encoding = "utf-8"
-	baseline = "あか"
-	undertest = "元気"
+	baseline = u"あか"
+	undertest = u"元気"
 	result = {}
 
 	result = case2.compare(label, baseline, undertest, encoding)

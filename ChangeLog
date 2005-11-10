@@ -1,5 +1,15 @@
 2005-11-10  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/tc.py: Don't initialize TC's self.{baseline,undertest,result} so
+	that TC.compare() defaults to failing. Make sure to assign
+	self.{baseline,undertest} to the value of the arguments passed to
+	compare(). Fix several unit tests to specify their strings as being
+	Unicode-encoded. Strings comparisons now fail properly. Thanks to
+	Muktha Narayan for reporting the bug and attaching a proposed patch. 
+	Closes: #321151.
+
+2005-11-10  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tc.py: s@scripts/pound@examples/data@g to reflect the
 	directory naming that occured a while back.
 

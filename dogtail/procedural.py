@@ -111,6 +111,11 @@ class FocusWidget (FocusBase):
 				result = FocusApplication.node.findChild(GenericPredicate(name = name, roleName = roleName, description = description), requireResult = False, retry = False)
 				if result: self.__class__.node = result
 			except AttributeError: raise FocusError, name
+		
+		print str(result)
+		if result == None:
+			self.__class__.node = result
+			raise FocusError, name
 
 class Focus (FocusBase):
 	"""

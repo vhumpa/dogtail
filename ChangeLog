@@ -1,5 +1,10 @@
 2005-11-10  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/procedural.py: Make FocusWidget.__call__() actually raise a 
+	FocusError if it can't find what it's looking for.
+
+2005-11-10  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/procedural.py: Add menu(), Focus.frame(), Focus.window().
 
 2005-11-10  Zack Cerza <zcerza@redhat.com>

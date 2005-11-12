@@ -26,10 +26,13 @@ class TimeStamp:
 	def zeroPad(self, int, width = 1):
 		"""
 		Pads an integer 'int' with zeroes, up to width 'width'.
+		
 		Returns a string.
+		
+		It will not truncate. If you call zeroPad(100, 2), '100' will be returned.
 		"""
 		if int < 10 ** width:
-			return ("0" * width) + str(int)
+			return ("0" * (width - len(str(int))) ) + str(int)
 		else: 
 			return str(int)
 
@@ -155,45 +158,24 @@ class IconLogger:
 	"""
 	Writes entries to the tooltip of an icon in the notification area or the desktop.
 	"""
+	trayicon = None
 	def __init__(self, config = None, module_list = None):
-		from trayicon import TrayIcon
-		self.trayicon = TrayIcon()
-		if self.trayicon.proc: self.works = True
-		else: self.works = False
-		iconName = 'dogtail-tail-48.png'
-		iconPath = '/usr/share/pixmaps/' + iconName
-		if os.path.exists(iconPath):
-			self.trayicon.set_icon(iconPath)
-		self.message('dogtail running...')
+		if not IconLogger.trayicon:
+			from trayicon import TrayIcon
+			IconLogger.trayicon = TrayIcon()
+			if IconLogger.trayicon.proc: self.works = True
+			else: self.works = False
+			iconName = 'dogtail-tail-48.png'
+			iconPath = '/usr/share/pixmaps/' + iconName
+			if os.path.exists(iconPath):
+				IconLogger.trayicon.set_icon(iconPath)
+			self.message('dogtail running...')
 
-	def message(self, msg, module_num=-1):
-		'''Display a message to the user'''
-		
-		#if is_xterm:
-		#		 print '\033]0;dogtail: %s\007' % (msg)
-		self.trayicon.set_tooltip('%s' % (msg))
-
-	def set_action(self, action, module, module_num=-1, action_target=None):
-		if module_num == -1:
-			module_num = self.module_num
-		if not action_target:
-			action_target = module.name
-		self.message('%s %s' % (action, action_target), module_num)
-
-	def execute(self, command, hint=None):
-		'''executes a command, and returns the error code'''
-		if isinstance(command, (str, unicode)):
-			print command
-		else:
-			print ' '.join(command)
-
-		# get rid of hint if pretty printing is disabled.
-		if not self.config.pretty_print: hint = None
-		if hint == 'cvs':
-			stdout = subprocess.PIPE
-			stderr = subprocess.STDOUT
-		else:
-			stdout = stderr = None
+	def message(self, msg):
+		"""
+		Display a message to the user
+		"""
+		IconLogger.trayicon.set_tooltip(msg)
 
 class DebugLogger:
 	"""

@@ -1,5 +1,10 @@
 2005-11-10  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/logging.py: Fix TimeStamper.zeroPad()'s padding, and note in
+	its docstring that it will not truncate.
+
+2005-11-10  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/predicate.py, dogtail/rawinput.py: Clean up imports.
 
 2005-11-10  Zack Cerza <zcerza@redhat.com>

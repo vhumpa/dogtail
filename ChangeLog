@@ -1,5 +1,13 @@
 2005-11-14  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/procedural.py: Fix focusing. There are supposed to be three
+	different focus 'slots': application, dialog, and widget. Previously
+	Actions were not operating on the same nodes as FocusWidget as
+	intended. Also remove a couple print statements left over from
+	previous debugging.
+
+2005-11-14  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/rawinput.py: rewrite pressKey() to take as an argument the
 	English key name as seen on the keyboard, look its keysym up via a
 	dict, and pass that value to AT-SPI to synthesize the event. This

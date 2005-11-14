@@ -52,7 +52,7 @@ class FocusApplication (FocusBase):
 			nameMatch = app.name == name
 			descriptionMatch = app.description == description
 			if nameMatch and descriptionMatch:
-				self.__class__.node = app
+				FocusApplication.node = app
 				FocusDialog.node = None
 				FocusWidget.node = None
 				matched = True
@@ -80,7 +80,7 @@ class FocusDialog (FocusBase):
 			result = FocusApplication.node.findChild(IsADialogNamed(name), requireResult=False)
 		except AttributeError: pass
 		if result: 
-			self.__class__.node = result
+			FocusDialog.node = result
 			FocusWidget.node = None
 		else: raise FocusError, name
 
@@ -98,23 +98,22 @@ class FocusWidget (FocusBase):
 		# search for a widget.
 		result = None
 		try:
-			result = self.__class__.node.findChild(GenericPredicate(name = name, roleName = roleName, description = description), requireResult = False, retry = False)
+			result = FocusWidget.node.findChild(GenericPredicate(name = name, roleName = roleName, description = description), requireResult = False, retry = False)
 		except AttributeError: pass
-		if result: self.__class__.node = result
+		if result: FocusWidget.node = result
 		else:
 			try:
 				result = FocusDialog.node.findChild(GenericPredicate(name = name, roleName = roleName, description = description), requireResult = False, retry = False)
 			except AttributeError: pass
-		if result: self.__class__.node = result
+		if result: FocusWidget.node = result
 		else: 
 			try:
 				result = FocusApplication.node.findChild(GenericPredicate(name = name, roleName = roleName, description = description), requireResult = False, retry = False)
-				if result: self.__class__.node = result
+				if result: FocusWidget.node = result
 			except AttributeError: raise FocusError, name
 		
-		print str(result)
 		if result == None:
-			self.__class__.node = result
+			FocusWidget.node = result
 			raise FocusError, name
 
 class Focus (FocusBase):
@@ -272,8 +271,7 @@ class Click (Action):
 		if raw and button:
 			# We're doing a raw mouse click
 			FocusWidget.__call__(self, name = name, roleName = roleName, description = description)
-			print str(self.__class__.node)
-			self.__class__.node.rawClick(button)
+			Click.node.rawClick(button)
 			sleep(delay)
 		else:
 			Action.__call__(self, name = name, roleName = roleName, description = description, delay = delay)

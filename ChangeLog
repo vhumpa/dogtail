@@ -1,3 +1,12 @@
+2005-11-14  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/rawinput.py: rewrite pressKey() to take as an argument the
+	English key name as seen on the keyboard, look its keysym up via a
+	dict, and pass that value to AT-SPI to synthesize the event. This
+	means each key will have to be added to the keySyms dict explicitly,
+	but I think it's worth it for the API to make sense and be portable.
+	Add docstrings to pressKey() and typeText().
+
 2005-11-10  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/logging.py: Fix TimeStamper.zeroPad()'s padding, and note in

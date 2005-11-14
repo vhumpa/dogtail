@@ -88,9 +88,25 @@ def drag(fromXY, toXY, button = 1):
 	doDelay()
 
 def typeText(string):
+	"""
+	Types the specified string, one character at a time.
+	"""
 	ev = atspi.EventGenerator()
 	ev.injectKeyboardString(string)
 
-def pressKey(keycode, arg):
+keySyms = {
+	'enter' : 0xff0d,
+	'esc' : 0xff1b,
+	'space' : 0x20
+}
+
+def pressKey(keyName):
+	"""
+	Presses (and releases) the key specified by keyName.
+	keyName is the English name of the key as seen on the keyboard. Ex: 'enter'
+	Names are looked up in the keySyms dict.
+	"""
 	ev = atspi.EventGenerator()
-	ev.generateKeyboardEvent(keycode, "", arg)
+	keySym = keySyms[keyName.lower()]
+	ev.generateKeyboardEvent(keySym, "", atspi.SPI_KEY_SYM)
+

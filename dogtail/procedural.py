@@ -21,9 +21,6 @@ class FocusBase:
 	"""
 	def __getattr__ (self, name):
 		# Fold all the Node's AT-SPI properties into the Focus object.
-		try: assert self.__dict__['node']
-		except KeyError: raise AttributeError, name
-
 		try: return self.node.__getattr__(name)
 		except AttributeError: raise AttributeError, name
 	
@@ -211,7 +208,7 @@ class Action (FocusWidget):
 		sleep(delay)
 	
 	def __getattr__ (self, attr):
-		return getattr(FocusWidget, attr)
+		return getattr(FocusWidget.node, attr)
 
 	def __setattr__ (self, attr, value):
 		if attr == 'action': 

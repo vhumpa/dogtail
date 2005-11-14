@@ -1,5 +1,10 @@
 2005-11-14  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/procedural.py: Fix compositing of Node properties into
+	FocusBase subclasses.
+
+2005-11-14  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/procedural.py: Fix focusing. There are supposed to be three
 	different focus 'slots': application, dialog, and widget. Previously
 	Actions were not operating on the same nodes as FocusWidget as

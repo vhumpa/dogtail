@@ -1,5 +1,10 @@
 2005-11-15  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/logging.py: Make LogWriter print the name of the logfile
+	just before it creates it.
+
+2005-11-15  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/logging.py: Fix TimeStamp.zeroPad() by defaulting to
 	width=2. Fix TimeStamp.fileStamp() by renaming 'long' argument to
 	'addTime'.

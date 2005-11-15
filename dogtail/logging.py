@@ -115,6 +115,7 @@ class LogWriter:
 
 		# Try to create the file and write the header info
 		try:
+			print "Creating logfile at %s ..." % self.logfile
 			date = datetime.datetime.strftime(datetime.datetime.now(), '%d %b %Y %H:%M:%S')
 			self.loghandle = open(self.logfile, 'w')
 			self.loghandle.write("##### " + self.scriptName + " Created on: " + date + "\n")

@@ -23,7 +23,7 @@ class TimeStamp:
 		self.now = "0"
 		self.timetup = time.localtime()
 	
-	def zeroPad(self, int, width = 1):
+	def zeroPad(self, int, width = 2):
 		"""
 		Pads an integer 'int' with zeroes, up to width 'width'.
 		
@@ -37,10 +37,10 @@ class TimeStamp:
 			return str(int)
 
 	# file stamper
-	def fileStamp(self, filename, long = True):
+	def fileStamp(self, filename, addTime = True):
 		"""
 		Generates a filename stamp in the format of filename_YYYYMMDD-hhmmss.
-		A format of filename_YYYYMMDD can be used instead by specifying long = False.
+		A format of filename_YYYYMMDD can be used instead by specifying addTime = False.
 		"""
 		self.now = filename.strip() + "_"
 		self.timetup = time.localtime()
@@ -48,7 +48,7 @@ class TimeStamp:
 		# Should produce rel-eng style filestamps
 		# format it all pretty by chopping the tuple
 		fieldCount = 3
-		if long: fieldCount = fieldCount + 3
+		if addTime: fieldCount = fieldCount + 3
 		for i in range(fieldCount):
 			if i == 3: self.now = self.now + '-'
 			self.now = self.now + self.zeroPad(self.timetup[i])

@@ -1,5 +1,12 @@
 2005-11-14  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/procedural.py: Use {get,set}attr() inside
+	FocusBase.__{get,set}attr__() instead of
+	FocusBase.node.__{get,set}attr__(), in order to composite attributes 
+	that aren't dynamically generated.
+
+2005-11-14  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/procedural.py: Fix compositing of Node properties into
 	FocusBase subclasses.
 

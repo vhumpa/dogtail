@@ -21,7 +21,7 @@ class FocusBase:
 	"""
 	def __getattr__ (self, name):
 		# Fold all the Node's AT-SPI properties into the Focus object.
-		try: return self.node.__getattr__(name)
+		try: return getattr(self.node, name)
 		except AttributeError: raise AttributeError, name
 	
 	def __setattr__ (self, name, value):
@@ -29,7 +29,7 @@ class FocusBase:
 		if name == 'node': 
 			self.__dict__[name] = value
 		else:
-			try: self.node.__setattr__(name, value)
+			try: setattr(self.node, name, value)
 			except AttributeError: raise AttributeError, name
 	
 class FocusApplication (FocusBase):

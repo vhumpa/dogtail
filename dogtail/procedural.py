@@ -74,7 +74,7 @@ class FocusDialog (FocusBase):
 			raise TypeError, ENOARGS
 		result = None
 		try:
-			result = FocusApplication.node.findChild(IsADialogNamed(name), requireResult=False)
+			result = FocusApplication.node.findChild(IsADialogNamed(name), requireResult=False, recursive = False)
 		except AttributeError: pass
 		if result: 
 			FocusDialog.node = result

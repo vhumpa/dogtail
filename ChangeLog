@@ -1,7 +1,7 @@
 2005-11-16  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/procedural.py: Make FocusDialog.__call__() pass
-	recursive=False to FocusApplication.node.findChild().
+	recursive=False to FocusApplication.node.findChild(). Closes: #321624.
 
 2005-11-15  Zack Cerza <zcerza@redhat.com>
 

@@ -125,11 +125,13 @@ def setUpTable(node):
 		buffer.set_text(node.text)
 		try:
 			# Eeew! I'm touching tree's privates.
+			# This 'assert' will never cause an AssertionError - it
+			# will be an AttributeError.
 			assert node._Node__editableText
 			# Remember the handler ID of this connection.
 			textTextViewBufferChangedLastHandlerID = \
 				buffer.connect('changed', changeText, node)
-		except AssertionError:
+		except AttributeError:
 			textTextView.set_sensitive(False)
 	except AttributeError:
 		textTextView.get_buffer().set_text('')

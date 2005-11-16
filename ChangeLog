@@ -1,5 +1,10 @@
 2005-11-16  Zack Cerza <zcerza@redhat.com>
 
+	* sniff/sniff: Properly catch an AttributeError where an
+	AssertionError was previously expected. Closes: #321564:.
+
+2005-11-16  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/procedural.py: Make FocusDialog.__call__() pass
 	recursive=False to FocusApplication.node.findChild(). Closes: #321624.
 

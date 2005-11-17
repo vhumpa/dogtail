@@ -75,6 +75,8 @@ def connectSignals():
 	view.connect('button-press-event', buttonPress)
 	view.connect('row-expanded', rowExpanded)
 	view.connect('row-collapsed', rowCollapsed)
+	treeSelection = view.get_selection()
+	treeSelection.connect('changed', selectionChanged)
 
 def buttonPress(widget, event, *userParams):
 	global model
@@ -167,6 +169,53 @@ def rowCollapsed(treeview, iter, path, *userParams):
 					model.remove(grandChildRow.iter)
 			except StopIteration: pass
 	except StopIteration: pass
+
+BLINK_INTERVAL_MS = 200
+
+class Blinker:
+	def __init__(self, count, x, y, w, h):
+		self.count = count
+		self.x = x
+		self.y = y
+		self.w = w
+		self.h = h
+		self.timeout_handler_id = gobject.timeout_add (BLINK_INTERVAL_MS, self.blinkDrawRectangle)
+
+	def blinkDrawRectangle (self):
+		display = gtk.gdk.display_get_default()
+		screen = display.get_default_screen()
+		rootWindow = screen.get_root_window()
+		gc = rootWindow.new_gc()
+
+		gc.set_subwindow (gtk.gdk.INCLUDE_INFERIORS)
+		gc.set_function (gtk.gdk.INVERT)
+		gc.set_line_attributes (3, gtk.gdk.LINE_SOLID, gtk.gdk.CAP_BUTT, gtk.gdk.JOIN_MITER)
+		rootWindow.draw_rectangle (gc, False, self.x, self.y, self.w, self.h);
+
+		self.count-=1
+
+		if self.count <= 0:
+			return False
+		
+		return True
+		
+def blinkExtents(x,y,w,h):
+	blinkData = Blinker(4, x,y,w,h)
+
+def selectionChanged(treeSelection):
+	# print "selection changed"
+	node = getSelectedNode()
+	try:
+		(x,y,w,h) = node.extents
+		blinkExtents(x,y,w,h)
+	except AttributeError: pass
+
+def getSelectedNode():
+	global model
+	global view
+	(store, iter) = view.get_selection().get_selected()
+	node = model[iter][0]
+	return node	
 
 def menuItemActivate(menuItem, *userParams):
 	method = userParams[0]

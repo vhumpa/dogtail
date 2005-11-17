@@ -1,5 +1,12 @@
 2005-11-17  David Malcolm <dmalcolm@redhat.com>
 
+	* sniff/sniff: implement a selectionChanged callback for the tree 
+	view; use it to make the extents of the selected node blink, porting
+	code from at-poke's src/poke.c (though without the grabs that uses).
+	Closes: #321655
+
+2005-11-17  David Malcolm <dmalcolm@redhat.com>
+
 	* sniff/sniff: remove the unused "populate" function 
 
 2005-11-16  Zack Cerza <zcerza@redhat.com>

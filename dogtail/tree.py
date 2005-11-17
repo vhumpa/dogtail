@@ -311,6 +311,7 @@ class Node:
 				size = (extents[2], extents[3])
 				clickX = position[0] + 0.5 * size[0]
 				clickY = position[1] + 0.5 * size[1]
+				if config.debugSearching: logger.log("raw click on %s %s at (%s,%s)"%(self.name, self.getLogString(), str(clickX), str(clickY)))
 				rawinput.click(clickX, clickY, button)
 			self.rawClick = rawClick
 
@@ -319,6 +320,7 @@ class Node:
 				Generates raw keyboard events to type text into the Node.
 				"""
 				import rawinput
+				if config.debugSearching: logger.log("Typing text '%s' into %s"%(text, self.getLogString()))
 				self.grabFocus()
 				rawinput.typeText(text)
 			self.rawType = rawType

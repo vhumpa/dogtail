@@ -1,5 +1,10 @@
 2005-11-17  David Malcolm <dmalcolm@redhat.com>
 
+	* dogtail/tree.py: Add debug logging to Node.rawClick() and
+	Node.rawType().
+
+2005-11-17  David Malcolm <dmalcolm@redhat.com>
+
 	* sniff/sniff: reduce it to a single blink (2 calls of the callback) 
 	rather than two blinks (4 calls) to avoid visual confusion when 
 	rapidly changing the selection.   

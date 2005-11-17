@@ -1,5 +1,11 @@
 2005-11-17  David Malcolm <dmalcolm@redhat.com>
 
+	* sniff/sniff: reduce it to a single blink (2 calls of the callback) 
+	rather than two blinks (4 calls) to avoid visual confusion when 
+	rapidly changing the selection.   
+
+2005-11-17  David Malcolm <dmalcolm@redhat.com>
+
 	* sniff/sniff: implement a selectionChanged callback for the tree 
 	view; use it to make the extents of the selected node blink, porting
 	code from at-poke's src/poke.c (though without the grabs that uses).

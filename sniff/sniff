@@ -200,7 +200,7 @@ class Blinker:
 		return True
 		
 def blinkExtents(x,y,w,h):
-	blinkData = Blinker(4, x,y,w,h)
+	blinkData = Blinker(2, x,y,w,h)
 
 def selectionChanged(treeSelection):
 	# print "selection changed"

@@ -1,4 +1,4 @@
-2005-11-17  David Malcolm <dmalcolm@redhat.com>
+2005-11-17  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/tree.py: Add debug logging to Node.rawClick() and
 	Node.rawType().

@@ -176,20 +176,6 @@ def refreshAll(menuItem, *userParams):
 	global model
 	resetModel()
 
-def populate(model, newChild, oldParent = None):
-	#import pdb
-	#pdb.set_trace()
-	iter = model.insert_before(oldParent, None)
-	model.set_value(iter, MODEL_FIELD_NODE, newChild)
-	model.set_value(iter, MODEL_FIELD_NAME, newChild.name)
-	#model.set_value(iter, MODEL_FIELD_ROLENAME, newChild.roleName)
-	#model.set_value(iter, MODEL_FIELD_DESCRIPTION, newChild.description)
-	
-	try: 
-		for grandChild in newChild.children:
-			populate(model, grandChild, iter)
-	except AttributeError: pass
-
 def addNodeToModel(node, parentInTreeView = None):
 	global model
 	iter = model.insert_before(parentInTreeView, None)

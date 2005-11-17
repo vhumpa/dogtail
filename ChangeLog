@@ -1,3 +1,7 @@
+2005-11-17  David Malcolm <dmalcolm@redhat.com>
+
+	* sniff/sniff: remove the unused "populate" function 
+
 2005-11-16  Zack Cerza <zcerza@redhat.com>
 
 	* sniff/sniff: Properly catch an AttributeError where an

@@ -274,6 +274,7 @@ class Node:
 	contained = ('__accessible', '__action', '__component', '__text', '__editableText')
 
 	def __init__ (self, initializer):
+		self.__hideChildren = False
 		self.debugName = None
 		if isinstance(initializer, atspi.Accessible):
 			self.__accessible = initializer
@@ -340,6 +341,11 @@ class Node:
 			self.__editableText = editableText
 			self.setAttributes = self.__editableText.setAttributes
 
+		# Swallow the Hypertext object, if it exists
+		hypertext = self.__accessible.getHypertext()
+		if hypertext is not None:
+			self.__hypertext = hypertext
+
 		# Add more objects here. Nobody uses them yet, so I haven't.
 		# You also need to change the __getattr__ and __setattr__ functions.
 
@@ -387,9 +393,15 @@ class Node:
 				# Wrap the AttributeError to be more informative.
 				raise AttributeError, attr
 		elif attr == "children":
+			if self.__hideChildren: raise AttributeError, attr
 			children = []
 			for i in xrange (self.__accessible.getChildCount ()):
 				children.append (Node (self.__accessible.getChildAtIndex (i)))
+			# Attributes from the Hypertext object
+			try:
+				for i in range(self.__hypertext.getNLinks()):
+					children.append(Link(self, self.__hypertext.getLink(i), i))
+			except AttributeError: pass
 			if children: return children
 			else:
 				raise AttributeError, attr
@@ -804,6 +816,38 @@ class Node:
 		for child in children:
 				result.extend(child.getUserVisibleStrings())
 		return result
+
+class Link(Node):
+	"""
+	Class representing a hyperlink
+	"""
+	contained = ('__hyperlink', '__node')
+
+	def __init__(self, node, hyperlink, index):
+		self.debugName = None
+		self.parent = node
+		self.__hyperlink = hyperlink
+		self.__index = index
+		self.__node = Node(self.__hyperlink.getObject(self.__index))
+		# Somehow, if we allow the children to be seen, things get weird.
+		self.__node.__hideChildren = True
+	
+	def __getattr__(self, name):
+		if False: pass
+		elif name == 'URI':
+			# Note: This doesn't seem to work. It usually just causes python to hang.
+			return self.__hyperlink.getURI(self.__index)
+		else: 
+			if name == 'children':
+				raise AttributeError, name
+			try: 
+				result = getattr(self.__node, name)
+				return result
+			except AttributeError: 
+				raise AttributeError, name
+
+	def __setattr__(self, name, value):
+		self.__dict__[name] = value
 		
 class Root (Node):
 	"""

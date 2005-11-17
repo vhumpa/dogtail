@@ -1,5 +1,11 @@
 2005-11-17  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/tree.py: Add Hyperlink and Hypertext support via the Link
+	class (subclass of Node). Link objects have a roleName of 'hyper link'
+	and a 'jump' action in Epiphany - I haven't tested Firefox yet.
+
+2005-11-17  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tree.py: Add debug logging to Node.rawClick() and
 	Node.rawType().
 

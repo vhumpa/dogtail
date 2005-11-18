@@ -3,15 +3,6 @@
 	* sniff/sniff: Move blink interval constant into Blinker class. Make
 	Blinker.__init__()'s count argument optional, defaulting to 2.
 
-2005-11-18  Zack Cerza <zcerza@redhat.com>
-
-	* dogtail/tree.py: Re-add helper methods that were removed on 11-08.
-	Change Action API from "Node.actionName()" to
-	"Node.actions[actionName].do()" for an action whose name is
-	'actionName'. Closes: #321196.
-
-	* dogtail/procedural.py: Update to new Action API.
-
 2005-11-17  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/tree.py: Add Hyperlink and Hypertext support via the Link

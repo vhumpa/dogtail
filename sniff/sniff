@@ -170,16 +170,16 @@ def rowCollapsed(treeview, iter, path, *userParams):
 			except StopIteration: pass
 	except StopIteration: pass
 
-BLINK_INTERVAL_MS = 200
-
 class Blinker:
-	def __init__(self, count, x, y, w, h):
+	INTERVAL_MS = 200
+
+	def __init__(self, x, y, w, h, count = 2):
 		self.count = count
 		self.x = x
 		self.y = y
 		self.w = w
 		self.h = h
-		self.timeout_handler_id = gobject.timeout_add (BLINK_INTERVAL_MS, self.blinkDrawRectangle)
+		self.timeout_handler_id = gobject.timeout_add (Blinker.INTERVAL_MS, self.blinkDrawRectangle)
 
 	def blinkDrawRectangle (self):
 		display = gtk.gdk.display_get_default()
@@ -199,15 +199,15 @@ class Blinker:
 		
 		return True
 		
-def blinkExtents(x,y,w,h):
-	blinkData = Blinker(2, x,y,w,h)
+def blinkExtents(x, y, w, h):
+	blinkData = Blinker(x, y, w, h)
 
 def selectionChanged(treeSelection):
 	# print "selection changed"
 	node = getSelectedNode()
 	try:
-		(x,y,w,h) = node.extents
-		blinkExtents(x,y,w,h)
+		(x, y, w, h) = node.extents
+		blinkExtents(x, y, w, h)
 	except AttributeError: pass
 
 def getSelectedNode():

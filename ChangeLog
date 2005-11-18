@@ -1,5 +1,14 @@
 2005-11-18  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/config.py: Add config parameter 'blinkOnActions'. The 
+	parameter defaults to False. Set it to True to watch your scripts 
+	blinken die lichten!
+
+	* dogtail/tree.py: Make Action.do() call blink() on the associated
+	node.
+
+2005-11-18  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/utils.py: Add Blinker class from sniff/sniff, which, upon 
 	initialization, blinks a rectangular shape onscreen.
 	

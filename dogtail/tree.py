@@ -152,6 +152,7 @@ class Action:
 			else:
 				nSE = NotSensitiveError(self)
 				print "Warning: " + str(nSE)
+		if config.blinkOnActions: self.node.blink()
 		result = self.__action.doAction (self.__index)
 		doDelay()
 		return result

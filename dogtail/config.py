@@ -53,6 +53,10 @@ class _Config(object):
 	debugTranslation (boolean):
 	Whether we should write out debug information from the translation/i18n
 	subsystem.
+
+	blinkOnActions (boolean):
+	Whether we should blink a rectangle around a Node when an action is 
+	performed on it.
 	"""
 	__scriptName = staticmethod(_scriptName)
 	__encoding = staticmethod(_encoding)
@@ -82,7 +86,8 @@ class _Config(object):
 		'debugSearchPaths' : False,
 		'absoluteNodePaths' : False,
 		'ensureSensitivity' : False,
-		'debugTranslation' : False
+		'debugTranslation' : False,
+		'blinkOnActions' : False
 	}
 	
 	options = {}

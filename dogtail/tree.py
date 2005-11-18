@@ -67,6 +67,7 @@ from datetime import datetime
 from time import sleep
 from config import config
 from utils import doDelay
+from utils import Blinker
 import path
 
 from logging import debugLogger as logger
@@ -294,7 +295,7 @@ class Node:
 		component = self.__accessible.getComponent()
 		if component is not None:
 			self.__component = component
-
+			
 			def grabFocus():
 				self.__component.grabFocus()
 			self.grabFocus = grabFocus
@@ -816,6 +817,17 @@ class Node:
 		for child in children:
 				result.extend(child.getUserVisibleStrings())
 		return result
+
+	def blink(self, count = 2):
+		"""
+		Blink, baby!
+		"""
+		try:
+			(x, y, w, h) = self.extents
+			blinkData = Blinker(x, y, w, h, count)
+			return True
+		except AttributeError:
+			return False
 
 class Link(Node):
 	"""

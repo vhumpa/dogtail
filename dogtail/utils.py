@@ -112,3 +112,37 @@ def doDelay(delay=None):
 		logger.log("sleeping for %f"%delay)
 	sleep(delay)
 
+class Blinker:
+	INTERVAL_MS = 200
+
+	def __init__(self, x, y, w, h, count = 2):
+		import gobject
+		import gtk.gdk
+		self.count = count
+		self.x = x
+		self.y = y
+		self.w = w
+		self.h = h
+		self.timeout_handler_id = gobject.timeout_add (Blinker.INTERVAL_MS, self.blinkDrawRectangle)
+		gtk.main()
+
+	def blinkDrawRectangle (self):
+		import gtk.gdk
+		display = gtk.gdk.display_get_default()
+		screen = display.get_default_screen()
+		rootWindow = screen.get_root_window()
+		gc = rootWindow.new_gc()
+
+		gc.set_subwindow (gtk.gdk.INCLUDE_INFERIORS)
+		gc.set_function (gtk.gdk.INVERT)
+		gc.set_line_attributes (3, gtk.gdk.LINE_SOLID, gtk.gdk.CAP_BUTT, gtk.gdk.JOIN_MITER)
+		rootWindow.draw_rectangle (gc, False, self.x, self.y, self.w, self.h);
+
+		self.count-=1
+
+		if self.count <= 0:
+			gtk.main_quit()
+			return False
+		
+		return True
+		

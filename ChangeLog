@@ -1,5 +1,18 @@
 2005-11-18  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/utils.py: Add Blinker class from sniff/sniff, which, upon 
+	initialization, blinks a rectangular shape onscreen.
+	
+	* dogtail/tree.py: Add Node.blink(), which blinks a rectangle around
+	the node's extents (if it has extents). This is intended to help
+	debugging situations where, during script writing, the node found in a
+	search is not what was expeced.
+	
+	* sniff/sniff: Remove Blinker class and blinkExtents(). Make
+	selectionChanged() just call node.blink().
+
+2005-11-18  Zack Cerza <zcerza@redhat.com>
+
 	* sniff/sniff: Move blink interval constant into Blinker class. Make
 	Blinker.__init__()'s count argument optional, defaulting to 2.
 

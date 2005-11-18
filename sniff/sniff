@@ -5,6 +5,7 @@ appName = 'Sniff'
 appAuthors = ['Zack Cerza <zcerza@redhat.com>', 'David Malcolm <dmalcolm@redhat.com']
 
 from dogtail import tree
+from dogtail import utils
 import gobject
 import gnome
 import atspi
@@ -170,45 +171,10 @@ def rowCollapsed(treeview, iter, path, *userParams):
 			except StopIteration: pass
 	except StopIteration: pass
 
-class Blinker:
-	INTERVAL_MS = 200
-
-	def __init__(self, x, y, w, h, count = 2):
-		self.count = count
-		self.x = x
-		self.y = y
-		self.w = w
-		self.h = h
-		self.timeout_handler_id = gobject.timeout_add (Blinker.INTERVAL_MS, self.blinkDrawRectangle)
-
-	def blinkDrawRectangle (self):
-		display = gtk.gdk.display_get_default()
-		screen = display.get_default_screen()
-		rootWindow = screen.get_root_window()
-		gc = rootWindow.new_gc()
-
-		gc.set_subwindow (gtk.gdk.INCLUDE_INFERIORS)
-		gc.set_function (gtk.gdk.INVERT)
-		gc.set_line_attributes (3, gtk.gdk.LINE_SOLID, gtk.gdk.CAP_BUTT, gtk.gdk.JOIN_MITER)
-		rootWindow.draw_rectangle (gc, False, self.x, self.y, self.w, self.h);
-
-		self.count-=1
-
-		if self.count <= 0:
-			return False
-		
-		return True
-		
-def blinkExtents(x, y, w, h):
-	blinkData = Blinker(x, y, w, h)
-
 def selectionChanged(treeSelection):
 	# print "selection changed"
 	node = getSelectedNode()
-	try:
-		(x, y, w, h) = node.extents
-		blinkExtents(x, y, w, h)
-	except AttributeError: pass
+	node.blink()
 
 def getSelectedNode():
 	global model

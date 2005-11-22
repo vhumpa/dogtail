@@ -2,7 +2,7 @@ Source: dogtail
 Section: misc
 Priority: optional
 Maintainer: Zack Cerza <zcerza@coe.neu.edu>
-Build-Depends: debhelper (>=4.2.0, cdbs
+Build-Depends: debhelper (>=4.2.0), cdbs
 Standards-Version: 3.6.1.1
 
 Package: python-dogtail

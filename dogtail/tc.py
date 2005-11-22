@@ -7,6 +7,7 @@ __author__ = "Ed Rousseau <rousseau@redhat.com>"
 import string
 import sys
 import os
+import re
 import time
 import datetime
 import os.path
@@ -75,11 +76,18 @@ class TCImage(TC):
 	"""
 	Image Test Case Class.
 	"""
+	IMVersion = ''
+	
 	def __init__(self):
 		TC.__init__(self)
 		self.supportedmetrics = ("MAE", "MSE", "PSE", "PSNR","RMSE", "none")
 		self.scratchDir = config.scratchDir
 		self.deldfile = 0
+
+		# Get the ImageMagick version by parsing its '-version' output.
+		IMVer = os.popen('compare -version').readline()
+		IMVer = re.match('Version: ImageMagick ([0-9\.]+) .*', IMVer).groups()[0]
+		TCImage.IMVersion = IMVer
 
 	# Use ImageMagick to compare 2 files
 	def compare(self, label, baseline, undertest, dfile='default', metric='none', threshold=0.0):
@@ -131,7 +139,15 @@ class TCImage(TC):
 				cmd = ("compare  -metric " + self.metric + " " + self.baseline + " " + self.undertest + " " + self.dfile + " " + "2>&1")
 				answer = os.popen(cmd).readlines()
 
-				if len(answer) is not 1: # metric didn't fire; something's wrong
+				# We need to check if the metric comparison failed. Unfortunately we
+				# can only tell this by checking the length of the output of the 
+				# command. More unfortunately, ImageMagic changed the length of the
+				# output at version 6.2.4, so we have to work around that.
+				metricFailed = True
+				IMVersion = TCImage.IMVersion
+				if IMVersion <= '6.2.3' and len(answer) == 1: metricFailed = False
+				if IMVersion >= '6.2.4' and len(answer) != 1: metricFailed = False
+				if metricFailed:
 					fanswer = answer[0]
 					self.result = {self.label: "Failed - " + fanswer}
 				else: # grab the metric from answer and convert it to a number

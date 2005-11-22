@@ -1,4 +1,4 @@
-2005-11-18  Zack Cerza <zcerza@redhat.com>
+2005-11-22  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/tc.py: Make TCImage.compare() work around a change in 
 	ImageMagick that broke the method, by comparing its version string 

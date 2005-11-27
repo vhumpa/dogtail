@@ -1,5 +1,9 @@
 2005-11-27  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/utils.py: Remove spurious print statement from screenshot().
+
+2005-11-27  Zack Cerza <zcerza@redhat.com>
+
 	* NEWS: Reformat to make more readable.
 
 2005-11-27  Zack Cerza <zcerza@redhat.com>

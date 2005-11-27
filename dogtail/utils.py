@@ -37,7 +37,6 @@ def screenshot(windowname = 'root', file = 'screenshot.png', timeStamp = True, a
 	if not baseName: 
 		baseName = file
 		fileExt = 'png'
-	print baseName, fileExt
 	
 	if timeStamp:
 		ts = TimeStamp()

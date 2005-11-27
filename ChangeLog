@@ -1,5 +1,9 @@
 2005-11-27  Zack Cerza <zcerza@redhat.com>
 
+	* NEWS: Reformat to make more readable.
+
+2005-11-27  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tree.py: Re-add helper methods that were removed on 11-08.
 	Change Action API from "Node.actionName()" to
 	"Node.doAction(actionName)" for an action whose name is	'actionName'. 

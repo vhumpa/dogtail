@@ -1,39 +1,55 @@
-Major changes in 0.4.3:
+dogtail 0.4.3
+=============
 
 Features:
-* Headless support has been added. Use dogtail-run-headless to spawn an X 
-server, a minimal "Nat/Jeff" GNOME session, and execute a given dogtail 
-script before exiting. The dogtail-detect-session script detects a running 
-GNOME session, but KDE support can be dropped in once KDE has accessibility 
-support.
-* dogtail now uses a notification icon while it is running. Its tooltip is 
-equal to the last message relayed by the debug logger. Most of the code was 
-taken from jhbuild.
-* Sniff, the AT-SPI browser that uses the dogtail libraries, has gained icons 
-for both applications and specific widgets (based on the role name, taken 
-from at-poke) to make browsing easier.
-* Sniff also gained a proper dogtail icon.
-* The procedural API has been given more convenience functions for 'focusing' 
-different types of widgets.
-* The procedural API has also been given an openItem() method, which works 
-just like click(), for opening icons on nautilus' desktop.
-* dogtail can now detect Gentoo and Conary distributions, thanks to Brent 
-Smith and Tim Gerla, respectively.
-* The Node class in dogtail.tree now exports the 'role' attribute in addition 
-to the 'role name'.
-* Wrappers for gcalctool and yelp were added, thanks to Dave Malcolm.
-* A wrapper for gedit was added, thanks to Paolo Borelli.
-* New examples for Evolution, gcalctool and the GTK file chooser were added, 
-thanks to Dave Malcolm.
-* Dave Malcolm also enhanced the Evolution wrapper, adding support for 
-creating new meetings.
-* A new example that generates fake documentation for a given application has 
-been added, thanks to Dave Malcolm.
-* dogtail.spec has been added, thanks to Jeremy Katz, to improve the quality 
-of the RPM packages.
+ * Headless support has been added. Use dogtail-run-headless to spawn an X 
+   server, a minimal "Nat/Jeff" GNOME session, and execute a given dogtail 
+   script before exiting. The dogtail-detect-session script detects a running 
+   GNOME session, but KDE support can be dropped in once KDE has accessibility
+   support.
+
+ * dogtail now uses a notification icon while it is running. Its tooltip is 
+   equal to the last message relayed by the debug logger. Most of the code 
+   was taken from jhbuild.
+
+ * Sniff, the AT-SPI browser that uses the dogtail libraries, has gained icons
+   for both applications and specific widgets (based on the role name, taken 
+   from at-poke) to make browsing easier.
+
+ * Sniff also gained a proper dogtail icon.
+
+ * The procedural API has been given more convenience functions for 'focusing'
+   different types of widgets.
+
+ * The procedural API has also been given an openItem() method, which works 
+   just like click(), for opening icons on nautilus' desktop.
+
+ * dogtail can now detect Gentoo and Conary distributions, thanks to Brent 
+   Smith and Tim Gerla, respectively.
+
+ * The Node class in dogtail.tree now exports the 'role' attribute in addition
+   to the 'role name'.
+
+ * Wrappers for gcalctool and yelp were added, thanks to Dave Malcolm.
+
+ * A wrapper for gedit was added, thanks to Paolo Borelli.
+
+ * New examples for Evolution, gcalctool and the GTK file chooser were added, 
+   thanks to Dave Malcolm.
+
+ * Dave Malcolm also enhanced the Evolution wrapper, adding support for 
+   creating new meetings.
+
+ * A new example that generates fake documentation for a given application has 
+   been added, thanks to Dave Malcolm.
+
+ * dogtail.spec has been added, thanks to Jeremy Katz, to improve the quality 
+   of the RPM packages.
 
 Bugfixes:
-* several examples had not been updated to reflect API changes before the 
-last release. This has been corrected.
-* The epiphany wrapper now uses the package name 'epiphany-browser' on 
-Debian-based distributions to detect the package version, thanks to Andrew Beresford.
+ * several examples had not been updated to reflect API changes before the 
+   last release. This has been corrected.
+
+ * The epiphany wrapper now uses the package name 'epiphany-browser' on 
+   Debian-based distributions to detect the package version, thanks to Andrew 
+   Beresford.

@@ -203,8 +203,7 @@ class Action (FocusWidget):
 		"""
 		if name or roleName or description:
 			FocusWidget.__call__(self, name = name, roleName = roleName, description = description)
-		method = getattr(self.node, self.action)
-		method()
+		self.node.doAction(self.action)
 		sleep(delay)
 	
 	def __getattr__ (self, attr):

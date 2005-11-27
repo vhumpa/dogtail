@@ -139,10 +139,6 @@ class Action:
 	def do (self):
 		"""
 		Performs the given tree.Action, with appropriate delays and logging.
-		
-		This function is wired in automatically for each of 'Node.click()',
-		'Node.press()' etc for every action exported on that node's
-		Accessible by Node.__getattr__
 		"""
 		assert isinstance(self, Action)
 		logger.log("%s on %s"%(self.name, self.node.getLogString()))
@@ -291,6 +287,12 @@ class Node:
 		action = self.__accessible.getAction()
 		if action is not None:
 			self.__action = action
+			def doAction(name):
+				"""
+				Performs the tree.Action with the given name, with appropriate delays and logging.
+				"""
+				return self.actions[name].do()
+			self.doAction = doAction
 
 		# Swallow the Component object, if it exists
 		component = self.__accessible.getComponent()
@@ -435,22 +437,14 @@ class Node:
 		
 		# Attributes from the Action object
 		elif attr == "actions":
-			actions = []
+			actions = {}
 			for i in xrange (self.__action.getNActions ()):
-				actions.append (Action (self, self.__action, i))
+				action = (Action (self, self.__action, i))
+				actions[action.name] = action
 			if actions: 
 				return actions
 			else:
 				raise AttributeError, attr
-		elif attr in Action.types:
-			# synthesize a function named after each Action supported by this Node (e.g. "click"):
-			actions = self.actions
-			for action in actions:
-				# action.do() is a function that, when called, executes the AT-SPI
-				# action associated with the Action instance. Here, we're simply
-				# returning a copy of the function, with a different name.
-				if action.name == attr: return action.do
-			raise AttributeError, attr
 
 		# Attributes from the Component object
 		elif attr == "extents":
@@ -800,6 +794,89 @@ class Node:
 				candidate = candidate.parent
 		# Not found:
 		return None
+	
+
+	# Various wrapper/helper search methods:
+	def child (self, name = '', roleName = '', description= '', label = '', recursive=True, debugName=None):
+		"""
+		Finds a child satisying the given criteria.
+
+		This is implemented using findChild, and hence will automatically retry
+		if no such child is found, and will eventually raise an exception.  It
+		also logs the search.
+		"""
+		return self.findChild (predicate.GenericPredicate(name = name, roleName = roleName, description= description, label = label), recursive = recursive, debugName=debugName)
+
+	# FIXME: does this clash with the "menu" action
+	def menu(self, menuName, recursive=True):
+		"""
+		Search below this node for a menu with the given name.
+
+		This is implemented using findChild, and hence will automatically retry
+		if no such child is found, and will eventually raise an exception.  It
+		also logs the search.
+		"""
+		return self.findChild (predicate.IsAMenuNamed(menuName=menuName), recursive)
+
+	def menuItem(self, menuItemName, recursive=True):
+		"""
+		Search below this node for a menu item with the given name.
+		
+		This is implemented using findChild, and hence will automatically retry
+		if no such child is found, and will eventually raise an exception.  It
+		also logs the search.
+		"""
+		return self.findChild (predicate.IsAMenuItemNamed(menuItemName=menuItemName), recursive)
+
+	def textentry(self, textEntryName, recursive=True):
+		"""
+		Search below this node for a text entry with the given name.
+
+		This is implemented using findChild, and hence will automatically retry
+		if no such child is found, and will eventually raise an exception.  It
+		also logs the search.
+		"""
+		return self.findChild (predicate.IsATextEntryNamed(textEntryName=textEntryName), recursive)
+
+	def button(self, buttonName, recursive=True):
+		"""
+		Search below this node for a button with the given name.
+
+		This is implemented using findChild, and hence will automatically retry
+		if no such child is found, and will eventually raise an exception.  It
+		also logs the search.
+		"""
+		return self.findChild (predicate.IsAButtonNamed(buttonName=buttonName), recursive)
+
+	def childLabelled(self, labelText, recursive=True):
+		"""
+		Search below this node for a child labelled with the given text.
+
+		This is implemented using findChild, and hence will automatically retry
+		if no such child is found, and will eventually raise an exception.  It
+		also logs the search.
+		"""
+		return self.findChild (predicate.IsLabelled(labelText), recursive)
+
+	def childNamed(self, childName, recursive=True):
+		"""
+		Search below this node for a child with the given name.
+
+		This is implemented using findChild, and hence will automatically retry
+		if no such child is found, and will eventually raise an exception.  It
+		also logs the search.
+		"""
+		return self.findChild (predicate.IsNamed(childName), recursive)
+
+	def tab(self, tabName, recursive=True):
+		"""
+		Search below this node for a tab with the given name.
+
+		This is implemented using findChild, and hence will automatically retry
+		if no such child is found, and will eventually raise an exception.  It
+		also logs the search.
+		"""
+		return self.findChild (predicate.IsATabNamed(tabName=tabName), recursive)
 
 	def getUserVisibleStrings(self):
 		"""

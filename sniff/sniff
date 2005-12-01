@@ -91,7 +91,7 @@ def buttonPress(widget, event, *userParams):
 		menu = gtk.Menu()
 		menuItem = None
 		try:
-			for action in node.actions:
+			for action in node.actions.values():
 				menuItem = gtk.MenuItem(action.name.capitalize())
 				menuItem.connect('activate', menuItemActivate, action.do)
 				menuItem.show()
@@ -112,7 +112,7 @@ def setUpTable(node):
 	descTextLabel.set_text(node.description)
 	try:
 		str = ''
-		for action in node.actions: str = ' '.join([str, action.name]).strip()
+		for action in node.actions.values(): str = ' '.join([str, action.name]).strip()
 		actionsTextLabel.set_text(str)
 	except AttributeError: actionsTextLabel.set_text('')
 	

@@ -1,5 +1,9 @@
 2005-12-01  Zack Cerza <zcerza@redhat.com>
 
+	* sniff/sniff: Update to the new Action API.
+
+2005-12-01  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tree.py: Add patch from David Malcolm to add a single
 	shortcut method for Node.doAction('click') - simply Node.click() as a
 	compromise. Closes: #321196.

@@ -99,6 +99,18 @@ class NotSensitiveError(Exception):
 	def __str__(self):
 		return self.message % (self.action.name, self.action.node.getLogString())
 
+class ActionNotSupported(Exception):
+	"""
+	The widget does not support the requested action.
+	"""
+	message = "Cannot do '%s' action on %s"
+	def __init__(self, actionName, node):
+		self.actionName = actionName
+		self.node = node
+	
+	def __str__(self):
+		return self.message % (self.actionName, self.node.getLogString())
+
 class Action:
 	"""
 	Class representing an action that can be performed on a specific node
@@ -284,14 +296,19 @@ class Node:
 		assert self.__accessible
 
 		# Swallow the Action object, if it exists
-		action = self.__accessible.getAction()
-		if action is not None:
-			self.__action = action
+		self.__action = self.__accessible.getAction()
+		if self.__action is not None:
 			def doAction(name):
 				"""
-				Performs the tree.Action with the given name, with appropriate delays and logging.
+				Performs the tree.Action with the given name, with appropriate delays and logging,
+				or raises the ActionNotSupported exception if the node doesn't support that particular
+				action.
 				"""
-				return self.actions[name].do()
+				actions = self.actions
+				if actions.has_key(name):
+					return actions[name].do()
+				else:
+					raise ActionNotSupported(name, self)
 			self.doAction = doAction
 
 		# Swallow the Component object, if it exists
@@ -906,6 +923,18 @@ class Node:
 			return True
 		except AttributeError:
 			return False
+
+	def click(self):
+		"""
+		If the Node supports an action called "click", do it, with appropriate delays and logging.
+		Otherwise, raise an ActionNotSupported exception.  
+
+		Note that this is just a shortcut to doAction('click'), as it is by far the most-used
+		action. To do any other action such as 'activate' or 'open', you must use doAction().
+		"""
+		if self.__action is not None:
+			return self.doAction('click')
+		raise ActionNotSupported('click', self)
 
 class Link(Node):
 	"""

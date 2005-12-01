@@ -1,3 +1,9 @@
+2005-12-01  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Add patch from David Malcolm to add a single
+	shortcut method for Node.doAction('click') - simply Node.click() as a
+	compromise. Closes: #321196.
+
 2005-11-27  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/utils.py: Remove spurious print statement from screenshot().
@@ -11,7 +17,6 @@
 	* dogtail/tree.py: Re-add helper methods that were removed on 11-08.
 	Change Action API from "Node.actionName()" to
 	"Node.doAction(actionName)" for an action whose name is	'actionName'. 
-	Closes: #321196.
 
 	* dogtail/procedural.py: Update to new Action API.
 

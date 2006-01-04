@@ -1,3 +1,8 @@
+2006-01-04  Zack Cerza <zcerza@redhat.com>
+
+	* examples/gedit-test-utf8-procedural-api.py: Add comment about how to
+	turn on automatic translation.
+
 2005-12-01  Zack Cerza <zcerza@redhat.com>
 
 	* sniff/sniff: Update to the new Action API.

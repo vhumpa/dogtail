@@ -9,6 +9,11 @@ import dogtail.tc
 from dogtail.procedural import *
 from dogtail.utils import screenshot
 
+# These next two lines get us translations for free. To see the script run
+# translated, run it like this: 
+#  LANG=ja_JP.UTF-8 ./gedit-test-utf8-procedural-api.py
+# You might also want to set config.debugTranslation and 
+# config.debugSearching to True, just for fun.
 import dogtail.i18n
 dogtail.i18n.loadTranslationsFromPackageMoFiles('gedit')
 

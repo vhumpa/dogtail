@@ -1,3 +1,157 @@
+dogtail 0.5.0
+=============
+
+Features:
+
+ * Automatic runtime translation into the current locale using the application
+   under test's own translations. See 
+   examples/gedit-test-utf8-procedural-api.py for an example.
+
+ * dogtail.distro.packageDb gained new methods: getFiles(), getMoFiles(), and 
+   getDependencies().
+
+ * dogtail.distro.packageDb now has support for JHBuild environments.
+
+ * dogtail.distro has gained exceptions:
+
+   - PackageNotFoundError: raised when the specified package is not found.
+
+   - DistributionNotSupportedError: raised when support for the current 
+     distribution is not currently implemented in dogtail.distro. This does
+     not mean that dogtail will not work at all; only that 
+     distribution-specific functionality, like automatic runtime translation,
+     will not.
+
+ * sniff will now cause the selected node to blink onscreen.
+
+ * dogtail.tree has a new Node subclass, Link. Link nodes have a roleName of
+   'hyper link' and an action called 'jump'. Their main purpose is to allow
+   us to follow links in web pages.
+
+ * dogtail.tree.Node has new properties and methods:
+
+   - position: the onscreen position of the node, if it wraps an 
+     atspi.Component.
+   
+   - size: the onscreen size of the node, if it wraps an atspi.Component.
+
+   - blink(): causes the node to blink onscreen.
+
+   - grabFocus(): causes the node to grab the keyboard focus, if it wraps an
+     atspi.Component.
+
+   - rawClick(): synthesizes a raw mouse click on the node, if it wraps an
+     atspi.Component.
+
+   - rawType(): synthesizes raw keyboard events to type text into the node, if
+     it wraps an atspi.Component.
+
+ * dogtail.procedural has new helper methods:
+
+   - menu(): executes the 'menu' action on the focused widget.
+
+   - focus.frame(): a shortcut to focus.widget(roleName='frame' ...)
+
+   - focus.window(): a shortcut to focus.widget(roleName='window' ...)
+
+ * dogtail.procedural.click() can now synthesize raw mouse events to perform 
+   "raw" clicks.
+
+ * dogtail.rawinput has gained new methods:
+
+   - pressKey(): synthesizes a raw keyboard event, pressing the key whose 
+     name is specified.
+
+   - typeText(): types a specified string, one key at a time, using raw 
+     keyboard events.
+
+ * dogtail.config was rewritten.
+
+ * dogtail.config.config has new parameters:
+
+   - ensureSensitivity: controls whether a NotSensitiveError is raised when 
+     an attempt is made to execute an action belonging to a Node instance 
+     that is not sensitive, or if a warning is simply printed instead (the
+     default).
+
+   - debugTranslation: Controls whether details of the autotranslation 
+     process will be outputted to the debug logger.
+
+ * dogtail.config now creates its scratchDir, dataDir, and logDir as soon as 
+   the values are set.
+
+ * dogtail.utils.screenshot(), by default, whether using a custom filename or
+   not, now appends a timestamp to the filename. That may be disabled by 
+   passing 'timeStamp = False' to the method. For this reason, it also prints 
+   the full path to the screenshot.
+
+ * dogtail.logging.TimeStamp.fileStamp()'s format has changed, to 
+   filename_YYYYMMDD-hhmmss or just filename_YYYYMMDD, controlled by the new 
+   optional argument 'addTime'.
+
+ * dogtail prints the full path to any logfiles it creates.
+
+ * dogtail-run-headless will now turn accessibility on before executing the
+   script under test, and also restore the old value after the the script has 
+   finished executing (GNOME bug #320548).
+
+Bugfixes:
+
+ * sniff will correctly show the text of a non-editable text node again 
+   (GNOME bug #321564).
+
+ * dogtail.tree.screenshot() was mostly rewritten, and no longer breaks when 
+   given a custom filename. 
+
+ * dogtail.procedural no longer causes PyDoc to fail miserably (or at all).
+
+ * dogtail.procedural.focus.dialog() no longer searches recursively (GNOME 
+   bug #321624).
+
+ * dogtail.procedural.focus.widget() and its shortcut functions now properly
+   raise a FocusError if their search fails.
+
+ * dogtail.tc.TCString.compare() will now fail properly again, thanks to 
+   Muktha Narayan (GNOME bug #321151).
+
+ * dogtail.tc.TCImage.compare() now works with the newest version of 
+   ImageMagick. That version had changed its behavior, breaking the function.
+   (GNOME bug #321431).
+
+ * Attempting to execute an action belonging to a Node instance that isn't 
+   sensitive no longer fails by default, but prints a warning. This behavior
+   is controlled by the ensureSensitivity configuration parameter.
+
+ * dogtail-run-headless now correctly returns the exit code of the script 
+   being executed (GNOME bug #320535).
+
+ * dogtail.distro's APT support implementation now only calls 
+   apt_pkg.GetCache() once, improving performance significantly when multiple 
+   calls to packageDb.get{Version,Dependencies}() are needed.
+
+ * Building RPM packages from the supplied dogtail.spec works again on distros
+   that are as old or older than RHEL4.
+
+ * Building RPM packages with 'make rpm' works again without root privileges.
+
+API breaks:
+
+ * Action execution via dogtail.tree.Node instances was forced to change 
+   interfaces from the "node.open()" model to a "node.doAction('open')" 
+   model. To retain backward compatibility with the application wrappers, the 
+   "click" action is still available as "node.click()". The 
+   dogtail.procedural interface was able to remain unchanged.
+
+ * dogtail.config was rewritten to be more robust, and its interface was 
+   changed slightly. To port, First, remove any instantiations of the old 
+   Config class, and then make the following parameter replacements:
+
+   - Config  => config
+   - logdir  => logDir
+   - scratch => scratchDir
+   - data    => dataDir
+
+
 dogtail 0.4.3
 =============
 

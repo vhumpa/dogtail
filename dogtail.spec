@@ -1,6 +1,6 @@
 Summary: GUI test tool and automation framework
 Name: dogtail
-Version: 0.4.4
+Version: 0.5.0
 Release: 1
 License: GPL
 Group: User Interface/X
@@ -8,6 +8,8 @@ URL: http://people.redhat.com/zcerza/dogtail/
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildArchitectures: noarch
+BuildRequires: at-spi-devel
+Requires: pyspi >= 0.5.3
 
 # hrm, the brp-python-bytecompile will byte-compile docs stuff too
 # which is probably not what we want
@@ -37,6 +39,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Jan 13 2006 Zack Cerza <zcerza@redhat.com>
+- New upstream release.
+- Added missing BuildRequires on at-spi-devel.
+- Added Requires on pyspi >= 0.5.3.
+
 * Mon Oct 24 2005 Zack Cerza <zcerza@redhat.com>
 - New upstream release.
 

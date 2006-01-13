@@ -1,3 +1,7 @@
+2006-01-13  Zack Cerza <zcerza@redhat.com>
+
+	* MANIFEST.in: Add NEWS file to tarball.
+
 2006-01-05  Zack Cerza <zcerza@redhat.com>
 
 	* NEWS: Update with changes since 0.4.3.

@@ -4,6 +4,7 @@ include Makefile
 include dogtail.spec
 include HACKING
 include INSTALL
+include NEWS
 recursive-include docs *
 recursive-include debian *
 recursive-include scripts *

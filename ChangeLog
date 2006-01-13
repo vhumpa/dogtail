@@ -1,5 +1,14 @@
 2006-01-13  Zack Cerza <zcerza@redhat.com>
 
+	* setup.py: Change author_email to dogtail-list@gnome.org.
+
+2006-01-13  Zack Cerza <zcerza@redhat.com>
+
+	* setup.py, dogtail/__init__.py, dogtail/apps/__init__.py, 
+	dogtail/apps/wrappers/__init__.py: Bump version numbers.
+
+2006-01-13  Zack Cerza <zcerza@redhat.com>
+
 	* MANIFEST.in: Add NEWS file to tarball.
 
 2006-01-05  Zack Cerza <zcerza@redhat.com>

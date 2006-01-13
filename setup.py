@@ -56,7 +56,7 @@ setup (
 	author = """Zack Cerza <zcerza@redhat.com>,
 Ed Rousseau <rousseau@redhat.com>, 
 David Malcolm <dmalcolm@redhat.com>""",
-	author_email = 'dogtail-maint@gnome.org',
+	author_email = 'dogtail-list@gnome.org',
 	url = 'http://people.redhat.com/zcerza/dogtail/',
 	packages = ['dogtail', 'dogtail.apps', 'dogtail.apps.wrappers'],
 	scripts = scripts(),

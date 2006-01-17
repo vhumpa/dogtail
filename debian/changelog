@@ -3,7 +3,7 @@ dogtail (0.5.0-1) unstable; urgency=low
   * New upstream release.
   * Build-Depend on python-at-spi (>=0.5.3-1).
 
- -- Zack Cerza <zcerza@coe.neu.edu>  Fri, 13 Jan 2006 14:46:25 -0500
+ -- Zack Cerza <zcerza@coe.neu.edu>  Tue, 17 Jan 2006 18:18:36 -0500
 
 dogtail (0.4.3-1) unstable; urgency=low
 

@@ -39,7 +39,7 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Fri Jan 13 2006 Zack Cerza <zcerza@redhat.com>
+* Tue Jan 17 2006 Zack Cerza <zcerza@redhat.com>
 - New upstream release.
 - Added missing BuildRequires on at-spi-devel.
 - Added Requires on pyspi >= 0.5.3.

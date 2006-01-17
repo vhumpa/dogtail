@@ -32,8 +32,13 @@ class TC:
 		"""
 		Compares 2 strings to see if they are the same. The user may specify
 		the encoding to which the two strings are to be normalized for the
-		comparison.  Default encoding is the default system encoding. Normalization to extended
-		8 bit charactersets is not supported.
+		comparison.  Default encoding is the default system encoding. 
+		Normalization to extended 8 bit charactersets is not supported.
+
+		When the origin of either baseline or undertest is a text file whose 
+		encoding is something other than ASCII, it is necessary to use 
+		codecs.open() instead of open(), so the file's encoding may be 
+		specified.
 		"""
 		self.label = label.strip()
 		self.baseline = baseline

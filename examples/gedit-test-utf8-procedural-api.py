@@ -35,9 +35,10 @@ focus.application('gedit')
 # Focus gedit's text buffer.
 focus.text()
 
-# Load the UTF-8 demo file.
+# Load the UTF-8 demo file. Use codecs.open() instead of open().
+from codecs import open
 from sys import path
-utfdemo = file(path[0] + '/data/UTF-8-demo.txt')
+utfdemo = open(path[0] + '/data/UTF-8-demo.txt')
 
 # Load the UTF-8 demo file into the text buffer.
 focus.widget.text = utfdemo.read()
@@ -77,14 +78,19 @@ click('Quit')
 # the baseline file
 
 # Read in the "gold" file
+import codecs
 try:
-	gold = open(path[0] + '/data/UTF-8-demo.txt', 'r').readlines()
+	# When reading the file, we have to make sure and tell codecs.open() which 
+	# encoding we're using, otherwise python gets confused later.
+	gold = open(path[0] + '/data/UTF-8-demo.txt', encoding='utf-8').readlines()
 except IOError:
 	print "File open failed"
 
 # Read the test file for comparison
 filepath = environ['HOME'] + '/Desktop/UTF8demo.txt'
-testfile = open(filepath, 'r').readlines()
+# When reading the file, we have to make sure and tell codecs.open() which 
+# encoding we're using, otherwise python gets confused later.
+testfile = open(filepath, encoding='utf-8').readlines()
 
 # We now have the original and saved files as lists. Let's compare them line
 # by line to see if they are the same

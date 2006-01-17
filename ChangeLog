@@ -1,5 +1,16 @@
 2006-01-17  Zack Cerza <zcerza@redhat.com>
 
+	* examples/gedit-test-utf8-procedural-api.py: Use codecs.open()
+	instead of open() for reading the UTF-8 files. open() apparently
+	ignores encoding issues, and codecs.open() allows us to specify the
+	encoding of the file. Add comments to that effect.
+
+	* dogtail/tc.py: Make a note in TC.compare()'s docstring that
+	codecs.open() must be used to open any non-ASCII files that are
+	intended to be compared using that function.
+
+2006-01-17  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/utils.py: Make screenshot() raise a DependencyNotFoundError
 	if ImageMagick is not installed.
 

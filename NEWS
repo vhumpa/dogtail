@@ -22,6 +22,10 @@ Features:
      distribution-specific functionality, like automatic runtime translation,
      will not.
 
+ * dogtail.errors is a new module for very general exceptions, such as 
+   DependencyNotFoundError, which is raised when the use of a feature that 
+   depends on some missing piece of software is attempted.
+
  * sniff will now cause the selected node to blink onscreen.
 
  * dogtail.tree has a new Node subclass, Link. Link nodes have a roleName of
@@ -117,6 +121,10 @@ Bugfixes:
  * dogtail.tc.TCImage.compare() now works with the newest version of 
    ImageMagick. That version had changed its behavior, breaking the function.
    (GNOME bug #321431).
+
+ * attempting to instantiate a dogtail.tc.TCImage object while ImageMagick is
+   not installed will now give a comprehensible error message, thanks to the 
+   new dogtail.errors.DistributionNotSupportedError exception.
 
  * Attempting to execute an action belonging to a Node instance that isn't 
    sensitive no longer fails by default, but prints a warning. This behavior

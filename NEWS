@@ -122,9 +122,12 @@ Bugfixes:
    ImageMagick. That version had changed its behavior, breaking the function.
    (GNOME bug #321431).
 
- * attempting to instantiate a dogtail.tc.TCImage object while ImageMagick is
+ * Attempting to instantiate a dogtail.tc.TCImage object while ImageMagick is
    not installed will now give a comprehensible error message, thanks to the 
-   new dogtail.errors.DistributionNotSupportedError exception.
+   new dogtail.errors.DependencyNotFoundError exception.
+
+ * Calling dogtail.utils.screenshot() while ImageMagick is not installed will
+   also raise a dogtail.errors.DependencyNotFoundError.
 
  * Attempting to execute an action belonging to a Node instance that isn't 
    sensitive no longer fails by default, but prints a warning. This behavior

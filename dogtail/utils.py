@@ -11,10 +11,12 @@ David Malcolm <dmalcolm@redhat.com>
 """
 
 import os
+import re
 from config import config
 from time import sleep
 from logging import debugLogger as logger
 from logging import TimeStamp
+from errors import DependencyNotFoundError
 
 def screenshot(windowname = 'root', file = 'screenshot.png', timeStamp = True, args = ''):
 	"""
@@ -26,6 +28,11 @@ def screenshot(windowname = 'root', file = 'screenshot.png', timeStamp = True, a
 	By default, screenshot filenames are in the format of foo_YYYYMMDD-hhmmss.png .
 	The timeStamp argument may be set to False to name the file foo.png.
 	"""
+	IMVer = os.popen('import -version').readline()
+	IMVer = re.match('Version: ImageMagick ([0-9\.]+) .*', IMVer)
+	if IMVer is None: 
+		raise DependencyNotFoundError, "ImageMagick"
+	
 	# config is supposed to create this for us. If it's not there, bail.
 	assert os.path.isdir(config.scratchDir)
 	

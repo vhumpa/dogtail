@@ -1,5 +1,12 @@
 2006-01-17  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/utils.py: Make screenshot() raise a DependencyNotFoundError
+	if ImageMagick is not installed.
+
+	* NEWS: Add note about the last change to screenshot().
+
+2006-01-17  Zack Cerza <zcerza@redhat.com>
+
 	* NEWS: Add notes about dogtail.errors and the change to TCImage.
 
 2006-01-17  Zack Cerza <zcerza@redhat.com>

@@ -13,6 +13,7 @@ import datetime
 import os.path
 from config import config
 from logging import LogWriter, TimeStamp
+from errors import DependencyNotFoundError
 
 
 class TC:
@@ -70,7 +71,6 @@ class TCString(TC):
 	def __init__(self):
 		TC.__init__(self)
 
-
 # Image test case subclass
 class TCImage(TC):
 	"""
@@ -86,8 +86,12 @@ class TCImage(TC):
 
 		# Get the ImageMagick version by parsing its '-version' output.
 		IMVer = os.popen('compare -version').readline()
-		IMVer = re.match('Version: ImageMagick ([0-9\.]+) .*', IMVer).groups()[0]
-		TCImage.IMVersion = IMVer
+		IMVer = re.match('Version: ImageMagick ([0-9\.]+) .*', IMVer)
+		if IMVer is not None: 
+			IMVer = IMVer.groups()[0]
+			TCImage.IMVersion = IMVer
+		else:
+			raise DependencyNotFoundError, "ImageMagick"
 
 	# Use ImageMagick to compare 2 files
 	def compare(self, label, baseline, undertest, dfile='default', metric='none', threshold=0.0):

@@ -21,7 +21,6 @@ from os import environ, path, remove
 
 # Load our persistent Dogtail objects
 TestString = dogtail.tc.TCString()
-TestImage = dogtail.tc.TCImage()
 
 # Remove the output file, if it's still there from a previous run
 if path.isfile(path.join(path.expandvars("$HOME"), "Desktop", "UTF8demo.txt")):
@@ -50,7 +49,13 @@ screenshot()
 click('Save')
 
 # Focus gedit's Save As... dialog
-focus.dialog('Save as...')
+try:
+	# This string changed somewhere around gedit 2.13.2.
+	# This is the new string
+	focus.dialog('Save As\xe2\x80\xa6')
+except FocusError:
+	# Fall back to the old string.
+	focus.dialog('Save as...')
 
 # click the Browse for other folders widget
 activate('Browse for other folders')

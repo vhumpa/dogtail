@@ -1,3 +1,18 @@
+2006-01-17  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/errors.py: Add errors.py, a module for generalized
+	exceptions, i.e. its first exception: DependencyNotFoundError. Other
+	exceptions such as distro.PackageNotFoundError and
+	procedural.FocusError probably do not belong here.
+	
+	* dogtail/tc.py: Give a better error message if TCImage is
+	instantiated while ImageMagick is not installed, by raising a
+	DependencyNotFoundError.
+	
+	* examples/gedit-test-utf8-procedural-api.py: Remove unncessary
+	TCImage instantiation. Also, be aware that the naming of the "Save as"
+	dialog changed slightly. Try both strings.
+
 2006-01-13  Zack Cerza <zcerza@redhat.com>
 
 	* setup.py: Change author_email to dogtail-list@gnome.org.

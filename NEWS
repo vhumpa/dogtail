@@ -109,6 +109,9 @@ Bugfixes:
 
  * dogtail.procedural no longer causes PyDoc to fail miserably (or at all).
 
+ * dogtail will no longer warn about missing wnck bindings, because they're 
+   not actually used anyway.
+
  * dogtail.procedural.focus.dialog() no longer searches recursively (GNOME 
    bug #321624).
 

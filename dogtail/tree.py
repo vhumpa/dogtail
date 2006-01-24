@@ -83,7 +83,8 @@ try:
 	import wnck
 	gotWnck = True
 except ImportError:
-	print "Warning: Dogtail could not import the Python bindings for libwnck.  Window-manager manipulation will not be available."
+	# Skip this warning, since the functionality is almost entirely nonworking anyway.
+	#print "Warning: Dogtail could not import the Python bindings for libwnck.  Window-manager manipulation will not be available."
 	gotWnck = False
 
 SearchError = "Couldn't find"

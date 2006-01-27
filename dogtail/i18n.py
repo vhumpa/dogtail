@@ -193,8 +193,8 @@ def loadTranslationsFromPackageMoFiles(packageName, getDependencies=True):
 					moFiles[moFile] = None
 				except (AttributeError, IndexError), inst:
 					if config.config.debugTranslation:
-						import traceback
-						logger.log(traceback.format_exc())
+						#import traceback
+						#logger.log(traceback.format_exc())
 						logger.log("Warning: Failed to load mo-file for translation: " + moFile)
 				
 	# Hack alert:

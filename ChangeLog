@@ -1,5 +1,12 @@
 2006-01-27  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/i18n.py: Comment out some super-verbose debug statements.
+
+	* examples/gedit-test-utf8-procedural-api.py: Use a proper Unicode
+	ellipsis.
+
+2006-01-27  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/i18n.py: Make sure we filter the list of mo-files so that 
 	we only get the ones in the target language.
 

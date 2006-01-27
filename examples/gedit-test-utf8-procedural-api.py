@@ -53,7 +53,7 @@ click('Save')
 try:
 	# This string changed somewhere around gedit 2.13.2.
 	# This is the new string
-	focus.dialog('Save As\xe2\x80\xa6')
+	focus.dialog(u'Save As\u2026')
 except FocusError:
 	# Fall back to the old string.
 	focus.dialog('Save as...')

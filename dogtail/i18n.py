@@ -10,6 +10,7 @@ __author__ = """David Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.c
 import distro
 import config
 
+import os
 import re
 import gettext
 
@@ -137,20 +138,32 @@ class TranslatableString:
 
 
 
-def isMoFile(filename):
+def isMoFile(filename, language = ''):
 	"""
 	Does the given filename look like a gettext mo file?
+	
+	Optionally: Does the file also contain translations for a certain language,
+	for example 'ja'?
 	"""
-	return re.match('(.*)\\.mo$', filename)
+	if re.match('(.*)\\.mo$', filename):
+		if not language: return True
+		elif re.match('/usr/share/locale(.*)/%s(.*)/LC_MESSAGES/(.*)\\.mo$' % \
+				language, filename):
+			return True
+		else:
+			return False
+	else:
+		return False
 
-def getMoFilesForPackage(packageName, getDependencies=True):
+def getMoFilesForPackage(packageName, language = '', getDependencies=True):
 	"""
-	Look up the named package and find all gettext mo files within it (and its 
-	dependencies)
+	Look up the named package and find all gettext mo files within it and its
+	dependencies. It is possible to restrict the results to those of a certain
+	language, for example 'ja'.
 	"""
 	result = []
 	for filename in distro.packageDb.getFiles(packageName):
-		if isMoFile(filename):
+		if isMoFile(filename, language):
 			result.append(filename)
 
 	if getDependencies:
@@ -158,7 +171,7 @@ def getMoFilesForPackage(packageName, getDependencies=True):
 		for dep in distro.packageDb.getDependencies(packageName):
 			# We pass False to the inner call because getDependencies has already 
 			# walked the full tree
-			result.extend(getMoFilesForPackage(dep, False))
+			result.extend(getMoFilesForPackage(dep, language, False))
 		
 	return result
 
@@ -169,8 +182,8 @@ def loadTranslationsFromPackageMoFiles(packageName, getDependencies=True):
 	"""
 	# Keep a list of mo-files that are already in use to avoid duplicates.
 	moFiles = {}
-	def load(packageName, getDependencies = True):
-		for moFile in getMoFilesForPackage(packageName, getDependencies):
+	def load(packageName, language = '', getDependencies = True):
+		for moFile in getMoFilesForPackage(packageName, language, getDependencies):
 			# Searching the popt mo-files for translations makes gettext bail out, 
 			# so we ignore them here. This is 
 			# https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=172155 .
@@ -178,8 +191,10 @@ def loadTranslationsFromPackageMoFiles(packageName, getDependencies=True):
 				try:
 					translationDbs.append(GettextTranslationDb(moFile))
 					moFiles[moFile] = None
-				except AttributeError:
+				except (AttributeError, IndexError), inst:
 					if config.config.debugTranslation:
+						import traceback
+						logger.log(traceback.format_exc())
 						logger.log("Warning: Failed to load mo-file for translation: " + moFile)
 				
 	# Hack alert:
@@ -189,11 +204,10 @@ def loadTranslationsFromPackageMoFiles(packageName, getDependencies=True):
 	# this special case, aside from the simple fact that there is one, 
 	# is that it makes automatic translations much slower.
 
+	language = os.environ['LANG'][0:2]
 	if isinstance(distro.distro, distro.Ubuntu):
-		import os
-		language = os.environ['LANG'][0:2]
 		if os.environ.get('LANGUAGE', language)[0:2] != language:
 			language = os.environ['LANGUAGE'][0:2]
-		load('language-pack-gnome-%s' % language)
-	load(packageName, getDependencies)
+		load('language-pack-gnome-%s' % language, language)
+	load(packageName, language, getDependencies)
 

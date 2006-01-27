@@ -1,3 +1,8 @@
+2006-01-27  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/i18n.py: Make sure we filter the list of mo-files so that 
+	we only get the ones in the target language.
+
 2006-01-26  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/i18n.py: Fix automatic runtime translation. Stop using

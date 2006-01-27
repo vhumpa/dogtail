@@ -5,7 +5,7 @@ Internationalization facilities
 Authors: David Malcolm <dmalcolm@redhat.com>
 """
 
-__author__ = """David Malcolm <dmalcolm@redhat.com>"""
+__author__ = """David Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.com>"""
 
 import distro
 import config
@@ -41,17 +41,17 @@ class TranslationDb:
 class GettextTranslationDb(TranslationDb):
 	"""
 	Implementation of TranslationDb which leverages gettext, using a single
-	translation domain.
+	translation mo-file.
 	"""
-	def __init__(self, domainName):
-		self.domainName = domainName
+	def __init__(self, moFile):
+		self.__moFile = moFile
+		self.__gnutranslations = gettext.GNUTranslations(open(moFile))
 
 	def getTranslationsOf(self, srcName):
 		# print "searching for translations of %s"%srcName
 		# Use a dict to get uniqueness:
 		results = {}
-		result = gettext.dgettext(self.domainName, srcName)
-		#print "result in domain %s is %s"%(self.domainName, result)
+		result = self.__gnutranslations.ugettext(srcName)
 		if result!=srcName:
 			results[result]=None
 
@@ -70,8 +70,7 @@ class GettextTranslationDb(TranslationDb):
 			
 		for index in range(len(srcName)):
 			candidate = srcName[:index]+"_"+srcName[index:]
-			result = gettext.dgettext(self.domainName, candidate)
-			# print "result in domain %s for %s is %s"%(self.domainName, candidate, result)
+			result = self.__gnutranslations.ugettext(candidate)
 			if result!=candidate:
 				# Strip out the underscore, and add to the result:
 				results[result.replace('_','')]=True
@@ -142,7 +141,7 @@ def isMoFile(filename):
 	"""
 	Does the given filename look like a gettext mo file?
 	"""
-	return re.match('(.*)\\.mo', filename)
+	return re.match('(.*)\\.mo$', filename)
 
 def getMoFilesForPackage(packageName, getDependencies=True):
 	"""
@@ -163,47 +162,25 @@ def getMoFilesForPackage(packageName, getDependencies=True):
 		
 	return result
 
-def getTranslationDomainsForPackage(packageName, getDependencies=True):
-	"""
-	Return a list of translation domain names for the named package, based upon 
-	all mo files provided by the package (and all its dependencies, if this is 
-	true)
-	"""
-	# fake a set using a hash to dummy values:
-	result = {}
-	for filename in getMoFilesForPackage(packageName, getDependencies):
-		# We assume they're of the format:
-		# /usr/share/locale/name-of-locale/LC_MESSAGES/filename.mo
-		m = re.match('/usr/share/locale(.*)/([a-zA-Z@_\.0-9]*)/LC_MESSAGES/(.*)\\.mo', filename)
-		if m:
-			# Insert the translation domain into the hash:
-				result[m.group(3)]=None
-		else:
-			# somehow the initial regex is letting this file through:
-			# /etc/pango/i386-redhat-linux-gnu/pango.modules
-			pass # raise filename
-	# Convert the hash to a list, containing unique entries:
-	return result.keys()
-
-
 def loadTranslationsFromPackageMoFiles(packageName, getDependencies=True):
 	"""
-	Helper function which appends all of the gettext translation domains used by 
+	Helper function which appends all of the gettext translation mo-files used by 
 	the package (and its dependencies) to the translation database list.
 	"""
-	# Keep a list of domains that are already in use to avoid duplicates.
-	#
-	# The list also acts as a blacklist. For example, searching the popt
-	# domain for translations makes gettext bail out, so we ignore it here.
-	# This is https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=172155 .
-	domains = ['popt']
+	# Keep a list of mo-files that are already in use to avoid duplicates.
+	moFiles = {}
 	def load(packageName, getDependencies = True):
-		for domainName in getTranslationDomainsForPackage(packageName, getDependencies):
-			if domainName not in domains:
-				#if config.config.debugTranslation:
-				#	logger.log('Using translation domain "%s"'%domainName)
-				translationDbs.append(GettextTranslationDb(domainName))
-				domains.append(domainName)
+		for moFile in getMoFilesForPackage(packageName, getDependencies):
+			# Searching the popt mo-files for translations makes gettext bail out, 
+			# so we ignore them here. This is 
+			# https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=172155 .
+			if 'popt.mo' not in moFile:
+				try:
+					translationDbs.append(GettextTranslationDb(moFile))
+					moFiles[moFile] = None
+				except AttributeError:
+					if config.config.debugTranslation:
+						logger.log("Warning: Failed to load mo-file for translation: " + moFile)
 				
 	# Hack alert:
 	#
@@ -214,6 +191,9 @@ def loadTranslationsFromPackageMoFiles(packageName, getDependencies=True):
 
 	if isinstance(distro.distro, distro.Ubuntu):
 		import os
-		load('language-pack-gnome-%s' % os.environ['LANG'][0:2])
+		language = os.environ['LANG'][0:2]
+		if os.environ.get('LANGUAGE', language)[0:2] != language:
+			language = os.environ['LANGUAGE'][0:2]
+		load('language-pack-gnome-%s' % language)
 	load(packageName, getDependencies)
 

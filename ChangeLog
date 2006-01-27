@@ -1,3 +1,12 @@
+2006-01-26  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/i18n.py: Fix automatic runtime translation. Stop using
+	gettext.dgettext(), and instead use the gettext.GNUTranslations class
+	and its member function, ugettext(). This ensures that we always get
+	Unicode back. As a consequence, stop caring about "domains" and just
+	deal with mo-files. Remove getTranslationDomainsForPackage(). Closes:
+	#328652. Also, fix isMoFile()'s regexp matching.
+
 2006-01-24  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/tree.py: Comment out the warning about missing wnck

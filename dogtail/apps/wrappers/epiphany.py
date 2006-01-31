@@ -33,7 +33,7 @@ class EpiphanyApp(Application, WebBrowser):
 		# Set URL:
 		print window.urlEntry().extents
 		window.urlEntry().text = urlString
-		window.urlEntry().activate()
+		window.urlEntry().doAction('activate')
 
 		# This is in the final tab; return it:
 		return tabs[-1]

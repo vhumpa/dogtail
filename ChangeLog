@@ -1,3 +1,7 @@
+2006-01-31  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/apps/wrappers/epiphany.py: Update to new Action API.
+
 2006-01-27  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/i18n.py: Comment out some super-verbose debug statements.

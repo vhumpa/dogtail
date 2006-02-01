@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Internationalization facilities
 
@@ -49,6 +50,8 @@ class GettextTranslationDb(TranslationDb):
 		self.__gnutranslations = gettext.GNUTranslations(open(moFile))
 
 	def getTranslationsOf(self, srcName):
+		if not isinstance(srcName, unicode):
+			srcName = srcName.decode('utf-8')
 		# print "searching for translations of %s"%srcName
 		# Use a dict to get uniqueness:
 		results = {}
@@ -88,6 +91,7 @@ def translate(srcString):
 	# Try to translate the string:
 	for translationDb in translationDbs:
 		for result in translationDb.getTranslationsOf(srcString):
+			result = result.encode('utf-8')
 			results[result]=True
 
 	# No translations found:
@@ -107,6 +111,10 @@ class TranslatableString:
 		Constructor looks up the string in all of the translation databases, storing
 		the various translations it finds.
 		"""
+		if isinstance(untranslatedString, unicode):
+			untranslatedString = untranslatedString.encode('utf-8')
+		else:
+			untranslatedString = untranslatedString.decode('utf-8')
 		self.untranslatedString = untranslatedString
 		self.translatedStrings = translate(untranslatedString)
 
@@ -116,10 +124,13 @@ class TranslatableString:
 		string (or simply the original string, if no translation was found).
 		"""
 		#print "comparing %s against %s"%(string, self)
+		matched = False
 		if len(self.translatedStrings)>0:
-			return string in self.translatedStrings
+			matched = string in self.translatedStrings
+			return matched
 		else:
-			return string==self.untranslatedString
+			matched = string==self.untranslatedString
+			return matched
 			
 	def __str__(self):
 		"""
@@ -129,12 +140,12 @@ class TranslatableString:
 		if len(self.translatedStrings)>0:
 			# build an output string, with commas in the correct places
 			translations = ""			
-			for i in range(len(self.translatedStrings)-1):
-				translations += '"%s", '%self.translatedStrings[i]
-			translations += '"%s"'%self.translatedStrings[-1]
-			return '"%s" (%s)'%(self.untranslatedString, translations)
+			for tString in self.translatedStrings:
+				translations += '"%s", ' % tString.decode('utf-8')
+			result = '"%s" (%s)' % (self.untranslatedString, translations)
+			return result.encode('utf-8')
 		else:
-			return '"%s"'%(self.untranslatedString)
+			return '"%s"' % (self.untranslatedString)
 
 
 

@@ -1,5 +1,12 @@
 2006-01-31  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/i18n.py, dogtail/predicate.py dogtail/trayicon.py: Be much
+	more intelligent about encodings. This should really, truly fix the
+	last remaining blocker on the automatic runtime translation feature.
+	Closes: 328652.
+
+2006-01-31  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/i18n.py: Generalize language detection.
 
 2006-01-31  Zack Cerza <zcerza@redhat.com>

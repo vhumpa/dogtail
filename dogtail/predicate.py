@@ -126,7 +126,7 @@ class GenericPredicate(Predicate):
 			else:
 				self.debugName = "child with"
 			if name:
-				self.debugName += " name=%s"%self.name	
+				self.debugName += " name=%s" % self.name
 			if roleName:
 				self.debugName += " roleName='%s'"%roleName
 			if description:

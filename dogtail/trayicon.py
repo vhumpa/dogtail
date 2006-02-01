@@ -65,6 +65,8 @@ class TrayIcon:
 
 	def _send_cmd(self, cmd):
 		if not self.proc: return
+		if isinstance(cmd, unicode):
+			cmd = cmd.encode('utf-8')
 		try:
 			self.proc.stdin.write(cmd)
 			self.proc.stdin.flush()

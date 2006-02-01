@@ -204,10 +204,8 @@ def loadTranslationsFromPackageMoFiles(packageName, getDependencies=True):
 	# this special case, aside from the simple fact that there is one, 
 	# is that it makes automatic translations much slower.
 
-	language = os.environ['LANG'][0:2]
+	language = os.environ.get('LANGUAGE', os.environ['LANG'])[0:2]
 	if isinstance(distro.distro, distro.Ubuntu):
-		if os.environ.get('LANGUAGE', language)[0:2] != language:
-			language = os.environ['LANGUAGE'][0:2]
 		load('language-pack-gnome-%s' % language, language)
 	load(packageName, language, getDependencies)
 

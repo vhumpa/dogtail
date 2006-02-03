@@ -1,11 +1,11 @@
-2006-01-31  Zack Cerza <zcerza@redhat.com>
+2006-02-03  Zack Cerza <zcerza@redhat.com>
 
 	* setup.py, sniff/sniff: Move sniff's application icons from 
 	/usr/share/pixmaps/ into /usr/share/hicolor/*/apps/.
 
 	* setup.cfg: Remove.
 
-2006-01-31  Zack Cerza <zcerza@redhat.com>
+2006-02-03  Zack Cerza <zcerza@redhat.com>
 
 	* README: Add README file. It's a start.
 

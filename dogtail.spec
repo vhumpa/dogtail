@@ -9,7 +9,7 @@ Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildArchitectures: noarch
 BuildRequires: at-spi-devel
-Requires: pyspi >= 0.5.3
+Requires: pyspi >= 0.5.3, pygtk2, rpm-python, ImageMagick, python-elementtree, xorg-x11-Xvfb
 
 # hrm, the brp-python-bytecompile will byte-compile docs stuff too
 # which is probably not what we want
@@ -28,21 +28,37 @@ python ./setup.py build
 %install
 rm -rf $RPM_BUILD_ROOT
 python ./setup.py install -O2 --root=$RPM_BUILD_ROOT --record=%{name}.files
+rm -rf $RPM_BUILD_ROOT/%{_docdir}/dogtail
+
+%post
+rm -rf /usr/share/doc/dogtail/
+gtk-update-icon-cache -f /usr/share/icons/hicolor 2>/dev/null
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-
-%files -f %{name}.files
+#%files -f %{name}.files
+%files
 %defattr(-,root,root,-)
+/usr/bin/
+/usr/lib/
+/usr/share/applications/
+/usr/share/dogtail/
+/usr/share/icons/hicolor/
 %doc COPYING
-
+%doc README
+%doc examples/
 
 %changelog
-* Tue Jan 17 2006 Zack Cerza <zcerza@redhat.com>
+* Fri Feb  3 2006 Zack Cerza <zcerza@redhat.com>
 - New upstream release.
 - Added missing BuildRequires on at-spi-devel.
 - Added Requires on pyspi >= 0.5.3.
+- Added Requires on rpm-python, pygtk2, ImageMagick, xorg-x11-Xvfb, 
+  python-elementtree.
+- Moved documentation (including examples) to the correct place.
+- Make sure /usr/share/doc/dogtail is removed.
+- Added 'gtk-update-icon-cache' to %post.
 
 * Mon Oct 24 2005 Zack Cerza <zcerza@redhat.com>
 - New upstream release.

@@ -31,12 +31,12 @@ def sniff_icons():
 			result = result + ['sniff/icons/' + file]
 	return result
 
-def icons():
+def icons(ext_tuple):
 	import os
 	list = os.listdir(os.curdir + '/icons/')
 	result = []
 	for file in list:
-		if file.split('.')[-1] in ('svg', 'png'):
+		if file.split('.')[-1] in ext_tuple:
 			result = result + ['icons/' + file]
 	return result
 
@@ -68,7 +68,8 @@ David Malcolm <dmalcolm@redhat.com>""",
 				('share/dogtail/glade', ['sniff/sniff.glade']),
 				('share/dogtail/icons', sniff_icons() ),
 				('share/applications', ['sniff/sniff.desktop']),
-				('share/pixmaps', icons())
+				('share/icons/hicolor/48x48/apps', icons('png')),
+				('share/icons/hicolor/scalable/apps', icons('svg'))
 				],
 	cmdclass = {
 		'bdist_rpm': bdist_rpm

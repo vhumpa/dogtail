@@ -1,5 +1,9 @@
 2006-02-03  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/logging.py: Update to use new icon path.
+
+2006-02-03  Zack Cerza <zcerza@redhat.com>
+
 	* setup.py, sniff/sniff: Move sniff's application icons from 
 	/usr/share/pixmaps/ into /usr/share/hicolor/*/apps/.
 

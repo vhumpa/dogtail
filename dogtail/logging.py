@@ -167,7 +167,7 @@ class IconLogger:
 			if IconLogger.trayicon.proc: self.works = True
 			else: self.works = False
 			iconName = 'dogtail-tail-48.png'
-			iconPath = '/usr/share/pixmaps/' + iconName
+			iconPath = '/usr/share/icons/hicolor/48x48/apps/' + iconName
 			if os.path.exists(iconPath):
 				IconLogger.trayicon.set_icon(iconPath)
 			self.message('dogtail running...')

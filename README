@@ -1,0 +1,71 @@
+dogtail is a GUI test tool and automation framework written in Python. It uses Accessibility (a11y) technologies to communicate with desktop applications. dogtail scripts are written in Python and executed like any other Python program.
+
+
+News
+====
+
+See NEWS file.
+
+
+Installation
+============
+
+See INSTALL file.
+
+
+Dependencies
+============
+
+pyspi 0.5.3 or newer:
+  http://people.redhat.com/zcerza/dogtail/releases/
+
+Python bindings for your distribution, e.g. python-apt or rpm-python
+
+Applications to test, e.g. from the GNOME desktop:
+  http://gnome.org/
+
+ImageMagick (optional):
+  http://www.imagemagick.org/
+
+Xvfb (optional):
+  http://xorg.freedesktop.org/
+
+cElementTree or ElementTree (optional):
+  http://effbot.org/downloads/
+
+
+Using
+=====
+
+Currently only GNOME and GTK+ applications are supported. KDE 4 should have 
+the accessibility support that will enable you to use dogtail with it.
+
+First, enable accessibility support in your GNOME session with:
+  gconftool-2 --type bool --set /desktop/gnome/interface/accessibility true
+This only affects newly-started applications, so you may want to log out and 
+log back in again.
+
+Then, look at some of the example scripts. Run them, tweak them, write your own.
+
+
+Bugs
+====
+
+Please report any bugs at:
+	http://bugzilla.gnome.org/enter_bug.cgi?product=dogtail
+
+Contact
+=======
+
+Website:
+  http://people.redhat.com/zcerza/dogtail/
+
+IRC:
+  #dogtail on irc.freenode.net
+
+Mailing list for users:
+  dogtail-list@gnome.org
+
+Mailing list for developers:
+  dogtail-devel-list@gnome.org
+

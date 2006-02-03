@@ -2,8 +2,9 @@ dogtail (0.5.0-1) unstable; urgency=low
 
   * New upstream release.
   * Build-Depend on python-at-spi (>=0.5.3-1).
+  * Add post-install script that calls gtk-update-icon-cache.
 
- -- Zack Cerza <zcerza@coe.neu.edu>  Tue, 17 Jan 2006 18:18:36 -0500
+ -- Zack Cerza <zcerza@coe.neu.edu>  Fri,  3 Feb 2006 16:24:56 -0500
 
 dogtail (0.4.3-1) unstable; urgency=low
 

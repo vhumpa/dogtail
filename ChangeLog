@@ -1,5 +1,10 @@
 2006-02-03  Zack Cerza <zcerza@redhat.com>
 
+	* sniff/sniff: Add some error checking to getSelectedNode(), to get
+	rid of a (harmless, but scary) traceback on startup.
+
+2006-02-03  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/logging.py: Update to use new icon path.
 
 2006-02-03  Zack Cerza <zcerza@redhat.com>

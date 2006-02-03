@@ -174,13 +174,14 @@ def rowCollapsed(treeview, iter, path, *userParams):
 def selectionChanged(treeSelection):
 	# print "selection changed"
 	node = getSelectedNode()
-	node.blink()
+	if node: node.blink()
 
 def getSelectedNode():
 	global model
 	global view
 	(store, iter) = view.get_selection().get_selected()
-	node = model[iter][0]
+	if not iter: node = None
+	else: node = model[iter][0]
 	return node	
 
 def menuItemActivate(menuItem, *userParams):

@@ -1,3 +1,8 @@
+2006-02-07  Zack Cerza <zcerza@redhat.com>
+
+	* README: Add pointed to gedit-procedural example, and note that it's
+	the most frequently updated.
+
 2006-02-03  Zack Cerza <zcerza@redhat.com>
 
 	* sniff/sniff: Add some error checking to getSelectedNode(), to get

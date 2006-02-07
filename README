@@ -47,12 +47,16 @@ log back in again.
 
 Then, look at some of the example scripts. Run them, tweak them, write your own.
 
+I suggest starting with gedit-test-utf8-procedural-api.py, as it's updated the
+most often.
+
 
 Bugs
 ====
 
 Please report any bugs at:
 	http://bugzilla.gnome.org/enter_bug.cgi?product=dogtail
+
 
 Contact
 =======

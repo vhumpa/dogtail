@@ -1,5 +1,9 @@
 2006-02-07  Zack Cerza <zcerza@redhat.com>
 
+	Released 0.5.0.
+
+2006-02-07  Zack Cerza <zcerza@redhat.com>
+
 	* README: Add pointed to gedit-procedural example, and note that it's
 	the most frequently updated.
 

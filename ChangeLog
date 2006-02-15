@@ -1,3 +1,10 @@
+2006-02-14  Zack Cerza <zcerza@redhat.com>
+
+	* Makefile: Split 'rpm' target into 'rpm_prep' and 'rpm'. Add a new
+	target, 'srpm', to build just a source RPM. Make it ignore 
+	BuildRequires. Make 'rpm' target only build binary RPMs. Don't make 
+	the 'tarball' target depend on the 'clean' target.
+
 2006-02-07  Zack Cerza <zcerza@redhat.com>
 
 	Released 0.5.0.

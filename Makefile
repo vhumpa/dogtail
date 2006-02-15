@@ -17,18 +17,27 @@ export StudlyCaps='[a-zA-Z_][a-zA-Z0-9_]*$$'
 check:
 	pylint --indent-string="	" --class-rgx=${StudlyCaps} --function-rgx=${camelCAPS} --method-rgx=${camelCAPS} --variable-rgx=${camelCAPS} --argument-rgx=${camelCaps} dogtail sniff/sniff examples/*.py
 
-tarball: clean
+tarball:
 	python setup.py sdist
 
-rpm: tarball
+rpm_prep: tarball
 	mkdir -p rpms/{BUILD,RPMS/noarch,SOURCES,SPECS,SRPMS}
 	# Create an rpmrc that will include our custom rpmmacros file
 	echo "%_topdir `pwd`/rpms/" > rpms/tmp.rpmmacros
 	echo "macrofiles: /usr/lib/rpm/macros:/usr/lib/rpm/%{_target}/macros:/usr/lib/rpm/redhat/macros:/etc/rpm/macros.*:/etc/rpm/macros:/etc/rpm/%{_target}/macros:~/.rpmmacros:`pwd`/rpms/tmp.rpmmacros" > rpms/tmp.rpmrc
+
+rpm: rpm_prep
 	# Build using the custom rpmrc in the rpms/ sub-dir
-	rpmbuild --rcfile /usr/lib/rpm/rpmrc:/usr/lib/rpm/redhat/rpmrc:`pwd`/rpms/tmp.rpmrc  -ta dist/dogtail-*.tar.gz
+	rpmbuild --rcfile /usr/lib/rpm/rpmrc:/usr/lib/rpm/redhat/rpmrc:`pwd`/rpms/tmp.rpmrc  -tb dist/dogtail-*.tar.gz
 	# Move the source and binary RPMs to dist/
-	mv rpms/SRPMS/* rpms/RPMS/noarch/* dist/
+	mv rpms/RPMS/noarch/* dist/
+	rm -rf rpms/
+
+srpm: rpm_prep
+	# Build using the custom rpmrc in the rpms/ sub-dir
+	rpmbuild --rcfile /usr/lib/rpm/rpmrc:/usr/lib/rpm/redhat/rpmrc:`pwd`/rpms/tmp.rpmrc  -ts dist/dogtail-*.tar.gz
+	# Move the source and binary RPMs to dist/
+	mv rpms/SRPMS/* dist/
 	rm -rf rpms/
 
 deb:

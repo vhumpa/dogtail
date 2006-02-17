@@ -1,7 +1,7 @@
 Summary: GUI test tool and automation framework
 Name: dogtail
 Version: 0.5.0
-Release: 1
+Release: 2
 License: GPL
 Group: User Interface/X
 URL: http://people.redhat.com/zcerza/dogtail/
@@ -32,7 +32,7 @@ rm -rf $RPM_BUILD_ROOT/%{_docdir}/dogtail
 
 %post
 rm -rf /usr/share/doc/dogtail/
-gtk-update-icon-cache -f /usr/share/icons/hicolor 2>/dev/null
+[ -x /usr/bin/gtk-update-icon-cache ] && gtk-update-icon-cache -f /usr/share/icons/hicolor 2>/dev/null
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -55,6 +55,7 @@ rm -rf $RPM_BUILD_ROOT
 - Remove Requires on python-elementtree, since RHEL4 didn't have it. The 
   functionality it provides is probably never used anyway, and will most likely
   be removed in the future.
+- Don't run gtk-update-icon-cache if it doesn't exist.
 
 * Fri Feb  3 2006 Zack Cerza <zcerza@redhat.com>
 - New upstream release.

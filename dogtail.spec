@@ -9,7 +9,7 @@ Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildArchitectures: noarch
 BuildRequires: at-spi-devel
-Requires: pyspi >= 0.5.3, pygtk2, rpm-python, ImageMagick, python-elementtree, xorg-x11-Xvfb
+Requires: pyspi >= 0.5.3, pygtk2, rpm-python, ImageMagick, Xvfb
 
 # hrm, the brp-python-bytecompile will byte-compile docs stuff too
 # which is probably not what we want
@@ -50,6 +50,11 @@ rm -rf $RPM_BUILD_ROOT
 %doc examples/
 
 %changelog
+* Fri Feb  17 2006 Zack Cerza <zcerza@redhat.com>
+- It looks like xorg-x11-Xvfb changed names. Require 'Xvfb' instead.
+- Remove Requires on python-elementtree, since RHEL4 didn't have it. The 
+  functionality it provides is probably never used anyway, and will most likely
+  be removed in the future.
 * Fri Feb  3 2006 Zack Cerza <zcerza@redhat.com>
 - New upstream release.
 - Added missing BuildRequires on at-spi-devel.

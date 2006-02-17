@@ -55,6 +55,7 @@ rm -rf $RPM_BUILD_ROOT
 - Remove Requires on python-elementtree, since RHEL4 didn't have it. The 
   functionality it provides is probably never used anyway, and will most likely
   be removed in the future.
+
 * Fri Feb  3 2006 Zack Cerza <zcerza@redhat.com>
 - New upstream release.
 - Added missing BuildRequires on at-spi-devel.

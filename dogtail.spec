@@ -16,8 +16,8 @@ Requires: pyspi >= 0.5.3, pygtk2, rpm-python, ImageMagick, Xvfb
 %define __os_install_post [ -x /usr/lib/rpm/brp-python-bytecompile ] && /usr/lib/rpm/brp-python-bytecompile find $RPM_BUILD_ROOT/%{_docdir}/dogtail -name *.py[co] |xargs rm -f 
 
 %description
-GUI test tool and automation framework that uses Accessibility (a11y) 
-technologies to communicate with desktop applications.
+GUI test tool and automation framework that uses assistive technologies to 
+communicate with desktop applications.
 
 %prep
 %setup -q

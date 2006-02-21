@@ -31,8 +31,8 @@ python ./setup.py install -O2 --root=$RPM_BUILD_ROOT --record=%{name}.files
 rm -rf $RPM_BUILD_ROOT/%{_docdir}/dogtail
 
 %post
-rm -rf /usr/share/doc/dogtail/
 [ -x /usr/bin/gtk-update-icon-cache ] && gtk-update-icon-cache -f /usr/share/icons/hicolor 2>/dev/null
+rm -rf /usr/share/doc/dogtail/
 
 %clean
 rm -rf $RPM_BUILD_ROOT

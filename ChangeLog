@@ -1,5 +1,16 @@
 2006-02-24  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/distro.py, dogtail/i18n.py, dogtail/logging.py,
+	dogtail/tc.py, dogtail/trayicon.py, dogtail/tree.py,
+	dogtail/apps/wrappers/evolution.py: s/  / /g. This will make it easier
+	to convert to four-space indentation, since that's all the rage these
+	days.
+	
+	* dogtail/apps/wrappers/nautilus.py: Fix up indentation; was mixing
+	tabs and spaces.
+
+2006-02-24  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/procedural.py: Tweak the FocusWidget and FocusDialog
 	algorithms so that they store the predicate instance. That way, we can
 	give more meaningful FocusErrors by passing the predicate's debugName.

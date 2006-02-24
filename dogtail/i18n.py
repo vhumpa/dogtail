@@ -32,7 +32,7 @@ class TranslationDb:
 		Pure virtual method to look up the translation of a string.
 		Returns a list of candidate strings (the translation), empty if not found.
 		
-		Note that a source string can map to multiple translated strings.  For 
+		Note that a source string can map to multiple translated strings. For 
 		example, in the French translation of Evolution, the string "Forward" can 
 		translate to both
 		(i) "Faire suivre" for forwarding an email, and 
@@ -69,7 +69,7 @@ class GettextTranslationDb(TranslationDb):
 		# Since these underscores have been stripped out before we see these strings,
 		# we are looking for a translation of "Add" into "Ajouter" in this case, so
 		# we need to fake it, by looking up the string multiple times, with underscores
-		# inserted in all possible positions, stripping underscores out of the result.  
+		# inserted in all possible positions, stripping underscores out of the result. 
 		# Ugly, but it works.
 			
 		for index in range(len(srcName)):
@@ -104,7 +104,7 @@ class TranslatableString:
 	"""
 	Class representing a string that we want to match strings against, handling 
 	translation for us, by looking it up once at construction time.
-	"""  
+	""" 
 
 	def __init__(self, untranslatedString):
 		"""

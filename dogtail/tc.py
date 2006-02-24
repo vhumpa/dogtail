@@ -32,7 +32,7 @@ class TC:
 		"""
 		Compares 2 strings to see if they are the same. The user may specify
 		the encoding to which the two strings are to be normalized for the
-		comparison.  Default encoding is the default system encoding. 
+		comparison. Default encoding is the default system encoding. 
 		Normalization to extended 8 bit charactersets is not supported.
 
 		When the origin of either baseline or undertest is a text file whose 
@@ -66,7 +66,7 @@ class TC:
 			self.result = {self.label: "ERROR - " + self.encoding + " is not a supported encoding type"}
 			TC.writer.writeResult(self.result)
 			return self.result
-  
+ 
 
 # String Test Case subclass
 class TCString(TC):
@@ -102,8 +102,8 @@ class TCImage(TC):
 	def compare(self, label, baseline, undertest, dfile='default', metric='none', threshold=0.0):
 		"""
 		Calls ImageMagick's "compare" program. Default compares are based on
-  	size but metric based comparisons are also supported with a threshold
-  	determining pass/fail criteria.
+ 	size but metric based comparisons are also supported with a threshold
+ 	determining pass/fail criteria.
 		"""
 		self.label = label.strip()
 		self.baseline = baseline.strip()
@@ -145,7 +145,7 @@ class TCImage(TC):
 				return self.result
 			else: # otherwise run the metric code
 				# Build the cmd
-				cmd = ("compare  -metric " + self.metric + " " + self.baseline + " " + self.undertest + " " + self.dfile + " " + "2>&1")
+				cmd = ("compare -metric " + self.metric + " " + self.baseline + " " + self.undertest + " " + self.dfile + " " + "2>&1")
 				answer = os.popen(cmd).readlines()
 
 				# We need to check if the metric comparison failed. Unfortunately we

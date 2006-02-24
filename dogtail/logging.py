@@ -61,7 +61,7 @@ class TimeStamp:
 		"""
 		self.timetup = time.localtime()
 
-		# This will return a log entry formatted string in YYYY.MM.DD  HH:MM:SS
+		# This will return a log entry formatted string in YYYY.MM.DD HH:MM:SS
 		for i in range(6):
 			# put in the year
 			if i == 0:
@@ -187,7 +187,7 @@ class DebugLogger:
 
 	def log(self, message):
 		"""
-		Hook used for logging messages.  Might eventually be a virtual
+		Hook used for logging messages. Might eventually be a virtual
 		function, but nice and simple for now.
 		"""
 		# Try to use the IconLogger.

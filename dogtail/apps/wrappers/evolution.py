@@ -65,7 +65,7 @@ class EvolutionApp(Application, EmailClient):
 		"""
 		Utility function for dealing with Evolution's password dialog.	It
 		finds the dialog, then fills in the password, setting the 'Remember
-		Password' checkbox accordingly.  It then clicks on OK
+		Password' checkbox accordingly. It then clicks on OK
 		"""
 		passwdDlg = self.child(roleName="alert", recursive=False, debugName="passwordDlg")
 		passwdDlg.child("Remember this password").setCheckbox = rememberPassword
@@ -119,7 +119,7 @@ class EvolutionApp(Application, EmailClient):
 	
 	def importSingleEmail(self, filename, useSubfolder=False):
 		"""
-		Test hook to test importing a single email.  Imports the email into a
+		Test hook to test importing a single email. Imports the email into a
 		local folder (either the local Inbox, or creates specially-purpose
 		subfolder inside the local Inbox), then views that email (and then
 		tests that Evolution is still running)
@@ -133,7 +133,7 @@ class EvolutionApp(Application, EmailClient):
 			filetype = "Berkeley Mailbox (mbox)"
 		else:
 			filetype = "MBox (mbox)"
-	   
+	  
 		importAssistant = self.__doImportFromSingleFile(filename, filetype)
 
 		if useSubfolder:
@@ -202,7 +202,7 @@ class EvolutionApp(Application, EmailClient):
 	def __doSendingEmailPage(self, accountWiz, account):	
 		# "Sending Email" page:
 		# FIXME: this fails; it picks up on the "Server Type:" from the earlier page
-		# and hence can't find the value it wants in the combo.  Should use the correct page for all of this...
+		# and hence can't find the value it wants in the combo. Should use the correct page for all of this...
 		sendingEmailPage = accountWiz.currentPage()
 		sendingEmailPage.child(label="Server Type: ").combovalue = account.getSendingComboValue()
 		print sendingEmailPage
@@ -253,7 +253,7 @@ class EvolutionApp(Application, EmailClient):
 		# "Done" page:
 		accountWiz.child("Apply").click()
 
-		# FIXME: we should add a review stage where we check that all widgets have the correct settings.  (But why should that even be necessary? Can our framework implement that on the script's behalf? perhaps with a UITransaction class or somesuch?)
+		# FIXME: we should add a review stage where we check that all widgets have the correct settings. (But why should that even be necessary? Can our framework implement that on the script's behalf? perhaps with a UITransaction class or somesuch?)
 
 	def doFirstTimeWizard(self, account, accountName, timezoneName):
 		setupWiz = Wizard(self.window('Evolution Setup Assistant'))
@@ -350,7 +350,7 @@ class Composer(Window):
 
 	def send(self):
 		"""
-		Clicks on the Send menu item to send this email.   Use with caution!
+		Clicks on the Send menu item to send this email.  Use with caution!
 		"""
 		self.menuItem("Send").click()
 
@@ -415,7 +415,7 @@ class MeetingWindow(AppointmentWindow):
 		
 	def addAttendee(self, attendee, attendeeType, role, rsvp, status):
 		"""
-		Add an attendeee to this meeting.  Doesn't fully work yet.
+		Add an attendeee to this meeting. Doesn't fully work yet.
 		"""
 		self.invitationsTab.button('Add').click()
 

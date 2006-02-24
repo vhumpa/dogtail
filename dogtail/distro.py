@@ -229,7 +229,7 @@ class Distro:
 	
 	Scripts may want to do arbitrary logic based on whichever distro is in use (e.g. handling differences in names of packages, distribution-specific patches, etc.)
 
-	We can either create methods in the Distro class to handle these, or we can use constructs like isinstance(distro, Ubuntu) to handle this.  We can even create hierarchies of distro subclasses to handle this kind of thing (could get messy fast though)
+	We can either create methods in the Distro class to handle these, or we can use constructs like isinstance(distro, Ubuntu) to handle this. We can even create hierarchies of distro subclasses to handle this kind of thing (could get messy fast though)
 	"""
 
 class RedHatOrFedora(Distro):

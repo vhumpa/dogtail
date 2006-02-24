@@ -8,17 +8,17 @@ script is doing
 - traps various UI malfunctions, raising exceptions for them (again,
 hopefully improving the logs)
 
-The most important class is Node.  Each Node is an element of the desktop UI.
+The most important class is Node. Each Node is an element of the desktop UI.
 There is a tree of nodes, starting at 'root', with applications as its
-children, with the top-level windows and dialogs as their children.  The various
-widgets that make up the UI appear as descendents in this tree.  All of these
+children, with the top-level windows and dialogs as their children. The various
+widgets that make up the UI appear as descendents in this tree. All of these
 elements (root, the applications, the windows, and the widgets) are represented
 as instances of Node in a tree (provided that the program of interest is
-correctly exporting its user-interface to the accessibility system).  The Node
+correctly exporting its user-interface to the accessibility system). The Node
 class is a wrapper around Accessible and the various Accessible interfaces.
 
 The Action class represents an action that the accessibility layer exports as
-performable on a specific node, such as clicking on it.  It's a wrapper around
+performable on a specific node, such as clicking on it. It's a wrapper around
 AccessibleAction.
 
 We often want to look for a node, based on some criteria, and this is provided
@@ -30,9 +30,9 @@ a 'backoff and retry' algorithm. This fixes most timing problems e.g. when a
 dialog is in the process of opening but hasn't yet done so.
 
 If a search fails, it waits 'config.searchBackoffDuration' seconds, and then
-tries again, repeatedly.  After several failed attempts (determined by
+tries again, repeatedly. After several failed attempts (determined by
 config.searchWarningThreshold) it will start sending warnings about the search
-to the debug log.  If it still can't succeed after 'config.searchCutoffCount'
+to the debug log. If it still can't succeed after 'config.searchCutoffCount'
 attempts, it raises an exception containing details of the search. You can see
 all of this process in the debug log by setting 'config.debugSearching' to True
 
@@ -43,15 +43,15 @@ still run into timing issues.	 For example, Evolution (and probably most
 other apps) set things up on new dialogs and wizard pages as they appear, and
 we can run into 'setting wars' where the app resets the widgetry to defaults
 after our script has already filled out the desired values, and so we lose our
-values.  So we give the app time to set the widgetry up before the rest of the
+values. So we give the app time to set the widgetry up before the rest of the
 script runs.
 
 The classes trap various UI malfunctions and raise exceptions that better
-describe what went wrong.  For example, they detects attempts to click on an
+describe what went wrong. For example, they detects attempts to click on an
 insensitive UI element and raise a specific exception for this.
 
 Unfortunately, some applications do not set up the 'sensitive' state
-correctly on their buttons (e.g. Epiphany on form buttons in a web page).  The
+correctly on their buttons (e.g. Epiphany on form buttons in a web page). The
 current workaround for this is to set config.ensureSensitivity=False, which
 disables the sensitivity testing. 
 
@@ -84,7 +84,7 @@ try:
 	gotWnck = True
 except ImportError:
 	# Skip this warning, since the functionality is almost entirely nonworking anyway.
-	#print "Warning: Dogtail could not import the Python bindings for libwnck.  Window-manager manipulation will not be available."
+	#print "Warning: Dogtail could not import the Python bindings for libwnck. Window-manager manipulation will not be available."
 	gotWnck = False
 
 SearchError = "Couldn't find"
@@ -169,11 +169,11 @@ class Action:
 class Node:
 	"""
 	A node in the tree of UI elements. It wraps an Accessible and
-	exposes its useful members.  It also has a debugName which is set
+	exposes its useful members. It also has a debugName which is set
 	up automatically when doing searches.
 
 	Node instances have various attributes synthesized, to make it easy to
-	get and the underlying accessible data.  Many more attributes can be
+	get and the underlying accessible data. Many more attributes can be
 	added as desired.
 
 	'name' (read-only string):
@@ -189,19 +189,19 @@ class Node:
 	Wraps Accessible_getDescription on the Node's underlying Accessible
 	
 	'parent' (read-only Node instance):
-	A Node instance wrapping the parent, or None.  Wraps Accessible_getParent
+	A Node instance wrapping the parent, or None. Wraps Accessible_getParent
 
 	'children' (read-only list of Node instances):
 	The children of this node, wrapping getChildCount and getChildAtIndex 
 
 	'text' (string):
-	For instances wrapping AccessibleText, the text.  This is read-only,
-	unless the instance wraps an AccessibleEditableText.  In this case, you
-	can write values to the attribute.  This will get logged in the debug
-	log, and a delay will be added.  After the delay, the content of the
-	node will be checked to ensure that it has the expected value.  If it
-	does not, an exception will be raised.  This does not work for password
-	dialogs (since all we get back are * characters).  In this case, set
+	For instances wrapping AccessibleText, the text. This is read-only,
+	unless the instance wraps an AccessibleEditableText. In this case, you
+	can write values to the attribute. This will get logged in the debug
+	log, and a delay will be added. After the delay, the content of the
+	node will be checked to ensure that it has the expected value. If it
+	does not, an exception will be raised. This does not work for password
+	dialogs (since all we get back are * characters). In this case, set
 	the passwordText attribute instead.
 
 	'passwordText' (write-only string):
@@ -212,7 +212,7 @@ class Node:
 	expressed as an offset in characters.
 
 	'combovalue' (write-only string):
-	For comboboxes.  Write to this attribute to set the combobox to the
+	For comboboxes. Write to this attribute to set the combobox to the
 	given value, with appropriate delays and logging.
 
 	'stateSet' (read-only StateSet instance):
@@ -222,14 +222,14 @@ class Node:
 	Wraps Accessible_getRelationSet
 
 	'labellee' (read-only list of Node instances):
-	The node(s) that this node is a label for.  Generated from 'relations'.
+	The node(s) that this node is a label for. Generated from 'relations'.
 
 	'labeller' (read-only list of Node instances):
-	The node(s) that is/are a label for this node.  Generated from
+	The node(s) that is/are a label for this node. Generated from
 	'relations'.
 
 	'sensitive' (read-only boolean):
-	Is this node sensitive (i.e. not greyed out).  Generated from stateSet
+	Is this node sensitive (i.e. not greyed out). Generated from stateSet
 	based on presence of atspi.SPI_STATE_SENSITIVE
 	Not all applications/toolkits seem to properly set this up.
 
@@ -512,7 +512,7 @@ class Node:
 		elif attr=='passwordText':
 			"""
 			Set the text of the node to the given value, with
-			appropriate delays and logging.  We can't test the
+			appropriate delays and logging. We can't test the
 			result, we'd only get * characters back.
 			"""
 			logger.log("Setting text %s to password '%s'"%(self.getLogString(), value))
@@ -820,7 +820,7 @@ class Node:
 		Finds a child satisying the given criteria.
 
 		This is implemented using findChild, and hence will automatically retry
-		if no such child is found, and will eventually raise an exception.  It
+		if no such child is found, and will eventually raise an exception. It
 		also logs the search.
 		"""
 		return self.findChild (predicate.GenericPredicate(name = name, roleName = roleName, description= description, label = label), recursive = recursive, debugName=debugName)
@@ -831,7 +831,7 @@ class Node:
 		Search below this node for a menu with the given name.
 
 		This is implemented using findChild, and hence will automatically retry
-		if no such child is found, and will eventually raise an exception.  It
+		if no such child is found, and will eventually raise an exception. It
 		also logs the search.
 		"""
 		return self.findChild (predicate.IsAMenuNamed(menuName=menuName), recursive)
@@ -841,7 +841,7 @@ class Node:
 		Search below this node for a menu item with the given name.
 		
 		This is implemented using findChild, and hence will automatically retry
-		if no such child is found, and will eventually raise an exception.  It
+		if no such child is found, and will eventually raise an exception. It
 		also logs the search.
 		"""
 		return self.findChild (predicate.IsAMenuItemNamed(menuItemName=menuItemName), recursive)
@@ -851,7 +851,7 @@ class Node:
 		Search below this node for a text entry with the given name.
 
 		This is implemented using findChild, and hence will automatically retry
-		if no such child is found, and will eventually raise an exception.  It
+		if no such child is found, and will eventually raise an exception. It
 		also logs the search.
 		"""
 		return self.findChild (predicate.IsATextEntryNamed(textEntryName=textEntryName), recursive)
@@ -861,7 +861,7 @@ class Node:
 		Search below this node for a button with the given name.
 
 		This is implemented using findChild, and hence will automatically retry
-		if no such child is found, and will eventually raise an exception.  It
+		if no such child is found, and will eventually raise an exception. It
 		also logs the search.
 		"""
 		return self.findChild (predicate.IsAButtonNamed(buttonName=buttonName), recursive)
@@ -871,7 +871,7 @@ class Node:
 		Search below this node for a child labelled with the given text.
 
 		This is implemented using findChild, and hence will automatically retry
-		if no such child is found, and will eventually raise an exception.  It
+		if no such child is found, and will eventually raise an exception. It
 		also logs the search.
 		"""
 		return self.findChild (predicate.IsLabelled(labelText), recursive)
@@ -881,7 +881,7 @@ class Node:
 		Search below this node for a child with the given name.
 
 		This is implemented using findChild, and hence will automatically retry
-		if no such child is found, and will eventually raise an exception.  It
+		if no such child is found, and will eventually raise an exception. It
 		also logs the search.
 		"""
 		return self.findChild (predicate.IsNamed(childName), recursive)
@@ -891,7 +891,7 @@ class Node:
 		Search below this node for a tab with the given name.
 
 		This is implemented using findChild, and hence will automatically retry
-		if no such child is found, and will eventually raise an exception.  It
+		if no such child is found, and will eventually raise an exception. It
 		also logs the search.
 		"""
 		return self.findChild (predicate.IsATabNamed(tabName=tabName), recursive)
@@ -928,7 +928,7 @@ class Node:
 	def click(self):
 		"""
 		If the Node supports an action called "click", do it, with appropriate delays and logging.
-		Otherwise, raise an ActionNotSupported exception.  
+		Otherwise, raise an ActionNotSupported exception. 
 
 		Note that this is just a shortcut to doAction('click'), as it is by far the most-used
 		action. To do any other action such as 'activate' or 'open', you must use doAction().
@@ -985,7 +985,7 @@ class Root (Node):
 		or raising an exception.
 
 		This is implemented using findChild, and hence will automatically retry
-		if no such child is found, and will eventually raise an exception.  It
+		if no such child is found, and will eventually raise an exception. It
 		also logs the search.
 		"""
 		return Application(root.findChild(predicate.IsAnApplicationNamed(appName),recursive=False))
@@ -997,7 +997,7 @@ class Application (Node):
 		returning a Window instance.
 
 		This is implemented using findChild, and hence will automatically retry
-		if no such child is found, and will eventually raise an exception.  It
+		if no such child is found, and will eventually raise an exception. It
 		also logs the search.
 		
 		FIXME: should this method activate the dialog?
@@ -1010,7 +1010,7 @@ class Application (Node):
 		returning a Window instance.
 
 		This is implemented using findChild, and hence will automatically retry
-		if no such child is found, and will eventually raise an exception.  It
+		if no such child is found, and will eventually raise an exception. It
 		also logs the search.		
 
 		FIXME: this bit isn't true:

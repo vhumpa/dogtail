@@ -1,5 +1,5 @@
 # jhbuild - a build script for GNOME 1.x and 2.x
-# Copyright (C) 2001-2004  James Henstridge
+# Copyright (C) 2001-2004 James Henstridge
 #
 #	trayicon.py: simple wrapper for zenity based tray icons
 #
@@ -25,7 +25,7 @@ except ImportError:
 	# I know, let's add an ugly hack!
 	# Don't totally bail when not using python2.4 or newer.
 	# FIXME: since we aren't using any new functionality of subprocess, we
-	#        could just use the deprecated methods.
+	#    could just use the deprecated methods.
 	class subprocess:
 		PIPE = None
 		def Popen(cmd, close_fds, preexec_fn, stdin): return None
@@ -48,7 +48,7 @@ class TrayIcon:
 			os.setsid()
 		try:
 			self.proc = subprocess.Popen(['zenity', '--notification',
-										  '--listen'],
+										 '--listen'],
 										 close_fds=True,
 										 preexec_fn=preexec,
 										 stdin=subprocess.PIPE)

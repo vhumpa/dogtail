@@ -1,7 +1,7 @@
 Summary: GUI test tool and automation framework
 Name: dogtail
-Version: 0.5.0
-Release: 2
+Version: 0.5.1
+Release: 1
 License: GPL
 Group: User Interface/X
 URL: http://people.redhat.com/zcerza/dogtail/
@@ -50,6 +50,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc examples/
 
 %changelog
+* Fri Feb  24 2006 Zack Cerza <zcerza@redhat.com>
+- Post-release version bump.
+
 * Fri Feb  17 2006 Zack Cerza <zcerza@redhat.com>
 - It looks like xorg-x11-Xvfb changed names. Require 'Xvfb' instead.
 - Remove Requires on python-elementtree, since RHEL4 didn't have it. The 

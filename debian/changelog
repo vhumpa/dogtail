@@ -1,3 +1,9 @@
+dogtail (0.5.1-1) unstable; urgency=low
+
+  * Post-release version bump.
+
+ -- Zack Cerza <zcerza@coe.neu.edu>  Fri, 24 Feb 2006 14:54:49 -0500
+
 dogtail (0.5.0-1) unstable; urgency=low
 
   * New upstream release.

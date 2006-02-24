@@ -1,5 +1,10 @@
 2006-02-24  Zack Cerza <zcerza@redhat.com>
 
+	* setup.py, dogtail/__init__.py, dogtail/apps/__init__.py, 
+	dogtail/apps/wrappers/__init__.py: Belated post-release version bump.
+
+2006-02-24  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/distro.py, dogtail/i18n.py, dogtail/logging.py,
 	dogtail/tc.py, dogtail/trayicon.py, dogtail/tree.py,
 	dogtail/apps/wrappers/evolution.py: s/  / /g. This will make it easier

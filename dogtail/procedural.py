@@ -73,13 +73,14 @@ class FocusDialog (FocusBase):
 		if not name and not description:
 			raise TypeError, ENOARGS
 		result = None
+		predicate = IsADialogNamed(name)
 		try:
-			result = FocusApplication.node.findChild(IsADialogNamed(name), requireResult=False, recursive = False)
+			result = FocusApplication.node.findChild(predicate, requireResult=False, recursive = False)
 		except AttributeError: pass
 		if result: 
 			FocusDialog.node = result
 			FocusWidget.node = None
-		else: raise FocusError, name
+		else: raise FocusError, predicate.debugName
 
 class FocusWidget (FocusBase):
 	"""
@@ -94,24 +95,25 @@ class FocusWidget (FocusBase):
 		
 		# search for a widget.
 		result = None
+		predicate = GenericPredicate(name = name, roleName = roleName, description = description)
 		try:
-			result = FocusWidget.node.findChild(GenericPredicate(name = name, roleName = roleName, description = description), requireResult = False, retry = False)
+			result = FocusWidget.node.findChild(predicate, requireResult = False, retry = False)
 		except AttributeError: pass
 		if result: FocusWidget.node = result
 		else:
 			try:
-				result = FocusDialog.node.findChild(GenericPredicate(name = name, roleName = roleName, description = description), requireResult = False, retry = False)
+				result = FocusDialog.node.findChild(predicate, requireResult = False, retry = False)
 			except AttributeError: pass
 		if result: FocusWidget.node = result
 		else: 
 			try:
-				result = FocusApplication.node.findChild(GenericPredicate(name = name, roleName = roleName, description = description), requireResult = False, retry = False)
+				result = FocusApplication.node.findChild(predicate, requireResult = False, retry = False)
 				if result: FocusWidget.node = result
 			except AttributeError: raise FocusError, name
 		
 		if result == None:
 			FocusWidget.node = result
-			raise FocusError, name
+			raise FocusError, predicate.debugName
 
 class Focus (FocusBase):
 	"""

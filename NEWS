@@ -1,3 +1,10 @@
+dogtail 0.5.1
+=============
+
+Features:
+
+ * dogtail.procedural's FocusErrors are now more informative.
+
 dogtail 0.5.0
 =============
 

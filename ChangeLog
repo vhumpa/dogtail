@@ -1,3 +1,9 @@
+2006-02-24  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Tweak the FocusWidget and FocusDialog
+	algorithms so that they store the predicate instance. That way, we can
+	give more meaningful FocusErrors by passing the predicate's debugName.
+
 2006-02-14  Zack Cerza <zcerza@redhat.com>
 
 	* Makefile: Split 'rpm' target into 'rpm_prep' and 'rpm'. Add a new

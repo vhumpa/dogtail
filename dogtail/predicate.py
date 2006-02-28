@@ -22,6 +22,7 @@ def makeCamel(string):
 	"""
 	Convert string to camelCaps
 	"""
+	string = str(string)
 	# FIXME: this function is probably really fragile, lots of difficult cases here
 
 	# Sanitize string, replacing bad characters with spaces:

@@ -1,3 +1,9 @@
+2006-02-28  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/predicate.py: Fix makeCamel() to deal with
+	TranslatableString instances properly by calling str() on the
+	parameter as a safeguard.
+
 2006-02-24  Zack Cerza <zcerza@redhat.com>
 
 	* setup.py, dogtail/__init__.py, dogtail/apps/__init__.py, 

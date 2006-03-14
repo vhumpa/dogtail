@@ -4,7 +4,7 @@ Version: 0.5.1
 Release: 1%{?dist}
 License: GPL
 Group: User Interface/X
-URL: http://people.redhat.com/zcerza/dogtail/
+URL: http://people.redhat.com/zcerza/dogtail/releases/dogtail-0.5.1.tar.gz
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch: noarch

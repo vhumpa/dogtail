@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Author: David Malcolm <dmalcolm@redhat.com>
 """

@@ -1,3 +1,11 @@
+2006-03-14  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/i18n.py, dogtail/rawinput.py, dogtail/i18n.py, 
+	dogtail/rawinput.py, dogtail/logging.py, dogtail/utils.py, 
+	dogtail/path.py: Remove '#!/usr/bin/env python' headers to fix rpmlint
+	warnings. The rest apparently can keep them, since they have unit
+	tests. Add UTF-8 encoding headers.
+
 2006-02-28  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/predicate.py: Fix makeCamel() to deal with

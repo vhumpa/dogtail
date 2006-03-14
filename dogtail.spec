@@ -1,7 +1,7 @@
 Summary: GUI test tool and automation framework
 Name: dogtail
 Version: 0.5.1
-Release: 1
+Release: 1%{?dist}
 License: GPL
 Group: User Interface/X
 URL: http://people.redhat.com/zcerza/dogtail/
@@ -74,6 +74,7 @@ rm -rf $RPM_BUILD_ROOT
   python macro to define python_sitelib and use that.
 - Remove the executable bit on the examples in install scriptlet.
 - Remove call to /bin/rm in post scriptlet.
+- Use dist in Release.
 
 * Fri Feb 17 2006 Zack Cerza <zcerza@redhat.com> - 0.5.0-2
 - It looks like xorg-x11-Xvfb changed names. Require 'Xvfb' instead.

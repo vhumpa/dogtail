@@ -6,7 +6,7 @@ License: GPL
 Group: User Interface/X
 URL: http://people.redhat.com/zcerza/dogtail/
 Source0: %{name}-%{version}.tar.gz
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch: noarch
 BuildRequires: python
 Requires: pyspi >= 0.5.3
@@ -22,6 +22,7 @@ GUI test tool and automation framework that uses assistive technologies to
 communicate with desktop applications.
 
 %prep
+%{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 %setup -q
 
 %build
@@ -31,12 +32,12 @@ python ./setup.py build
 rm -rf $RPM_BUILD_ROOT
 python ./setup.py install -O2 --root=$RPM_BUILD_ROOT --record=%{name}.files
 rm -rf $RPM_BUILD_ROOT/%{_docdir}/dogtail
+find examples -type f -exec chmod 0644 \{\} \;
 
 %post
 touch --no-create %{_datadir}/icons/hicolor || :
 [ -x /usr/bin/gtk-update-icon-cache ] && gtk-update-icon-cache --quiet -f %{_datadir}/icons/hicolor || :
 update-desktop-database &> /dev/null || :
-rm -rf %{_datadir}/doc/dogtail/
 
 %postun
 touch --no-create %{_datadir}/icons/hicolor || :
@@ -48,11 +49,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%{_bindir}
-%{_libdir}
-%{_datadir}/applications/
+%{_bindir}/*
+%{python_sitelib}/dogtail/
+%{_datadir}/applications/*
 %{_datadir}/dogtail/
-%{_datadir}/icons/hicolor/
+%{_datadir}/icons/hicolor/*
 %doc COPYING
 %doc README
 %doc examples/
@@ -61,13 +62,18 @@ rm -rf $RPM_BUILD_ROOT
 * Fri Feb 24 2006 Zack Cerza <zcerza@redhat.com> - 0.5.1-1
 - Remove BuildRequires on at-spi-devel. Added one on python.
 - Use macros instead of absolute paths.
-- Touch %{_datadir}/icons/hicolor/ before running gtk-update-icon-cache.
+- Touch _datadir/icons/hicolor/ before running gtk-update-icon-cache.
 - Require and use desktop-file-utils.
-- %postun = %post.
+- postun = post.
 - Shorten BuildArchitectures to BuildArch. The former worked, but even vim's 
   hilighting hated it.
 - Put each *Requires on a separate line.
 - Remove __os_install_post definition.
+- Use Fedora Extras BuildRoot.
+- Instead of _libdir, which kills the build if it's /usr/lib64, use a
+  python macro to define python_sitelib and use that.
+- Remove the executable bit on the examples in install scriptlet.
+- Remove call to /bin/rm in post scriptlet.
 
 * Fri Feb 17 2006 Zack Cerza <zcerza@redhat.com> - 0.5.0-2
 - It looks like xorg-x11-Xvfb changed names. Require 'Xvfb' instead.

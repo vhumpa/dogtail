@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Dogtail demo script
-__author__ = 'David Malcolm <dmalcolm@redhat.com>'
+__author__ = 'David Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.com>'
 
 # Event recorder.
 # FIXME: under construction
@@ -98,6 +98,11 @@ class OOScriptWriter(ScriptWriter):
             # Have to specify it as an absolute path:
             return "root"+absSearchPath.makeScriptMethodCall()
     
+    def recordKey(self, node, key):
+        searchPath = node.getAbsoluteSearchPath()
+        result = self.generateAbsSearchPathMethodCall(searchPath)
+        result +=".rawType('%s')" % key
+
     def recordClick(self, node):
         searchPath = node.getAbsoluteSearchPath()
 
@@ -121,7 +126,8 @@ class OOScriptWriter(ScriptWriter):
                         print "It is not yet a variable"
                         self.printVariables()
                         
-                    varName = prefixPath.getPredicate(i-1).makeScriptVariableName()
+                    predicate = prefixPath.getPredicate(i-1)
+                    varName = predicate.makeScriptVariableName()
                     print varName+" = "+self.generateAbsSearchPathMethodCall(prefixPath)
                     self.variables[varName]=prefixPath
                 else:
@@ -152,21 +158,24 @@ global recorder
 class EventRecorder:
     def __init__(self):
         self.writer = OOScriptWriter()
-        self.__registerEvents()
+        self.listeners = self.__registerEvents()
         self.lastFocussedNode = None
         self.absoluteNodePaths = True
  
     def __registerEvents(self):
         # Only specific events are recorded:
+        listeners = []
 
         # Focus events:
-        atspi.EventListener(marshalOnFocus, ["focus:"]) 
+        listeners.append(atspi.EventListener(marshalOnFocus, ["focus:"]))
 
         # Mouse button-1 clicks:
-        atspi.EventListener(marshalOnMouseClick, ["mouse:button:1p"])
+        listeners.append(atspi.EventListener(marshalOnMouseClick, ["mouse:button:1p"]))
 
         # Window creation:
-        atspi.EventListener(marshalOnWindowCreate, ["window:create"])
+        listeners.append(atspi.EventListener(marshalOnWindowCreate, ["window:create"]))
+
+        return listeners
 
     def onFocus(self, event): 
         # logEvent(event)

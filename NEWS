@@ -3,7 +3,15 @@ dogtail 0.5.1
 
 Features:
 
+ * An improved build system for RPMs.
+
  * dogtail.procedural's FocusErrors are now more informative.
+
+Bugfixes:
+
+ * examples/recorder.py was broken; a bug in dogtail.predicate.makeCamel() 
+   was breaking the predicates' makeScriptVariableName() calls. It's fixed.
+
 
 dogtail 0.5.0
 =============

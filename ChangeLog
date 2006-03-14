@@ -1,5 +1,14 @@
 2006-03-14  Zack Cerza <zcerza@redhat.com>
 
+	* examples/recorder.py: Store each EventListener in a list instead of
+	initializing it and throwing it away. Add the beginnings of a
+	OOScriptWriter.recordKey() method - for when pyspi's DeviceListener
+	works properly.
+
+	* NEWS: Updated.
+
+2006-03-14  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/i18n.py, dogtail/rawinput.py, dogtail/i18n.py, 
 	dogtail/rawinput.py, dogtail/logging.py, dogtail/utils.py, 
 	dogtail/path.py: Remove '#!/usr/bin/env python' headers to fix rpmlint

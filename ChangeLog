@@ -1,3 +1,13 @@
+2006-03-21  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/__init__.py, dogtail/apps/__init__.py,
+	dogtail/apps/wrappers/__init__.py, setup.py, NEWS: Post-release
+	version bump.
+
+2006-03-14  Zack Cerza <zcerza@redhat.com>
+
+	Released 0.5.1.
+
 2006-03-14  Zack Cerza <zcerza@redhat.com>
 
 	* examples/recorder.py: Store each EventListener in a list instead of

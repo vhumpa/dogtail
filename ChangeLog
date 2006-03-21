@@ -1,5 +1,16 @@
 2006-03-21  Zack Cerza <zcerza@redhat.com>
 
+	* examples/recorder.py: s/Focussed/Focused/g. Add lastSelectedNode
+	callbacks and event listener registration. s/MouseClick/MouseButton/g.
+	Keep track of lastPressedNode and lastReleasedNode. Add code to try to
+	detect the "real" source nodes by checking the X and Y coordinates of
+	lastFocusedNode and lastSelectedNode. Add a way to exit the recorder -
+	currently, clicking on an Edit menu will do it. When the
+	OOScriptWriter is initialized, make it spit out "from dogtail.tree
+	import *".
+
+2006-03-21  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/predicate.py: Remove extra quotes from all the script
 	generation code.
 

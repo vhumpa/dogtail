@@ -42,6 +42,9 @@ class OOScriptWriter(ScriptWriter):
         self.variables = {}
         self.debug = False
         self.debugVariables = False
+        
+        print "from dogtail.tree import *"
+        print
 
     def generateVariableName(self, predicate):
         # Ensure uniqueness
@@ -159,7 +162,10 @@ class EventRecorder:
     def __init__(self):
         self.writer = OOScriptWriter()
         self.listeners = self.__registerEvents()
-        self.lastFocussedNode = None
+        self.lastFocusedNode = None
+        self.lastSelectedNode = None
+        self.lastPressedNode = None
+        self.lastReleasedNoed = None
         self.absoluteNodePaths = True
  
     def __registerEvents(self):
@@ -169,8 +175,11 @@ class EventRecorder:
         # Focus events:
         listeners.append(atspi.EventListener(marshalOnFocus, ["focus:"]))
 
+        # State Changed events:
+        listeners.append(atspi.EventListener(marshalOnSelect, ["object:state-changed:selected"]))
+
         # Mouse button-1 clicks:
-        listeners.append(atspi.EventListener(marshalOnMouseClick, ["mouse:button:1p"]))
+        listeners.append(atspi.EventListener(marshalOnMouseButton, ["mouse:button"]))
 
         # Window creation:
         listeners.append(atspi.EventListener(marshalOnWindowCreate, ["window:create"]))
@@ -178,22 +187,47 @@ class EventRecorder:
         return listeners
 
     def onFocus(self, event): 
-        # logEvent(event)
+        #logEvent(event)
         sourceNode = dogtail.tree.Node(event.source)
         #print "Focus on %s"%str(sourceNode)
         #path = sourceNode.getAbsoluteSourcePath()
         #print "SourcePath: %s"%path
         #print "    Script: %s"%path.make
-        self.lastFocussedNode = sourceNode
+        self.lastFocusedNode = sourceNode
 
-    def onMouseClick(self, event): 
-        # logEvent(event)
+    def onSelect(self, event):
+        #logEvent(event)
         sourceNode = dogtail.tree.Node(event.source)
-        # sourceNode seems to always be set to "main" (other events come through on all objects)
-        # so we pretend the click was on the last node to be focussed
-        # print "Click on %s"%str(self.getLogStringForNode(self.lastFocussedNode))
-        if self.lastFocussedNode!=None:
-            self.writer.recordClick(self.lastFocussedNode)
+        self.lastSelectedNode = sourceNode
+        if sourceNode.name == "Edit":
+            atspi.event_quit()
+
+    def onMouseButton(self, event):
+        #logEvent(event)
+        
+        isPress = isRelease = False
+        if "mouse:button:1" not in event.type:
+            return
+        elif event.type == "mouse:button:1p":
+            isPress = True
+        elif event.type == "mouse:button:1r":
+            isRelease = True
+        
+        # The source node is always "main" - which sucks.
+        # sourceNode = dogtail.tree.Node(event.source)
+        
+        x = event.detail1
+        y = event.detail2
+        #print "x,y: %s, %s" % (x, y)
+        for node in (self.lastFocusedNode, self.lastSelectedNode):
+            #print "position: %s, size: %s" % (node.position, node.size)
+            if  node.position[0] <= x <= (node.position[0] + node.size[0]) and \
+                    node.position[1] <= y <= (node.position[1] + node.size[1]):
+                if isPress: self.lastPressedNode = node
+                elif isRelease: self.lastReleasedNode = node
+                break
+        
+        if isRelease: self.writer.recordClick(self.lastFocusedNode)
 
     def onWindowCreate(self, event):
         # logEvent(event)
@@ -211,8 +245,11 @@ class EventRecorder:
 def marshalOnFocus(event): 
     recorder.onFocus(event)
 
-def marshalOnMouseClick(event):
-    recorder.onMouseClick(event)
+def marshalOnSelect(event):
+    recorder.onSelect(event)
+
+def marshalOnMouseButton(event):
+    recorder.onMouseButton(event)
 
 def marshalOnWindowCreate(event): 
     recorder.onWindowCreate(event)
@@ -221,3 +258,5 @@ recorder = EventRecorder()
 #recorder.writer.debug = True
 #recorder.writer.debugVariables = True
 atspi.event_main()
+
+# vim: sw=4 ts=4 sts=4 et ai

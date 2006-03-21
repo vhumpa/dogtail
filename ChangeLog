@@ -1,5 +1,10 @@
 2006-03-21  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/predicate.py: Remove extra quotes from all the script
+	generation code.
+
+2006-03-21  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/__init__.py, dogtail/apps/__init__.py,
 	dogtail/apps/wrappers/__init__.py, setup.py, NEWS: Post-release
 	version bump.

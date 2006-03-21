@@ -99,7 +99,7 @@ class IsAnApplicationNamed(Predicate):
 
 	def makeScriptMethodCall(self, isRecursive):
 		# ignores the isRecursive parameter
-		return "application('%s')"%self.appName
+		return "application(%s)"%self.appName
 
 	def makeScriptVariableName(self):
 		return makeCamel(self.appName)+"App"
@@ -159,15 +159,15 @@ class GenericPredicate(Predicate):
 
 	def makeScriptMethodCall(self, isRecursive):
 		if self.label:
-			args = "label='%s'"%label
+			args = "label=%s"%label
 		else:
 			args = ""
 			if self.name:
-				args += " name='%s'"%self.name
+				args += " name=%s"%self.name
 			if self.roleName:
-				args += " roleName='%s'"%self.roleName
+				args += " roleName=%s"%self.roleName
 			if self.description:
-				args += " description='%s'"%self.description
+				args += " description=%s"%self.description
 		return "child(%s%s)"%(args, makeScriptRecursiveArgument(isRecursive, True))
 
 	def makeScriptVariableName(self):
@@ -194,7 +194,7 @@ class IsNamed(Predicate):
 		return "named %s"%self.name
 
 	def makeScriptMethodCall(self, isRecursive):
-		return "child(name='%s'%s)"%(self.name, makeScriptRecursiveArgument(isRecursive, True))
+		return "child(name=%s%s)"%(self.name, makeScriptRecursiveArgument(isRecursive, True))
 	def makeScriptVariableName(self):
 		return makeCamel(self.name)+"Node"
 
@@ -210,7 +210,7 @@ class IsAWindowNamed(Predicate):
 		return "%s window"%self.windowName
 
 	def makeScriptMethodCall(self, isRecursive):
-		return "window('%s'%s)"%(self.windowName, makeScriptRecursiveArgument(isRecursive, False))
+		return "window(%s%s)"%(self.windowName, makeScriptRecursiveArgument(isRecursive, False))
 
 	def makeScriptVariableName(self):
 		return makeCamel(self.windowName)+"Win"
@@ -235,7 +235,7 @@ class IsADialogNamed(Predicate):
 		return '%s dialog'%self.dialogName
 
 	def makeScriptMethodCall(self, isRecursive):
-		return "dialog('%s'%s)"%(self.dialogName, makeScriptRecursiveArgument(isRecursive, False))
+		return "dialog(%s%s)"%(self.dialogName, makeScriptRecursiveArgument(isRecursive, False))
 
 	def makeScriptVariableName(self):
 		return makeCamel(self.dialogName)+"Dlg"
@@ -259,7 +259,7 @@ class IsLabelledAs(Predicate):
 		return 'labelled %s'%self.labelText
 
 	def makeScriptMethodCall(self, isRecursive):
-		return "child(label='%s'%s)"%(self.labelText, makeScriptRecursiveArgument(isRecursive, True))
+		return "child(label=%s%s)"%(self.labelText, makeScriptRecursiveArgument(isRecursive, True))
 
 	def makeScriptVariableName(self):
 		return makeCamel(self.labelText)+"Node"
@@ -276,7 +276,7 @@ class IsAMenuNamed(Predicate):
 		return '%s menu'%(self.menuName)
 
 	def makeScriptMethodCall(self, isRecursive):
-		return "menu('%s'%s)"%(self.menuName, makeScriptRecursiveArgument(isRecursive, True))
+		return "menu(%s%s)"%(self.menuName, makeScriptRecursiveArgument(isRecursive, True))
 
 	def makeScriptVariableName(self):
 		return makeCamel(self.menuName)+"Menu"
@@ -294,7 +294,7 @@ class IsAMenuItemNamed(Predicate):
 		return '%s menuitem'%(self.menuItemName)
 
 	def makeScriptMethodCall(self, isRecursive):
-		return "menuItem('%s'%s)"%(self.menuItemName, makeScriptRecursiveArgument(isRecursive, True))
+		return "menuItem(%s%s)"%(self.menuItemName, makeScriptRecursiveArgument(isRecursive, True))
 
 	def makeScriptVariableName(self):
 		return makeCamel(self.menuItemName)+"MenuItem"
@@ -311,7 +311,7 @@ class IsATextEntryNamed(Predicate):
 		return '%s textentry'%(self.textEntryName)
 
 	def makeScriptMethodCall(self, isRecursive):
-		return "textentry('%s'%s)"%(self.textEntryName, makeScriptRecursiveArgument(isRecursive, True))
+		return "textentry(%s%s)"%(self.textEntryName, makeScriptRecursiveArgument(isRecursive, True))
 
 	def makeScriptVariableName(self):
 		return makeCamel(self.textEntryName)+"Entry"
@@ -328,7 +328,7 @@ class IsAButtonNamed(Predicate):
 		return '%s button'%(self.buttonName)
 
 	def makeScriptMethodCall(self, isRecursive):
-		return "button('%s'%s)"%(self.buttonName, makeScriptRecursiveArgument(isRecursive, True))
+		return "button(%s%s)"%(self.buttonName, makeScriptRecursiveArgument(isRecursive, True))
 
 	def makeScriptVariableName(self):
 		return makeCamel(self.buttonName)+"Button"
@@ -345,7 +345,7 @@ class IsATabNamed(Predicate):
 		return '%s tab'%(self.tabName)
 
 	def makeScriptMethodCall(self, isRecursive):
-		return "tab('%s'%s)"%(self.tabName, makeScriptRecursiveArgument(isRecursive, True))
+		return "tab(%s%s)"%(self.tabName, makeScriptRecursiveArgument(isRecursive, True))
 
 	def makeScriptVariableName(self):
 		return makeCamel(self.tabName)+"Tab"

@@ -1,21 +1,20 @@
 Summary: GUI test tool and automation framework
 Name: dogtail
 Version: 0.5.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPL
 Group: User Interface/X
-URL: http://people.redhat.com/zcerza/dogtail/releases/dogtail-0.5.1.tar.gz
-Source0: %{name}-%{version}.tar.gz
+URL: http://people.redhat.com/zcerza/dogtail/releases/
+Source0: http://people.redhat.com/zcerza/dogtail/releases/dogtail-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch: noarch
 BuildRequires: python
+BuildRequires: desktop-file-utils
 Requires: pyspi >= 0.5.3
 Requires: pygtk2
 Requires: rpm-python
 Requires: ImageMagick
 Requires: Xvfb
-Requires(post): desktop-file-utils
-Requires(postun): desktop-file-utils
 
 %description
 GUI test tool and automation framework that uses assistive technologies to 
@@ -33,16 +32,19 @@ rm -rf $RPM_BUILD_ROOT
 python ./setup.py install -O2 --root=$RPM_BUILD_ROOT --record=%{name}.files
 rm -rf $RPM_BUILD_ROOT/%{_docdir}/dogtail
 find examples -type f -exec chmod 0644 \{\} \;
+desktop-file-install $RPM_BUILD_ROOT/%{_datadir}/applications/sniff.desktop
+  --vendor=fedora \
+  --dir=$RPM_BUILD_ROOT/%{_datadir}/applications \
+  --add-category X-Fedora \
+  --delete-original
 
 %post
 touch --no-create %{_datadir}/icons/hicolor || :
 [ -x /usr/bin/gtk-update-icon-cache ] && gtk-update-icon-cache --quiet -f %{_datadir}/icons/hicolor || :
-update-desktop-database &> /dev/null || :
 
 %postun
 touch --no-create %{_datadir}/icons/hicolor || :
 [ -x /usr/bin/gtk-update-icon-cache ] && gtk-update-icon-cache --quiet -f %{_datadir}/icons/hicolor || :
-update-desktop-database &> /dev/null || :
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -59,6 +61,10 @@ rm -rf $RPM_BUILD_ROOT
 %doc examples/
 
 %changelog
+* Tue Mar 21 2006 Zack Cerza <zcerza@redhat.com> - 0.5.1-2
+- Fix URL and Source0 fields.
+- Fix desktop-file-utils magic; use desktop-file-install.
+
 * Fri Feb 24 2006 Zack Cerza <zcerza@redhat.com> - 0.5.1-1
 - Remove BuildRequires on at-spi-devel. Added one on python.
 - Use macros instead of absolute paths.

@@ -43,7 +43,7 @@ def icons(ext_tuple):
 def scripts():
 	import os
 	list = os.listdir(os.curdir + '/scripts/')
-	result = ['sniff/sniff']
+	result = ['sniff/sniff', 'recorder/dogtail-recorder']
 	for file in list:
 		if file != 'CVS':
 			result = result + ['scripts/' + file]
@@ -65,7 +65,8 @@ David Malcolm <dmalcolm@redhat.com>""",
 					examples() ),
 				('share/doc/dogtail/examples/data', 
 					examples_data() ),
-				('share/dogtail/glade', ['sniff/sniff.glade']),
+				('share/dogtail/glade', ['sniff/sniff.glade', 
+					'recorder/recorder.glade']),
 				('share/dogtail/icons', sniff_icons() ),
 				('share/applications', ['sniff/sniff.desktop']),
 				('share/icons/hicolor/48x48/apps', icons('png')),

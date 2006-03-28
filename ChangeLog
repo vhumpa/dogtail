@@ -1,5 +1,11 @@
 2006-03-28  Zack Cerza <zcerza@redhat.com>
 
+	* MANIFEST.in: Add the new recorder files to the tarball.
+
+	* setup.py: Add the new recorder files to packages.
+
+2006-03-28  Zack Cerza <zcerza@redhat.com>
+
 	* recorder/dogtail-recorder: Add GUI with Record, Stop, Save and Quit
 	buttons. Add new methods to EventRecorder: startRecording() and
 	stopRecording(), and move all the event listener (de)registration and

@@ -9,5 +9,6 @@ recursive-include docs *
 recursive-include debian *
 recursive-include scripts *
 include sniff/sniff.glade sniff/sniff.desktop sniff/icons/*.xpm
+include recorder/recorder.glade recorder/dogtail-recorder
 recursive-include examples *.py *.txt *.png *.cfg
 include icons/*.svg icons/*.png

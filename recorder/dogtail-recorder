@@ -3,7 +3,50 @@ __author__ = 'David Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.com
 
 # Event recorder.
 # FIXME: under construction
-# To quit, click any Edit menu.
+
+# Begin GUI code
+import gobject
+import gnome
+import gtk.glade
+class RecorderGUI(gnome.Program):
+    def __init__(self):
+        gnome.Program.__init__(self)
+        appName = 'Recorder'
+        appAuthors = ['Zack Cerza <zcerza@redhat.com>']
+        program = gnome.program_init(appName, '0.1')
+
+        try:
+            x = gtk.glade.XML('recorder.glade')
+        except RuntimeError:
+            x = gtk.glade.XML('/usr/share/dogtail/glade/recorder.glade')
+
+        self.window = x.get_widget('window')
+
+        try:
+            self.window.set_icon_from_file('../icons/dogtail-head.svg')
+        except:
+            self.window.set_icon_from_file('/usr/share/icons/hicolor/scalable/apps/dogtail-head.svg')
+
+        self.recordButton = x.get_widget('recordButton')
+        self.stopButton = x.get_widget('stopButton')
+        self.saveButton = x.get_widget('saveButton')
+        self.quitButton = x.get_widget('quitButton')
+
+        self.connectSignals()
+
+        self.window.show_all()
+        gtk.main()
+
+    def connectSignals(self):
+        self.recordButton.connect('clicked', recorder.startRecording)
+        self.stopButton.connect('clicked', recorder.stopRecording)
+        self.quitButton.connect('clicked', self.quit)
+
+    def quit(*args):
+        gtk.main_quit()
+    quit = staticmethod(quit)
+        
+# End GUI code
 
 import atspi
 import dogtail.tree
@@ -16,8 +59,7 @@ def logEvent(event):
         sourceStr = ""
     print "Got event: %s%s"%(event.type, sourceStr)
 
-
-class ScriptWriter(Writer):
+class ScriptWriter:
     """
     Abstract Writer subclass which writes out Python scripts
     """
@@ -146,9 +188,6 @@ class ProceduralScriptWriter(ScriptWriter):
         # FIXME: not yet written
         raise NotImplementedError
 
-# Singleton EventRecorder
-global recorder
-
 class FakeNode(dogtail.tree.Node):
     """A "cached pseudo-copy" of a Node
 
@@ -189,11 +228,16 @@ class FakeNode(dogtail.tree.Node):
     def __setattr__(self, name, value):
         self.__dict__[name] = value
 
-# Test event recording class; under construction
+# Singleton EventRecorder
+global recorder
+
 class EventRecorder:
-    def __init__(self):
-        self.writer = OOScriptWriter()
-        self.listeners = self.__registerEvents()
+    """
+    Event Recorder
+    """
+    def __init__(self, writerClass = OOScriptWriter):
+        self.writer = None
+        self.writerClass = writerClass
         self.lastFocusedNode = None
         self.lastSelectedNode = None
         self.lastPressedNode = None
@@ -218,9 +262,20 @@ class EventRecorder:
 
         return listeners
 
+    def startRecording(self, unused = None):
+        self.writer = self.writerClass()
+        self.listeners = self.__registerEvents()
+        atspi.event_main()
+
+    def stopRecording(self, unused = None):
+        self.writer = None
+        for listener in self.listeners:
+            listener.deregister()
+        atspi.event_quit()
+
     def onFocus(self, event): 
         #logEvent(event)
-        sourceNode=dogtail.tree.Node(event.source)
+        sourceNode = dogtail.tree.Node(event.source)
         sourceNode = FakeNode(sourceNode)
         self.lastFocusedNode = sourceNode
 
@@ -229,8 +284,6 @@ class EventRecorder:
         sourceNode = dogtail.tree.Node(event.source)
         sourceNode = FakeNode(sourceNode)
         self.lastSelectedNode = sourceNode
-        if sourceNode.name == "Edit":
-            atspi.event_quit()
 
     def onMouseButton(self, event):
         #logEvent(event)
@@ -291,8 +344,9 @@ def marshalOnWindowCreate(event):
     recorder.onWindowCreate(event)
 
 recorder = EventRecorder()
+recorderGUI = RecorderGUI()
 #recorder.writer.debug = True
 #recorder.writer.debugVariables = True
-atspi.event_main()
+
 
 # vim: sw=4 ts=4 sts=4 et ai

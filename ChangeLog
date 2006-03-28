@@ -1,5 +1,16 @@
 2006-03-28  Zack Cerza <zcerza@redhat.com>
 
+	* recorder/dogtail-recorder: Add GUI with Record, Stop, Save and Quit
+	buttons. Add new methods to EventRecorder: startRecording() and
+	stopRecording(), and move all the event listener (de)registration and
+	and AT-SPI event loop handling into those methods. Remove hack that
+	killed the recorder when an Edit menu was clicked, since there is a
+	working Stop button. This requires today's pyspi HEAD.
+
+	* recorder/recorder.glade: Add Glade file for dogtail-recorder.
+
+2006-03-28  Zack Cerza <zcerza@redhat.com>
+
 	* examples/recorder.py: Move to recorder/dogtail-recorder.
 
 	* recorder/dogtail-recorder: Move from examples/recorder.py.

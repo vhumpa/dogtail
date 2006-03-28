@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-# Dogtail demo script
 __author__ = 'David Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.com>'
 
 # Event recorder.
 # FIXME: under construction
-# The event handler callback seems to trap and lose Ctrl-C so you need to be ready to be
-# kill the python process via some other means
+# To quit, click any Edit menu.
 
 import atspi
 import dogtail.tree
@@ -19,18 +17,12 @@ def logEvent(event):
     print "Got event: %s%s"%(event.type, sourceStr)
 
 
-class Writer:
-    """
-    Abstract base class for writing out events
-    """
-    def recordClick(self, node):
-        raise NotImplementedError
-    
 class ScriptWriter(Writer):
     """
     Abstract Writer subclass which writes out Python scripts
     """
-    pass
+    def recordClick(self, node):
+        raise NotImplementedError
 
 class OOScriptWriter(ScriptWriter):
     """
@@ -157,6 +149,46 @@ class ProceduralScriptWriter(ScriptWriter):
 # Singleton EventRecorder
 global recorder
 
+class FakeNode(dogtail.tree.Node):
+    """A "cached pseudo-copy" of a Node
+
+    This class exists for cases where we know we're going to need information
+    about a Node instance at a point in time where it's no longer safe to 
+    assume that the Accessible it wraps is still valid. It is designed to 
+    cache enough information to allow all of the necessary Node methods to 
+    execute properly and return something meaningful.
+
+    As it is often necessary to know the Node instance's parent, it creates 
+    FakeNode instances of each and every one of its ancestors.
+    """
+    def __init__(self, node):
+        self.__node = node
+        self.name = self.__node.name
+        self.roleName = self.__node.roleName
+        self.description = self.__node.description
+        self.debugName = self.__node.debugName
+
+        try: self.text = self.__node.text
+        except AttributeError: self.text = None
+        
+        try: self.position = self.__node.position
+        except AttributeError: self.position = None
+        
+        try: self.size = self.__node.size
+        except AttributeError: self.size = None
+        
+        if node.parent: self.parent = FakeNode(self.__node.parent)
+        else: self.parent = None
+        
+        if node.labellee: self.labellee = FakeNode(self.__node.labellee)
+        else: self.labellee = None
+
+    def __getattr__(self, name):
+        raise AttributeError, name
+
+    def __setattr__(self, name, value):
+        self.__dict__[name] = value
+
 # Test event recording class; under construction
 class EventRecorder:
     def __init__(self):
@@ -188,16 +220,14 @@ class EventRecorder:
 
     def onFocus(self, event): 
         #logEvent(event)
-        sourceNode = dogtail.tree.Node(event.source)
-        #print "Focus on %s"%str(sourceNode)
-        #path = sourceNode.getAbsoluteSourcePath()
-        #print "SourcePath: %s"%path
-        #print "    Script: %s"%path.make
+        sourceNode=dogtail.tree.Node(event.source)
+        sourceNode = FakeNode(sourceNode)
         self.lastFocusedNode = sourceNode
 
     def onSelect(self, event):
         #logEvent(event)
         sourceNode = dogtail.tree.Node(event.source)
+        sourceNode = FakeNode(sourceNode)
         self.lastSelectedNode = sourceNode
         if sourceNode.name == "Edit":
             atspi.event_quit()
@@ -215,17 +245,23 @@ class EventRecorder:
         
         # The source node is always "main" - which sucks.
         # sourceNode = dogtail.tree.Node(event.source)
+
+        #print "position", self.lastFocusedNode.position
+        #print "size", self.lastFocusedNode.size
         
         x = event.detail1
         y = event.detail2
         #print "x,y: %s, %s" % (x, y)
         for node in (self.lastFocusedNode, self.lastSelectedNode):
             #print "position: %s, size: %s" % (node.position, node.size)
-            if  node.position[0] <= x <= (node.position[0] + node.size[0]) and \
-                    node.position[1] <= y <= (node.position[1] + node.size[1]):
-                if isPress: self.lastPressedNode = node
-                elif isRelease: self.lastReleasedNode = node
-                break
+            try:
+                if node.position:
+                    if node.position[0] <= x <= (node.position[0] + node.size[0]) and \
+                            node.position[1] <= y <= (node.position[1] + node.size[1]):
+                        if isPress: self.lastPressedNode = node
+                        elif isRelease: self.lastReleasedNode = node
+                        break
+            except AttributeError: pass
         
         if isRelease: self.writer.recordClick(self.lastFocusedNode)
 

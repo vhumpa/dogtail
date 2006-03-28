@@ -1,3 +1,19 @@
+2006-03-28  Zack Cerza <zcerza@redhat.com>
+
+	* examples/recorder.py: Remove the Writer class and move its only
+	method to the ScriptWriter class. Create a a subclass of
+	dogtail.tree.node, called FakeNode, which can wrap a Node instance and
+	store certain attributes of it, so AT-SPI calls are not used when
+	reading them. This was necessary because events are useless if they
+	are received after their source has been destroyed. For example, by 
+	storing recorder.lastFocusedNode as a FakeNode instead of a Node, if a
+	Close button in a dialog is clicked we will still have all the
+	information we need to record the event. So, make
+	EventRecorder.on{Focus,Select}() store self.last{Focus,Select}edNode 
+	as FakeNodes. Also, make EventRecorder.onMouseButton() properly dance 
+	around dogtail.tree's handling of attributes. This will have to be 
+	fixed in the nearish future, though.
+	
 2006-03-21  Zack Cerza <zcerza@redhat.com>
 
 	* examples/recorder.py: s/Focussed/Focused/g. Add lastSelectedNode

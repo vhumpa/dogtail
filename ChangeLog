@@ -1,5 +1,11 @@
 2006-03-28  Zack Cerza <zcerza@redhat.com>
 
+	* examples/recorder.py: Move to recorder/dogtail-recorder.
+
+	* recorder/dogtail-recorder: Move from examples/recorder.py.
+
+2006-03-28  Zack Cerza <zcerza@redhat.com>
+
 	* examples/recorder.py: Remove the Writer class and move its only
 	method to the ScriptWriter class. Create a a subclass of
 	dogtail.tree.node, called FakeNode, which can wrap a Node instance and

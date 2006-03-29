@@ -1,7 +1,7 @@
 Summary: GUI test tool and automation framework
 Name: dogtail
-Version: 0.5.1
-Release: 2%{?dist}
+Version: 0.5.2
+Release: 1%{?dist}
 License: GPL
 Group: User Interface/X
 URL: http://people.redhat.com/zcerza/dogtail/releases/
@@ -61,6 +61,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc examples/
 
 %changelog
+* Tue Mar 28 2006 Zack Cerza <zcerza@redhat.com> - 0.5.2-1
+- Post-release version bump.
+
 * Tue Mar 21 2006 Zack Cerza <zcerza@redhat.com> - 0.5.1-2
 - Fix URL and Source0 fields.
 - Fix desktop-file-utils magic; use desktop-file-install.

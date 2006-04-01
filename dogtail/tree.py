@@ -282,7 +282,7 @@ class Node:
 	"""
 
 	#Valid types of AT-SPI objects we wrap.
-	contained = ('__accessible', '__action', '__component', '__text', '__editableText')
+	contained = ('__accessible', '__action', '__component', '__text', '__editableText', '__selection')
 
 	def __init__ (self, initializer):
 		self.__hideChildren = False
@@ -368,6 +368,50 @@ class Node:
 		if hypertext is not None:
 			self.__hypertext = hypertext
 
+		# Swallow the Selection object, if it exists
+		selection = self.__accessible.getSelection()
+		if selection is not None:
+			self.__selection = selection
+			def selectAll():
+				"""
+				Selects all children.
+				"""
+				return self.__selection.selectAll()
+			self.selectAll = selectAll
+
+			def deselectAll():
+				"""
+				Deselects all selected children.
+				"""
+				return self.__selection.clearSelection()
+			self.deselectAll = deselectAll
+
+		# Implement select() for children of nodes with Selection interfaces.
+		parent = self.parent
+		try:
+			if parent._Node__selection:
+				def select():
+					"""
+					Selects the node, relative to its siblings.
+					"""
+					return self.parent._Node__selection.selectChild(self.indexInParent)
+				self.select = select
+
+				def deselect():
+					"""
+					Deselects the node, relative to its siblings.
+					"""
+					selectedIndex = 0
+					parent = self.parent
+					for i in range(self.indexInParent):
+						if parent.children[i].isSelected:
+							selectedIndex+=1
+					return parent._Node__selection.deselectSelectedChild(selectedIndex)
+				self.deselect = select
+
+		except AttributeError:
+			pass
+
 		# Add more objects here. Nobody uses them yet, so I haven't.
 		# You also need to change the __getattr__ and __setattr__ functions.
 
@@ -414,6 +458,8 @@ class Node:
 			except AttributeError:
 				# Wrap the AttributeError to be more informative.
 				raise AttributeError, attr
+		elif attr =="indexInParent":
+			return self.__accessible.getIndexInParent()
 		elif attr == "children":
 			if self.__hideChildren: raise AttributeError, attr
 			children = []
@@ -481,6 +527,17 @@ class Node:
 		# Attributes from the Component object
 		elif attr == "extents":
 			return self.__component.getExtents ()
+
+		# Attributes from the Selection object
+		elif attr == "isSelected":
+			return self.parent._Node__selection.isChildSelected(self.indexInParent)
+		elif attr == "selectedChildren":
+			if self.__hideChildren:
+				raise AttributeError, attr
+			selectedChildren = []
+			for i in xrange(self.__selection.getNSelectedChildren()):
+				selectedChildren.append(Node(self.__selection.getSelectedChild(i)))
+			return selectedChildren
 
 		else: raise AttributeError, attr
 

@@ -1,3 +1,10 @@
+2006-03-31  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Added support for AccessibleSelection to Node, via
+	Node.{de,}select(), Node.{de,}selectAll(), Node.isSelected,
+	Node.selectedChildren and Node.indexInParent.. Thanks to Peter 
+	Johanson and Jose Dapena Paz. Closes: #336562.
+
 2006-03-28  Zack Cerza <zcerza@redhat.com>
 
 	* MANIFEST.in: Add the new recorder files to the tarball.

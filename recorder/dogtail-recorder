@@ -29,8 +29,12 @@ class RecorderGUI(gnome.Program):
 
         self.recordButton = x.get_widget('recordButton')
         self.stopButton = x.get_widget('stopButton')
+        self.stopButton.set_sensitive(False)
         self.saveButton = x.get_widget('saveButton')
+        self.saveButton.set_sensitive(False)
         self.quitButton = x.get_widget('quitButton')
+        self.scriptTextView = x.get_widget('scriptTextView')
+        self.scriptTextView.set_editable(False)
 
         self.connectSignals()
 
@@ -38,10 +42,61 @@ class RecorderGUI(gnome.Program):
         gtk.main()
 
     def connectSignals(self):
-        self.recordButton.connect('clicked', recorder.startRecording)
-        self.stopButton.connect('clicked', recorder.stopRecording)
+        self.recordButton.connect('clicked', self.startRecording, self.scriptTextView)
+        self.stopButton.connect('clicked', self.stopRecording, self.scriptTextView)
+        self.saveButton.connect('clicked', self.saveScript)
         self.quitButton.connect('clicked', self.quit)
 
+    def startRecording(self, unused = None, scriptTextView = None):
+        self.recordButton.set_sensitive(False)
+        self.saveButton.set_sensitive(False)
+        self.scriptTextView.set_editable(False)
+        self.stopButton.set_sensitive(True)
+        recorder.startRecording(unused, scriptTextView)
+
+    def stopRecording(self, unused = None, scriptTextView = None):
+        self.recordButton.set_sensitive(True)
+        self.saveButton.set_sensitive(True)
+        self.scriptTextView.set_editable(True)
+        self.stopButton.set_sensitive(False)
+        recorder.stopRecording(unused, scriptTextView)
+    
+    def saveScript(self, button):
+        """
+        Brings up a file chooser dialog asking where to save the script.
+        """
+        self.saveFileChooser = gtk.FileChooserDialog("Save Script...", None, \
+            gtk.FILE_CHOOSER_ACTION_SAVE, (gtk.STOCK_CANCEL, \
+            gtk.RESPONSE_CANCEL, gtk.STOCK_SAVE, gtk.RESPONSE_OK))
+        self.saveFileChooser.set_default_response(gtk.RESPONSE_OK)
+
+        # Why this isn't default, I do not understand.
+        self.saveFileChooser.set_do_overwrite_confirmation(True)
+
+        filter = gtk.FileFilter()
+        filter.set_name('Python files')
+        filter.add_pattern('*.py')
+        self.saveFileChooser.add_filter(filter)
+        filter = gtk.FileFilter()
+        filter.set_name('All Files')
+        filter.add_pattern('*')
+        self.saveFileChooser.add_filter(filter)
+        
+        response = self.saveFileChooser.run()
+        if response == gtk.RESPONSE_OK:
+            fileName = self.saveFileChooser.get_filename()
+            # Append a .py to the file name if necessary
+            if fileName[-3:] != '.py':
+                fileName += '.py'
+            file = open(fileName, 'w')
+            buffer = self.scriptTextView.get_buffer()
+            startIter = buffer.get_start_iter()
+            endIter = buffer.get_end_iter()
+            scriptText = buffer.get_text(startIter, endIter)
+            file.write(scriptText)
+            file.close()
+        self.saveFileChooser.destroy()
+    
     def quit(*args):
         gtk.main_quit()
     quit = staticmethod(quit)
@@ -63,7 +118,24 @@ class ScriptWriter:
     """
     Abstract Writer subclass which writes out Python scripts
     """
+    def __init__(self, scriptTextView = None):
+        self.scriptBuffer = ""
+        self.scriptTextView = scriptTextView
+        self.debug = False
+        
+    def recordLine(self, string):
+        print string
+        if self.scriptTextView:
+            buffer = self.scriptTextView.get_buffer()
+            iter = buffer.get_end_iter()
+            buffer.insert(iter, string + '\n')
+        else:
+            self.scriptBuffer += '\n' + string
+        
     def recordClick(self, node):
+        raise NotImplementedError
+    
+    def recordKey(self, node):
         raise NotImplementedError
 
 class OOScriptWriter(ScriptWriter):
@@ -71,14 +143,16 @@ class OOScriptWriter(ScriptWriter):
     Concrete Writer subclass which writes out Python scripts in an object-oriented
     style
     """
-    def __init__(self):
-        # maintain a dict from variable names to search paths
-        self.variables = {}
-        self.debug = False
+    def __init__(self, scriptTextView = None):
+        ScriptWriter.__init__(self, scriptTextView)
+        
         self.debugVariables = False
         
-        print "from dogtail.tree import *"
-        print
+        self.recordLine("#!/usr/bin/python")
+        self.recordLine("from dogtail.tree import *\n")
+
+        # maintain a dict from variable names to search paths
+        self.variables = {}
 
     def generateVariableName(self, predicate):
         # Ensure uniqueness
@@ -136,11 +210,21 @@ class OOScriptWriter(ScriptWriter):
             return "root"+absSearchPath.makeScriptMethodCall()
     
     def recordKey(self, node, key):
+        """
+        Record a keystroke
+
+        NOTE: This function is under construction. It doesn't work.
+        """
+        if node == None: return
         searchPath = node.getAbsoluteSearchPath()
         result = self.generateAbsSearchPathMethodCall(searchPath)
         result +=".rawType('%s')" % key
 
     def recordClick(self, node):
+        """
+        Record a mouse click
+        """
+        if node == None: return
         searchPath = node.getAbsoluteSearchPath()
 
         if self.debug:
@@ -165,7 +249,7 @@ class OOScriptWriter(ScriptWriter):
                         
                     predicate = prefixPath.getPredicate(i-1)
                     varName = predicate.makeScriptVariableName()
-                    print varName+" = "+self.generateAbsSearchPathMethodCall(prefixPath)
+                    self.recordLine(varName+" = "+self.generateAbsSearchPathMethodCall(prefixPath))
                     self.variables[varName]=prefixPath
                 else:
                     if self.debugVariables:
@@ -177,7 +261,7 @@ class OOScriptWriter(ScriptWriter):
         if self.debug:
             print "----------------------------------"
 
-        print result
+        self.recordLine(result)
 
 class ProceduralScriptWriter(ScriptWriter):
     """
@@ -262,16 +346,16 @@ class EventRecorder:
 
         return listeners
 
-    def startRecording(self, unused = None):
-        self.writer = self.writerClass()
+    def startRecording(self, unused = None, scriptTextView = None):
+        self.writer = self.writerClass(scriptTextView)
         self.listeners = self.__registerEvents()
         atspi.event_main()
 
-    def stopRecording(self, unused = None):
-        self.writer = None
+    def stopRecording(self, unused = None, scriptTextView = None):
         for listener in self.listeners:
             listener.deregister()
         atspi.event_quit()
+        self.writer = None
 
     def onFocus(self, event): 
         #logEvent(event)

@@ -1,108 +1,97 @@
 <?xml version="1.0" standalone="no"?> <!--*- mode: xml -*-->
-<!DOCTYPE glade-interface SYSTEM "http://glade.gnome.org/glade-2.0.dtd">
-
+<!DOCTYPE glade-interface SYSTEM "http://gazpacho.sicem.biz/gazpacho-0.1.dtd">
 <glade-interface>
-
-<widget class="GtkWindow" id="window">
-  <property name="visible">True</property>
-  <property name="title" translatable="yes" context="yes">Script Recorder</property>
-  <property name="type">GTK_WINDOW_TOPLEVEL</property>
-  <property name="window_position">GTK_WIN_POS_NONE</property>
-  <property name="modal">False</property>
-  <property name="default_width">440</property>
-  <property name="default_height">250</property>
-  <property name="resizable">False</property>
-  <property name="destroy_with_parent">False</property>
-  <property name="decorated">True</property>
-  <property name="skip_taskbar_hint">False</property>
-  <property name="skip_pager_hint">False</property>
-  <property name="type_hint">GDK_WINDOW_TYPE_HINT_NORMAL</property>
-  <property name="gravity">GDK_GRAVITY_NORTH_WEST</property>
-  <property name="focus_on_map">True</property>
-  <property name="urgency_hint">False</property>
-
-  <child>
-    <widget class="GtkVBox" id="vbox1">
-      <property name="homogeneous">False</property>
-      <property name="spacing">0</property>
-
-      <child>
-	<widget class="GtkHBox" id="hbox1">
-	  <property name="homogeneous">False</property>
-	  <property name="spacing">0</property>
-
-	  <child>
-	    <widget class="GtkButton" id="recordButton">
-	      <property name="visible">True</property>
-	      <property name="label">gtk-media-record</property>
-	      <property name="use_stock">True</property>
-	      <property name="relief">GTK_RELIEF_NORMAL</property>
-	      <property name="focus_on_click">True</property>
-	    </widget>
-	    <packing>
-	      <property name="padding">0</property>
-	      <property name="expand">False</property>
-	      <property name="fill">True</property>
-	    </packing>
-	  </child>
-
-	  <child>
-	    <widget class="GtkButton" id="stopButton">
-	      <property name="visible">True</property>
-	      <property name="label">gtk-media-stop</property>
-	      <property name="use_stock">True</property>
-	      <property name="relief">GTK_RELIEF_NORMAL</property>
-	      <property name="focus_on_click">True</property>
-	      <accessibility>
-		<atkproperty name="AtkObject::accessible_description" translatable="yes">stop dogtail script recording</atkproperty>
-	      </accessibility>
-	    </widget>
-	    <packing>
-	      <property name="padding">0</property>
-	      <property name="expand">False</property>
-	      <property name="fill">True</property>
-	    </packing>
-	  </child>
-
-	  <child>
-	    <widget class="GtkButton" id="saveButton">
-	      <property name="visible">True</property>
-	      <property name="label">gtk-save</property>
-	      <property name="use_stock">True</property>
-	      <property name="relief">GTK_RELIEF_NORMAL</property>
-	      <property name="focus_on_click">True</property>
-	    </widget>
-	    <packing>
-	      <property name="padding">0</property>
-	      <property name="expand">False</property>
-	      <property name="fill">True</property>
-	    </packing>
-	  </child>
-
-	  <child>
-	    <widget class="GtkButton" id="quitButton">
-	      <property name="visible">True</property>
-	      <property name="can_focus">True</property>
-	      <property name="label">gtk-quit</property>
-	      <property name="use_stock">True</property>
-	      <property name="relief">GTK_RELIEF_NORMAL</property>
-	      <property name="focus_on_click">True</property>
-	    </widget>
-	    <packing>
-	      <property name="padding">0</property>
-	      <property name="expand">False</property>
-	      <property name="fill">False</property>
-	    </packing>
-	  </child>
-	</widget>
-	<packing>
-	  <property name="padding">0</property>
-	  <property name="expand">False</property>
-	  <property name="fill">True</property>
-	</packing>
-      </child>
+    <widget class="GtkWindow" id="window">
+        <property name="default_width">440</property>
+        <property name="title" context="yes" translatable="yes">Script Recorder</property>
+        <property name="visible">True</property>
+        <child>
+            <widget class="GtkVBox" id="vbox1">
+                <property name="visible">True</property>
+                <child>
+                    <widget class="GtkHBox" id="hbox1">
+                        <property name="visible">True</property>
+                        <child>
+                            <widget class="GtkButton" id="recordButton">
+                                <property name="label">gtk-media-record</property>
+                                <property name="use_stock">True</property>
+                                <property name="visible">True</property>
+                            </widget>
+                            <packing>
+                                <property name="expand">False</property>
+                            </packing>
+                        </child>
+                        <child>
+                            <widget class="GtkButton" id="stopButton">
+                                <property name="label">gtk-media-stop</property>
+                                <property name="use_stock">True</property>
+                                <property name="visible">True</property>
+                            </widget>
+                            <packing>
+                                <property name="expand">False</property>
+                                <property name="position">1</property>
+                            </packing>
+                        </child>
+                        <child>
+                            <widget class="GtkButton" id="saveButton">
+                                <property name="label">gtk-save</property>
+                                <property name="use_stock">True</property>
+                                <property name="visible">True</property>
+                            </widget>
+                            <packing>
+                                <property name="expand">False</property>
+                                <property name="position">2</property>
+                            </packing>
+                        </child>
+                        <child>
+                            <widget class="GtkButton" id="quitButton">
+                                <property name="label">gtk-quit</property>
+                                <property name="use_stock">True</property>
+                                <property name="visible">True</property>
+                            </widget>
+                            <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">3</property>
+                            </packing>
+                        </child>
+                    </widget>
+                    <packing>
+                        <property name="expand">False</property>
+                    </packing>
+                </child>
+                <child>
+                    <widget class="GtkExpander" id="scriptExpander">
+                        <property name="is_focus">True</property>
+                        <property name="label" context="yes" translatable="yes">Show script</property>
+                        <property name="spacing">1</property>
+                        <property name="use_underline">True</property>
+                        <property name="visible">True</property>
+                        <child>
+                            <widget class="GtkVBox" id="vbox2">
+                                <property name="spacing">1</property>
+                                <property name="visible">True</property>
+                                <child>
+                                    <widget class="GtkScrolledWindow" id="scrolledwindow1">
+                                        <property name="hscrollbar_policy">automatic</property>
+                                        <property name="visible">True</property>
+                                        <property name="vscrollbar_policy">automatic</property>
+                                        <child>
+                                            <widget class="GtkTextView" id="scriptTextView">
+                                                <property name="editable">False</property>
+                                                <property name="visible">True</property>
+                                            </widget>
+                                        </child>
+                                    </widget>
+                                </child>
+                            </widget>
+                        </child>
+                    </widget>
+                    <packing>
+                        <property name="position">1</property>
+                    </packing>
+                </child>
+            </widget>
+        </child>
     </widget>
-  </child>
-</widget>
-
 </glade-interface>

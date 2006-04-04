@@ -11,4 +11,4 @@ Terminal=false
 Type=Application
 Icon=dogtail-head.svg
 StartupNotify=true
-Categories=GNOME;Application;System;
+Categories=GNOME;Application;Utility;

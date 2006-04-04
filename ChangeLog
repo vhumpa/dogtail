@@ -1,5 +1,9 @@
 2006-04-04  Zack Cerza <zcerza@redhat.com>
 
+	* sniff/sniff.desktop: Move to the 'Accessories' category in the menu.
+
+2006-04-04  Zack Cerza <zcerza@redhat.com>
+
 	* recorder/dogtail-recorder.desktop: Add desktop file for
 	dogtail-recorder.
 

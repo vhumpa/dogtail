@@ -1,1 +1,3 @@
 gtk-update-icon-cache -f /usr/share/icons/hicolor 2>/dev/null
+desktop-file-install --vendor dogtail /usr/share/applications/sniff.desktop
+desktop-file-install --vendor dogtail /usr/share/applications/dogtail-recorder.desktop

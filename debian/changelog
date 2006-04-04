@@ -1,8 +1,9 @@
 dogtail (0.5.2-1) unstable; urgency=low
 
   * Post-release version bump. 
+  * Run desktop-file-install in post-install.
 
- -- Zack Cerza <zcerza@coe.neu.edu>  Tue, 21 Mar 2006 15:21:42 -0500
+ -- Zack Cerza <zcerza@coe.neu.edu>  Tue, 04 Apr 2006 18:33:42 -0500
 
 dogtail (0.5.1-1) unstable; urgency=low
 

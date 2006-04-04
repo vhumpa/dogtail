@@ -1,11 +1,18 @@
 2006-04-04  Zack Cerza <zcerza@redhat.com>
 
-	* dogtail/recorder/recorder.glade: Add gtk.Expander and	gtk.TextView
+	* recorder/dogtail-recorder.desktop: Add desktop file for
+	dogtail-recorder.
+
+	* MANIFEST.in, setup.py: Ship and install dogtail-recorder.desktop.
+
+2006-04-04  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/recorder.glade: Add gtk.Expander and	gtk.TextView
 	to allow viewing and editing a script. Note that when the Expander is
 	collapsed, the main window doesn't shrink back to its original size.
 	This is a bug.
 
-	* dogtail/recorder/dogtail-recorder: Make ScriptWriters either store
+	* recorder/dogtail-recorder: Make ScriptWriters either store
 	the script in a normal Python string, or a gtk.TextView if it's
 	available. Continue to print the script to standard out, for
 	debugging. Implement saving scripts via the GUI, automatically

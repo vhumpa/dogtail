@@ -4,7 +4,7 @@ Version: 0.5.2
 Release: 1%{?dist}
 License: GPL
 Group: User Interface/X
-URL: http://people.redhat.com/zcerza/dogtail/releases/
+URL: http://people.redhat.com/zcerza/dogtail/
 Source0: http://people.redhat.com/zcerza/dogtail/releases/dogtail-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch: noarch
@@ -61,8 +61,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc examples/
 
 %changelog
-* Tue Mar 28 2006 Zack Cerza <zcerza@redhat.com> - 0.5.2-1
+* Tue Apr 04 2006 Zack Cerza <zcerza@redhat.com> - 0.5.2-1
 - Post-release version bump.
+- Remove '/releases' from URL.
 
 * Tue Mar 21 2006 Zack Cerza <zcerza@redhat.com> - 0.5.1-2
 - Fix URL and Source0 fields.

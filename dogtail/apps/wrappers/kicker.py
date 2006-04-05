@@ -9,5 +9,4 @@ from dogtail.distro import packageDb
 from dogtail.apps.categories import *
 
 class Kicker(ApplicationRef, DesktopPanel):
-		"""Utility wrapper for Kicker, the KDE panel; implements the DesktopPanel mixin interface"""
-
+    """Utility wrapper for Kicker, the KDE panel; implements the DesktopPanel mixin interface"""

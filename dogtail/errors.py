@@ -6,8 +6,7 @@ __author__ = "Zack Cerza <zcerza@redhat.com>"
 
 
 class DependencyNotFoundError(Exception):
-	"""
-	A dependency was not found.
-	"""
-	pass
-
+    """
+    A dependency was not found.
+    """
+    pass

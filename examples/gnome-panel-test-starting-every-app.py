@@ -12,9 +12,6 @@ dogtail.config.config.debugSearching=True
 
 panel = GnomePanel()
 for launcher in panel.applications():
-	print launcher
-	sleep(5) # really need this for sanity's sake!
-	launcher.click()    
-	
-
-    
+    print launcher
+    sleep(5) # really need this for sanity's sake!
+    launcher.click()

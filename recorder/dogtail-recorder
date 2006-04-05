@@ -60,7 +60,7 @@ class RecorderGUI(gnome.Program):
         self.scriptTextView.set_editable(True)
         self.stopButton.set_sensitive(False)
         recorder.stopRecording(unused, scriptTextView)
-    
+
     def saveScript(self, button):
         """
         Brings up a file chooser dialog asking where to save the script.
@@ -81,7 +81,7 @@ class RecorderGUI(gnome.Program):
         filter.set_name('All Files')
         filter.add_pattern('*')
         self.saveFileChooser.add_filter(filter)
-        
+
         response = self.saveFileChooser.run()
         if response == gtk.RESPONSE_OK:
             fileName = self.saveFileChooser.get_filename()
@@ -96,11 +96,11 @@ class RecorderGUI(gnome.Program):
             file.write(scriptText)
             file.close()
         self.saveFileChooser.destroy()
-    
+
     def quit(*args):
         gtk.main_quit()
     quit = staticmethod(quit)
-        
+
 # End GUI code
 
 import atspi
@@ -122,7 +122,7 @@ class ScriptWriter:
         self.scriptBuffer = ""
         self.scriptTextView = scriptTextView
         self.debug = False
-        
+
     def recordLine(self, string):
         print string
         if self.scriptTextView:
@@ -131,10 +131,10 @@ class ScriptWriter:
             buffer.insert(iter, string + '\n')
         else:
             self.scriptBuffer += '\n' + string
-        
+
     def recordClick(self, node):
         raise NotImplementedError
-    
+
     def recordKey(self, node):
         raise NotImplementedError
 
@@ -145,9 +145,9 @@ class OOScriptWriter(ScriptWriter):
     """
     def __init__(self, scriptTextView = None):
         ScriptWriter.__init__(self, scriptTextView)
-        
+
         self.debugVariables = False
-        
+
         self.recordLine("#!/usr/bin/python")
         self.recordLine("from dogtail.tree import *\n")
 
@@ -170,7 +170,7 @@ class OOScriptWriter(ScriptWriter):
         # debug hook
         print "variables:"
         for (varName, varAbsPath) in self.variables.iteritems():
-            print "varName:%s -> absPath:%s"%(varName, varAbsPath)        
+            print "varName:%s -> absPath:%s"%(varName, varAbsPath)
 
     def generateAbsSearchPathMethodCall(self, absSearchPath):
         """
@@ -183,7 +183,7 @@ class OOScriptWriter(ScriptWriter):
             print "*******************"
             print "generateAbsSearchPathMethodCall for %s"%absSearchPath
             self.printVariables()
-            
+
         shortestRelativePath = None
         for (varName, varAbsPath) in self.variables.iteritems():
             relPath = varAbsPath.getRelativePath(absSearchPath)
@@ -208,7 +208,7 @@ class OOScriptWriter(ScriptWriter):
         else:
             # Have to specify it as an absolute path:
             return "root"+absSearchPath.makeScriptMethodCall()
-    
+
     def recordKey(self, node, key):
         """
         Record a keystroke
@@ -231,7 +231,7 @@ class OOScriptWriter(ScriptWriter):
             print "----------------------------------"
             print "click on %s"%searchPath
             print "Full script would be: root%s"%searchPath.makeScriptMethodCall()
-            
+
         # Generate variables for nodes likely to be referred to often (application, window)
         # FIXME: make this smarter?
         for i in [1,2,3]:
@@ -246,7 +246,7 @@ class OOScriptWriter(ScriptWriter):
                     if self.debugVariables:
                         print "It is not yet a variable"
                         self.printVariables()
-                        
+
                     predicate = prefixPath.getPredicate(i-1)
                     varName = predicate.makeScriptVariableName()
                     self.recordLine(varName+" = "+self.generateAbsSearchPathMethodCall(prefixPath))
@@ -276,12 +276,12 @@ class FakeNode(dogtail.tree.Node):
     """A "cached pseudo-copy" of a Node
 
     This class exists for cases where we know we're going to need information
-    about a Node instance at a point in time where it's no longer safe to 
-    assume that the Accessible it wraps is still valid. It is designed to 
-    cache enough information to allow all of the necessary Node methods to 
+    about a Node instance at a point in time where it's no longer safe to
+    assume that the Accessible it wraps is still valid. It is designed to
+    cache enough information to allow all of the necessary Node methods to
     execute properly and return something meaningful.
 
-    As it is often necessary to know the Node instance's parent, it creates 
+    As it is often necessary to know the Node instance's parent, it creates
     FakeNode instances of each and every one of its ancestors.
     """
     def __init__(self, node):
@@ -293,16 +293,16 @@ class FakeNode(dogtail.tree.Node):
 
         try: self.text = self.__node.text
         except AttributeError: self.text = None
-        
+
         try: self.position = self.__node.position
         except AttributeError: self.position = None
-        
+
         try: self.size = self.__node.size
         except AttributeError: self.size = None
-        
+
         if node.parent: self.parent = FakeNode(self.__node.parent)
         else: self.parent = None
-        
+
         if node.labellee: self.labellee = FakeNode(self.__node.labellee)
         else: self.labellee = None
 
@@ -327,7 +327,7 @@ class EventRecorder:
         self.lastPressedNode = None
         self.lastReleasedNoed = None
         self.absoluteNodePaths = True
- 
+
     def __registerEvents(self):
         # Only specific events are recorded:
         listeners = []
@@ -357,7 +357,7 @@ class EventRecorder:
         atspi.event_quit()
         self.writer = None
 
-    def onFocus(self, event): 
+    def onFocus(self, event):
         #logEvent(event)
         sourceNode = dogtail.tree.Node(event.source)
         sourceNode = FakeNode(sourceNode)
@@ -371,7 +371,7 @@ class EventRecorder:
 
     def onMouseButton(self, event):
         #logEvent(event)
-        
+
         isPress = isRelease = False
         if "mouse:button:1" not in event.type:
             return
@@ -379,13 +379,13 @@ class EventRecorder:
             isPress = True
         elif event.type == "mouse:button:1r":
             isRelease = True
-        
+
         # The source node is always "main" - which sucks.
         # sourceNode = dogtail.tree.Node(event.source)
 
         #print "position", self.lastFocusedNode.position
         #print "size", self.lastFocusedNode.size
-        
+
         x = event.detail1
         y = event.detail2
         #print "x,y: %s, %s" % (x, y)
@@ -399,7 +399,7 @@ class EventRecorder:
                         elif isRelease: self.lastReleasedNode = node
                         break
             except AttributeError: pass
-        
+
         if isRelease: self.writer.recordClick(self.lastFocusedNode)
 
     def onWindowCreate(self, event):
@@ -412,10 +412,10 @@ class EventRecorder:
             return node.getAbsoluteSearchPath()
         else:
             return node
-    
+
 # Under construction.  These ought to be methods, but am having Python assertion
 # failures in refcounting when trying to hook them up using lambda expressions; grrr...
-def marshalOnFocus(event): 
+def marshalOnFocus(event):
     recorder.onFocus(event)
 
 def marshalOnSelect(event):
@@ -424,7 +424,7 @@ def marshalOnSelect(event):
 def marshalOnMouseButton(event):
     recorder.onMouseButton(event)
 
-def marshalOnWindowCreate(event): 
+def marshalOnWindowCreate(event):
     recorder.onWindowCreate(event)
 
 recorder = EventRecorder()

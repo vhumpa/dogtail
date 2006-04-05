@@ -11,38 +11,37 @@ from dogtail.apps.categories import *
 import os
 
 class IsAnIcon(predicate.Predicate):
-	"""Search subclass that looks for icons"""
-	def satisfiedByNode(self, node):
-		return node.roleName=='icon'
+    """Search subclass that looks for icons"""
+    def satisfiedByNode(self, node):
+        return node.roleName=='icon'
 
-	def describeSearchResult(self):
-		return 'icon'
+    def describeSearchResult(self):
+        return 'icon'
 
 class NautilusApp(Application, FileBrowser):
-	"""Utility wrapper for Nautilus; implements the FileBrowser mixin interface"""
+    """Utility wrapper for Nautilus; implements the FileBrowser mixin interface"""
 
-	def __init__ (self):
-		Application.__init__(self, root.application("nautilus"))
+    def __init__ (self):
+        Application.__init__(self, root.application("nautilus"))
 
-		self.nautiVersion = packageDb.getVersion("nautilus")
-		print "Nautilus version %s"%self.nautiVersion
+        self.nautiVersion = packageDb.getVersion("nautilus")
+        print "Nautilus version %s"%self.nautiVersion
 
-		try:
-			self.gnomevfsVersion = packageDb.getVersion("gnome-vfs2")
-			print "GnomeVFS version %s"%self.gnomevfsVersion
-		except: pass # handle undetected gnomevfs version; probably named differently on different distros
+        try:
+            self.gnomevfsVersion = packageDb.getVersion("gnome-vfs2")
+            print "GnomeVFS version %s"%self.gnomevfsVersion
+        except: pass # handle undetected gnomevfs version; probably named differently on different distros
 
-	def openPath (self, path):
-		"""
-		Open a Nautilus spatial window for the given path (not a URL).
+    def openPath (self, path):
+        """
+        Open a Nautilus spatial window for the given path (not a URL).
 
-		Returns a Window instance
-		"""
-		os.system('nautilus %s'%os.path.abspath(path))
+        Returns a Window instance
+        """
+        os.system('nautilus %s'%os.path.abspath(path))
 
-		return NautilusWindow(self.window(windowName=os.path.basename(path)))
+        return NautilusWindow(self.window(windowName=os.path.basename(path)))
 
 class NautilusWindow(Window):
-	def iconView (self):
-		return self.child("Content View").child("Icon View")
-
+    def iconView (self):
+        return self.child("Content View").child("Icon View")

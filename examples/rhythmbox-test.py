@@ -16,6 +16,3 @@ focus.application('rhythmbox') #FIXME: shouldn't 'run' automatically scope the a
 # name='Artist', roleName='table column header'
 
 # name='Album', roleName='table column header'
-
-
-

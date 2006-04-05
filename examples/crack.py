@@ -26,12 +26,12 @@ class PresentationCrack:
         self.startPage("Dogtail: a Free Automated GUI test tool")
         self.addBullet("foo")
         self.addBullet("bar")
-        
+
         self.startPage("Leveraging Synergies")
         self.addBullet("pirates!")
         self.addBullet("zombies!")
         self.addBullet("zombie pirates!")
-    
+
         self.startPage("4-Stroke Internal Combustion Engine")
         self.addBullet("suck")
         self.addBullet("squeeze")

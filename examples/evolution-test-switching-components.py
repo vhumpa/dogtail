@@ -16,5 +16,5 @@ import dogtail.tree
 evo = dogtail.tree.root.application('evolution')
 
 while True:
-	for compName in ['Mail', 'Contacts', 'Calendars', 'Tasks']:
-		evo.menu('View').menu('Window').menuItem(compName).click()
+    for compName in ['Mail', 'Contacts', 'Calendars', 'Tasks']:
+        evo.menu('View').menu('Window').menuItem(compName).click()

@@ -13,16 +13,16 @@ program = gnome.program_init(appName, '0.1')
 import gtk.glade
 
 try:
-	x = gtk.glade.XML('sniff.glade')
+    x = gtk.glade.XML('sniff.glade')
 except RuntimeError:
-	x = gtk.glade.XML('/usr/share/dogtail/glade/sniff.glade')
+    x = gtk.glade.XML('/usr/share/dogtail/glade/sniff.glade')
 
 sniff = x.get_widget(appName)
 
 try:
-	sniff.set_icon_from_file('../icons/dogtail-head.svg')
+    sniff.set_icon_from_file('../icons/dogtail-head.svg')
 except:
-	sniff.set_icon_from_file('/usr/share/icons/hicolor/scalable/apps/dogtail-head.svg')
+    sniff.set_icon_from_file('/usr/share/icons/hicolor/scalable/apps/dogtail-head.svg')
 
 view = x.get_widget('treeTreeView')
 
@@ -41,189 +41,189 @@ MODEL_FIELD_DESCRIPTION = 3
 MODEL_FIELD_PIXBUF = 4
 
 def quit(*args):
-	gtk.main_quit()
+    gtk.main_quit()
 
 def expandAll(widget, *args):
-	global view
-	if args[0] == True: view.expand_all()
-	elif args[0] == False: view.collapse_all()
+    global view
+    if args[0] == True: view.expand_all()
+    elif args[0] == False: view.collapse_all()
 
 def showAbout(*args):
-	about = gtk.AboutDialog()
-	about.set_name(appName)
-	about.set_authors(appAuthors)
-	about.set_comments('Explore your desktop with Dogtail')
-	about.set_website('http://people.redhat.com/zcerza/dogtail/')
-	about.show_all()
+    about = gtk.AboutDialog()
+    about.set_name(appName)
+    about.set_authors(appAuthors)
+    about.set_comments('Explore your desktop with Dogtail')
+    about.set_website('http://people.redhat.com/zcerza/dogtail/')
+    about.show_all()
 
 def connectSignals():
-	sniff.connect('delete_event', quit)
+    sniff.connect('delete_event', quit)
 
-	quit1 = x.get_widget('quit1')
-	quit1.connect('activate', quit)
+    quit1 = x.get_widget('quit1')
+    quit1.connect('activate', quit)
 
-	expand_all1 = x.get_widget('expand_all1')
-	expand_all1.connect('activate', expandAll, True)
-	collapse_all1 = x.get_widget('collapse_all1')
-	collapse_all1.connect('activate', expandAll, False)
-	
-	about1 = x.get_widget('about1')
-	about1.connect('activate', showAbout)
+    expand_all1 = x.get_widget('expand_all1')
+    expand_all1.connect('activate', expandAll, True)
+    collapse_all1 = x.get_widget('collapse_all1')
+    collapse_all1.connect('activate', expandAll, False)
 
-	refreshMenuItem = x.get_widget('refresh1')
-	refreshMenuItem.connect('activate', refreshAll)
+    about1 = x.get_widget('about1')
+    about1.connect('activate', showAbout)
 
-	view.connect('button-press-event', buttonPress)
-	view.connect('row-expanded', rowExpanded)
-	view.connect('row-collapsed', rowCollapsed)
-	treeSelection = view.get_selection()
-	treeSelection.connect('changed', selectionChanged)
+    refreshMenuItem = x.get_widget('refresh1')
+    refreshMenuItem.connect('activate', refreshAll)
+
+    view.connect('button-press-event', buttonPress)
+    view.connect('row-expanded', rowExpanded)
+    view.connect('row-collapsed', rowCollapsed)
+    treeSelection = view.get_selection()
+    treeSelection.connect('changed', selectionChanged)
 
 def buttonPress(widget, event, *userParams):
-	global model
-	try: path, treeViewCol, relX, relY = \
-			view.get_path_at_pos(int(event.x), int(event.y))
-	except TypeError: return
-	node = model[path][0]
-	setUpTable(node)
+    global model
+    try: path, treeViewCol, relX, relY = \
+                    view.get_path_at_pos(int(event.x), int(event.y))
+    except TypeError: return
+    node = model[path][0]
+    setUpTable(node)
 
-	if event.button == 3:
-		menu = gtk.Menu()
-		menuItem = None
-		try:
-			for action in node.actions.values():
-				menuItem = gtk.MenuItem(action.name.capitalize())
-				menuItem.connect('activate', menuItemActivate, action.do)
-				menuItem.show()
-				menu.append(menuItem)
-		except AttributeError: pass
-		if not menuItem: return
-		menu.show()
-		menu.popup(None, None, None, event.button, event.time)
+    if event.button == 3:
+        menu = gtk.Menu()
+        menuItem = None
+        try:
+            for action in node.actions.values():
+                menuItem = gtk.MenuItem(action.name.capitalize())
+                menuItem.connect('activate', menuItemActivate, action.do)
+                menuItem.show()
+                menu.append(menuItem)
+        except AttributeError: pass
+        if not menuItem: return
+        menu.show()
+        menu.popup(None, None, None, event.button, event.time)
 
 # I hate globals too. I think we need one here, though.
 # Make it a non-integer, so we can know if it has been set yet (later).
 textTextViewBufferChangedLastHandlerID = 3.141592654
 
 def setUpTable(node):
-	"""Generic code for setting up the table under the TreeView"""
-	nameTextLabel.set_text(node.name)
-	roleNameTextLabel.set_text(node.roleName)
-	descTextLabel.set_text(node.description)
-	try:
-		str = ''
-		for action in node.actions.values(): str = ' '.join([str, action.name]).strip()
-		actionsTextLabel.set_text(str)
-	except AttributeError: actionsTextLabel.set_text('')
-	
-	global textTextViewBufferChangedLastHandlerID
-	# Have we connected this signal yet? If so, disconnect it before proceeding.
-	if int(textTextViewBufferChangedLastHandlerID) == \
-		textTextViewBufferChangedLastHandlerID: 
-		textTextView.get_buffer().disconnect(textTextViewBufferChangedLastHandlerID)
-	
-	try:
-		textTextView.set_sensitive(True)
-		buffer = textTextView.get_buffer()
-		buffer.set_text(node.text)
-		try:
-			# Eeew! I'm touching tree's privates.
-			# This 'assert' will never cause an AssertionError - it
-			# will be an AttributeError.
-			assert node._Node__editableText
-			# Remember the handler ID of this connection.
-			textTextViewBufferChangedLastHandlerID = \
-				buffer.connect('changed', changeText, node)
-		except AttributeError:
-			textTextView.set_sensitive(False)
-	except AttributeError:
-		textTextView.get_buffer().set_text('')
-		textTextView.set_sensitive(False)
+    """Generic code for setting up the table under the TreeView"""
+    nameTextLabel.set_text(node.name)
+    roleNameTextLabel.set_text(node.roleName)
+    descTextLabel.set_text(node.description)
+    try:
+        str = ''
+        for action in node.actions.values(): str = ' '.join([str, action.name]).strip()
+        actionsTextLabel.set_text(str)
+    except AttributeError: actionsTextLabel.set_text('')
+
+    global textTextViewBufferChangedLastHandlerID
+    # Have we connected this signal yet? If so, disconnect it before proceeding.
+    if int(textTextViewBufferChangedLastHandlerID) == \
+            textTextViewBufferChangedLastHandlerID:
+        textTextView.get_buffer().disconnect(textTextViewBufferChangedLastHandlerID)
+
+    try:
+        textTextView.set_sensitive(True)
+        buffer = textTextView.get_buffer()
+        buffer.set_text(node.text)
+        try:
+            # Eeew! I'm touching tree's privates.
+            # This 'assert' will never cause an AssertionError - it
+            # will be an AttributeError.
+            assert node._Node__editableText
+            # Remember the handler ID of this connection.
+            textTextViewBufferChangedLastHandlerID = \
+                    buffer.connect('changed', changeText, node)
+        except AttributeError:
+            textTextView.set_sensitive(False)
+    except AttributeError:
+        textTextView.get_buffer().set_text('')
+        textTextView.set_sensitive(False)
 
 def changeText(textBuffer, node):
-	node.text = textBuffer.get_text(textBuffer.get_start_iter(), \
-			textBuffer.get_end_iter())
+    node.text = textBuffer.get_text(textBuffer.get_start_iter(), \
+                    textBuffer.get_end_iter())
 
 def rowExpanded(treeview, iter, path, *userParams):
-	global model
-	row = model[path]
-	childRows = row.iterchildren()
-	node = row[0]
-	try: 
-		childNodes = node.children
-		for childNode in childNodes:
-			childRow = childRows.next()
-			addChildren(childNode, childRow.iter)
-	except AttributeError: pass
+    global model
+    row = model[path]
+    childRows = row.iterchildren()
+    node = row[0]
+    try:
+        childNodes = node.children
+        for childNode in childNodes:
+            childRow = childRows.next()
+            addChildren(childNode, childRow.iter)
+    except AttributeError: pass
 
 def rowCollapsed(treeview, iter, path, *userParams):
-	global model
-	row = model[path]
-	childRows = row.iterchildren()
-	try:
-		while True:
-			childRow = childRows.next()
-			grandChildRows = childRow.iterchildren()
-			try:
-				while True:
-					grandChildRow = grandChildRows.next()
-					model.remove(grandChildRow.iter)
-			except StopIteration: pass
-	except StopIteration: pass
+    global model
+    row = model[path]
+    childRows = row.iterchildren()
+    try:
+        while True:
+            childRow = childRows.next()
+            grandChildRows = childRow.iterchildren()
+            try:
+                while True:
+                    grandChildRow = grandChildRows.next()
+                    model.remove(grandChildRow.iter)
+            except StopIteration: pass
+    except StopIteration: pass
 
 def selectionChanged(treeSelection):
-	# print "selection changed"
-	node = getSelectedNode()
-	if node: node.blink()
+    # print "selection changed"
+    node = getSelectedNode()
+    if node: node.blink()
 
 def getSelectedNode():
-	global model
-	global view
-	(store, iter) = view.get_selection().get_selected()
-	if not iter: node = None
-	else: node = model[iter][0]
-	return node	
+    global model
+    global view
+    (store, iter) = view.get_selection().get_selected()
+    if not iter: node = None
+    else: node = model[iter][0]
+    return node
 
 def menuItemActivate(menuItem, *userParams):
-	method = userParams[0]
-	if method: method()
+    method = userParams[0]
+    if method: method()
 
 def refreshAll(menuItem, *userParams):
-	global model
-	resetModel()
+    global model
+    resetModel()
 
 def addNodeToModel(node, parentInTreeView = None):
-	global model
-	iter = model.insert_before(parentInTreeView, None)
-	model.set_value(iter, MODEL_FIELD_NODE, node)
-	return iter
+    global model
+    iter = model.insert_before(parentInTreeView, None)
+    model.set_value(iter, MODEL_FIELD_NODE, node)
+    return iter
 
 def addChildren(node, parentInTreeView = None):
-	global model
-	try:
-		for child in node.children:
-			iter = addNodeToModel(child, parentInTreeView)
-	except AttributeError: pass
+    global model
+    try:
+        for child in node.children:
+            iter = addNodeToModel(child, parentInTreeView)
+    except AttributeError: pass
 
 def showNode(node, parentInTreeView = None):
-	global model
-	iter = addNodeToModel(node, parentInTreeView)
-	addChildren(node, iter)
+    global model
+    iter = addNodeToModel(node, parentInTreeView)
+    addChildren(node, iter)
 
 def resetModel():
-	global model
-	model.clear()
-	showNode(tree.root)	
-	rootPath = model.get_path(model.get_iter_root())
-	view.expand_row(rootPath, False)
+    global model
+    model.clear()
+    showNode(tree.root)
+    rootPath = model.get_path(model.get_iter_root())
+    view.expand_row(rootPath, False)
 
 def loadIcon(iconName):
-	try:
-		pixbuf = gtk.gdk.pixbuf_new_from_file('icons/' + iconName)
-	except gobject.GError:
-		iconName = '/usr/share/dogtail/icons/' + iconName
-		pixbuf = gtk.gdk.pixbuf_new_from_file(iconName)
-	return pixbuf
+    try:
+        pixbuf = gtk.gdk.pixbuf_new_from_file('icons/' + iconName)
+    except gobject.GError:
+        iconName = '/usr/share/dogtail/icons/' + iconName
+        pixbuf = gtk.gdk.pixbuf_new_from_file(iconName)
+    return pixbuf
 
 button_xpm = loadIcon("button.xpm")
 checkbutton_xpm = loadIcon("checkbutton.xpm")
@@ -251,151 +251,150 @@ vseparator_xpm = loadIcon("vseparator.xpm")
 window_xpm = loadIcon("window.xpm")
 
 iconForRole = { \
-	atspi.SPI_ROLE_INVALID : None, \
-	atspi.SPI_ROLE_ACCEL_LABEL : label_xpm, \
-	atspi.SPI_ROLE_ALERT : None, \
-	atspi.SPI_ROLE_ANIMATION : None, \
-	atspi.SPI_ROLE_ARROW : None, \
-	atspi.SPI_ROLE_CALENDAR : None, \
-	atspi.SPI_ROLE_CANVAS : None, \
-	atspi.SPI_ROLE_CHECK_BOX : checkbutton_xpm, \
-	atspi.SPI_ROLE_CHECK_MENU_ITEM : checkmenuitem_xpm, \
-	atspi.SPI_ROLE_COLOR_CHOOSER : colorselection_xpm, \
-	atspi.SPI_ROLE_COLUMN_HEADER : None, \
-	atspi.SPI_ROLE_COMBO_BOX : combo_xpm, \
-	atspi.SPI_ROLE_DATE_EDITOR : None, \
-	atspi.SPI_ROLE_DESKTOP_ICON : None, \
-	atspi.SPI_ROLE_DESKTOP_FRAME : None, \
-	atspi.SPI_ROLE_DIAL : None, \
-	atspi.SPI_ROLE_DIALOG : dialog_xpm, \
-	atspi.SPI_ROLE_DIRECTORY_PANE : None, \
-	atspi.SPI_ROLE_DRAWING_AREA : None, \
-	atspi.SPI_ROLE_FILE_CHOOSER : None, \
-	atspi.SPI_ROLE_FILLER : None, \
-	atspi.SPI_ROLE_FONT_CHOOSER : None, \
-	atspi.SPI_ROLE_FRAME : window_xpm, \
-	atspi.SPI_ROLE_GLASS_PANE : None, \
-	atspi.SPI_ROLE_HTML_CONTAINER : None, \
-	atspi.SPI_ROLE_ICON : image_xpm, \
-	atspi.SPI_ROLE_IMAGE : image_xpm, \
-	atspi.SPI_ROLE_INTERNAL_FRAME : None, \
-	atspi.SPI_ROLE_LABEL : label_xpm, \
-	atspi.SPI_ROLE_LAYERED_PANE : viewport_xpm, \
-	atspi.SPI_ROLE_LIST : None, \
-	atspi.SPI_ROLE_LIST_ITEM : None, \
-	atspi.SPI_ROLE_MENU : menuitem_xpm, \
-	atspi.SPI_ROLE_MENU_BAR : menubar_xpm, \
-	atspi.SPI_ROLE_MENU_ITEM : menuitem_xpm, \
-	atspi.SPI_ROLE_OPTION_PANE : None, \
-	atspi.SPI_ROLE_PAGE_TAB : notebook_xpm, \
-	atspi.SPI_ROLE_PAGE_TAB_LIST : notebook_xpm, \
-	atspi.SPI_ROLE_PANEL : viewport_xpm, \
-	atspi.SPI_ROLE_PASSWORD_TEXT : None, \
-	atspi.SPI_ROLE_POPUP_MENU : None, \
-	atspi.SPI_ROLE_PROGRESS_BAR : None, \
-	atspi.SPI_ROLE_PUSH_BUTTON : button_xpm, \
-	atspi.SPI_ROLE_RADIO_BUTTON : None, \
-	atspi.SPI_ROLE_RADIO_MENU_ITEM : None, \
-	atspi.SPI_ROLE_ROOT_PANE : viewport_xpm, \
-	atspi.SPI_ROLE_ROW_HEADER : None, \
-	atspi.SPI_ROLE_SCROLL_BAR : vscrollbar_xpm, \
-	atspi.SPI_ROLE_SCROLL_PANE : scrolledwindow_xpm, \
-	atspi.SPI_ROLE_SEPARATOR : vseparator_xpm, \
-	atspi.SPI_ROLE_SLIDER : None, \
-	atspi.SPI_ROLE_SPIN_BUTTON : spinbutton_xpm, \
-	atspi.SPI_ROLE_SPLIT_PANE : None, \
-	atspi.SPI_ROLE_STATUS_BAR : statusbar_xpm, \
-	atspi.SPI_ROLE_TABLE : table_xpm, \
-	atspi.SPI_ROLE_TABLE_CELL : treeitem_xpm, \
-	atspi.SPI_ROLE_TABLE_COLUMN_HEADER : None, \
-	atspi.SPI_ROLE_TABLE_ROW_HEADER : None, \
-	atspi.SPI_ROLE_TEAROFF_MENU_ITEM : None, \
-	atspi.SPI_ROLE_TERMINAL : None, \
-	atspi.SPI_ROLE_TEXT : text_xpm, \
-	atspi.SPI_ROLE_TOGGLE_BUTTON : None, \
-	atspi.SPI_ROLE_TOOL_BAR : toolbar_xpm, \
-	atspi.SPI_ROLE_TOOL_TIP : None, \
-	atspi.SPI_ROLE_TREE : tree_xpm, \
-	atspi.SPI_ROLE_TREE_TABLE : tree_xpm, \
-	atspi.SPI_ROLE_UNKNOWN : unknown_xpm, \
-	atspi.SPI_ROLE_VIEWPORT : viewport_xpm, \
-	atspi.SPI_ROLE_WINDOW : window_xpm, \
-	atspi.SPI_ROLE_EXTENDED : None, \
-	atspi.SPI_ROLE_HEADER : None, \
-	atspi.SPI_ROLE_FOOTER : None, \
-	atspi.SPI_ROLE_PARAGRAPH : None, \
-	atspi.SPI_ROLE_RULER : None, \
-	atspi.SPI_ROLE_APPLICATION : None, \
-	atspi.SPI_ROLE_AUTOCOMPLETE : None, \
-	atspi.SPI_ROLE_EDITBAR : None, \
-	atspi.SPI_ROLE_EMBEDDED : None, \
-	atspi.SPI_ROLE_LAST_DEFINED: None }
+        atspi.SPI_ROLE_INVALID : None, \
+        atspi.SPI_ROLE_ACCEL_LABEL : label_xpm, \
+        atspi.SPI_ROLE_ALERT : None, \
+        atspi.SPI_ROLE_ANIMATION : None, \
+        atspi.SPI_ROLE_ARROW : None, \
+        atspi.SPI_ROLE_CALENDAR : None, \
+        atspi.SPI_ROLE_CANVAS : None, \
+        atspi.SPI_ROLE_CHECK_BOX : checkbutton_xpm, \
+        atspi.SPI_ROLE_CHECK_MENU_ITEM : checkmenuitem_xpm, \
+        atspi.SPI_ROLE_COLOR_CHOOSER : colorselection_xpm, \
+        atspi.SPI_ROLE_COLUMN_HEADER : None, \
+        atspi.SPI_ROLE_COMBO_BOX : combo_xpm, \
+        atspi.SPI_ROLE_DATE_EDITOR : None, \
+        atspi.SPI_ROLE_DESKTOP_ICON : None, \
+        atspi.SPI_ROLE_DESKTOP_FRAME : None, \
+        atspi.SPI_ROLE_DIAL : None, \
+        atspi.SPI_ROLE_DIALOG : dialog_xpm, \
+        atspi.SPI_ROLE_DIRECTORY_PANE : None, \
+        atspi.SPI_ROLE_DRAWING_AREA : None, \
+        atspi.SPI_ROLE_FILE_CHOOSER : None, \
+        atspi.SPI_ROLE_FILLER : None, \
+        atspi.SPI_ROLE_FONT_CHOOSER : None, \
+        atspi.SPI_ROLE_FRAME : window_xpm, \
+        atspi.SPI_ROLE_GLASS_PANE : None, \
+        atspi.SPI_ROLE_HTML_CONTAINER : None, \
+        atspi.SPI_ROLE_ICON : image_xpm, \
+        atspi.SPI_ROLE_IMAGE : image_xpm, \
+        atspi.SPI_ROLE_INTERNAL_FRAME : None, \
+        atspi.SPI_ROLE_LABEL : label_xpm, \
+        atspi.SPI_ROLE_LAYERED_PANE : viewport_xpm, \
+        atspi.SPI_ROLE_LIST : None, \
+        atspi.SPI_ROLE_LIST_ITEM : None, \
+        atspi.SPI_ROLE_MENU : menuitem_xpm, \
+        atspi.SPI_ROLE_MENU_BAR : menubar_xpm, \
+        atspi.SPI_ROLE_MENU_ITEM : menuitem_xpm, \
+        atspi.SPI_ROLE_OPTION_PANE : None, \
+        atspi.SPI_ROLE_PAGE_TAB : notebook_xpm, \
+        atspi.SPI_ROLE_PAGE_TAB_LIST : notebook_xpm, \
+        atspi.SPI_ROLE_PANEL : viewport_xpm, \
+        atspi.SPI_ROLE_PASSWORD_TEXT : None, \
+        atspi.SPI_ROLE_POPUP_MENU : None, \
+        atspi.SPI_ROLE_PROGRESS_BAR : None, \
+        atspi.SPI_ROLE_PUSH_BUTTON : button_xpm, \
+        atspi.SPI_ROLE_RADIO_BUTTON : None, \
+        atspi.SPI_ROLE_RADIO_MENU_ITEM : None, \
+        atspi.SPI_ROLE_ROOT_PANE : viewport_xpm, \
+        atspi.SPI_ROLE_ROW_HEADER : None, \
+        atspi.SPI_ROLE_SCROLL_BAR : vscrollbar_xpm, \
+        atspi.SPI_ROLE_SCROLL_PANE : scrolledwindow_xpm, \
+        atspi.SPI_ROLE_SEPARATOR : vseparator_xpm, \
+        atspi.SPI_ROLE_SLIDER : None, \
+        atspi.SPI_ROLE_SPIN_BUTTON : spinbutton_xpm, \
+        atspi.SPI_ROLE_SPLIT_PANE : None, \
+        atspi.SPI_ROLE_STATUS_BAR : statusbar_xpm, \
+        atspi.SPI_ROLE_TABLE : table_xpm, \
+        atspi.SPI_ROLE_TABLE_CELL : treeitem_xpm, \
+        atspi.SPI_ROLE_TABLE_COLUMN_HEADER : None, \
+        atspi.SPI_ROLE_TABLE_ROW_HEADER : None, \
+        atspi.SPI_ROLE_TEAROFF_MENU_ITEM : None, \
+        atspi.SPI_ROLE_TERMINAL : None, \
+        atspi.SPI_ROLE_TEXT : text_xpm, \
+        atspi.SPI_ROLE_TOGGLE_BUTTON : None, \
+        atspi.SPI_ROLE_TOOL_BAR : toolbar_xpm, \
+        atspi.SPI_ROLE_TOOL_TIP : None, \
+        atspi.SPI_ROLE_TREE : tree_xpm, \
+        atspi.SPI_ROLE_TREE_TABLE : tree_xpm, \
+        atspi.SPI_ROLE_UNKNOWN : unknown_xpm, \
+        atspi.SPI_ROLE_VIEWPORT : viewport_xpm, \
+        atspi.SPI_ROLE_WINDOW : window_xpm, \
+        atspi.SPI_ROLE_EXTENDED : None, \
+        atspi.SPI_ROLE_HEADER : None, \
+        atspi.SPI_ROLE_FOOTER : None, \
+        atspi.SPI_ROLE_PARAGRAPH : None, \
+        atspi.SPI_ROLE_RULER : None, \
+        atspi.SPI_ROLE_APPLICATION : None, \
+        atspi.SPI_ROLE_AUTOCOMPLETE : None, \
+        atspi.SPI_ROLE_EDITBAR : None, \
+        atspi.SPI_ROLE_EMBEDDED : None, \
+        atspi.SPI_ROLE_LAST_DEFINED: None }
 
 def getPixbufForNode(node):
-	theme = gtk.icon_theme_get_default()
-	if node.role==atspi.SPI_ROLE_APPLICATION:
-		# FIXME: Use the pixbuf from libwcnk (if available):
-		# wnckApp = Application(node).getWnckApplication()
-		# if wnckApp
-		try: return theme.load_icon(node.name, 24, gtk.ICON_LOOKUP_USE_BUILTIN)
-		except gobject.GError: 
-			try: return theme.load_icon(node.name.lower(), 24, gtk.ICON_LOOKUP_USE_BUILTIN)
-			except gobject.GError: return None
-	elif node.parent:
-		return iconForRole[node.role]
-	else:
-		return theme.load_icon("gnome-fs-desktop", 24, gtk.ICON_LOOKUP_USE_BUILTIN)
+    theme = gtk.icon_theme_get_default()
+    if node.role==atspi.SPI_ROLE_APPLICATION:
+        # FIXME: Use the pixbuf from libwcnk (if available):
+        # wnckApp = Application(node).getWnckApplication()
+        # if wnckApp
+        try: return theme.load_icon(node.name, 24, gtk.ICON_LOOKUP_USE_BUILTIN)
+        except gobject.GError:
+            try: return theme.load_icon(node.name.lower(), 24, gtk.ICON_LOOKUP_USE_BUILTIN)
+            except gobject.GError: return None
+    elif node.parent:
+        return iconForRole[node.role]
+    else:
+        return theme.load_icon("gnome-fs-desktop", 24, gtk.ICON_LOOKUP_USE_BUILTIN)
 
 def getNodeAttr(column, cell, model, iter, attr):
-	node = model.get_value(iter, MODEL_FIELD_NODE)
-	cell.set_property('text', getattr(node, attr))
+    node = model.get_value(iter, MODEL_FIELD_NODE)
+    cell.set_property('text', getattr(node, attr))
 
 def getCellPixbufForNode(column, cell, model, iter):
-	node = model.get_value(iter, MODEL_FIELD_NODE)	
-	pixbuf = getPixbufForNode(node)
-	cell.set_property('pixbuf', pixbuf)
+    node = model.get_value(iter, MODEL_FIELD_NODE)
+    pixbuf = getPixbufForNode(node)
+    cell.set_property('pixbuf', pixbuf)
 
 def main():
-	connectSignals()
+    connectSignals()
 
-	nameTextLabel.set_text('')
-	roleNameTextLabel.set_text('')
-	descTextLabel.set_text('')
-	actionsTextLabel.set_text('')
-	textTextView.set_sensitive(False)
-	textTextView.get_buffer().set_text('')
+    nameTextLabel.set_text('')
+    roleNameTextLabel.set_text('')
+    descTextLabel.set_text('')
+    actionsTextLabel.set_text('')
+    textTextView.set_sensitive(False)
+    textTextView.get_buffer().set_text('')
 
-	global sniff, view, model
+    global sniff, view, model
 
-	col = gtk.TreeViewColumn()
-	cellRenderer = gtk.CellRendererPixbuf()
-	col.pack_start(cellRenderer, expand = False)
-	col.set_cell_data_func(cellRenderer, getCellPixbufForNode)
+    col = gtk.TreeViewColumn()
+    cellRenderer = gtk.CellRendererPixbuf()
+    col.pack_start(cellRenderer, expand = False)
+    col.set_cell_data_func(cellRenderer, getCellPixbufForNode)
 
-	cellRenderer = gtk.CellRendererText()
-	col.pack_end(cellRenderer, expand = False)
-	col.set_cell_data_func(cellRenderer, getNodeAttr, 'name')
+    cellRenderer = gtk.CellRendererText()
+    col.pack_end(cellRenderer, expand = False)
+    col.set_cell_data_func(cellRenderer, getNodeAttr, 'name')
 
-	col.set_title('Name')
+    col.set_title('Name')
 
-	view.insert_column(col, -1)
-	#view.insert_column_with_data_func(-1, "Role Name", \
-	#		gtk.CellRendererText(), getNodeAttr, 'roleName')
-	#view.insert_column_with_data_func(-1, "Description", \
-	#		gtk.CellRendererText(), getNodeAttr, 'description')
-	for column in view.get_columns():
-		column.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
-		column.set_resizable(True)
-	view.show()
-	sniff.show_all ()
-	
-	model = gtk.TreeStore(gobject.TYPE_PYOBJECT, gobject.TYPE_STRING, \
-			gobject.TYPE_STRING, gobject.TYPE_STRING)
-	view.set_model(model)
+    view.insert_column(col, -1)
+    #view.insert_column_with_data_func(-1, "Role Name", \
+    #               gtk.CellRendererText(), getNodeAttr, 'roleName')
+    #view.insert_column_with_data_func(-1, "Description", \
+    #               gtk.CellRendererText(), getNodeAttr, 'description')
+    for column in view.get_columns():
+        column.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
+        column.set_resizable(True)
+    view.show()
+    sniff.show_all ()
 
-	resetModel()
-	
-	gtk.main()
+    model = gtk.TreeStore(gobject.TYPE_PYOBJECT, gobject.TYPE_STRING, \
+                    gobject.TYPE_STRING, gobject.TYPE_STRING)
+    view.set_model(model)
+
+    resetModel()
+
+    gtk.main()
 
 if __name__ == '__main__': main()
-

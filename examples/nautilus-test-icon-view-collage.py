@@ -20,70 +20,70 @@ import dogtail.config
 n = NautilusApp()
 
 class Jigsaw:
-  def __init__(self, sourceImage):
-    self.sourceImage = os.path.abspath(sourceImage)
-    self.basePath = os.curdir
-    self.piecesPath = os.path.abspath(os.path.join(self.basePath, "JigsawPieces"))
-    self.resultPath = os.path.abspath(os.path.join(self.basePath, "JigsawResult"))
-    self.pieceArg = os.path.join(self.piecesPath, "piece.png")
+    def __init__(self, sourceImage):
+        self.sourceImage = os.path.abspath(sourceImage)
+        self.basePath = os.curdir
+        self.piecesPath = os.path.abspath(os.path.join(self.basePath, "JigsawPieces"))
+        self.resultPath = os.path.abspath(os.path.join(self.basePath, "JigsawResult"))
+        self.pieceArg = os.path.join(self.piecesPath, "piece.png")
 
-    self.baseWidth = 640
-    self.baseHeight = 480
-    self.divisor = 5
-    self.pieceWidth = self.baseWidth/self.divisor
-    self.pieceHeight = self.baseHeight/self.divisor
-    self.iconWidth = 70.0 # self.baseWidth/self.divisor
-    self.iconHeight = 54.0 # self.baseHeight/self.divisor
+        self.baseWidth = 640
+        self.baseHeight = 480
+        self.divisor = 5
+        self.pieceWidth = self.baseWidth/self.divisor
+        self.pieceHeight = self.baseHeight/self.divisor
+        self.iconWidth = 70.0 # self.baseWidth/self.divisor
+        self.iconHeight = 54.0 # self.baseHeight/self.divisor
 
-  def makeCropCommand(self):
-    return 'convert -crop %sx%s %s %s'%(self.pieceWidth, self.pieceHeight, self.sourceImage, self.pieceArg)
+    def makeCropCommand(self):
+        return 'convert -crop %sx%s %s %s'%(self.pieceWidth, self.pieceHeight, self.sourceImage, self.pieceArg)
 
-  def targetLocation(self, baseXY, index):
-    (baseX, baseY) = baseXY
-    (pieceX,pieceY) = ((float(index)%self.divisor)*self.iconWidth, (float(index)/self.divisor)*self.iconHeight)
-    return (baseX+pieceX,baseY+pieceY)
+    def targetLocation(self, baseXY, index):
+        (baseX, baseY) = baseXY
+        (pieceX,pieceY) = ((float(index)%self.divisor)*self.iconWidth, (float(index)/self.divisor)*self.iconHeight)
+        return (baseX+pieceX,baseY+pieceY)
 
-  def makeDirectories(self):
-    try: os.mkdir(self.piecesPath)
-    except OSError: pass
-    
-    try: os.mkdir(self.resultPath)
-    except OSError: pass
+    def makeDirectories(self):
+        try: os.mkdir(self.piecesPath)
+        except OSError: pass
+
+        try: os.mkdir(self.resultPath)
+        except OSError: pass
 
 class Drag:
-  def __init__(self, startXY, endXY):
-    self.startXY = startXY
-    self.endXY = endXY
+    def __init__(self, startXY, endXY):
+        self.startXY = startXY
+        self.endXY = endXY
 
-  def doDrag(self, duration, steps):
-    ev = atspi.EventGenerator()
+    def doDrag(self, duration, steps):
+        ev = atspi.EventGenerator()
 
-    (x,y) = self.calcCoord(0.0)
-    ev.absoluteMotion(x, y)
-    doDelay(0.1)
-    ev.press (x,y,1)
-    
-    for step in range(steps):
-      frac = float(step)/float(steps)
-      (x,y) = self.calcCoord(frac)
-      #doDelay(duration/steps)
-      ev.absoluteMotion(x, y)
+        (x,y) = self.calcCoord(0.0)
+        ev.absoluteMotion(x, y)
+        doDelay(0.1)
+        ev.press (x,y,1)
 
-    (x,y) = self.calcCoord(1.0)
-    ev.absoluteMotion(x,y)
-    doDelay(0.5)
-    ev.release (x,y,1)
+        for step in range(steps):
+            frac = float(step)/float(steps)
+            (x,y) = self.calcCoord(frac)
+            #doDelay(duration/steps)
+            ev.absoluteMotion(x, y)
 
-  def calcCoord(self, frac):
-    raise NotImplementedError
-    
+        (x,y) = self.calcCoord(1.0)
+        ev.absoluteMotion(x,y)
+        doDelay(0.5)
+        ev.release (x,y,1)
+
+    def calcCoord(self, frac):
+        raise NotImplementedError
+
 class LinearDrag(Drag):
-  def calcCoord(self, frac):
-    (startX, startY) = self.startXY
-    (endX, endY) = self.endXY
-    #(deltaX, deltaY) = (endX-startX, endY-startY)
+    def calcCoord(self, frac):
+        (startX, startY) = self.startXY
+        (endX, endY) = self.endXY
+        #(deltaX, deltaY) = (endX-startX, endY-startY)
 
-    return ( (startX*(1.0-frac)) + (endX*frac), (startY*(1.0-frac)) + (endY*frac))
+        return ( (startX*(1.0-frac)) + (endX*frac), (startY*(1.0-frac)) + (endY*frac))
 
 jigsaw = Jigsaw('victim.png')
 
@@ -96,18 +96,18 @@ os.system(command)
 #os.exit()
 
 def prepareNautilusWindow(w):
-  viewMenu = w.menu("View")
+    viewMenu = w.menu("View")
 
-  # Ensure it's in icon view mode:
-  viewMenu.menuItem("View as Icons").click()
+    # Ensure it's in icon view mode:
+    viewMenu.menuItem("View as Icons").click()
 
-  viewMenu.menuItem("Normal Size").click()
-  viewMenu.menuItem("Zoom In").click()
+    viewMenu.menuItem("Normal Size").click()
+    viewMenu.menuItem("Zoom In").click()
 
-  # Ensure we're in manual layout mode:
-  viewMenu.menu("Arrange Items").menuItem("Manually").click()
+    # Ensure we're in manual layout mode:
+    viewMenu.menu("Arrange Items").menuItem("Manually").click()
 
-  viewMenu.menuItem("Clean Up by Name").click()
+    viewMenu.menuItem("Clean Up by Name").click()
 
 
 
@@ -126,17 +126,17 @@ icons = iv.findChildren(IsAnIcon(), recursive=True)
 matcher = re.compile('piece-(.*).png')
 
 for icon in icons:
-  #print icon
-  index = int(matcher.match(icon.name).group(1))
-  (x,y,w,h) = icon.extents
+    #print icon
+    index = int(matcher.match(icon.name).group(1))
+    (x,y,w,h) = icon.extents
 
-  (dstX, dstY, dstW, dstH) = resultWindow.iconView().extents
-  
-  (targetX, targetY) = jigsaw.targetLocation((dstX+100, dstY+100), index)
-  
-  # FIXME: different drag routes!
-  drag = LinearDrag((x+w/2,y+h/2), (targetX+w/2,targetY+h/2))
-  drag.doDrag(2.0, 50)
+    (dstX, dstY, dstW, dstH) = resultWindow.iconView().extents
+
+    (targetX, targetY) = jigsaw.targetLocation((dstX+100, dstY+100), index)
+
+    # FIXME: different drag routes!
+    drag = LinearDrag((x+w/2,y+h/2), (targetX+w/2,targetY+h/2))
+    drag.doDrag(2.0, 50)
 
 # Drag out to select the entire collage:
 (dstX, dstY, dstW, dstH) = resultWindow.iconView().extents
@@ -155,5 +155,3 @@ click(dstX+50, dstY+50, 1)
 #viewMenu = resultWindow.menu("View")
 #viewMenu.menuItem("Zoom In").click()
 #viewMenu.menuItem("Zoom In").click()
-
-

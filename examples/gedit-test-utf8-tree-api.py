@@ -11,7 +11,7 @@ environ['LANG']='en_US.UTF-8'
 
 # Remove the output file, if it's still there from a previous run
 if path.isfile(path.join(path.expandvars("$HOME"), "Desktop", "UTF8demo.txt")):
-	remove(path.join(path.expandvars("$HOME"), "Desktop", "UTF8demo.txt"))
+    remove(path.join(path.expandvars("$HOME"), "Desktop", "UTF8demo.txt"))
 
 # Start gedit.
 run("gedit")
@@ -51,5 +51,4 @@ saveas.menuItem('Desktop').click()
 saveas.button('Save').click()
 
 # Let's quit now.
-filemenu.menuItem('Quit').click() 
-
+filemenu.menuItem('Quit').click()

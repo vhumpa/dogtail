@@ -1,5 +1,35 @@
 2006-04-04  Zack Cerza <zcerza@redhat.com>
 
+	* setup.py, dogtail/__init__.py, dogtail/config.py, dogtail/distro.py,
+	dogtail/dump.py, dogtail/errors.py, dogtail/i18n.py, 
+	dogtail/logging.py, dogtail/path.py, dogtail/predicate.py, 
+	dogtail/procedural.py, dogtail/rawinput.py, dogtail/tc.py, 
+	dogtail/trayicon.py, dogtail/tree.py, dogtail/utils.py, 
+	dogtail/version.py, dogtail/apps/categories.py, 
+	dogtail/apps/wrappers/__init__.py, dogtail/apps/wrappers/epiphany.py, 
+	dogtail/apps/wrappers/evolution.py, 
+	dogtail/apps/wrappers/gcalctool.py, dogtail/apps/wrappers/gedit.py, 
+	dogtail/apps/wrappers/gnomepanel.py, dogtail/apps/wrappers/kicker.py, 
+	dogtail/apps/wrappers/konqueror.py, dogtail/apps/wrappers/mozilla.py, 
+	dogtail/apps/wrappers/nautilus.py, dogtail/apps/wrappers/yelp.py, 
+	examples/abiword-test.py, examples/crack.py, 
+	examples/evolution-test-switching-components.py, 
+	examples/filechooser-stress-test.py, 
+	examples/gcalctool-test-fibonacci.py, 
+	examples/gedit-test-utf8-procedural-api.py, 
+	examples/gedit-test-utf8-tree-api.py, 
+	examples/gnome-panel-test-starting-every-app.py, 
+	examples/google-search.py, examples/i18n-test.py, 
+	examples/nautilus-test-icon-view-collage.py, 
+	examples/no-help-at-all.py, examples/rhythmbox-test.py, 
+	examples/test-events.py, recorder/dogtail-recorder, sniff/sniff:
+	Convert everything to use 4 spaces for indentation, instead of tabs.
+
+	* HACKING: Remove all the notes about forcing editors to use tabs for
+	indentation. Closes: #318833.
+
+2006-04-04  Zack Cerza <zcerza@redhat.com>
+
 	* sniff/sniff.desktop: Move to the 'Accessories' category in the menu.
 
 2006-04-04  Zack Cerza <zcerza@redhat.com>

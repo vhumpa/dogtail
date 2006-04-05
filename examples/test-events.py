@@ -8,7 +8,7 @@ import dogtail
 # Test of event callbacks
 # Under construction
 
-def callback(event): 
+def callback(event):
     source = event.source
     if isinstance(source, atspi.Accessible):
         sourceStr = " source:%s"%(str(dogtail.tree.Node(source)))

@@ -46,6 +46,3 @@ for result in results:
     print "Result:"
     print result.text
     print "--------------------------------------"
-
-
-

@@ -13,18 +13,16 @@ dogtail.config.config.defaultDelay = 0.3
 
 a = 1
 b = 1
-	
+
 while True:
-	gcalctool.clearEntry()
-	gcalctool.typeNumber(a, 10)
-	gcalctool.button('Add').click()
-	gcalctool.typeNumber(b, 10)
-	
-	gcalctool.button('Calculate result').click()
-	
-	assert int(gcalctool.getText())==(a+b)
-	
-	a=b
-	b=int(gcalctool.getText())
+    gcalctool.clearEntry()
+    gcalctool.typeNumber(a, 10)
+    gcalctool.button('Add').click()
+    gcalctool.typeNumber(b, 10)
 
+    gcalctool.button('Calculate result').click()
 
+    assert int(gcalctool.getText())==(a+b)
+
+    a=b
+    b=int(gcalctool.getText())

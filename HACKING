@@ -4,31 +4,7 @@
 
 
 == Formatting ==
-We use tabs rather than spaces in the Dogtail python sources
-
-If you don't know how to make your editor use tabs, here are some 
-instructions. Note that you can replace '4' with '2' '8' or
-any other number, but make sure to change it in both places.
-
--- Vim users --
-Put this in your ~/.vimrc:
-set tabstop=4
-set shiftwidth=4
-set noexpandtab
-
-
--- Emacs users --
-Put this in your ~/.emacs:
-(defun custom-python-mode ()
-	;; The following two variables must be equal for...
-	(setq tab-width 4)
-	(setq py-indent-offset 4)
-
-	;; The following setting to be actually respected:
-	;; Use tabs for indentation in Python mode
-	(setq indent-tabs-mode t))
-(add-hook 'python-mode-hook 'custom-python-mode)
-
+We use 4 spaces for indentation.
 
 == Python versions ==
 We're trying to support both Python 2.3 and Python 2.4

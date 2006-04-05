@@ -10,9 +10,9 @@ from dogtail.procedural import *
 from dogtail.utils import screenshot
 
 # These next two lines get us translations for free. To see the script run
-# translated, run it like this: 
+# translated, run it like this:
 #  LANG=ja_JP.UTF-8 ./gedit-test-utf8-procedural-api.py
-# You might also want to set config.debugTranslation and 
+# You might also want to set config.debugTranslation and
 # config.debugSearching to True, just for fun.
 import dogtail.i18n
 dogtail.i18n.loadTranslationsFromPackageMoFiles('gedit')
@@ -24,7 +24,7 @@ TestString = dogtail.tc.TCString()
 
 # Remove the output file, if it's still there from a previous run
 if path.isfile(path.join(path.expandvars("$HOME"), "Desktop", "UTF8demo.txt")):
-	remove(path.join(path.expandvars("$HOME"), "Desktop", "UTF8demo.txt"))
+    remove(path.join(path.expandvars("$HOME"), "Desktop", "UTF8demo.txt"))
 
 # Start gedit.
 run('gedit')
@@ -51,12 +51,12 @@ click('Save')
 
 # Focus gedit's Save As... dialog
 try:
-	# This string changed somewhere around gedit 2.13.2.
-	# This is the new string
-	focus.dialog(u'Save As\u2026')
+    # This string changed somewhere around gedit 2.13.2.
+    # This is the new string
+    focus.dialog(u'Save As\u2026')
 except FocusError:
-	# Fall back to the old string.
-	focus.dialog('Save as...')
+    # Fall back to the old string.
+    focus.dialog('Save as...')
 
 # click the Browse for other folders widget
 activate('Browse for other folders')
@@ -74,21 +74,21 @@ click('Save')
 # Let's quit now.
 click('Quit')
 
-# We have driven gedit now lets check to see if the saved file is the same as 
+# We have driven gedit now lets check to see if the saved file is the same as
 # the baseline file
 
 # Read in the "gold" file
 import codecs
 try:
-	# When reading the file, we have to make sure and tell codecs.open() which 
-	# encoding we're using, otherwise python gets confused later.
-	gold = open(path[0] + '/data/UTF-8-demo.txt', encoding='utf-8').readlines()
+    # When reading the file, we have to make sure and tell codecs.open() which
+    # encoding we're using, otherwise python gets confused later.
+    gold = open(path[0] + '/data/UTF-8-demo.txt', encoding='utf-8').readlines()
 except IOError:
-	print "File open failed"
+    print "File open failed"
 
 # Read the test file for comparison
 filepath = environ['HOME'] + '/Desktop/UTF8demo.txt'
-# When reading the file, we have to make sure and tell codecs.open() which 
+# When reading the file, we have to make sure and tell codecs.open() which
 # encoding we're using, otherwise python gets confused later.
 testfile = open(filepath, encoding='utf-8').readlines()
 
@@ -96,7 +96,6 @@ testfile = open(filepath, encoding='utf-8').readlines()
 # by line to see if they are the same
 i = 0
 for baseline in gold:
-	label = "line test " + str(i + 1)
-	TestString.compare(label, baseline, testfile[i], encoding='utf-8')
-	i = i + 1
-
+    label = "line test " + str(i + 1)
+    TestString.compare(label, baseline, testfile[i], encoding='utf-8')
+    i = i + 1

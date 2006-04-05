@@ -17,9 +17,9 @@ abiVersion = packageDb.getVersion('abiword')
 
 # Set up appname based on version of abiword:
 if abiVersion>=Version([2,3,0]):
-	appName = 'AbiWord-2.4'
+    appName = 'AbiWord-2.4'
 else:
-	appName = 'AbiWord'
+    appName = 'AbiWord'
 
 run("abiword", appName=appName)
 

@@ -17,205 +17,204 @@ import gettext
 from logging import debugLogger as logger
 
 """
-Singleton list of TranslationDb instances, to be initialized by the script with 
+Singleton list of TranslationDb instances, to be initialized by the script with
 whatever translation databases it wants.
 """
 translationDbs = []
 
 class TranslationDb:
-	"""
-	Abstract base class representing a database of translations
-	"""
-	def getTranslationsOf(self, srcName):
-		"""
-		Pure virtual method to look up the translation of a string.
-		Returns a list of candidate strings (the translation), empty if not found.
-		
-		Note that a source string can map to multiple translated strings. For 
-		example, in the French translation of Evolution, the string "Forward" can 
-		translate to both
-		(i) "Faire suivre" for forwarding an email, and 
-		(ii) "Suivant" for the next page in a wizard.
-		"""
-		raise NotImplementedError
+    """
+    Abstract base class representing a database of translations
+    """
+    def getTranslationsOf(self, srcName):
+        """
+        Pure virtual method to look up the translation of a string.
+        Returns a list of candidate strings (the translation), empty if not found.
+
+        Note that a source string can map to multiple translated strings. For
+        example, in the French translation of Evolution, the string "Forward" can
+        translate to both
+        (i) "Faire suivre" for forwarding an email, and
+        (ii) "Suivant" for the next page in a wizard.
+        """
+        raise NotImplementedError
 
 class GettextTranslationDb(TranslationDb):
-	"""
-	Implementation of TranslationDb which leverages gettext, using a single
-	translation mo-file.
-	"""
-	def __init__(self, moFile):
-		self.__moFile = moFile
-		self.__gnutranslations = gettext.GNUTranslations(open(moFile))
+    """
+    Implementation of TranslationDb which leverages gettext, using a single
+    translation mo-file.
+    """
+    def __init__(self, moFile):
+        self.__moFile = moFile
+        self.__gnutranslations = gettext.GNUTranslations(open(moFile))
 
-	def getTranslationsOf(self, srcName):
-		if not isinstance(srcName, unicode):
-			srcName = srcName.decode('utf-8')
-		# print "searching for translations of %s"%srcName
-		# Use a dict to get uniqueness:
-		results = {}
-		result = self.__gnutranslations.ugettext(srcName)
-		if result!=srcName:
-			results[result]=None
+    def getTranslationsOf(self, srcName):
+        if not isinstance(srcName, unicode):
+            srcName = srcName.decode('utf-8')
+        # print "searching for translations of %s"%srcName
+        # Use a dict to get uniqueness:
+        results = {}
+        result = self.__gnutranslations.ugettext(srcName)
+        if result!=srcName:
+            results[result]=None
 
-		# Hack alert:
-		#
-		# Note that typical UI definition in GTK etc contains strings with 
-		# underscores to denote accelerators. 
-		# For example, the stock GTK "Add" item has text "_Add" which e.g. 
-		# translates to "A_jouter" in French
-		#
-		# Since these underscores have been stripped out before we see these strings,
-		# we are looking for a translation of "Add" into "Ajouter" in this case, so
-		# we need to fake it, by looking up the string multiple times, with underscores
-		# inserted in all possible positions, stripping underscores out of the result. 
-		# Ugly, but it works.
-			
-		for index in range(len(srcName)):
-			candidate = srcName[:index]+"_"+srcName[index:]
-			result = self.__gnutranslations.ugettext(candidate)
-			if result!=candidate:
-				# Strip out the underscore, and add to the result:
-				results[result.replace('_','')]=True
-			
-		return results.keys()
+        # Hack alert:
+        #
+        # Note that typical UI definition in GTK etc contains strings with
+        # underscores to denote accelerators.
+        # For example, the stock GTK "Add" item has text "_Add" which e.g.
+        # translates to "A_jouter" in French
+        #
+        # Since these underscores have been stripped out before we see these strings,
+        # we are looking for a translation of "Add" into "Ajouter" in this case, so
+        # we need to fake it, by looking up the string multiple times, with underscores
+        # inserted in all possible positions, stripping underscores out of the result.
+        # Ugly, but it works.
+
+        for index in range(len(srcName)):
+            candidate = srcName[:index]+"_"+srcName[index:]
+            result = self.__gnutranslations.ugettext(candidate)
+            if result!=candidate:
+                # Strip out the underscore, and add to the result:
+                results[result.replace('_','')]=True
+
+        return results.keys()
 
 def translate(srcString):
-	"""
-	Look up srcString in the various translation databases (if any), returning
-	a list of all matches found (potentially the empty list)
-	"""
-	# Use a dict to get uniqueness:
-	results = {}
-	# Try to translate the string:
-	for translationDb in translationDbs:
-		for result in translationDb.getTranslationsOf(srcString):
-			result = result.encode('utf-8')
-			results[result]=True
+    """
+    Look up srcString in the various translation databases (if any), returning
+    a list of all matches found (potentially the empty list)
+    """
+    # Use a dict to get uniqueness:
+    results = {}
+    # Try to translate the string:
+    for translationDb in translationDbs:
+        for result in translationDb.getTranslationsOf(srcString):
+            result = result.encode('utf-8')
+            results[result]=True
 
-	# No translations found:
-	if len(results)==0:
-		if config.config.debugTranslation:
-			logger.log('Translation not found for "%s"'%srcString)
-	return results.keys()
-		
+    # No translations found:
+    if len(results)==0:
+        if config.config.debugTranslation:
+            logger.log('Translation not found for "%s"'%srcString)
+    return results.keys()
+
 class TranslatableString:
-	"""
-	Class representing a string that we want to match strings against, handling 
-	translation for us, by looking it up once at construction time.
-	""" 
+    """
+    Class representing a string that we want to match strings against, handling
+    translation for us, by looking it up once at construction time.
+    """
 
-	def __init__(self, untranslatedString):
-		"""
-		Constructor looks up the string in all of the translation databases, storing
-		the various translations it finds.
-		"""
-		if isinstance(untranslatedString, unicode):
-			untranslatedString = untranslatedString.encode('utf-8')
-		else:
-			untranslatedString = untranslatedString.decode('utf-8')
-		self.untranslatedString = untranslatedString
-		self.translatedStrings = translate(untranslatedString)
+    def __init__(self, untranslatedString):
+        """
+        Constructor looks up the string in all of the translation databases, storing
+        the various translations it finds.
+        """
+        if isinstance(untranslatedString, unicode):
+            untranslatedString = untranslatedString.encode('utf-8')
+        else:
+            untranslatedString = untranslatedString.decode('utf-8')
+        self.untranslatedString = untranslatedString
+        self.translatedStrings = translate(untranslatedString)
 
-	def matchedBy(self, string):
-		"""
-		Compare the test string against either the translation of the original 
-		string (or simply the original string, if no translation was found).
-		"""
-		#print "comparing %s against %s"%(string, self)
-		matched = False
-		if len(self.translatedStrings)>0:
-			matched = string in self.translatedStrings
-			return matched
-		else:
-			matched = string==self.untranslatedString
-			return matched
-			
-	def __str__(self):
-		"""
-		Provide a meaningful debug version of the string (and the translation in 
-		use)
-		"""
-		if len(self.translatedStrings)>0:
-			# build an output string, with commas in the correct places
-			translations = ""			
-			for tString in self.translatedStrings:
-				translations += '"%s", ' % tString.decode('utf-8')
-			result = '"%s" (%s)' % (self.untranslatedString, translations)
-			return result.encode('utf-8')
-		else:
-			return '"%s"' % (self.untranslatedString)
+    def matchedBy(self, string):
+        """
+        Compare the test string against either the translation of the original
+        string (or simply the original string, if no translation was found).
+        """
+        #print "comparing %s against %s"%(string, self)
+        matched = False
+        if len(self.translatedStrings)>0:
+            matched = string in self.translatedStrings
+            return matched
+        else:
+            matched = string==self.untranslatedString
+            return matched
+
+    def __str__(self):
+        """
+        Provide a meaningful debug version of the string (and the translation in
+        use)
+        """
+        if len(self.translatedStrings)>0:
+            # build an output string, with commas in the correct places
+            translations = ""
+            for tString in self.translatedStrings:
+                translations += '"%s", ' % tString.decode('utf-8')
+            result = '"%s" (%s)' % (self.untranslatedString, translations)
+            return result.encode('utf-8')
+        else:
+            return '"%s"' % (self.untranslatedString)
 
 
 
 def isMoFile(filename, language = ''):
-	"""
-	Does the given filename look like a gettext mo file?
-	
-	Optionally: Does the file also contain translations for a certain language,
-	for example 'ja'?
-	"""
-	if re.match('(.*)\\.mo$', filename):
-		if not language: return True
-		elif re.match('/usr/share/locale(.*)/%s(.*)/LC_MESSAGES/(.*)\\.mo$' % \
-				language, filename):
-			return True
-		else:
-			return False
-	else:
-		return False
+    """
+    Does the given filename look like a gettext mo file?
+
+    Optionally: Does the file also contain translations for a certain language,
+    for example 'ja'?
+    """
+    if re.match('(.*)\\.mo$', filename):
+        if not language: return True
+        elif re.match('/usr/share/locale(.*)/%s(.*)/LC_MESSAGES/(.*)\\.mo$' % \
+                        language, filename):
+            return True
+        else:
+            return False
+    else:
+        return False
 
 def getMoFilesForPackage(packageName, language = '', getDependencies=True):
-	"""
-	Look up the named package and find all gettext mo files within it and its
-	dependencies. It is possible to restrict the results to those of a certain
-	language, for example 'ja'.
-	"""
-	result = []
-	for filename in distro.packageDb.getFiles(packageName):
-		if isMoFile(filename, language):
-			result.append(filename)
+    """
+    Look up the named package and find all gettext mo files within it and its
+    dependencies. It is possible to restrict the results to those of a certain
+    language, for example 'ja'.
+    """
+    result = []
+    for filename in distro.packageDb.getFiles(packageName):
+        if isMoFile(filename, language):
+            result.append(filename)
 
-	if getDependencies:
-		# Recurse:
-		for dep in distro.packageDb.getDependencies(packageName):
-			# We pass False to the inner call because getDependencies has already 
-			# walked the full tree
-			result.extend(getMoFilesForPackage(dep, language, False))
-		
-	return result
+    if getDependencies:
+        # Recurse:
+        for dep in distro.packageDb.getDependencies(packageName):
+            # We pass False to the inner call because getDependencies has already
+            # walked the full tree
+            result.extend(getMoFilesForPackage(dep, language, False))
+
+    return result
 
 def loadTranslationsFromPackageMoFiles(packageName, getDependencies=True):
-	"""
-	Helper function which appends all of the gettext translation mo-files used by 
-	the package (and its dependencies) to the translation database list.
-	"""
-	# Keep a list of mo-files that are already in use to avoid duplicates.
-	moFiles = {}
-	def load(packageName, language = '', getDependencies = True):
-		for moFile in getMoFilesForPackage(packageName, language, getDependencies):
-			# Searching the popt mo-files for translations makes gettext bail out, 
-			# so we ignore them here. This is 
-			# https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=172155 .
-			if 'popt.mo' not in moFile:
-				try:
-					translationDbs.append(GettextTranslationDb(moFile))
-					moFiles[moFile] = None
-				except (AttributeError, IndexError), inst:
-					if config.config.debugTranslation:
-						#import traceback
-						#logger.log(traceback.format_exc())
-						logger.log("Warning: Failed to load mo-file for translation: " + moFile)
-				
-	# Hack alert:
-	#
-	# The following special-case is necessary for Ubuntu, since their 
-	# translations are shipped in a single huge package. The downside to
-	# this special case, aside from the simple fact that there is one, 
-	# is that it makes automatic translations much slower.
+    """
+    Helper function which appends all of the gettext translation mo-files used by
+    the package (and its dependencies) to the translation database list.
+    """
+    # Keep a list of mo-files that are already in use to avoid duplicates.
+    moFiles = {}
+    def load(packageName, language = '', getDependencies = True):
+        for moFile in getMoFilesForPackage(packageName, language, getDependencies):
+            # Searching the popt mo-files for translations makes gettext bail out,
+            # so we ignore them here. This is
+            # https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=172155 .
+            if 'popt.mo' not in moFile:
+                try:
+                    translationDbs.append(GettextTranslationDb(moFile))
+                    moFiles[moFile] = None
+                except (AttributeError, IndexError), inst:
+                    if config.config.debugTranslation:
+                        #import traceback
+                        #logger.log(traceback.format_exc())
+                        logger.log("Warning: Failed to load mo-file for translation: " + moFile)
 
-	language = os.environ.get('LANGUAGE', os.environ['LANG'])[0:2]
-	if isinstance(distro.distro, distro.Ubuntu):
-		load('language-pack-gnome-%s' % language, language)
-	load(packageName, language, getDependencies)
+    # Hack alert:
+    #
+    # The following special-case is necessary for Ubuntu, since their
+    # translations are shipped in a single huge package. The downside to
+    # this special case, aside from the simple fact that there is one,
+    # is that it makes automatic translations much slower.
 
+    language = os.environ.get('LANGUAGE', os.environ['LANG'])[0:2]
+    if isinstance(distro.distro, distro.Ubuntu):
+        load('language-pack-gnome-%s' % language, language)
+    load(packageName, language, getDependencies)

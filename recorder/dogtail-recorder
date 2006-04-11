@@ -268,9 +268,62 @@ class ProceduralScriptWriter(ScriptWriter):
     Concrete Writer subclass which writes out Python scripts in a procedural
     style
     """
+    
+    currentWidget = None
+    currentDialog = None
+    currentApplication = None
+
+    def __init__(self, scriptTextView = None):
+        ScriptWriter.__init__(self, scriptTextView)
+
+        self.recordLine("#!/usr/bin/python")
+        self.recordLine("from dogtail.procedural import *\n")
+    
+    def findAncestor(self, node, name = None, roleName = None, description = None):
+        while node.parent:
+            nameMatch = False
+            roleNameMatch = False
+            descMatch = False
+            if name != None: nameMatch = node.parent.name == name
+            else: nameMatch = True
+            if roleName != None: roleNameMatch = node.parent.roleName == roleName
+            else: roleNameMatch = True
+            if description != None: 
+                descMatch = node.parent.description == description
+            else: descMatch = True
+            match = nameMatch and roleNameMatch and descMatch
+            if match: return node.parent
+            node = node.parent
+        return None
+
     def recordClick(self, node):
-        # FIXME: not yet written
-        raise NotImplementedError
+        assert node
+        
+        application = self.findAncestor(node, roleName = 'application')
+        if application:
+            needApp = True
+            if self.currentApplication:
+                if application == self.currentApplication: needApp = False
+            if needApp:
+                self.recordLine("focus.application('%s')" % application.name)
+                self.currentApplication = application
+
+        dialog = self.findAncestor(node, roleName = 'dialog')
+        if dialog:
+            needDialog = True
+            if dialog == self.currentDialog: needDialog = False
+            if needDialog:
+                self.recordLine("focus.dialog('%s')" % dialog.name)
+                self.currentDialog = dialog
+        
+        widget = node
+        self.recordLine("click('%s', roleName='%s')" % (widget.name, widget.roleName))
+        self.currentWidget = widget
+        
+
+    def recordKey(self, node):
+        pass
+
 
 class FakeNode(dogtail.tree.Node):
     """A "cached pseudo-copy" of a Node
@@ -285,6 +338,8 @@ class FakeNode(dogtail.tree.Node):
     FakeNode instances of each and every one of its ancestors.
     """
     def __init__(self, node):
+        assert node
+
         self.__node = node
         self.name = self.__node.name
         self.roleName = self.__node.roleName
@@ -311,6 +366,19 @@ class FakeNode(dogtail.tree.Node):
 
     def __setattr__(self, name, value):
         self.__dict__[name] = value
+
+    def __cmp__(self, otherNode):
+        if not otherNode: return True
+
+        nameMatch = False
+        roleNameMatch = False
+        descMatch = False
+        nameMatch = otherNode.name == self.name
+        roleNameMatch = otherNode.roleName == self.roleName
+        descMatch = otherNode.description == self.description
+        match = nameMatch and roleNameMatch and descMatch
+        return not match
+
 
 # Singleton EventRecorder
 global recorder
@@ -359,12 +427,14 @@ class EventRecorder:
 
     def onFocus(self, event):
         #logEvent(event)
+
         sourceNode = dogtail.tree.Node(event.source)
         sourceNode = FakeNode(sourceNode)
         self.lastFocusedNode = sourceNode
 
     def onSelect(self, event):
         #logEvent(event)
+
         sourceNode = dogtail.tree.Node(event.source)
         sourceNode = FakeNode(sourceNode)
         self.lastSelectedNode = sourceNode
@@ -400,6 +470,8 @@ class EventRecorder:
                         break
             except AttributeError: pass
 
+        assert self.lastFocusedNode:
+        
         if isRelease: self.writer.recordClick(self.lastFocusedNode)
 
     def onWindowCreate(self, event):
@@ -427,7 +499,8 @@ def marshalOnMouseButton(event):
 def marshalOnWindowCreate(event):
     recorder.onWindowCreate(event)
 
-recorder = EventRecorder()
+#recorder = EventRecorder()
+recorder = EventRecorder(ProceduralScriptWriter)
 recorderGUI = RecorderGUI()
 #recorder.writer.debug = True
 #recorder.writer.debugVariables = True

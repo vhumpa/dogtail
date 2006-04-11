@@ -1,3 +1,16 @@
+2006-04-11  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Implement ProceduralScriptWriter class.
+	It implements recordClick() just like OOScriptWriter, but it also has
+	the special method findAncestor(), for deciding whether the script
+	will need to do a focus.application() or focus.dialog(). For this, I
+	needed to implement a FakeNode.__cmp__(). It only compares the name,
+	roleName and description of the FakeNode instances. Bother me if you
+	need it to compare more attributes for it to work. Make
+	ProceduralScriptWriter the default ScriptWriter for now. Also, add a 
+	couple assertions in various methods to make sure the node parameter 
+	is never None.
+
 2006-04-04  Zack Cerza <zcerza@redhat.com>
 
 	* setup.py, dogtail/__init__.py, dogtail/config.py, dogtail/distro.py,

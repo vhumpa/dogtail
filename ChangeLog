@@ -1,5 +1,10 @@
 2006-04-11  Zack Cerza <zcerza@redhat.com>
 
+	* recorder/dogtail-recorder: Scroll to the end of the TextView after
+	inserting a new line, so you can watch the script as it's written.
+
+2006-04-11  Zack Cerza <zcerza@redhat.com>
+
 	* recorder/dogtail-recorder, recorder/recorder.glade: Add ComboBox to
 	allow selection of ScriptWriter. Make ProceduralScriptWriter default.
 	Remove those assertions, because they were evil.

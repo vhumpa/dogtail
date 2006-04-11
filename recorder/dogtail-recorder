@@ -143,7 +143,15 @@ class ScriptWriter:
         if self.scriptTextView:
             buffer = self.scriptTextView.get_buffer()
             iter = buffer.get_end_iter()
-            buffer.insert(iter, string + '\n')
+            if buffer.get_line_count() > 1:
+                string = '\n' + string
+            buffer.insert(iter, string)
+            
+            # Scroll to the end
+            iter = buffer.get_end_iter()
+            mark = buffer.create_mark('end', iter, True)
+            self.scriptTextView.scroll_mark_onscreen(mark)
+            buffer.delete_mark(mark)
         else:
             self.scriptBuffer += '\n' + string
 
@@ -163,8 +171,7 @@ class OOScriptWriter(ScriptWriter):
 
         self.debugVariables = False
 
-        self.recordLine("#!/usr/bin/python")
-        self.recordLine("from dogtail.tree import *\n")
+        self.recordLine("#!/usr/bin/python\nfrom dogtail.tree import *\n")
 
         # maintain a dict from variable names to search paths
         self.variables = {}
@@ -291,8 +298,7 @@ class ProceduralScriptWriter(ScriptWriter):
     def __init__(self, scriptTextView = None):
         ScriptWriter.__init__(self, scriptTextView)
 
-        self.recordLine("#!/usr/bin/python")
-        self.recordLine("from dogtail.procedural import *\n")
+        self.recordLine("#!/usr/bin/python\nfrom dogtail.procedural import *\n")
     
     def findAncestor(self, node, name = None, roleName = None, description = None):
         while node.parent:

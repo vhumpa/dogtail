@@ -35,6 +35,9 @@ class RecorderGUI(gnome.Program):
         self.quitButton = x.get_widget('quitButton')
         self.scriptTextView = x.get_widget('scriptTextView')
         self.scriptTextView.set_editable(False)
+        self.writerComboBox = x.get_widget('writerComboBox')
+        self.writerComboBox.set_active(0)
+        self.writerComboBox.set_sensitive(True)
 
         self.connectSignals()
 
@@ -42,12 +45,23 @@ class RecorderGUI(gnome.Program):
         gtk.main()
 
     def connectSignals(self):
+        self.writerComboBox.connect('changed', self.setWriterClass)
         self.recordButton.connect('clicked', self.startRecording, self.scriptTextView)
         self.stopButton.connect('clicked', self.stopRecording, self.scriptTextView)
         self.saveButton.connect('clicked', self.saveScript)
         self.quitButton.connect('clicked', self.quit)
 
+    def setWriterClass (self, comboBox):
+        selected = comboBox.get_active_text()
+        if selected == "Procedural":
+            recorder.writerClass = ProceduralScriptWriter
+        elif selected == "Object-Oriented":
+            recorder.writerClass = OOScriptWriter
+        else:
+            print selected, "isn't a ScriptWriter, but it is selected. How?"
+
     def startRecording(self, unused = None, scriptTextView = None):
+        self.writerComboBox.set_sensitive(False)
         self.recordButton.set_sensitive(False)
         self.saveButton.set_sensitive(False)
         self.scriptTextView.set_editable(False)
@@ -55,6 +69,7 @@ class RecorderGUI(gnome.Program):
         recorder.startRecording(unused, scriptTextView)
 
     def stopRecording(self, unused = None, scriptTextView = None):
+        self.writerComboBox.set_sensitive(True)
         self.recordButton.set_sensitive(True)
         self.saveButton.set_sensitive(True)
         self.scriptTextView.set_editable(True)
@@ -297,7 +312,7 @@ class ProceduralScriptWriter(ScriptWriter):
         return None
 
     def recordClick(self, node):
-        assert node
+        if node == None: return False
         
         application = self.findAncestor(node, roleName = 'application')
         if application:
@@ -338,7 +353,7 @@ class FakeNode(dogtail.tree.Node):
     FakeNode instances of each and every one of its ancestors.
     """
     def __init__(self, node):
-        assert node
+        if node == None: return False
 
         self.__node = node
         self.name = self.__node.name
@@ -387,7 +402,7 @@ class EventRecorder:
     """
     Event Recorder
     """
-    def __init__(self, writerClass = OOScriptWriter):
+    def __init__(self, writerClass = ProceduralScriptWriter):
         self.writer = None
         self.writerClass = writerClass
         self.lastFocusedNode = None
@@ -470,7 +485,7 @@ class EventRecorder:
                         break
             except AttributeError: pass
 
-        assert self.lastFocusedNode:
+        if self.lastFocusedNode == None: return False
         
         if isRelease: self.writer.recordClick(self.lastFocusedNode)
 
@@ -499,8 +514,7 @@ def marshalOnMouseButton(event):
 def marshalOnWindowCreate(event):
     recorder.onWindowCreate(event)
 
-#recorder = EventRecorder()
-recorder = EventRecorder(ProceduralScriptWriter)
+recorder = EventRecorder()
 recorderGUI = RecorderGUI()
 #recorder.writer.debug = True
 #recorder.writer.debugVariables = True

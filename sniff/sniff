@@ -90,13 +90,12 @@ def buttonPress(widget, event, *userParams):
     if event.button == 3:
         menu = gtk.Menu()
         menuItem = None
-        try:
+        if node.actions:
             for action in node.actions.values():
                 menuItem = gtk.MenuItem(action.name.capitalize())
                 menuItem.connect('activate', menuItemActivate, action.do)
                 menuItem.show()
                 menu.append(menuItem)
-        except AttributeError: pass
         if not menuItem: return
         menu.show()
         menu.popup(None, None, None, event.button, event.time)
@@ -110,11 +109,10 @@ def setUpTable(node):
     nameTextLabel.set_text(node.name)
     roleNameTextLabel.set_text(node.roleName)
     descTextLabel.set_text(node.description)
-    try:
+    if node.actions:
         str = ''
         for action in node.actions.values(): str = ' '.join([str, action.name]).strip()
         actionsTextLabel.set_text(str)
-    except AttributeError: actionsTextLabel.set_text('')
 
     global textTextViewBufferChangedLastHandlerID
     # Have we connected this signal yet? If so, disconnect it before proceeding.
@@ -122,21 +120,18 @@ def setUpTable(node):
             textTextViewBufferChangedLastHandlerID:
         textTextView.get_buffer().disconnect(textTextViewBufferChangedLastHandlerID)
 
-    try:
-        textTextView.set_sensitive(True)
+    if node.text is not None:
         buffer = textTextView.get_buffer()
         buffer.set_text(node.text)
-        try:
-            # Eeew! I'm touching tree's privates.
-            # This 'assert' will never cause an AssertionError - it
-            # will be an AttributeError.
-            assert node._Node__editableText
+        # Eeew! I'm touching tree's privates.
+        if node._Node__editableText:
             # Remember the handler ID of this connection.
+            textTextView.set_sensitive(True)
             textTextViewBufferChangedLastHandlerID = \
                     buffer.connect('changed', changeText, node)
-        except AttributeError:
+        else:
             textTextView.set_sensitive(False)
-    except AttributeError:
+    else:
         textTextView.get_buffer().set_text('')
         textTextView.set_sensitive(False)
 
@@ -149,12 +144,10 @@ def rowExpanded(treeview, iter, path, *userParams):
     row = model[path]
     childRows = row.iterchildren()
     node = row[0]
-    try:
-        childNodes = node.children
-        for childNode in childNodes:
-            childRow = childRows.next()
-            addChildren(childNode, childRow.iter)
-    except AttributeError: pass
+    childNodes = node.children
+    for childNode in childNodes:
+        childRow = childRows.next()
+        addChildren(childNode, childRow.iter)
 
 def rowCollapsed(treeview, iter, path, *userParams):
     global model
@@ -200,10 +193,8 @@ def addNodeToModel(node, parentInTreeView = None):
 
 def addChildren(node, parentInTreeView = None):
     global model
-    try:
-        for child in node.children:
-            iter = addNodeToModel(child, parentInTreeView)
-    except AttributeError: pass
+    for child in node.children:
+        iter = addNodeToModel(child, parentInTreeView)
 
 def showNode(node, parentInTreeView = None):
     global model

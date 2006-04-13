@@ -1,3 +1,25 @@
+2006-04-13  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Change the way Node reports that attributes
+	provided by specialized Accessible interface extensions do not apply.
+	For example, for some instance 'foo', trying to access 'foo.text' when
+	the AccessibleText interface is not available for that node will now
+	return None instead of raising an AttributeError (if it were
+	available, and the text was zero-length, it would have returned '').
+	Trying to access 'foo.children' will return [] instead of raising an
+	AttributeError. The reason for this change is that these conditions
+	are not "exceptional". Trying to access
+	'foo.thisIsANonexistentAttribute' would be exceptional. Also, add a
+	ReadOnlyError exception which is raised when, for example, someone
+	tries to set 'foo.text' when 'foo' does not have an 
+	AccessibleEditableText implementation.
+
+	* sniff/sniff: Update Sniff to reflect the removal of most of Node's
+	AttributeErrors.
+
+	* sniff/sniff.glade: Use a GtkWindow instead of a GnomeApp. The latter
+	was unnecessary and forced us to use widgets we didn't want.
+
 2006-04-11  Zack Cerza <zcerza@redhat.com>
 
 	* recorder/dogtail-recorder: Scroll to the end of the TextView after

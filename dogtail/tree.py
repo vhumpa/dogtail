@@ -89,6 +89,17 @@ except ImportError:
 
 SearchError = "Couldn't find"
 
+class ReadOnlyError(TypeError):
+    """
+    This attribute is not writeable.
+    """
+    message = "Cannot set %s. It is read-only."
+    def __init__(self, attr):
+        self.attr = attr
+
+    def __str__(self):
+        return self.message % self.attr
+
 class NotSensitiveError(Exception):
     """
     The widget is not sensitive.
@@ -313,10 +324,8 @@ class Node:
             self.doAction = doAction
 
         # Swallow the Component object, if it exists
-        component = self.__accessible.getComponent()
-        if component is not None:
-            self.__component = component
-
+        self.__component = self.__accessible.getComponent()
+        if self.__component is not None:
             def grabFocus():
                 self.__component.grabFocus()
             self.grabFocus = grabFocus
@@ -349,29 +358,24 @@ class Node:
             self.rawType = rawType
 
         # Swallow the Text object, if it exists
-        text = self.__accessible.getText()
-        if text is not None:
-            self.__text = text
+        self.__text = self.__accessible.getText()
+        if self.__text is not None:
             self.addSelection = self.__text.addSelection
             self.getNSelections = self.__text.getNSelections
             self.removeSelection = self.__text.removeSelection
             self.setSelection = self.__text.setSelection
 
         # Swallow the EditableText object, if it exists
-        editableText = self.__accessible.getEditableText()
-        if editableText is not None:
-            self.__editableText = editableText
+        self.__editableText = self.__accessible.getEditableText()
+        if self.__editableText is not None:
             self.setAttributes = self.__editableText.setAttributes
 
         # Swallow the Hypertext object, if it exists
-        hypertext = self.__accessible.getHypertext()
-        if hypertext is not None:
-            self.__hypertext = hypertext
+        self.__hypertext = self.__accessible.getHypertext()
 
         # Swallow the Selection object, if it exists
-        selection = self.__accessible.getSelection()
-        if selection is not None:
-            self.__selection = selection
+        self.__selection = self.__accessible.getSelection()
+        if self.__selection is not None:
             def selectAll():
                 """
                 Selects all children.
@@ -388,29 +392,25 @@ class Node:
 
         # Implement select() for children of nodes with Selection interfaces.
         parent = self.parent
-        try:
-            if parent._Node__selection:
-                def select():
-                    """
-                    Selects the node, relative to its siblings.
-                    """
-                    return self.parent._Node__selection.selectChild(self.indexInParent)
-                self.select = select
+        if parent and parent._Node__selection:
+            def select():
+                """
+                Selects the node, relative to its siblings.
+                """
+                return self.parent._Node__selection.selectChild(self.indexInParent)
+            self.select = select
 
-                def deselect():
-                    """
-                    Deselects the node, relative to its siblings.
-                    """
-                    selectedIndex = 0
-                    parent = self.parent
-                    for i in range(self.indexInParent):
-                        if parent.children[i].isSelected:
-                            selectedIndex+=1
-                    return parent._Node__selection.deselectSelectedChild(selectedIndex)
-                self.deselect = select
-
-        except AttributeError:
-            pass
+            def deselect():
+                """
+                Deselects the node, relative to its siblings.
+                """
+                selectedIndex = 0
+                parent = self.parent
+                for i in range(self.indexInParent):
+                    if parent.children[i].isSelected:
+                        selectedIndex+=1
+                return parent._Node__selection.deselectSelectedChild(selectedIndex)
+            self.deselect = select
 
         # Add more objects here. Nobody uses them yet, so I haven't.
         # You also need to change the __getattr__ and __setattr__ functions.
@@ -448,31 +448,22 @@ class Node:
         elif attr == "description":
             return self.__accessible.getDescription()
         elif attr == "parent":
-            try:
-                parentAcc = self.__accessible.getParent ()
-                if parentAcc:
-                    parent = Node (parentAcc)
-                    return parent
-                else:
-                    return None
-            except AttributeError:
-                # Wrap the AttributeError to be more informative.
-                raise AttributeError, attr
+            parentAcc = self.__accessible.getParent ()
+            if parentAcc:
+                parent = Node (parentAcc)
+                return parent
         elif attr =="indexInParent":
             return self.__accessible.getIndexInParent()
         elif attr == "children":
-            if self.__hideChildren: raise AttributeError, attr
+            if self.__hideChildren: return
             children = []
             for i in xrange (self.__accessible.getChildCount ()):
                 children.append (Node (self.__accessible.getChildAtIndex (i)))
             # Attributes from the Hypertext object
-            try:
+            if self.__hypertext:
                 for i in range(self.__hypertext.getNLinks()):
                     children.append(Link(self, self.__hypertext.getLink(i), i))
-            except AttributeError: pass
-            if children: return children
-            else:
-                raise AttributeError, attr
+            return children
         elif attr == "stateSet":
             return self.__accessible.getStateSet()
         elif attr == "relations":
@@ -492,7 +483,6 @@ class Node:
                     targets = relation.getTargets ()
                     return apply(Node, targets)
 
-
         # Attributes synthesized from the Accessible's stateSet:
         elif attr == "sensitive":
             return self.__accessible.getStateSet().contains(atspi.SPI_STATE_SENSITIVE)
@@ -502,41 +492,46 @@ class Node:
         # Attributes from the Action object
         elif attr == "actions":
             actions = {}
-            for i in xrange (self.__action.getNActions ()):
-                action = (Action (self, self.__action, i))
-                actions[action.name] = action
-            if actions:
-                return actions
-            else:
-                raise AttributeError, attr
+            if self.__action:
+                for i in xrange (self.__action.getNActions ()):
+                    action = (Action (self, self.__action, i))
+                    actions[action.name] = action
+            return actions
 
         # Attributes from the Component object
         elif attr == "extents":
-            return self.__component.getExtents ()
+            if self.__component:
+                return self.__component.getExtents ()
         elif attr == "position":
-            return self.__component.getPosition ()
+            if self.__component:
+                return self.__component.getPosition ()
         elif attr == "size":
-            return self.__component.getSize ()
+            if self.__component:
+                return self.__component.getSize ()
+        elif attr == "extents":
+            return self.__component.getExtents ()
 
         # Attributes from the Text object
         elif attr == "text":
-            return self.__text.getText (0, 32767)
+            if self.__text:
+                return self.__text.getText (0, 32767)
         elif attr == "caretOffset":
-            return self.__text.getCaretOffset ()
-
-        # Attributes from the Component object
-        elif attr == "extents":
-            return self.__component.getExtents ()
+            if self.__text:
+                return self.__text.getCaretOffset ()
 
         # Attributes from the Selection object
         elif attr == "isSelected":
-            return self.parent._Node__selection.isChildSelected(self.indexInParent)
+            parent = self.parent
+            if parent and parent._Node__selection:
+                return self.parent._Node__selection.isChildSelected(self.indexInParent)
         elif attr == "selectedChildren":
             if self.__hideChildren:
-                raise AttributeError, attr
+                return
             selectedChildren = []
-            for i in xrange(self.__selection.getNSelectedChildren()):
-                selectedChildren.append(Node(self.__selection.getSelectedChild(i)))
+            parent = self.parent
+            if parent and self.parent._Node__selection:
+                for i in xrange(self.__selection.getNSelectedChildren()):
+                    selectedChildren.append(Node(self.__selection.getSelectedChild(i)))
             return selectedChildren
 
         else: raise AttributeError, attr
@@ -550,6 +545,8 @@ class Node:
 
         # Attributes from the Text object
         elif attr=="caretOffset":
+            if not self.__text:
+                raise ReadOnlyError, attr
             self.__text.setCaretOffset(value)
 
         # Attributes from the EditableText object
@@ -558,6 +555,8 @@ class Node:
             Set the text of the node to the given value, with
             appropriate delays and logging, then test the result:
             """
+            if not self.__editableText:
+                raise ReadOnlyError, attr
             if config.debugSearching: logger.log("Setting text of %s to '%s'"%(self.getLogString(), value))
             self.__editableText.setTextContents (value)
             doDelay()
@@ -572,6 +571,8 @@ class Node:
             appropriate delays and logging. We can't test the
             result, we'd only get * characters back.
             """
+            if not self.__editableText:
+                raise ReadOnlyError, attr
             logger.log("Setting text %s to password '%s'"%(self.getLogString(), value))
             self.__editableText.setTextContents (value)
             doDelay()
@@ -631,11 +632,10 @@ class Node:
             return "{" + self.debugName + "}"
         else:
             string = "Node"
-            try: string = string + " roleName='%s'" % self.roleName
-            except AttributeError: pass
+            string = string + " roleName='%s'" % self.roleName
             string = string + " name='%s' description='%s'" % (self.name, self.description)
-            try: string = string + " text='%s'" % self.text
-            except AttributeError: pass
+            if self.text is not None:
+                string = string + " text='%s'" % self.text
             return string
 
     def getLogString(self):
@@ -975,12 +975,13 @@ class Node:
         """
         Blink, baby!
         """
-        try:
+        if not self.extents:
+            return False
+        else:
             (x, y, w, h) = self.extents
             blinkData = Blinker(x, y, w, h, count)
             return True
-        except AttributeError:
-            return False
+
 
     def click(self):
         """
@@ -1016,7 +1017,7 @@ class Link(Node):
             return self.__hyperlink.getURI(self.__index)
         else:
             if name == 'children':
-                raise AttributeError, name
+                return
             try:
                 result = getattr(self.__node, name)
                 return result
@@ -1206,12 +1207,11 @@ except AssertionError:
     # Warn if AT-SPI's desktop object doesn't show up.
     print "Error: AT-SPI's desktop is not visible. Do you have accessibility enabled?"
 
-try:
-    # Check that there are applications running. Warn if none are.
-    test = root.children
-    del test
-except AttributeError:
+# Check that there are applications running. Warn if none are.
+children = root.children
+if not children:
     print "Warning: AT-SPI's desktop is visible but it has no children. Are you running any AT-SPI-aware applications?"
+del children
 
 # This is my poor excuse for a unit test.
 if __name__ == '__main__':

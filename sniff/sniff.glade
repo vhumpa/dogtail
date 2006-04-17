@@ -5,6 +5,8 @@
 <requires lib="gnome"/>
 
 <widget class="GtkWindow" id="Sniff">
+  <property name="width_request">325</property>
+  <property name="height_request">475</property>
   <property name="visible">True</property>
   <property name="title" translatable="yes">AT-SPI Browser</property>
   <property name="type">GTK_WINDOW_TOPLEVEL</property>

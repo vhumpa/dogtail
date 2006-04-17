@@ -1,5 +1,9 @@
 2006-04-17  Zack Cerza <zcerza@redhat.com>
 
+	* sniff/sniff: Restore sane default window size.
+
+2006-04-17  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tree.py: Fix Node.size by using the values from
 	Node.__accessible.getExtents() instead of .getSize().
 

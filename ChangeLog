@@ -1,3 +1,8 @@
+2006-04-17  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Fix Node.size by using the values from
+	Node.__accessible.getExtents() instead of .getSize().
+
 2006-04-13  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/tree.py: Change the way Node reports that attributes

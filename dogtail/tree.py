@@ -501,23 +501,25 @@ class Node:
         # Attributes from the Component object
         elif attr == "extents":
             if self.__component:
-                return self.__component.getExtents ()
+                return self.__component.getExtents()
         elif attr == "position":
             if self.__component:
-                return self.__component.getPosition ()
+                return self.__component.getPosition()
         elif attr == "size":
             if self.__component:
-                return self.__component.getSize ()
-        elif attr == "extents":
-            return self.__component.getExtents ()
+                # This always returns [0, 0]
+                #return self.__component.getSize()
+                extents = self.__component.getExtents()
+                size = (extents[2], extents[3])
+                return size
 
         # Attributes from the Text object
         elif attr == "text":
             if self.__text:
-                return self.__text.getText (0, 32767)
+                return self.__text.getText(0, 32767)
         elif attr == "caretOffset":
             if self.__text:
-                return self.__text.getCaretOffset ()
+                return self.__text.getCaretOffset()
 
         # Attributes from the Selection object
         elif attr == "isSelected":

@@ -274,6 +274,32 @@ class Click (Action):
         else:
             Action.__call__(self, name = name, roleName = roleName, description = description, delay = delay)
 
+class Select (Action):
+    """
+    Aids in selecting and deselecting widgets, i.e. page tabs
+    """
+    select = 'select'
+    deselect = 'deselect'
+    def __init__(self, action):
+        """
+        action must be 'select' or 'deselect'.
+        """
+        if action not in (self.select, self.deselect):
+            raise ValueError, action
+        Action.__init__(self, action)
+
+    def __call__ (self, name = '', roleName = '', description = '', delay = config.actionDelay):
+        """
+        If name, roleName or description are specified, first search for a widget that matches and refocus on it.
+        Then execute the action.
+        """
+        if name or roleName or description:
+            FocusWidget.__call__(self, name = name, roleName = roleName, description = description)
+        func = getattr(self.node, self.action)
+        func()
+        sleep(delay)
+        
+
 def run(application, arguments = '', appName = ''):
     from utils import run as utilsRun
     utilsRun(application + arguments, appName = appName)
@@ -285,3 +311,5 @@ click = Click()
 activate = Action('activate')
 openItem = Action('open')
 menu = Action('menu')
+select = Select(Select.select)
+deselect = Select(Select.deselect)

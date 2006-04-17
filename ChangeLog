@@ -1,5 +1,30 @@
 2006-04-17  Zack Cerza <zcerza@redhat.com>
 
+	* recorder/dogtail-recorder: Make ProceduralScriptWriter.recordClick()
+	write out correct calls for Node instances that don't have
+	action['click'] and instead need, for example, 'activate'. If other
+	actions aren't available, use the node's select(). If that doesn't
+	work, do a click(raw=True), to spoof raw mouse input. Also, remove
+	some old AttributeError handlers from FakeNode.__init__(). Also, make
+	EventRecorder stop listening to window:create events, since those are
+	just thrown away. Also, refactor and rewrite
+	EventRecorder.onMouseButton() to be much more accurate in detecting
+	clicks. Reporting the wrong nodes happens far less often, now. There
+	is still the problem of clicks getting dropped when the mouse button
+	isn't help down for, say, 200ms. Clicks on toolbar buttons tend to get
+	dropped too. But there are no more false clicks, e.g. clicking on a
+	non-accessible application still recorded a (bogus) action. Also, make
+	clicking on table cells work properly, working around the fact that 
+	mouse:button events are always reported by the table and not the cell,
+	by finding the smallest child of the table whose extents the event 
+	occured inside.
+
+	* dogtail/procedural.py: Add Select, an Action subclass that doesn't
+	deal with actions. It lets us have select() and deselect() calls. The
+	former is how page tabs are activated.
+
+2006-04-17  Zack Cerza <zcerza@redhat.com>
+
 	* sniff/sniff: Restore sane default window size.
 
 2006-04-17  Zack Cerza <zcerza@redhat.com>

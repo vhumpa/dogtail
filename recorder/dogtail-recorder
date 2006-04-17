@@ -338,7 +338,18 @@ class ProceduralScriptWriter(ScriptWriter):
                 self.currentDialog = dialog
         
         widget = node
-        self.recordLine("click('%s', roleName='%s')" % (widget.name, widget.roleName))
+        possibleActions = ['click', 'activate', 'open', 'menu']
+        foundAnAction = False
+        for action in possibleActions:
+            if action in widget.actions.keys():
+                foundAnAction = True
+                self.recordLine("%s('%s', roleName='%s')" % (action, widget.name, widget.roleName))
+                break
+        if not foundAnAction: 
+            if hasattr(widget, 'select'):
+                self.recordLine("select('%s', roleName='%s')" % (widget.name, widget.roleName))
+            else:
+                self.recordLine("click('%s', roleName='%s', raw=True)" % (widget.name, widget.roleName))
         self.currentWidget = widget
         
 
@@ -359,22 +370,20 @@ class FakeNode(dogtail.tree.Node):
     FakeNode instances of each and every one of its ancestors.
     """
     def __init__(self, node):
-        if node == None: return False
+        if node == None: raise TypeError, node
 
         self.__node = node
         self.name = self.__node.name
         self.roleName = self.__node.roleName
         self.description = self.__node.description
+        self.actions = self.__node.actions
         self.debugName = self.__node.debugName
 
-        try: self.text = self.__node.text
-        except AttributeError: self.text = None
+        self.text = self.__node.text
 
-        try: self.position = self.__node.position
-        except AttributeError: self.position = None
+        self.position = self.__node.position
 
-        try: self.size = self.__node.size
-        except AttributeError: self.size = None
+        self.size = self.__node.size
 
         if node.parent: self.parent = FakeNode(self.__node.parent)
         else: self.parent = None
@@ -414,7 +423,7 @@ class EventRecorder:
         self.lastFocusedNode = None
         self.lastSelectedNode = None
         self.lastPressedNode = None
-        self.lastReleasedNoed = None
+        self.lastReleasedNode = None
         self.absoluteNodePaths = True
 
     def __registerEvents(self):
@@ -427,11 +436,11 @@ class EventRecorder:
         # State Changed events:
         listeners.append(atspi.EventListener(marshalOnSelect, ["object:state-changed:selected"]))
 
-        # Mouse button-1 clicks:
+        # Mouse button events:
         listeners.append(atspi.EventListener(marshalOnMouseButton, ["mouse:button"]))
 
         # Window creation:
-        listeners.append(atspi.EventListener(marshalOnWindowCreate, ["window:create"]))
+        #listeners.append(atspi.EventListener(marshalOnWindowCreate, ["window:create"]))
 
         return listeners
 
@@ -451,6 +460,9 @@ class EventRecorder:
 
         sourceNode = dogtail.tree.Node(event.source)
         sourceNode = FakeNode(sourceNode)
+        #if sourceNode == self.lastPressedNode or \
+        #        sourceNode == self.lastReleasedNode:
+        #    sourceNode._FakeNode__node.blink()
         self.lastFocusedNode = sourceNode
 
     def onSelect(self, event):
@@ -471,29 +483,74 @@ class EventRecorder:
         elif event.type == "mouse:button:1r":
             isRelease = True
 
-        # The source node is always "main" - which sucks.
-        # sourceNode = dogtail.tree.Node(event.source)
+        # The source node is always "main" - which sucks. We have to detect
+        # the real source ourselves.
 
-        #print "position", self.lastFocusedNode.position
-        #print "size", self.lastFocusedNode.size
+        def detectByCoordinates(nodes, x, y):
+            # From a list of nodes, find the smallest one that (x, y) is in
+            def isCandidate(node, x, y):
+                # If (x, y) is inside the node, return True
+                if node and node.position:
+                    #print "x,y: %s, %s" % (x, y)
+                    #print "position: %s, size: %s" % (node.position, node.size)
+                    if node.position[0] <= x <= (node.position[0] + node.size[0]) and \
+                            node.position[1] <= y <= (node.position[1] + node.size[1]):
+                        return True
+            def getAllDescendants(node):
+                result = []
+                for child in node.children:
+                    result.append(child)
+                    result.extend(getAllDescendants(child))
+                    #for grandChild in child.children:
+                    #    result.append(grandChild)
+                return result
+            def smallestNode(nodes):
+                # Return the node with the smallest area
+                areas = {}
+                for node in nodes:
+                    area = node.size[0] * node.size[1]
+                    if areas.get(area, None):
+                        print "Two nodes are the same size?!"
+                        print str(areas[area]) + "|" + str(node)
+                    areas[area] = node
+                if areas:
+                    return areas[min(areas.keys())]
+
+            detectedNode = None
+            for node in nodes:
+                if isCandidate(node, x, y):
+                    detectedNode = node
+                    # table children don't send focus signals, so we have to
+                    # find the child itself.
+                    if node.roleName == 'table':
+                        detectedNode = None
+                        if not hasattr(node, 'children'):
+                            node = node._FakeNode__node
+                        # getAllDescendants() is very expensive :(
+                        possibleNodes = getAllDescendants(node)
+                        probableNodes = [n for n in possibleNodes if \
+                                isCandidate(n, x, y)]
+                        detectedNode = smallestNode(probableNodes)
+            return detectedNode
 
         x = event.detail1
         y = event.detail2
-        #print "x,y: %s, %s" % (x, y)
-        for node in (self.lastFocusedNode, self.lastSelectedNode):
-            #print "position: %s, size: %s" % (node.position, node.size)
-            try:
-                if node.position:
-                    if node.position[0] <= x <= (node.position[0] + node.size[0]) and \
-                            node.position[1] <= y <= (node.position[1] + node.size[1]):
-                        if isPress: self.lastPressedNode = node
-                        elif isRelease: self.lastReleasedNode = node
-                        break
-            except AttributeError: pass
-
-        if self.lastFocusedNode == None: return False
+        if self.lastSelectedNode != self.lastFocusedNode:
+            possibleNodes = (self.lastSelectedNode, self.lastFocusedNode)
+        else:
+            # If self.lastSelectedNode isn't meaningful, don't waste time on 
+            # it with detectByCoordinates().
+            possibleNodes = [self.lastFocusedNode]
+        detectedNode = detectByCoordinates(possibleNodes, x, y)
+        if detectedNode:
+            detectedNode = FakeNode(detectedNode)
+        if isPress: 
+            self.lastPressedNode = detectedNode
+        elif isRelease:
+            self.lastReleasedNode = detectedNode
         
-        if isRelease: self.writer.recordClick(self.lastFocusedNode)
+        if isRelease and detectedNode:
+            self.writer.recordClick(detectedNode)
 
     def onWindowCreate(self, event):
         # logEvent(event)

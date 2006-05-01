@@ -1,3 +1,13 @@
+2006-05-01  Zack Cerza <zcerza@redhat.com>
+
+    * recorder/recorder.glade: Remove the 'Stop' button, and add a 'Clear'
+    button.
+
+    * recorder/dogtail-recorder: Make the 'Record' button turn into a 'Stop' 
+    button after it is pressed, and vice versa. Add toggleRecording() to
+    RecorderGUI and remove startRecording(). Make RecorderGUI.quit() stop the
+    recording before it calls gtk.main_quit().
+
 2006-04-17  Zack Cerza <zcerza@redhat.com>
 
 	* recorder/dogtail-recorder: Make ProceduralScriptWriter.recordClick()

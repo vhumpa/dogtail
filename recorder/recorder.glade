@@ -10,9 +10,11 @@
                 <property name="visible">True</property>
                 <child>
                     <widget class="GtkHBox" id="hbox1">
+                        <property name="visible">True</property>
                         <child>
                             <widget class="GtkLabel" id="label1">
                                 <property name="label" context="yes" translatable="yes">Script type:</property>
+                                <property name="visible">True</property>
                                 <property name="xpad">4</property>
                             </widget>
                             <packing>
@@ -23,6 +25,7 @@
                             <widget class="GtkComboBox" id="writerComboBox">
                                 <property name="items" context="yes" translatable="yes">Procedural
 Object-Oriented</property>
+                                <property name="visible">True</property>
                             </widget>
                             <packing>
                                 <property name="expand">False</property>
@@ -37,6 +40,7 @@ Object-Oriented</property>
                 <child>
                     <widget class="GtkHButtonBox" id="hbuttonbox1">
                         <property name="layout_style">start</property>
+                        <property name="visible">True</property>
                         <child>
                             <widget class="GtkButton" id="recordButton">
                                 <property name="is_focus">True</property>
@@ -46,11 +50,9 @@ Object-Oriented</property>
                             </widget>
                         </child>
                         <child>
-                            <widget class="GtkButton" id="stopButton">
-                                <property name="is_focus">True</property>
-                                <property name="label">gtk-media-stop</property>
+                            <widget class="GtkButton" id="clearButton">
+                                <property name="label">gtk-clear</property>
                                 <property name="use_stock">True</property>
-                                <property name="visible">True</property>
                             </widget>
                             <packing>
                                 <property name="position">1</property>

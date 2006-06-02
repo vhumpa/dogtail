@@ -169,7 +169,7 @@ if __name__ == '__main__':
     failOrPass(failure, "Reading all default values")
 
     failure = True
-    failure = config.ensureSensitivity != True
+    failure = config.ensureSensitivity != config.defaults['ensureSensitivity']
     config.ensureSensitivity = False
     failure = failure or config.ensureSensitivity == True
     config.ensureSensitivity = True

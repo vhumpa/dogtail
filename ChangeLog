@@ -1,12 +1,20 @@
+2006-06-02  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/config.py: Fix unit test that was broken by a commit from 
+	2005-11-01, which made config.ensureSensitivity default to True. The 
+	unit test wasn't updated in that commit. The unit test now doesn't 
+	assume what the default is, and uses the value obtained from 
+	config.defaults. Thanks to Len DiMaggio for reporting. Closes: #342028.
+
 2006-05-01  Zack Cerza <zcerza@redhat.com>
 
-    * recorder/recorder.glade: Remove the 'Stop' button, and add a 'Clear'
-    button.
+	* recorder/recorder.glade: Remove the 'Stop' button, and add a 'Clear'
+	button.
 
-    * recorder/dogtail-recorder: Make the 'Record' button turn into a 'Stop' 
-    button after it is pressed, and vice versa. Add toggleRecording() to
-    RecorderGUI and remove startRecording(). Make RecorderGUI.quit() stop the
-    recording before it calls gtk.main_quit().
+	* recorder/dogtail-recorder: Make the 'Record' button turn into a 
+	'Stop' button after it is pressed, and vice versa. Add 
+	toggleRecording() to RecorderGUI and remove startRecording(). Make 
+	RecorderGUI.quit() stop the recording before it calls gtk.main_quit().
 
 2006-04-17  Zack Cerza <zcerza@redhat.com>
 

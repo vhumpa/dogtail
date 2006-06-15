@@ -18,12 +18,25 @@ class _Config(object):
     """
     Contains configuration parameters for the dogtail run.
 
-    ensureSensitivity (boolean):
-    Should we check that ui nodes are sensitive (not 'greyed out') before
-    performing actions on them? If this is True (the default) it will raise
-    an exception if this happens. Can set to False as a workaround for apps
-    and toolkits that don't report sensitivity properly.
+    scratchDir(str):
+    Directory where things like screenshots are stored.
 
+    dataDir(str):
+    Directory where related data files are located.
+
+    logDir(str):
+    Directory where dogtail.tc.TC*-generated logs are stored.
+
+    scriptName(str) [Read-Only]
+    
+    encoding(str)
+
+    actionDelay(float)
+
+    runInterval(float)
+
+    runTimeout(int)
+    
     searchBackoffDuration (float):
     Time in seconds for which to delay when a search fails.
 
@@ -33,22 +46,28 @@ class _Config(object):
     searchCutoffCount (int):
     Number of times to retry when a search fails.
 
+    defaultDelay (float):
+    Default time in seconds to sleep when delaying.
+
     debugSearching (boolean):
     Whether to write info on search backoff and retry to the debug log.
 
     debugSleep (boolean):
     Whether to log whenever we sleep to the debug log.
 
-    defaultDelay (float):
-    Default time in seconds to sleep when delaying.
+    debugSearchPaths (boolean):
+    Whether we should write out debug info when running the SearchPath
+    routines.
 
     absoluteNodePaths (boolean):
     Whether we should identify nodes in the logs with long 'abcolute paths', or
     merely with a short 'relative path'. FIXME: give examples
 
-    debugSearchPaths (boolean):
-    Whether we should write out debug info when running the SearchPath
-    routines.
+    ensureSensitivity (boolean):
+    Should we check that ui nodes are sensitive (not 'greyed out') before
+    performing actions on them? If this is True (the default) it will raise
+    an exception if this happens. Can set to False as a workaround for apps
+    and toolkits that don't report sensitivity properly.
 
     debugTranslation (boolean):
     Whether we should write out debug information from the translation/i18n
@@ -106,13 +125,13 @@ class _Config(object):
             if _Config.defaults[name] != value or _Config.options.get(name, _Config.invalidValue) != value:
                 if "Dir" in name: _Config.__createDir(value)
                 _Config.options[name] = value
-        except KeyError: raise KeyError, name + " is not a valid option."
+        except KeyError: raise AttributeError, name + " is not a valid option."
 
     def __getattr__(self, name):
         try: return _Config.options[name]
         except KeyError:
             try: return _Config.defaults[name]
-            except KeyError: raise KeyError, name + " is not a valid option."
+            except KeyError: raise AttributeError, name + " is not a valid option."
 
     def __createDir(cls, dirName):
         """

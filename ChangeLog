@@ -1,3 +1,9 @@
+2006-06-15  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/config.py: Fix help(dogtail.config.config). Fix outdated 
+	documentation for dogtail.config.config by reorganizing and documenting
+	accidentally-undocumented parameters.
+
 2006-06-02  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/config.py: Fix unit test that was broken by a commit from 

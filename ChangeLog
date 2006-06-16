@@ -1,3 +1,9 @@
+2006-06-16  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Add patch from Dave Malcolm to work around the 
+	problem where pyspi would essentially just stop working, until the 
+	user logged out and back in. Closes: #321273.
+
 2006-06-15  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/config.py: Fix help(dogtail.config.config). Fix outdated 

@@ -458,7 +458,10 @@ class Node:
             if self.__hideChildren: return
             children = []
             for i in xrange (self.__accessible.getChildCount ()):
-                children.append (Node (self.__accessible.getChildAtIndex (i)))
+                a = self.__accessible.getChildAtIndex (i)
+                # Workaround to GNOME bug #321273
+                # http://bugzilla.gnome.org/show_bug.cgi?id=321273
+                if a is not None: children.append (Node (a))
             # Attributes from the Hypertext object
             if self.__hypertext:
                 for i in range(self.__hypertext.getNLinks()):

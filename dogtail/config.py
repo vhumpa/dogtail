@@ -27,15 +27,22 @@ class _Config(object):
     logDir(str):
     Directory where dogtail.tc.TC*-generated logs are stored.
 
-    scriptName(str) [Read-Only]
+    scriptName(str) [Read-Only]:
+    The name of the script being run.
     
     encoding(str)
+    The encoding for text, used by dogtail.tc.TCString .
 
-    actionDelay(float)
+    actionDelay(float):
+    The delay after an action is executed.
 
-    runInterval(float)
+    runInterval(float):
+    The interval at which dogtail.utils.run() and dogtail.procedural.run() 
+    check to see if the application has started up.
 
-    runTimeout(int)
+    runTimeout(int):
+    The timeout after which dogtail.utils.run() and dogtail.procedural.run()
+    give up on looking for the newly-started application.
     
     searchBackoffDuration (float):
     Time in seconds for which to delay when a search fails.

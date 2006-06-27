@@ -1,5 +1,8 @@
 2006-06-27  David Malcolm  <dmalcolm@redhat.com>
 
+	* recorder/dogtail-recorder: use GtkSourceView if available to get
+	syntax-highlighting.  Closes: #345374
+
 	* tests/Node.py: new file: unit tests for the dogtail.Node class.
 
 	* tests: new subdirectory, to hold unit tests for Dogtail itself

@@ -5,7 +5,7 @@ All the classes here are intended to be single-instance, except for Action.
 __author__ = 'Zack Cerza <zcerza@redhat.com>'
 
 import tree
-from predicate import GenericPredicate, IsADialogNamed
+from predicate import GenericPredicate, IsADialogNamed, IsAnApplicationNamed
 from config import config
 from time import sleep
 
@@ -37,24 +37,19 @@ class FocusApplication (FocusBase):
     Keeps track of which application is currently focused.
     """
     desktop = tree.root
-    def __call__ (self, name = '', description = ''):
+    def __call__ (self, name):
         """
-        If name or description are specified, search for an application that matches and refocus on it.
+        Search for an application that matches and refocus on the given name.
         """
-        if not name and not description:
-            raise TypeError, ENOARGS
-        # search for an application.
-        matched = False
-        for app in self.desktop.children:
-            nameMatch = app.name == name
-            descriptionMatch = app.description == description
-            if nameMatch and descriptionMatch:
-                FocusApplication.node = app
-                FocusDialog.node = None
-                FocusWidget.node = None
-                matched = True
-                break
-        if not matched: raise FocusError, name
+        try:
+            predicate = IsAnApplicationNamed(name)
+            app = self.desktop.findChild(predicate, recursive = False, retry = False)
+        except tree.SearchError, desc:
+            raise FocusError, name
+        if app: 
+            FocusApplication.node = app
+            FocusDialog.node = None
+            FocusWidget.node = None
 
 class FocusDesktop (FocusBase):
     """
@@ -66,12 +61,10 @@ class FocusDialog (FocusBase):
     """
     Keeps track of which dialog is currently focused.
     """
-    def __call__ (self, name = '', description = ''):
+    def __call__ (self, name):
         """
-        If name or description are specified, search for a dialog that matches and refocus on it.
+        Search for a dialog that matches the given name and refocus on it.
         """
-        if not name and not description:
-            raise TypeError, ENOARGS
         result = None
         predicate = IsADialogNamed(name)
         try:

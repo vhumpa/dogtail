@@ -87,7 +87,8 @@ except ImportError:
     #print "Warning: Dogtail could not import the Python bindings for libwnck. Window-manager manipulation will not be available."
     gotWnck = False
 
-SearchError = "Couldn't find"
+class SearchError(Exception):
+    pass
 
 class ReadOnlyError(TypeError):
     """
@@ -834,7 +835,7 @@ class Node:
                     print "sleeping for %f"%config.searchBackoffDuration
                 sleep(config.searchBackoffDuration)
         if requireResult:
-            raise SearchError, describeSearch(self, pred, recursive, debugName)
+            raise SearchError(describeSearch(self, pred, recursive, debugName))
 
     # The canonical "search for multiple" method:
     def findChildren(self, pred, recursive = True):

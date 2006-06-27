@@ -123,13 +123,41 @@ class TranslatableString:
         string (or simply the original string, if no translation was found).
         """
         #print "comparing %s against %s"%(string, self)
+        def stringsMatch(inS, outS):
+            """
+            Compares a regular expression to a string
+            """
+            # The old way just checked equality ...
+            #matched = inString == outString
+
+            # ... But we want regular expressions!
+            inString = str(inS)
+            outString = outS
+            inString = inString + '$'
+            if not isinstance(inString, unicode):
+                inString = inString.decode('utf-8')
+            if not isinstance(outString, unicode):
+                outString = outString.decode('utf-8')
+            #if ts: print "re.match('"+inString+"','"+outString+"')"
+            if inString[0] == '*':
+                inString = "\\" + inString
+            match = re.match(inString, outString)
+            matched = match is not None
+            return matched
+
         matched = False
-        if len(self.translatedStrings)>0:
-            matched = string in self.translatedStrings
-            return matched
-        else:
-            matched = string==self.untranslatedString
-            return matched
+        # the 'ts' variable keeps track of whether we're working with
+        # translated strings. it's only used for debugging purposes.
+        #ts = 0
+        #print string, str(self)
+        for translatedString in self.translatedStrings:
+            #ts = ts + 1
+            matched = stringsMatch(translatedString, string)
+            if not matched:
+                matched = translatedString == string
+            if matched: return matched
+        #ts=0
+        return stringsMatch(self.untranslatedString, string)
 
     def __str__(self):
         """
@@ -140,8 +168,8 @@ class TranslatableString:
             # build an output string, with commas in the correct places
             translations = ""
             for tString in self.translatedStrings:
-                translations += '"%s", ' % tString.decode('utf-8')
-            result = '"%s" (%s)' % (self.untranslatedString, translations)
+                translations += u'"%s", ' % tString.decode('utf-8')
+            result = u'"%s" (%s)' % (self.untranslatedString.decode('utf-8'), translations)
             return result.encode('utf-8')
         else:
             return '"%s"' % (self.untranslatedString)

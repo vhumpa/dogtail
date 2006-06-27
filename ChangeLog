@@ -1,3 +1,17 @@
+2006-06-27  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Make SearchError a proper Exception subclass.
+
+	* dogtail/procedural.py: Prepare module for support for accepting 
+	regular expressions as 'name' arguments. Use the IsAnApplicationNamed 
+	predicate in FocusApplication. Remove unused 'description' arguments.
+
+	* dogtail/i18n.py: Add regular expression support to 
+	TranslatableString.matchedBy(). This means that any 'name' argument
+	supports regular expression matching, by virtue of the fact that all
+	Predicate subclasses uses TranslatableString.matchedBy() for 'name' 
+	arguments.
+
 2006-06-16  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/tree.py: Add patch from Dave Malcolm to work around the 

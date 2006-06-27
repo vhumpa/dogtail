@@ -1,3 +1,9 @@
+2006-06-27  David Malcolm  <dmalcolm@redhat.com>
+
+	* tests/Node.py: new file: unit tests for the dogtail.Node class.
+
+	* tests: new subdirectory, to hold unit tests for Dogtail itself
+
 2006-06-27  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/tree.py: Make SearchError a proper Exception subclass.

@@ -3,6 +3,17 @@ Dogtail's procedural UI
 All the classes here are intended to be single-instance, except for Action.
 """
 __author__ = 'Zack Cerza <zcerza@redhat.com>'
+##############################################################################
+#                                                                            #
+# WARNING: Here There Be Dragons (TM)                                        #
+#                                                                            #
+# If you don't understand how to use this API, you almost certainly don't    #
+# want to read the code first. We make use of some very non-intuitive        #
+# features of Python in order to make the API very simplistic. Therefore,    #
+# you should probably only read this code if you're already familiar with    #
+# some of Python's advanced features. You have been warned. ;)               #
+#                                                                            #
+##############################################################################
 
 import tree
 from predicate import GenericPredicate, IsADialogNamed, IsAnApplicationNamed

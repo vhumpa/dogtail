@@ -1,3 +1,8 @@
+2006-06-29  David Malcolm  <dmalcolm@redhat.com>
+
+	* dogtail/procedural.py: Add warning not to read without understanding
+	the API.
+
 2006-06-27  David Malcolm  <dmalcolm@redhat.com>
 
 	* recorder/dogtail-recorder: use GtkSourceView if available to get

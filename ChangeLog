@@ -1,4 +1,17 @@
-2006-06-29  David Malcolm  <dmalcolm@redhat.com>
+2006-06-30  David Malcolm  <david@localhost.localdomain>
+
+	* tests/Node.py: add unit test for getting bogus attributes of a Node; 
+	document many of the existing unit tests; add unit tests for writing to
+	a read-only attribute of Node; fix some typos in the names of the unit
+	tests; check that Node.extents has non-zero size, and that Node.size is
+	non-zero
+
+	* dogtail/tree.py: make attempts to write to a read-only attribute of
+	Node raise a ReadOnlyError, rather than fall through to an
+	AttributeError; remove the old stubbed unit test from the tail of the
+	file
+
+2006-06-29  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/procedural.py: Add warning not to read without understanding
 	the API.

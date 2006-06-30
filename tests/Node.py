@@ -42,31 +42,44 @@ class TestNodeAttributes(GtkDemoTest):
     """
     Unit tests for the the various synthesized attributes of a Node
     """
+    def testGetBogus(self):
+        "Getting a non-existant attribute should raise an attribute error"
+        self.assertRaises(AttributeError, self.app.__getattr__,  "thisIsNotAnAttribute")
+
+    #FIXME: should setattr for a non-existant attr be allowed?
+    
     # 'name' (read-only string):
     def testGetName(self):
+        """
+        Node.name of the gtk-demo app should be "gtk-demo"
+        """
         self.assertEquals(self.app.name, 'gtk-demo')
 
         self.assertEquals(dogtail.tree.root.name, 'main')
 
     def testSetName(self):
-        # FIXME: should have the code raise a ReadOnly exception and check for it here
-        pass
+        "Node.name should be read-only"
+        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "name", "hello world")
     
     # 'roleName' (read-only string):
     def testGetRoleName(self):
+        """
+        roleName of the gtk-demo app should be "application"
+        """
         self.assertEquals(self.app.roleName, 'application')
 
     def testSetRoleName(self):
-        # FIXME: should have the code raise a ReadOnly exception and check for it here
-        pass
+        "Node.roleName should be read-only"
+        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "roleName", "hello world")
 
     # 'role' (read-only atspi role enum):
     def testGetRole(self):
+        "Node.role for a gtk-demo app should be SPI_ROLE_APPLICATION"
         self.assertEquals(self.app.role, atspi.SPI_ROLE_APPLICATION)
 
     def testSetRole(self):
-        # FIXME: should have the code raise a ReadOnly exception and check for it here
-        pass
+        "Node.role should be read-only"
+        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "role", "hello world")
 
     # 'description' (read-only string):
     def testGetDescription(self):
@@ -74,8 +87,8 @@ class TestNodeAttributes(GtkDemoTest):
         self.assertEquals(self.app.description, "")
 
     def testSetDescription(self):
-        # FIXME: should have the code raise a ReadOnly exception and check for it here
-        pass
+        "Node.description should be read-only"
+        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "description", "hello world")
 
     # 'parent' (read-only Node instance):
     def testGetParent(self):
@@ -86,22 +99,27 @@ class TestNodeAttributes(GtkDemoTest):
         self.assertEquals(self.app.children[0].parent.name, "gtk-demo")
 
     def testSetParent(self):
-        # FIXME: should have the code raise a ReadOnly exception and check for it here
-        pass
+        "Node.parent should be read-only"
+        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "parent", None)
 
     # 'children' (read-only list of Node instances):
     def testGetChildren(self):
+        "A fresh gtk-demo app should have a single child: the window."
         kids = self.app.children
         self.assertEquals(len(kids), 1)
         self.assertEquals(kids[0].name, "GTK+ Code Demos")
         self.assertEquals(kids[0].roleName, "frame")
 
     def testSetChildren(self):
-        # FIXME: should have the code raise a ReadOnly exception and check for it here
-        pass
+        "Node.children should be read-only"
+        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "children", [])
 
     # 'text' (string):
     def testSimpleTextEntry(self):
+        """
+        Use gtk-demo's text entry example to check that reading and writing
+        Node.text works as expected
+        """
         self.runDemo('Dialog and Message Boxes')
         wnd = self.app.window('Dialogs')
         wnd.button('Interactive Dialog').click()
@@ -131,7 +149,7 @@ class TestNodeAttributes(GtkDemoTest):
         # Ensure a label's text is read-only as expected:
         # FIXME: this doesn't work; the label has no 'text'; it has a name.  we wan't a readonly text entry
         # label = dlg.child('Entry 1')
-        # self.assertRaises(ReadOnlyError, label.text.__setattr__,  "text", "hello world")
+        # self.assertRaises(dogtail.tree.ReadOnlyError, label.text.__setattr__,  "text", "hello world")
 
         # FIXME: should we assert that things are logged and delays are added?
         # FIXME: should have a test case involving the complex GtkTextView widget
@@ -155,98 +173,112 @@ class TestNodeAttributes(GtkDemoTest):
 
     # 'stateSet' (read-only StateSet instance):
     def testGetStateSet(self):
+        "Node.stateSet should not contain SPI_STATE_SENSITIVE for the gtk-demo app node"
         val = self.app.stateSet
         self.assert_(not val.contains(atspi.SPI_STATE_SENSITIVE))
 
     def testSetStateSet(self):
-        # FIXME: should have the code raise a ReadOnly exception and check for it here
-        pass
+        "Node.stateSet should be read-only"
+        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "stateSet", [])
 
     # 'relations' (read-only list of atspi.Relation instances):
     def testGetRelations(self):
         # FIXME
         pass
 
-    def testSetRole(self):
-        # FIXME: should have the code raise a ReadOnly exception and check for it here
-        pass
+    def testSetRelations(self):
+        "Node.relations should be read-only"
+        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "relations", [])
 
     # 'labellee' (read-only list of Node instances):
-    def testGetRole(self):
+    def testGetLabellee(self):
         # FIXME
         pass
 
-    def testSetRole(self):
-        # FIXME: should have the code raise a ReadOnly exception and check for it here
-        pass
+    def testSetLabellee(self):
+        "Node.labellee should be read-only"
+        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "labellee", None)
 
     # 'labeller' (read-only list of Node instances):
-    def testGetRole(self):
+    def testGetLabeller(self):
         # FIXME
         pass
 
-    def testSetRole(self):
-        # FIXME: should have the code raise a ReadOnly exception and check for it here
-        pass
+    def testSetLabeller(self):
+        "Node.labeller should be read-only"
+        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "labeller", None)
 
     # 'sensitive' (read-only boolean):
     def testGetSensitive(self):
+        """
+        Node.sensitive should not be set for the gtk-demo app.
+        It should be set for the window within the app.
+        """
         self.assert_(not self.app.sensitive)
         self.assert_(self.app.children[0].sensitive)
 
     def testSetSensitive(self):
-        # FIXME: should have the code raise a ReadOnly exception and check for it here
-        pass
+        "Node.sensitive should be read-only"
+        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "sensitive", True)
 
     # 'showing' (read-only boolean):
     def testGetShowing(self):
+        "Node.showing should not be set for the gtk-demo.  It should be set for the window within the app"
         self.assert_(not self.app.showing)
         self.assert_(self.app.children[0].showing)
 
     def testSetShowing(self):
-        # FIXME: should have the code raise a ReadOnly exception and check for it here
-        pass
+        "Node.showing should be read-only"
+        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "showing", True)
 
     # 'actions' (read-only list of Action instances):
     def testGetActions(self):
+        "Node.actions should be an empty list for the app node"
         self.assertEquals(len(self.app.actions), 0) 
         # FIXME test some common widgets
    
     def testSetActions(self):
-        # FIXME: should have the code raise a ReadOnly exception and check for it here
-        pass
+        "Node.actions should be read-only"
+        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "actions", [])
 
     # 'extents' (readonly tuple):
     def testGetExtents(self):
+        "Node.extents should be a 4-tuple for a window, with non-zero size"
         (x,y,w,h) = self.app.children[0].extents
+        self.assert_(w>0)
+        self.assert_(h>0)
 
     def testSetExtents(self):
-        # FIXME: should have the code raise a ReadOnly exception and check for it here
-        pass
+        "Node.extents should be read-only"
+        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "extents", (0,0,640,480))
 
     # 'position' (readonly tuple):
     def testGetPosition(self):
+        "Node.position should be a 2-tuple for a window"
         (x,y) = self.app.children[0].position
 
     def testSetPosition(self):
-        # FIXME: should have the code raise a ReadOnly exception and check for it here
-        pass
+        "Node.position should be read-only"
+        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "position", (0,0))
 
     # 'size' (readonly tuple):
     def testGetSize(self):
+        "Node.size should be a 2-tuple for a window, with non-zero values"
         (w,h) = self.app.children[0].size
+        self.assert_(w>0)
+        self.assert_(h>0)
 
     def testSetSize(self):
-        # FIXME: should have the code raise a ReadOnly exception and check for it here
-        pass
+        "Node.size should be read-only"
+        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "size", (640,480))
 
     # 'toolkit' (readonly string):
     def testGetToolkit(self):
         self.assertEquals(self.app.toolkit, "GAIL")
 
     def testSetToolkit(self):
-        # FIXME: should have the code raise a ReadOnly exception and check for it here
-        pass
+        "Node.toolkit should be read-only"
+        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "toolkit", "GAIL")
 
     # 'version'
     def testGetVersion(self):
@@ -255,20 +287,24 @@ class TestNodeAttributes(GtkDemoTest):
         self.assertEquals(self.app.version, str(expectedVersion))
 
     def testSetVersion(self):
-        # FIXME: should have the code raise a ReadOnly exception and check for it here
-        pass
+        "Node.version should be read-only"
+        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "version", 42)
 
     # 'ID'
     def testGetID(self):
-        # all we know is that it should be numeric:
+        "Node.ID should be numeric"
         self.assertEquals(type(self.app.ID), type(42))
 
     def testSetID(self):
-        # FIXME: should have the code raise a ReadOnly exception and check for it here
-        pass
+        "Node.ID should be read-only"
+        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "ID", 42)
 
 class TestSelection(GtkDemoTest):
     def testTabs(self):
+        """
+        Tabs in the gtk-demo should be selectable, and be queryable for
+        "isSelected", and the results should change as they are selected.
+        """
         # Use the Info/Source tabs of gtk-demo:
         info = self.app.child('Info')
         source = self.app.child('Source')

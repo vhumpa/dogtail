@@ -549,6 +549,29 @@ class Node:
         elif attr.replace('_Node', '') in self.contained:
             self.__dict__[attr] = value
 
+        # Read-only attributes from Applications
+        # (self.__accessible will be an Application and not an Accessible)
+        elif attr in ["toolkit", "version", "ID"]:
+            raise ReadOnlyError, attr
+
+        # Read-only attributes from the Accessible object
+        elif attr in ["name", "role", "roleName", "description", "parent",
+                      "indexInParent", "children", "stateSet", "relations",
+                      "labellee", "labeller"]:
+            raise ReadOnlyError, attr
+
+        # Read-only attributes synthesized from the Accessible's stateSet:
+        elif attr in ["sensitive", "showing"]:
+            raise ReadOnlyError, attr
+
+        # Read-only attributes from the Action object
+        elif attr == "actions":
+            raise ReadOnlyError, attr
+
+        # Attributes from the Component object
+        elif attr in ["extents", "position", "size"]:
+            raise ReadOnlyError, attr
+
         # Attributes from the Text object
         elif attr=="caretOffset":
             if not self.__text:
@@ -1218,14 +1241,6 @@ children = root.children
 if not children:
     print "Warning: AT-SPI's desktop is visible but it has no children. Are you running any AT-SPI-aware applications?"
 del children
-
-# This is my poor excuse for a unit test.
-if __name__ == '__main__':
-    import tc
-    f=root.findChild(name="File", roleName="menu")
-    case = tc.TCNumber()
-    case.compare("File menu text", 4, len(f.text), "float")
-    print case.result
 
 # Convenient place to set some debug variables:
 #config.debugSearching = True

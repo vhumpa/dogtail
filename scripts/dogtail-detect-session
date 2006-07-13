@@ -50,7 +50,14 @@ def KDE():
 	running = False
 	return running
 
-if GNOME() or KDE():
+def JustSomeApps():
+    """
+    "Is at least one accessibility-enabled application running?"
+    """
+    assert focus.desktop
+    assert focus.desktop.children
+
+if GNOME() or KDE() or JustSomeApps():
 	sys.exit()
 else: 
 	sys.exit(1)

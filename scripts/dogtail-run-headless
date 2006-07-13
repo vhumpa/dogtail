@@ -1,60 +1,208 @@
-#!/bin/sh
-# dogtail-run-headless
-#
-# Usage: dogtail-run-headless ./some-dogtail-script.py
-#
-# This script launches an X server using the virtual framebuffer, allowing 
-# dogtail scripts to be run on headless servers. The server starts a minimal
-# GNOME session, based on Nat Friedman's notes here: 
-#  http://nat.org/2005/october/#Keep-It-Simple-Stupid
-# Dogtail scripts are run in the current directory. After the script 
-# terminates, so does the X server.
-#
-# The X server can be connected to using VNC via the following steps:
-#
-#  port=`"x11vnc -display :1 -viewonly -bg" | grep PORT)`
-#  port=`echo "$port" | sed -e's/PORT=//'`
-#  port=`expr $port - 5900`
-#
-#  vncviewer localhost:$port
-#
-# Author: Zack Cerza <zcerza@redhat.com>
-#
+#!/usr/bin/python
+"""
+dogtail-run-headless
 
-A11Y_ENABLED=`gconftool-2 --get /desktop/gnome/interface/accessibility`
+Runs a dogtail script 
+This script launches an X server using the virtual framebuffer, allowing
+dogtail scripts to be run on headless servers. 
+The server can currently use a minimal GNOME session, or just metacity.
 
-if test x$A11Y_ENABLED = xfalse; then 
-	echo "Enabling accessibility support for GNOME"
-	gconftool-2 --set --type bool /desktop/gnome/interface/accessibility true
-fi
+Dogtail scripts are run in the current directory. After the script
+terminates, so does the X server.
+"""
+__author__ = "Zack Cerza <zcerza@redhat.com>"
 
-EXIT_CODE_FILE=/tmp/dogtail-run-headless.exitcode
+_usage = """
+Usage: dogtail-run-headless <options> <script>
 
-mv -f ~/.xinitrc ~/.xinitrc-user 2>/dev/null && \
- echo "Moving ~/.xinitrc to ~/.xinitrc-user temporarily"
+Options:
 
-# xinit doesn't allow specifying an alternate xinitrc
-cat << EOF > ~/.xinitrc
-#!/bin/sh
-gnome-settings-daemon &
-gnome-panel &
-nautilus -n &
-metacity &
-gconftool-2 --set --type bool /desktop/gnome/interface/accessibility true
-sleep 10
-cd $PWD && dogtail-detect-session && sh -c "$@"; echo -n \$? > $EXIT_CODE_FILE
-EOF
+    -h, --help      Display this message.
+    
+    -g, --gnome     Use a GNOME session.
+    
+    -n, --none      Use a minimal session, consisting of just metacity.
+    
+    -k, --kde       Use a KDE session (not implemented).
+"""
 
-echo "Starting GNOME Session..."
-xinit -- /usr/X11R6/bin/Xvfb :1 -screen 0 1024x768x24 -fbdir /tmp :1
+def usage():
+    print _usage
 
-if test x$A11Y_ENABLED = xfalse; then
-	echo "Re-disabling accessibility support for GNOME"
-	gconftool-2 --set --type bool /desktop/gnome/interface/accessibility false
-fi
+import os
+import sys
 
-rm -f ~/.xinitrc
-mv -f ~/.xinitrc-user ~/.xinitrc 2>/dev/null && \
- echo "Restored ~/.xinitrc"
+TRUE='true'
+FALSE='false'
 
-exit `cat $EXIT_CODE_FILE`
+def getGConfBool(key):
+    cmd = 'gconftool-2 --get ' + key
+    answer = os.popen(cmd).readlines()[0].strip()
+    if answer == TRUE: return True
+    elif answer == FALSE: return False
+    else: raise RuntimeError, answer
+
+def setGConfBool(key, value):
+    if value == True: value = TRUE
+    elif value == False: value = FALSE
+    else: raise TypeError, value
+    cmd = 'gconftool-2 --type bool --set %s %s' % (key, value)
+    os.popen(cmd)
+
+a11yGConfKey = '/desktop/gnome/interface/accessibility'
+
+global a11yIsEnabled
+global a11yWasEnabled
+a11yWasEnabled = True
+
+def makeSureGNOMEIsAccessible():
+    global a11yIsEnabled, a11yWasEnabled
+    a11yIsEnabled = getGConfBool(a11yGConfKey)
+    a11yWasEnabled = a11yIsEnabled
+
+    if not a11yIsEnabled:
+        print "Temporarily enabling accessibility support for GNOME"
+        setGConfBool(a11yGConfKey, True)
+        a11yIsEnabled = True
+
+global xinitrc
+xinitrc = None
+
+def startXServer():
+    def findFreeDisplay():
+        import re
+        tmp = os.listdir('/tmp')
+        pattern = re.compile('\.X([0-9]+)-lock')
+        numbers = []
+        for file in tmp:
+            match = re.match(pattern, file)
+            if match: numbers.append(int(match.groups()[0]))
+        if not numbers: return ':0'
+        numbers.sort()
+        return ':' + str(numbers[-1] + 1)
+    
+    server = os.popen('/usr/bin/which Xvfb 2>/dev/null')
+    if not server:
+        print "Cannot find Xvfb"
+        sys.exit(EXIT_DEPS)
+    server = server.readlines()[0].strip()
+
+    client = xinitrc.name
+    resolution = '1024x768x16'
+    'xinit /usr/ucb/rsh fasthost cpupig -display ws:1 --  :1 -a 2 -t 5'
+    'xinit -- /usr/bin/Xvfb :1 -screen 0 1024x768x24 -ac -noreset -shmem'
+    cmd = 'xinit %s -- %s %s -screen 0 %s -ac -noreset -shmem' % \
+            (client, server, findFreeDisplay(), resolution)
+    print cmd
+    return os.system(cmd)
+    
+global exitCodeFile
+exitCodeFile = None
+
+def main(argv):
+    import getopt
+    EXIT_SYNTAX = 1
+    EXIT_NOT_IMPL = 2
+    EXIT_DEPS = 3
+
+    shortOpts = "hgkn"
+    longOpts = ['help', 'gnome', 'kde', 'none']
+    try:
+        opts, args = getopt.getopt(argv[1:], shortOpts, longOpts)
+    except getopt.GetoptError:
+        usage()
+        return EXIT_SYNTAX
+    if len(opts) == 0:
+        usage()
+        return EXIT_SYNTAX
+        
+    def stripOpt(opt):
+        # take the '-' out of e.g. '-h'
+        if len(opt) == 2: opt = opt[1]
+        # take the '--' out of e.g. '--help'
+        if len(opt) > 2: opt = opt[2:]
+        return opt
+    
+    for opt, arg in opts:
+        opt = stripOpt(opt)
+        if opt in (shortOpts[0], longOpts[0]):
+            usage()
+            cleanup()
+            return 0
+        elif len(args) == 0:
+            print "You must specify a script to execute in the headless session."
+            print
+            return EXIT_SYNTAX
+        elif len(args) > 1:
+            print "You may only specify one script to execute in the headless session."
+            print
+            print "Note: If you're trying to have dogtail-run-headless run a script using certain"
+            print "environment values, use the following format (note the quotation marks):"
+            print
+            print '   dogtail-run-headless "VAR=value /path/to/script.py"'
+            print
+            return EXIT_SYNTAX
+        else:
+            script = args[0]
+    
+        pid = str(os.getpid())
+        global exitCodeFile
+        exitCodeFile = "/tmp/dogtail-headless-exitcode." + pid
+
+        global xinitrc
+        xinitrc = file("/tmp/dogtail-headless-xinitrc." + pid, 'w')
+        xinitrc.write('#!/bin/sh\n')
+        
+        if opt in (shortOpts[1], longOpts[1]):
+            # (Fake) GNOME session
+            xinitrc.write('gnome-settings-daemon &\n')
+            xinitrc.write('gnome-panel &\n')
+            xinitrc.write('nautilus -n &\n')
+            xinitrc.write('metacity &\n')
+            xinitrc.write('sleep 10\n')
+            xinitrc.write('cd %s && dogtail-detect-session && sh -c "%s"; echo -n $? > %s\n') % (os.getcwdu(), script, exitCodeFile)
+            xinitrc.close()
+
+            makeSureGNOMEIsAccessible()
+            startXServer()
+            exitCode = int(file(exitCodeFile, 'r').read())
+            return exitCode
+            
+        elif opt in (shortOpts[2], longOpts[2]):
+            # KDE session
+            print "Sorry, this is just a placeholder. KDE4 should support dogtail, and vice versa."
+            cleanup()
+            return EXIT_NOT_IMPL
+
+        elif opt in (shortOpts[3], longOpts[3]):
+            # No session
+            xinitrc.write('metacity &\n')
+            xinitrc.write('sleep 3\n')
+            xinitrc.write('cd %s && sh -c "%s"; echo -n $? > %s\n' % (os.getcwdu(), script, exitCodeFile))
+            xinitrc.close()
+            
+            makeSureGNOMEIsAccessible()
+            startXServer()
+            exitCode = int(file(exitCodeFile, 'r').read())
+            return exitCode
+
+def cleanup():
+    if not a11yWasEnabled: setGConfBool(a11yGConfKey, False)
+    if exitCodeFile:
+        os.remove(exitCodeFile)
+    if xinitrc:
+        name = xinitrc.name
+        xinitrc.close()
+        os.remove(name)
+
+if __name__ == "__main__":
+    import traceback
+    try: exitCode = main(sys.argv)
+    except:
+        exitCode = 254
+        traceback.print_exc()
+    try: 
+        cleanup()
+    except: traceback.print_exc()
+    sys.exit(exitCode)
+

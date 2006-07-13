@@ -1,3 +1,15 @@
+2006-07-13  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Rewrite the script in Python. It now
+	accepts command line options to specify what session is to be used.
+	Currently those are: '--gnome' or '-g' for the old minimal GNOME 
+	session, and '--none' or '-n' for just metacity. The script also has
+	a usage statement and helpful error messages. In general it's more 
+	featureful, robust and easy to use.
+
+	* scripts/dogtail-detect-session: Also exit normally if any apps are 
+	found at all.
+
 2006-06-30  David Malcolm  <david@localhost.localdomain>
 
 	* tests/Node.py: add unit test for getting bogus attributes of a Node; 

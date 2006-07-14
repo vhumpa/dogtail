@@ -32,7 +32,7 @@ rm -rf $RPM_BUILD_ROOT
 python ./setup.py install -O2 --root=$RPM_BUILD_ROOT --record=%{name}.files
 rm -rf $RPM_BUILD_ROOT/%{_docdir}/dogtail
 find examples -type f -exec chmod 0644 \{\} \;
-desktop-file-install $RPM_BUILD_ROOT/%{_datadir}/applications/sniff.desktop
+desktop-file-install $RPM_BUILD_ROOT/%{_datadir}/applications/sniff.desktop \
   --vendor=fedora \
   --dir=$RPM_BUILD_ROOT/%{_datadir}/applications \
   --add-category X-Fedora \

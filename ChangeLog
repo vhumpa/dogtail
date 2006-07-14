@@ -1,3 +1,8 @@
+2006-07-14  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail.spec: Forward-port a fix from the Fedora Extras specfile, 
+	fixing a broken call to desktop-file-install. Closes: #347322.
+
 2006-07-13  Zack Cerza <zcerza@redhat.com>
 
 	* scripts/dogtail-run-headless: Rewrite the script in Python. It now
@@ -5,7 +10,7 @@
 	Currently those are: '--gnome' or '-g' for the old minimal GNOME 
 	session, and '--none' or '-n' for just metacity. The script also has
 	a usage statement and helpful error messages. In general it's more 
-	featureful, robust and easy to use.
+	featureful, robust and easy to use. Closes: #344902.
 
 	* scripts/dogtail-detect-session: Also exit normally if any apps are 
 	found at all.
@@ -31,7 +36,7 @@
 2006-06-27  David Malcolm  <dmalcolm@redhat.com>
 
 	* recorder/dogtail-recorder: use GtkSourceView if available to get
-	syntax-highlighting.  Closes: #345374
+	syntax-highlighting.  Closes: #345374.
 
 	* tests/Node.py: new file: unit tests for the dogtail.Node class.
 

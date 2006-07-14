@@ -39,15 +39,24 @@ savebutton = gedit.button('Save')
 savebutton.click()
 
 # Get a handle to gedit's Save As... dialog.
-saveas = gedit.dialog('Save as...')
+try:
+    saveas = gedit.dialog(u'Save As\u2026')
+except tree.SearchError:
+    saveas = gedit.dialog('Save as...')
 
 # We want to save to the file name 'UTF8demo.txt'.
 saveas.child(roleName = 'text').text = 'UTF8demo.txt'
 
-# Let's save it to the desktop.
-saveas.menuItem('Desktop').click()
+# Save the file on the Desktop
 
-# Click the Save button.
+# Don't make the mistake of only searching by name, there are multiple
+# "Desktop" entires in the Save As dialog - you have to query for the
+# roleName too - see the on-line help for the Dogtail "tree" class for
+# details
+desktop = saveas.child('Desktop', roleName='table cell')
+desktop.doAction('activate')
+
+#  Click the Save button.
 saveas.button('Save').click()
 
 # Let's quit now.

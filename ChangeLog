@@ -1,5 +1,11 @@
 2006-07-14  Zack Cerza <zcerza@redhat.com>
 
+	* examples/gedit-test-utf8-tree-api.py: Add patch from Len DiMaggio
+	to fix this script. Also make the script search for u'Save As\u2026'
+	in addition to 'Save As...' for the dialog title. Closes: #340734.
+
+2006-07-14  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail.spec: Forward-port a fix from the Fedora Extras specfile, 
 	fixing a broken call to desktop-file-install. Closes: #347322.
 

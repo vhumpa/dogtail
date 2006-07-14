@@ -60,7 +60,7 @@ class RecorderGUI(gnome.Program):
             self.scriptTextView = sourceView
         else:
             self.scriptTextView = x.get_widget('scriptTextView')
-        self.scriptTextView.set_editable(False)
+        self.scriptTextView.set_editable(True)
         self.writerComboBox = x.get_widget('writerComboBox')
         self.writerComboBox.set_active(0)
         self.writerComboBox.set_sensitive(True)
@@ -95,7 +95,6 @@ class RecorderGUI(gnome.Program):
             self.writerComboBox.set_sensitive(False)
             self.clearButton.set_sensitive(False)
             self.saveButton.set_sensitive(False)
-            self.scriptTextView.set_editable(False)
             self.recordButton.set_label(stopID)
             recorder.startRecording(self.recordButton, self.scriptTextView)
         
@@ -103,7 +102,6 @@ class RecorderGUI(gnome.Program):
             self.writerComboBox.set_sensitive(True)
             self.clearButton.set_sensitive(True)
             self.saveButton.set_sensitive(True)
-            self.scriptTextView.set_editable(True)
             self.recordButton.set_label(recordID)
             recorder.stopRecording(self.recordButton, self.scriptTextView)
 

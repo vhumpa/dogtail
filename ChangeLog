@@ -1,3 +1,9 @@
+2006-07-19  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Initialize EventRecorder.listeners to an 
+	empty list, to fix a traceback when the user tries to quit the 
+	recorder without actually recording anything.
+
 2006-07-14  Zack Cerza <zcerza@redhat.com>
 
 	* recorder/dogtail-recorder: Make the script TextView editable at

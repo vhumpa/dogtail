@@ -80,6 +80,7 @@ def run(string, timeout=config.runTimeout, interval=config.runInterval, desktop=
     if not desktop: from tree import root as desktop
     args = string.split()
     name = args[0]
+    environ['GTK_MODULES'] = 'gail:atk-bridge'
     pid = spawnvpe (P_NOWAIT, name, args, environ)
 
     if not appName:

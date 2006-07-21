@@ -1,5 +1,11 @@
 2006-07-21  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/utils.py: Set GTK_MODULES='gail:atk-bridge' in run() before
+	executing the app, to make sure it is accessible. It seems most 
+	non-GNOME apps need this set.
+
+2006-07-21  Zack Cerza <zcerza@redhat.com>
+
 	* recorder/dogtail-recorder: Add a UI for setting the text property of
 	a Node instance. While recording, you click 'Input Text', and a dialog
 	pops up. Click the node whose text you want to set, then type the text

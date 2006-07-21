@@ -1,3 +1,19 @@
+2006-07-21  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Add a UI for setting the text property of
+	a Node instance. While recording, you click 'Input Text', and a dialog
+	pops up. Click the node whose text you want to set, then type the text
+	into the dialog and press OK. The recorder sets the node's text, then
+	writes out lines in the script to do the same.
+	
+	* recorder/recorder.glade: Add 'Input Text' button.
+
+	* recorder/textinput.glade: Add new glade file: the text input dialog.
+
+	* MANIFEST.in: Add textinput.glade to tarball.
+
+	* setup.py: Add textinput.glade to packages.
+
 2006-07-19  Zack Cerza <zcerza@redhat.com>
 
 	* recorder/dogtail-recorder: Initialize EventRecorder.listeners to an 

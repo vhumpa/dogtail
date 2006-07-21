@@ -15,6 +15,56 @@ try:
 except:
     useGtkSourceView = False
 
+class TextInputDialog:
+    def __init__(self):
+        try:
+            x = gtk.glade.XML('textinput.glade')
+        except RuntimeError:
+            x = gtk.glade.XML('/usr/share/dogtail/glade/textinput.glade')
+        self.window = x.get_widget('window')
+        try:
+            self.window.set_icon_from_file('../icons/dogtail-head.svg')
+        except:
+            self.window.set_icon_from_file('/usr/share/icons/hicolor/scalable/apps/dogtail-head.svg')
+
+        self.label = x.get_widget('label')
+        self.textView = x.get_widget('textView')
+        self.okButton = x.get_widget('okButton')
+        self.okButton.set_sensitive(False)
+        self.cancelButton = x.get_widget('cancelButton')
+
+        recorder.catchNextClick = self
+        self.connectSignals()
+        self.window.show_all()
+
+    def connectSignals(self):
+        self.okButton.connect('clicked', self.passToRecorder)
+        self.cancelButton.connect('clicked', self.destroy)
+
+    def catchNode(self, node):
+        self.node = node
+        self.label.set_text(str(node))
+        self.okButton.set_sensitive(True)
+
+    def passToRecorder(self, button = None):
+        buffer = self.textView.get_buffer()
+        startIter = buffer.get_start_iter()
+        endIter = buffer.get_end_iter()
+        text = buffer.get_text(startIter, endIter)
+        recorder.catchNextClick = False
+        try:
+            recorder.setText(self.node, text)
+        except dogtail.tree.ReadOnlyError:
+            import traceback
+            traceback.print_exc()
+            print "TODO: handle this exception ;)"
+        self.destroy()
+
+    def destroy(self, unused = None):
+        recorder.catchNextClick = False
+        self.window.destroy()
+        del self
+
 def createSourceView():
     langManager = gtksourceview.SourceLanguagesManager()
     lang = langManager.get_language_from_mime_type("text/x-python")
@@ -44,6 +94,8 @@ class RecorderGUI(gnome.Program):
             self.window.set_icon_from_file('/usr/share/icons/hicolor/scalable/apps/dogtail-head.svg')
 
         self.recordButton = x.get_widget('recordButton')
+        self.textButton = x.get_widget('textButton')
+        self.textButton.set_sensitive(False)
         self.saveButton = x.get_widget('saveButton')
         self.saveButton.set_sensitive(False)
         self.clearButton = x.get_widget('clearButton')
@@ -73,6 +125,7 @@ class RecorderGUI(gnome.Program):
     def connectSignals(self):
         self.writerComboBox.connect('changed', self.setWriterClass)
         self.recordButton.connect('clicked', self.toggleRecording, self.scriptTextView)
+        self.textButton.connect('clicked', self.inputText)
         self.clearButton.connect('clicked', self.clearScript, self.scriptTextView)
         self.saveButton.connect('clicked', self.saveScript)
         self.quitButton.connect('clicked', self.quit)
@@ -96,6 +149,7 @@ class RecorderGUI(gnome.Program):
             self.clearButton.set_sensitive(False)
             self.saveButton.set_sensitive(False)
             self.recordButton.set_label(stopID)
+            self.textButton.set_sensitive(True)
             recorder.startRecording(self.recordButton, self.scriptTextView)
         
         elif label == stopID:
@@ -103,6 +157,7 @@ class RecorderGUI(gnome.Program):
             self.clearButton.set_sensitive(True)
             self.saveButton.set_sensitive(True)
             self.recordButton.set_label(recordID)
+            self.textButton.set_sensitive(False)
             recorder.stopRecording(self.recordButton, self.scriptTextView)
 
     def stopRecording(self):
@@ -150,14 +205,17 @@ class RecorderGUI(gnome.Program):
             file.close()
         self.saveFileChooser.destroy()
 
+    def inputText(self, button = None):
+        self.textInputDialog = TextInputDialog()
+
     def quit(self, *args):
         self.stopRecording()
         gtk.main_quit()
 
 # End GUI code
 
-import atspi
 import dogtail.tree
+atspi = dogtail.tree.atspi
 
 def logEvent(event):
     source = event.source
@@ -355,9 +413,7 @@ class ProceduralScriptWriter(ScriptWriter):
             node = node.parent
         return None
 
-    def recordClick(self, node):
-        if node == None: return False
-        
+    def __setUpFocus(self, node):
         application = self.findAncestor(node, roleName = 'application')
         if application:
             needApp = True
@@ -374,7 +430,12 @@ class ProceduralScriptWriter(ScriptWriter):
             if needDialog:
                 self.recordLine("focus.dialog('%s')" % dialog.name)
                 self.currentDialog = dialog
+
+    def recordClick(self, node):
+        if node == None: return False
         
+        self.__setUpFocus(node)
+
         widget = node
         possibleActions = ['click', 'activate', 'open', 'menu']
         foundAnAction = False
@@ -390,6 +451,11 @@ class ProceduralScriptWriter(ScriptWriter):
                 self.recordLine("click('%s', roleName='%s', raw=True)" % (widget.name, widget.roleName))
         self.currentWidget = widget
         
+    def recordSetText(self, node, text):
+        self.__setUpFocus(node)
+        if node != self.currentWidget:
+            self.recordLine("focus.widget('%s', roleName='%s')" % (node.name, node.roleName))
+        self.recordLine('focus.widget.text = "%s"' % text)
 
     def recordKey(self, node):
         pass
@@ -464,6 +530,7 @@ class EventRecorder:
         self.lastReleasedNode = None
         self.absoluteNodePaths = True
         self.listeners = []
+        self.catchNextClick = False
 
     def __registerEvents(self):
         # Only specific events are recorded:
@@ -581,7 +648,7 @@ class EventRecorder:
             # it with detectByCoordinates().
             possibleNodes = [self.lastFocusedNode]
         detectedNode = detectByCoordinates(possibleNodes, x, y)
-        if detectedNode:
+        if detectedNode and not isinstance(detectedNode, FakeNode):
             detectedNode = FakeNode(detectedNode)
         if isPress: 
             self.lastPressedNode = detectedNode
@@ -589,7 +656,10 @@ class EventRecorder:
             self.lastReleasedNode = detectedNode
         
         if isRelease and detectedNode:
-            self.writer.recordClick(detectedNode)
+            if self.catchNextClick:
+                self.catchNextClick.catchNode(detectedNode)
+            else:
+                self.writer.recordClick(detectedNode)
 
     def onWindowCreate(self, event):
         # logEvent(event)
@@ -601,6 +671,11 @@ class EventRecorder:
             return node.getAbsoluteSearchPath()
         else:
             return node
+
+    def setText(self, node, text):
+        node._FakeNode__node.text = text
+        self.writer.recordSetText(node, text)
+
 
 # Under construction.  These ought to be methods, but am having Python assertion
 # failures in refcounting when trying to hook them up using lambda expressions; grrr...

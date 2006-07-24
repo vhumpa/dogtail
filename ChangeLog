@@ -1,3 +1,9 @@
+2006-07-24  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/rawinput.py: Use gtk.kesyms to look up keysyms. Retain 
+	compatibility with old names via a keySymAliases dict. Also, use only
+	one atspi.EventGenerator.
+
 2006-07-21  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/utils.py: Set GTK_MODULES='gail:atk-bridge' in run() before

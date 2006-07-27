@@ -1,5 +1,11 @@
 2006-07-27  David Malcolm  <dmalcolm@redhat.com>
 
+	* tests/Node.py: added TestExceptions: ensure that when an app dies,
+	attempts to contact it result in an exception being raised (even more
+	final part of bg #318135)
+
+2006-07-27  David Malcolm  <dmalcolm@redhat.com>
+
 	* sniff/sniff: handle broken communication with nodes (e.g. for a
 	crashed app) by displaying "broken node" and an error icon (hopefully
 	the final part of bug #318135)

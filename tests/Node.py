@@ -339,7 +339,15 @@ class TestActions(GtkDemoTest):
 class TestProcedural(GtkDemoTest):
     # FIXME: should test the procedural API
     pass
-    
+
+class TestExceptions(GtkDemoTest):
+    def test_exception(self):
+        # Kill the gtk-demo prematurely:
+        import os, signal
+        os.kill(self.pid, signal.SIGKILL)
+
+        # Ensure that we get an exception when we try to work further with it:
+        self.assertRaises(atspi.SpiException, self.app.__getattr__, "name")
 
 if __name__ == '__main__':
     unittest.main()

@@ -324,22 +324,29 @@ iconForRole = { \
 
 def getPixbufForNode(node):
     theme = gtk.icon_theme_get_default()
-    if node.role==atspi.SPI_ROLE_APPLICATION:
-        # FIXME: Use the pixbuf from libwcnk (if available):
-        # wnckApp = Application(node).getWnckApplication()
-        # if wnckApp
-        try: return theme.load_icon(node.name, 24, gtk.ICON_LOOKUP_USE_BUILTIN)
-        except gobject.GError:
-            try: return theme.load_icon(node.name.lower(), 24, gtk.ICON_LOOKUP_USE_BUILTIN)
-            except gobject.GError: return None
-    elif node.parent:
-        return iconForRole[node.role]
-    else:
-        return theme.load_icon("gnome-fs-desktop", 24, gtk.ICON_LOOKUP_USE_BUILTIN)
+    try:
+        if node.role==atspi.SPI_ROLE_APPLICATION:
+            # FIXME: Use the pixbuf from libwcnk (if available):
+            # wnckApp = Application(node).getWnckApplication()
+            # if wnckApp
+            try: return theme.load_icon(node.name, 24, gtk.ICON_LOOKUP_USE_BUILTIN)
+            except gobject.GError:
+                try: return theme.load_icon(node.name.lower(), 24, gtk.ICON_LOOKUP_USE_BUILTIN)
+                except gobject.GError: return None
+        elif node.parent:
+            return iconForRole[node.role]
+        else:
+            return theme.load_icon("gnome-fs-desktop", 24, gtk.ICON_LOOKUP_USE_BUILTIN)
+    except atspi.SpiException:
+        return theme.load_icon("gtk-dialog-error", 24, gtk.ICON_LOOKUP_USE_BUILTIN)
 
 def getNodeAttr(column, cell, model, iter, attr):
     node = model.get_value(iter, MODEL_FIELD_NODE)
-    cell.set_property('text', getattr(node, attr))
+    try:
+        text = getattr(node, attr)
+    except atspi.SpiException:
+        text = "(broken node)"
+    cell.set_property('text', text)
 
 def getCellPixbufForNode(column, cell, model, iter):
     node = model.get_value(iter, MODEL_FIELD_NODE)

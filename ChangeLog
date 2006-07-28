@@ -1,3 +1,8 @@
+2006-07-28  David Malcolm  <dmalcom@redhat.com>
+
+	* Makefile: add a working default target ('all') and an install target,
+	so that it builds within jhbuild (Fixes: #318535)
+
 2006-07-27  David Malcolm  <dmalcolm@redhat.com>
 
 	* tests/Node.py: added TestExceptions: ensure that when an app dies,

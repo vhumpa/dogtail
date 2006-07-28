@@ -1,7 +1,10 @@
 # dogtail *development* Makefile
 
 all:
-	exit 1
+	python setup.py build_ext --inplace
+
+install:
+	python setup.py install
 
 clean:
 	python setup.py clean

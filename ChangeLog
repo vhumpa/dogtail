@@ -1,3 +1,7 @@
+2006-07-31  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/config.py, dogtail/tree.py: Remove shebang lines.
+
 2006-07-28  David Malcolm  <dmalcom@redhat.com>
 
 	* Makefile: add a working default target ('all') and an install target,

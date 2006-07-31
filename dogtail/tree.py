@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Makes some sense of the AT-SPI API
 
 The tree API handles various things for you:

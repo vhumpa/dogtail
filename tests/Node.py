@@ -15,6 +15,7 @@ test method is run.
 __author__="Dave Malcolm <dmalcolm@redhat.com>"
 
 import unittest
+import time
 import dogtail.tree
 import atspi
 
@@ -30,6 +31,9 @@ class GtkDemoTest(unittest.TestCase):
     def tearDown(self):
         import os, signal
         os.kill(self.pid, signal.SIGKILL)
+        # Sleep just enough to let the app actually die.
+        # AT-SPI doesn't like being hammered too fast.
+        time.sleep(0.5)
 
     def runDemo(self, demoName):
         """

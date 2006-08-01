@@ -10,10 +10,9 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch: noarch
 BuildRequires: python
 BuildRequires: desktop-file-utils
-Requires: pyspi >= 0.5.3
+Requires: pyspi >= 0.5.5
 Requires: pygtk2
 Requires: rpm-python
-Requires: ImageMagick
 Requires: xorg-x11-server-Xvfb
 
 %description
@@ -64,6 +63,8 @@ rm -rf $RPM_BUILD_ROOT
 * Tue Aug 01 2006 Zack Cerza <zcerza@redhat.com> - 0.5.2-1
 - New upstream release.
 - Update Requires from Xvfb to xorg-x11-server-Xvfb.
+- Bump pyspi Requires.
+- Remove ImageMagick Requires.
 - Escape post-macro in changelog-macro.
 
 * Mon Apr 17 2006 Zack Cerza <zcerza@redhat.com> - 0.5.1-3

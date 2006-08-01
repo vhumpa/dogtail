@@ -14,7 +14,7 @@ Requires: pyspi >= 0.5.3
 Requires: pygtk2
 Requires: rpm-python
 Requires: ImageMagick
-Requires: Xvfb
+Requires: xorg-x11-server-Xvfb
 
 %description
 GUI test tool and automation framework that uses assistive technologies to 
@@ -63,6 +63,7 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 * Tue Aug 01 2006 Zack Cerza <zcerza@redhat.com> - 0.5.2-1
 - New upstream release.
+- Update Requires from Xvfb to xorg-x11-server-Xvfb.
 - Escape post-macro in changelog-macro.
 
 * Mon Apr 17 2006 Zack Cerza <zcerza@redhat.com> - 0.5.1-3

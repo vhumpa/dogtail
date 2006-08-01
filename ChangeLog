@@ -1,3 +1,7 @@
+2006-08-01  Zack Cerza <zcerza@redhat.com>
+
+	* NEWS: Update.
+
 2006-07-31  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/config.py, dogtail/tree.py: Remove shebang lines.

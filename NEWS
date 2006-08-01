@@ -3,7 +3,18 @@ dogtail 0.5.2
 
 Features:
 
+ * A much-improved recorder:
+
+    - A procedural script writer, which is now default.
+
+ * Support for AccessibleSelections, providing a clean way to select page
+   tabs and combo box items.
+
 Bugfixes:
+
+ * The source is now indented with spaces and not tabs! :) (GNOME bug #318833)
+
+ * Pyspi and dogtail no longer mysteriously stop working. (GNOME bug #321273)
 
 
 dogtail 0.5.1

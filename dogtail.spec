@@ -61,9 +61,12 @@ rm -rf $RPM_BUILD_ROOT
 %doc examples/
 
 %changelog
-* Tue Apr 04 2006 Zack Cerza <zcerza@redhat.com> - 0.5.2-1
-- Post-release version bump.
-- Remove '/releases' from URL.
+* Tue Aug 01 2006 Zack Cerza <zcerza@redhat.com> - 0.5.2-1
+- New upstream release.
+- Escape post-macro in changelog-macro.
+
+* Mon Apr 17 2006 Zack Cerza <zcerza@redhat.com> - 0.5.1-3
+- Fix the URL field.
 
 * Tue Mar 21 2006 Zack Cerza <zcerza@redhat.com> - 0.5.1-2
 - Fix URL and Source0 fields.
@@ -101,7 +104,7 @@ rm -rf $RPM_BUILD_ROOT
   python-elementtree.
 - Moved documentation (including examples) to the correct place.
 - Make sure /usr/share/doc/dogtail is removed.
-- Added 'gtk-update-icon-cache' to %post.
+- Added 'gtk-update-icon-cache' to %%post.
 
 * Mon Oct 24 2005 Zack Cerza <zcerza@redhat.com> - 0.4.3-1
 - New upstream release.

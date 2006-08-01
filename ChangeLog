@@ -1,5 +1,9 @@
 2006-08-01  Zack Cerza <zcerza@redhat.com>
 
+	* NEWS: Update.
+	
+2006-08-01  Zack Cerza <zcerza@redhat.com>
+
 	* tests/Node.py: Put a time.sleep() in GtkDemoTest.tearDown() to let
 	gtk-demo actually die before launching another. AT-SPI seems to really
 	disapprove of the speed at which it was being hammered.

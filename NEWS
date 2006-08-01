@@ -7,14 +7,35 @@ Features:
 
     - A procedural script writer, which is now default.
 
+    - An 'Input Text' feature, which allows you to set the text attribute
+      of any visible Node via the recorder. Coming soon is proper keystroke
+      recording.
+
+    - The script view now uses syntax hilighting where available. (GNOME bug
+      #345374)
+
+ * A completely-rewritten dogtail-run-headless, which now offers two session
+   types: minimal GNOME and metacity. The syntax has changed, so use 
+   'dogtail-run-headless --help' to get started. (GNOME bug #320548)
+
+ * All 'name' arguments in dogtail.tree and dogtail.procedural now accept 
+   regular expressions.
+
  * Support for AccessibleSelections, providing a clean way to select page
-   tabs and combo box items.
+   tabs and combo box items. (GNOME bug #336562)
+
+ * Support for building in a jhbuild environment. (GNOME bug #318535)
+
+ * Far more extensive unit tests for dogtail.tree.Node.
 
 Bugfixes:
 
  * The source is now indented with spaces and not tabs! :) (GNOME bug #318833)
 
  * Pyspi and dogtail no longer mysteriously stop working. (GNOME bug #321273)
+
+ * Sniff no longer crashes when an application being poked disappears. (GNOME 
+   bug #318135)
 
 
 dogtail 0.5.1

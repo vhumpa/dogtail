@@ -31,23 +31,11 @@ def usage():
 
 import os
 import sys
+import gconf
+gconfClient = gconf.client_get_default()
 
 TRUE='true'
 FALSE='false'
-
-def getGConfBool(key):
-    cmd = 'gconftool-2 --get ' + key
-    answer = os.popen(cmd).readlines()[0].strip()
-    if answer == TRUE: return True
-    elif answer == FALSE: return False
-    else: raise RuntimeError, answer
-
-def setGConfBool(key, value):
-    if value == True: value = TRUE
-    elif value == False: value = FALSE
-    else: raise TypeError, value
-    cmd = 'gconftool-2 --type bool --set %s %s' % (key, value)
-    os.popen(cmd)
 
 a11yGConfKey = '/desktop/gnome/interface/accessibility'
 
@@ -57,13 +45,15 @@ a11yWasEnabled = True
 
 def makeSureGNOMEIsAccessible():
     global a11yIsEnabled, a11yWasEnabled
-    a11yIsEnabled = getGConfBool(a11yGConfKey)
+    a11yIsEnabled = gconfClient.get_bool(a11yGConfKey)
     a11yWasEnabled = a11yIsEnabled
 
     if not a11yIsEnabled:
         print "Temporarily enabling accessibility support for GNOME"
-        setGConfBool(a11yGConfKey, True)
-        a11yIsEnabled = True
+        gconfClient.set_bool(a11yGConfKey, True)
+        a11yIsEnabled = gconfClient.get_bool(a11yGConfKey)
+
+    return a11yIsEnabled
 
 global xinitrc
 xinitrc = None
@@ -89,8 +79,6 @@ def startXServer():
 
     client = xinitrc.name
     resolution = '1024x768x16'
-    'xinit /usr/ucb/rsh fasthost cpupig -display ws:1 --  :1 -a 2 -t 5'
-    'xinit -- /usr/bin/Xvfb :1 -screen 0 1024x768x24 -ac -noreset -shmem'
     cmd = 'xinit %s -- %s %s -screen 0 %s -ac -noreset -shmem' % \
             (client, server, findFreeDisplay(), resolution)
     print cmd
@@ -187,7 +175,7 @@ def main(argv):
             return exitCode
 
 def cleanup():
-    if not a11yWasEnabled: setGConfBool(a11yGConfKey, False)
+    if not a11yWasEnabled: gconfClient.set_bool(a11yGConfKey, False)
     if exitCodeFile:
         os.remove(exitCodeFile)
     if xinitrc:

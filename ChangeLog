@@ -1,3 +1,12 @@
+2006-08-11  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Use the python GConf bindings.
+
+2006-08-11  Zack Cerza <zcerza@redhat.com>
+
+	* NEWS, setup.py, dogtail/__init__.py, dogtail/apps/__init__.py, 
+	dogtail/apps/wrappers/__init__.py: Post-release version bump.
+
 2006-08-01  Zack Cerza <zcerza@redhat.com>
 
 	Released 0.5.2.

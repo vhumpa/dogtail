@@ -14,6 +14,7 @@ Requires: pyspi >= 0.5.5
 Requires: pygtk2
 Requires: rpm-python
 Requires: xorg-x11-server-Xvfb
+Requires: xorg-x11-xinit
 
 %description
 GUI test tool and automation framework that uses assistive technologies to 
@@ -62,6 +63,8 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 * Fri Aug 11 2006 Zack Cerza <zcerza@redhat.com> - 0.5.3-1
 - Post-release version bump.
+- Add Requires for xorg-x11-xinit.
+
 * Tue Aug 01 2006 Zack Cerza <zcerza@redhat.com> - 0.5.2-1
 - New upstream release.
 - Update Requires from Xvfb to xorg-x11-server-Xvfb.

@@ -1,3 +1,10 @@
+2006-08-21  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder.desktop: Move to the 'Accessories' 
+	category in the menu.
+
+	* sniff/sniff.desktop: Move to the 'Accessories' category in the menu.
+
 2006-08-11  Zack Cerza <zcerza@redhat.com>
 
 	* scripts/dogtail-run-headless: Use the python GConf bindings.

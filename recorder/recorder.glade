@@ -50,23 +50,13 @@ Object-Oriented</property>
                             </widget>
                         </child>
                         <child>
-                            <widget class="GtkButton" id="textButton">
-                                <property name="is_focus">True</property>
-                                <property name="label" context="yes" translatable="yes">Input Text</property>
-                                <property name="visible">True</property>
-                            </widget>
-                            <packing>
-                                <property name="position">1</property>
-                            </packing>
-                        </child>
-                        <child>
                             <widget class="GtkButton" id="clearButton">
                                 <property name="label">gtk-clear</property>
                                 <property name="use_stock">True</property>
                                 <property name="visible">True</property>
                             </widget>
                             <packing>
-                                <property name="position">2</property>
+                                <property name="position">1</property>
                             </packing>
                         </child>
                         <child>
@@ -77,7 +67,7 @@ Object-Oriented</property>
                                 <property name="visible">True</property>
                             </widget>
                             <packing>
-                                <property name="position">3</property>
+                                <property name="position">2</property>
                             </packing>
                         </child>
                         <child>
@@ -88,7 +78,7 @@ Object-Oriented</property>
                                 <property name="visible">True</property>
                             </widget>
                             <packing>
-                                <property name="position">4</property>
+                                <property name="position">3</property>
                             </packing>
                         </child>
                     </widget>

@@ -3,77 +3,15 @@ __author__ = 'David Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.com
 
 # Event recorder.
 # FIXME: under construction
+import atspi
+import dogtail.tree
+import gtk.gdk
+import dogtail.rawinput
 
 # Begin GUI code
 import gobject
 import gnome
 import gtk.glade
-
-try:
-    import gtksourceview
-    useGtkSourceView = True
-except:
-    useGtkSourceView = False
-
-class TextInputDialog:
-    def __init__(self):
-        try:
-            x = gtk.glade.XML('textinput.glade')
-        except RuntimeError:
-            x = gtk.glade.XML('/usr/share/dogtail/glade/textinput.glade')
-        self.window = x.get_widget('window')
-        try:
-            self.window.set_icon_from_file('../icons/dogtail-head.svg')
-        except:
-            self.window.set_icon_from_file('/usr/share/icons/hicolor/scalable/apps/dogtail-head.svg')
-
-        self.label = x.get_widget('label')
-        self.textView = x.get_widget('textView')
-        self.okButton = x.get_widget('okButton')
-        self.okButton.set_sensitive(False)
-        self.cancelButton = x.get_widget('cancelButton')
-
-        recorder.catchNextClick = self
-        self.connectSignals()
-        self.window.show_all()
-
-    def connectSignals(self):
-        self.okButton.connect('clicked', self.passToRecorder)
-        self.cancelButton.connect('clicked', self.destroy)
-
-    def catchNode(self, node):
-        self.node = node
-        self.label.set_text(str(node))
-        self.okButton.set_sensitive(True)
-
-    def passToRecorder(self, button = None):
-        buffer = self.textView.get_buffer()
-        startIter = buffer.get_start_iter()
-        endIter = buffer.get_end_iter()
-        text = buffer.get_text(startIter, endIter)
-        recorder.catchNextClick = False
-        try:
-            recorder.setText(self.node, text)
-        except dogtail.tree.ReadOnlyError:
-            import traceback
-            traceback.print_exc()
-            print "TODO: handle this exception ;)"
-        self.destroy()
-
-    def destroy(self, unused = None):
-        recorder.catchNextClick = False
-        self.window.destroy()
-        del self
-
-def createSourceView():
-    langManager = gtksourceview.SourceLanguagesManager()
-    lang = langManager.get_language_from_mime_type("text/x-python")
-    buffer = gtksourceview.SourceBuffer()
-    sourceView = gtksourceview.SourceView(buffer)
-    buffer.set_language(lang)
-    buffer.set_highlight(True)
-    return sourceView
-
 class RecorderGUI(gnome.Program):
     def __init__(self):
         gnome.Program.__init__(self)
@@ -94,25 +32,13 @@ class RecorderGUI(gnome.Program):
             self.window.set_icon_from_file('/usr/share/icons/hicolor/scalable/apps/dogtail-head.svg')
 
         self.recordButton = x.get_widget('recordButton')
-        self.textButton = x.get_widget('textButton')
-        self.textButton.set_sensitive(False)
         self.saveButton = x.get_widget('saveButton')
         self.saveButton.set_sensitive(False)
         self.clearButton = x.get_widget('clearButton')
         self.clearButton.set_sensitive(False)
         self.quitButton = x.get_widget('quitButton')
-
-        if useGtkSourceView:
-            oldTextView = x.get_widget('scriptTextView')
-            parent = oldTextView.get_parent()
-            parent.remove(oldTextView)
-            sourceView = createSourceView()
-            parent.add(sourceView)
-            sourceView.show()
-            self.scriptTextView = sourceView
-        else:
-            self.scriptTextView = x.get_widget('scriptTextView')
-        self.scriptTextView.set_editable(True)
+        self.scriptTextView = x.get_widget('scriptTextView')
+        self.scriptTextView.set_editable(False)
         self.writerComboBox = x.get_widget('writerComboBox')
         self.writerComboBox.set_active(0)
         self.writerComboBox.set_sensitive(True)
@@ -125,7 +51,6 @@ class RecorderGUI(gnome.Program):
     def connectSignals(self):
         self.writerComboBox.connect('changed', self.setWriterClass)
         self.recordButton.connect('clicked', self.toggleRecording, self.scriptTextView)
-        self.textButton.connect('clicked', self.inputText)
         self.clearButton.connect('clicked', self.clearScript, self.scriptTextView)
         self.saveButton.connect('clicked', self.saveScript)
         self.quitButton.connect('clicked', self.quit)
@@ -148,16 +73,16 @@ class RecorderGUI(gnome.Program):
             self.writerComboBox.set_sensitive(False)
             self.clearButton.set_sensitive(False)
             self.saveButton.set_sensitive(False)
+            self.scriptTextView.set_editable(False)
             self.recordButton.set_label(stopID)
-            self.textButton.set_sensitive(True)
             recorder.startRecording(self.recordButton, self.scriptTextView)
         
         elif label == stopID:
             self.writerComboBox.set_sensitive(True)
             self.clearButton.set_sensitive(True)
             self.saveButton.set_sensitive(True)
+            self.scriptTextView.set_editable(True)
             self.recordButton.set_label(recordID)
-            self.textButton.set_sensitive(False)
             recorder.stopRecording(self.recordButton, self.scriptTextView)
 
     def stopRecording(self):
@@ -205,17 +130,11 @@ class RecorderGUI(gnome.Program):
             file.close()
         self.saveFileChooser.destroy()
 
-    def inputText(self, button = None):
-        self.textInputDialog = TextInputDialog()
-
     def quit(self, *args):
         self.stopRecording()
         gtk.main_quit()
 
 # End GUI code
-
-import dogtail.tree
-atspi = dogtail.tree.atspi
 
 def logEvent(event):
     source = event.source
@@ -254,7 +173,10 @@ class ScriptWriter:
     def recordClick(self, node):
         raise NotImplementedError
 
-    def recordKey(self, node):
+    def recordTyping(self, string, type, node):
+        raise NotImplementedError
+
+    def recordKeyCombo(self, string, type, node):
         raise NotImplementedError
 
 class OOScriptWriter(ScriptWriter):
@@ -326,17 +248,6 @@ class OOScriptWriter(ScriptWriter):
         else:
             # Have to specify it as an absolute path:
             return "root"+absSearchPath.makeScriptMethodCall()
-
-    def recordKey(self, node, key):
-        """
-        Record a keystroke
-
-        NOTE: This function is under construction. It doesn't work.
-        """
-        if node == None: return
-        searchPath = node.getAbsoluteSearchPath()
-        result = self.generateAbsSearchPathMethodCall(searchPath)
-        result +=".rawType('%s')" % key
 
     def recordClick(self, node):
         """
@@ -413,7 +324,11 @@ class ProceduralScriptWriter(ScriptWriter):
             node = node.parent
         return None
 
-    def __setUpFocus(self, node):
+    def setUpFocus(self, node):
+        """
+        Writes out the necessary focus.application() and focus.dialog() lines 
+        to the script.
+        """
         application = self.findAncestor(node, roleName = 'application')
         if application:
             needApp = True
@@ -422,6 +337,10 @@ class ProceduralScriptWriter(ScriptWriter):
             if needApp:
                 self.recordLine("focus.application('%s')" % application.name)
                 self.currentApplication = application
+        elif application == None:
+            print "Warning: could not determine which application you are clicking or typing on."
+            print "    It is most likely not reporting its toplevel Accessible as having a"
+            print "    role name of 'application'. Please file a bug against it!"
 
         dialog = self.findAncestor(node, roleName = 'dialog')
         if dialog:
@@ -430,12 +349,12 @@ class ProceduralScriptWriter(ScriptWriter):
             if needDialog:
                 self.recordLine("focus.dialog('%s')" % dialog.name)
                 self.currentDialog = dialog
-
+        
     def recordClick(self, node):
         if node == None: return False
-        
-        self.__setUpFocus(node)
 
+        self.setUpFocus(node)
+        
         widget = node
         possibleActions = ['click', 'activate', 'open', 'menu']
         foundAnAction = False
@@ -451,15 +370,15 @@ class ProceduralScriptWriter(ScriptWriter):
                 self.recordLine("click('%s', roleName='%s', raw=True)" % (widget.name, widget.roleName))
         self.currentWidget = widget
         
-    def recordSetText(self, node, text):
-        self.__setUpFocus(node)
-        if node != self.currentWidget:
-            self.recordLine("focus.widget('%s', roleName='%s')" % (node.name, node.roleName))
-        self.recordLine('focus.widget.text = "%s"' % text)
+    def recordTyping(self, string, type, node):
+        if not string: return
+        self.setUpFocus(node)
+        self.recordLine("type(\"" + string.replace('"','\\"') + "\")")
 
-    def recordKey(self, node):
-        pass
-
+    def recordKeyCombo(self, string, type, node):
+        if not string: return
+        self.setUpFocus(node)
+        self.recordLine("keyCombo(\"" + string + "\")")
 
 class FakeNode(dogtail.tree.Node):
     """A "cached pseudo-copy" of a Node
@@ -521,6 +440,16 @@ class EventRecorder:
     """
     Event Recorder
     """
+    modifiers = {
+            atspi.Accessibility_MODIFIER_NUMLOCK: 'NumLock',
+            atspi.Accessibility_MODIFIER_META3: 'Meta3',
+            atspi.Accessibility_MODIFIER_META2: 'Meta2',
+            atspi.Accessibility_MODIFIER_META: 'Meta',
+            atspi.Accessibility_MODIFIER_ALT: 'Alt',
+            atspi.Accessibility_MODIFIER_CONTROL: 'Control',
+            atspi.Accessibility_MODIFIER_SHIFTLOCK: 'ShiftLock',
+            atspi.Accessibility_MODIFIER_SHIFT: 'Shift' }
+
     def __init__(self, writerClass = ProceduralScriptWriter):
         self.writer = None
         self.writerClass = writerClass
@@ -528,9 +457,12 @@ class EventRecorder:
         self.lastSelectedNode = None
         self.lastPressedNode = None
         self.lastReleasedNode = None
+        self.typedTextBuffer = ""
+        self.lastTypedNode = None
         self.absoluteNodePaths = True
         self.listeners = []
-        self.catchNextClick = False
+
+        import gtk.keysyms
 
     def __registerEvents(self):
         # Only specific events are recorded:
@@ -545,6 +477,9 @@ class EventRecorder:
         # Mouse button events:
         listeners.append(atspi.EventListener(marshalOnMouseButton, ["mouse:button"]))
 
+        # Keystroke events:
+        listeners.append(atspi.DeviceListener(marshalOnKeyPress))
+
         # Window creation:
         #listeners.append(atspi.EventListener(marshalOnWindowCreate, ["window:create"]))
 
@@ -553,6 +488,8 @@ class EventRecorder:
     def startRecording(self, unused = None, scriptTextView = None):
         self.writer = self.writerClass(scriptTextView)
         self.listeners = self.__registerEvents()
+        # set lastKeyPressTimeStamp to 1, which is an invalid value.
+        self.lastKeyPressTimeStamp = 1
         atspi.event_main()
 
     def stopRecording(self, unused = None, scriptTextView = None):
@@ -580,6 +517,8 @@ class EventRecorder:
 
     def onMouseButton(self, event):
         #logEvent(event)
+        self.writer.recordTyping(self.typedTextBuffer, "pressed", self.lastFocusedNode)
+        self.typedTextBuffer = ""
 
         isPress = isRelease = False
         if "mouse:button:1" not in event.type:
@@ -656,10 +595,129 @@ class EventRecorder:
             self.lastReleasedNode = detectedNode
         
         if isRelease and detectedNode:
-            if self.catchNextClick:
-                self.catchNextClick.catchNode(detectedNode)
-            else:
-                self.writer.recordClick(detectedNode)
+            self.writer.recordClick(detectedNode)
+
+    def __checkModMask(fullMask, partMask, toCheck):
+        result = False
+        if fullMask == 0 or partMask == 0:
+            return (partMask, result)
+        if partMask - toCheck >= 0:
+            partMask = partMask - toCheck
+            result = True
+        return (partMask, result)
+    __checkModMask = staticmethod(__checkModMask)
+
+    def __getModifiers(self, modMask, keyChar):
+        partMask = modMask
+        modsDict = {}
+        keys = self.modifiers.keys()
+        keys.sort()
+        for i in keys[::-1]:
+            (partMask, pressed) = self.__checkModMask(modMask, partMask, i)
+            if pressed: modsDict[self.modifiers[i]] = i
+        # Screw capslock.
+        if modsDict.has_key('ShiftLock'):
+            del modsDict['ShiftLock']
+        # Shift+foo is not considered a key combo if foo is printable
+        if modsDict.has_key('Shift') and not keyChar == '':
+            del modsDict['Shift']
+        return modsDict
+
+    def onKeyPress(self, event):
+        # The Fn key on my Thinkpad has a keyID of 0. Ignore it.
+        if not event.keyID: return
+        if event.type == atspi.SPI_KEY_PRESSED:
+            type = "pressed"
+        elif event.type == atspi.SPI_KEY_RELEASED:
+            type = "released"
+            return
+
+        self.lastKeyPressTimeStamp = event.timeStamp
+        if self.lastKeyPressTimeStamp < 0:
+            elapsedTime = event.timeStamp - self.lastKeyPressTimeStamp
+        else:
+            elapsedTime = 0
+
+        if self.lastFocusedNode:
+            self.lastFocusedNode.text = self.lastFocusedNode._FakeNode__node.text
+
+        keyString = dogtail.rawinput.keyStrings[event.keyID]
+        keyChar = dogtail.rawinput.keySymToUniChar(event.keyID)
+
+        # If the only key being pressed is a modifier, don't do anything.
+        if keyString.startswith("Alt_") or keyString.startswith("Control_") \
+                or keyString.startswith("Meta_") or \
+                keyString.startswith("Shift") or keyString == 'Caps_Lock':
+            isJustAMod = True
+            return
+        else:
+            isJustAMod = False
+
+        modsDict = self.__getModifiers(event.modifiers, keyChar)
+
+        def buildModifierString(modsDict):
+            s = ''
+            if modsDict:
+                for mod in modsDict.keys():
+                    s = s + '<' + mod + '>'
+            return s
+
+        modString = buildModifierString(modsDict)
+
+        # If modifiers are present, we're dealing with a key combo
+        if modString: combo = True
+        # Otherwise, we assume for a second that we're not.
+        else: combo = False
+        
+        # If the key represents a printable character, use that.
+        if keyChar != '': key = keyChar
+        else:
+            # Otherwise, use the keyString, e.g. 'Return'.
+            key = keyString
+            # We treat nonprintable characters like key combos.
+            combo = True
+
+        if not combo and self.lastTypedNode is not None and \
+                (self.lastTypedNode != self.lastFocusedNode):
+            #print "changed node, flushing"
+            flush = True
+        else: flush = False
+
+        #print "%s ! %s ! %s" % (str(self.lastTypedNode), str(self.lastFocusedNode), self.typedTextBuffer)
+
+        if combo:
+            self.writer.recordTyping(self.typedTextBuffer, "pressed", self.lastFocusedNode)
+            self.typedTextBuffer = ""
+            self.writer.recordKeyCombo(modString + key, type, self.lastFocusedNode)
+            self.lastTypedNode = self.lastFocusedNode
+        elif flush:
+            self.writer.recordTyping(self.typedTextBuffer, "pressed", self.lastTypedNode)
+            self.typedTextBuffer = key
+            self.lastTypedNode = self.lastFocusedNode
+        else:
+            if self.typedTextBuffer == "":
+                self.lastTypedNode = self.lastFocusedNode
+            self.typedTextBuffer = self.typedTextBuffer + key
+        return
+
+        # If we're using the keyString or have modifiers, flush 
+        # self.typedTextBuffer by recording a line and also record the key 
+        # combo.
+        if modString or flush:
+            if self.typedTextBuffer:
+                self.writer.recordTyping(self.typedTextBuffer, "pressed", self.lastFocusedNode)
+                if not combo:
+                    self.typedTextBuffer = key
+                else:
+                    self.typedTextBuffer = ""
+                self.lastTypedNode = self.lastFocusedNode
+            if modString or combo:
+                self.writer.recordKeyCombo(modString + key, type, self.lastFocusedNode)
+        # Otherwise add to the buffer, and wait to flush it.
+        else:
+            if self.typedTextBuffer == "":
+                self.lastTypedNode = self.lastFocusedNode
+            self.typedTextBuffer = self.typedTextBuffer + key
 
     def onWindowCreate(self, event):
         # logEvent(event)
@@ -672,24 +730,28 @@ class EventRecorder:
         else:
             return node
 
-    def setText(self, node, text):
-        node._FakeNode__node.text = text
-        self.writer.recordSetText(node, text)
-
-
 # Under construction.  These ought to be methods, but am having Python assertion
 # failures in refcounting when trying to hook them up using lambda expressions; grrr...
+import traceback
 def marshalOnFocus(event):
-    recorder.onFocus(event)
+    try: recorder.onFocus(event)
+    except: traceback.print_exc()
 
 def marshalOnSelect(event):
-    recorder.onSelect(event)
+    try: recorder.onSelect(event)
+    except: traceback.print_exc()
 
 def marshalOnMouseButton(event):
-    recorder.onMouseButton(event)
+    try: recorder.onMouseButton(event)
+    except: traceback.print_exc()
+
+def marshalOnKeyPress(event):
+    try: recorder.onKeyPress(event)
+    except: traceback.print_exc()
 
 def marshalOnWindowCreate(event):
-    recorder.onWindowCreate(event)
+    try: recorder.onWindowCreate(event)
+    except: traceback.print_exc()
 
 recorder = EventRecorder()
 recorderGUI = RecorderGUI()

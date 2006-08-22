@@ -1,5 +1,18 @@
 2006-08-22  Zack Cerza <zcerza@redhat.com>
 
+	* recorder/dogtail-recorder: Remove the text input UI. Implement actual
+	keystroke recording. Add support for the ProceduralScriptWriter to 
+	write out script calls. The OOScriptWriter is unsupported at this time.
+	Also, make exceptions occuring inside AT-SPI-registered callbacks more 
+	informative by printing their tracebacks before they're lost in the 
+	marshaling process. 
+
+	* recorder/recorder.glade: Remove 'Input Text' button.
+
+	* recorder/textinput.glade: Remove glade file for text input UI.
+
+2006-08-22  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/procedural.py: Add type(), which for now just calls
 	focus.widget.node.typeText(). Add keyCombo(), which for now just calls
 	focus.widget.node.keyCombo().

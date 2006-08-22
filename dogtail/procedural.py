@@ -303,12 +303,16 @@ class Select (Action):
         func()
         sleep(delay)
         
+def type(text):
+    focus.widget.node.typeText(text)
+
+def keyCombo(combo):
+    focus.widget.node.keyCombo(combo)
 
 def run(application, arguments = '', appName = ''):
     from utils import run as utilsRun
     utilsRun(application + arguments, appName = appName)
     focus.application(application)
-
 
 focus = Focus()
 click = Click()

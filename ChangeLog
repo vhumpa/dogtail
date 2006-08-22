@@ -1,5 +1,11 @@
 2006-08-22  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/procedural.py: Add type(), which for now just calls
+	focus.widget.node.typeText(). Add keyCombo(), which for now just calls
+	focus.widget.node.keyCombo().
+
+2006-08-22  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tree.py: Add new Node attributes: 'focusable' and 'focused'. 
 	Both are read-only Boolean values. 'focusable' indicates whether the
 	Node is able of taking keyboard focus. 'focused' indicates whether the

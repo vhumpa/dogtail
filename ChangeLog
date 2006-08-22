@@ -1,5 +1,18 @@
 2006-08-22  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/tree.py: Add new Node attributes: 'focusable' and 'focused'. 
+	Both are read-only Boolean values. 'focusable' indicates whether the
+	Node is able of taking keyboard focus. 'focused' indicates whether the
+	Node currently has keyboard focus. Remove Node.rawType() and move its
+	functionality to Node.typeText(). In Node.typeText(), if the node is 
+	focusable and not focused, try to grab its focus with Node.grabFocus
+	before using rawtype.typeText() to do the typing. If the node is not 
+	focusable, just append the string to the node's 'text' property. Add 
+	Node.keyCombo(), which does a similar thing but cannot have a fallback 
+	mechanism.
+
+2006-08-22  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/rawinput.py: Add keyCombo(), which takes a string in the same
 	format of gtk.accelerator_parse(), e.g. "<Control><Alt>Delete" and
 	generates the appropriate keyboard events to simulate the user pressing

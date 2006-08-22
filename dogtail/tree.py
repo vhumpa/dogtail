@@ -67,6 +67,7 @@ from time import sleep
 from config import config
 from utils import doDelay
 from utils import Blinker
+import rawinput
 import path
 
 from logging import debugLogger as logger
@@ -247,6 +248,12 @@ class Node:
     'showing' (read-only boolean):
     Generated from stateSet based on presence of atspi.SPI_STATE_SHOWING
 
+    'focusable' (read-only boolean):
+    Generated from stateSet based on presence of atspi.SPI_STATE_FOCUSABLE
+
+    'focused' (read-only boolean):
+    Generated from stateSet based on presence of atspi.SPI_STATE_FOCUSED
+
     'actions' (read-only list of Action instances):
     Generated from Accessible_getAction and AccessibleAction_getNActions
 
@@ -328,6 +335,7 @@ class Node:
         if self.__component is not None:
             def grabFocus():
                 self.__component.grabFocus()
+                doDelay()
             self.grabFocus = grabFocus
 
             def rawClick(button = 1):
@@ -337,25 +345,15 @@ class Node:
                 2 is middle,
                 3 is right.
                 """
-                import rawinput
                 extents = self.extents
                 position = (extents[0], extents[1])
                 size = (extents[2], extents[3])
                 clickX = position[0] + 0.5 * size[0]
                 clickY = position[1] + 0.5 * size[1]
-                if config.debugSearching: logger.log("raw click on %s %s at (%s,%s)"%(self.name, self.getLogString(), str(clickX), str(clickY)))
+                if config.debugSearching:
+                    logger.log("raw click on %s %s at (%s,%s)"%(self.name, self.getLogString(), str(clickX), str(clickY)))
                 rawinput.click(clickX, clickY, button)
             self.rawClick = rawClick
-
-            def rawType(text):
-                """
-                Generates raw keyboard events to type text into the Node.
-                """
-                import rawinput
-                if config.debugSearching: logger.log("Typing text '%s' into %s"%(text, self.getLogString()))
-                self.grabFocus()
-                rawinput.typeText(text)
-            self.rawType = rawType
 
         # Swallow the Text object, if it exists
         self.__text = self.__accessible.getText()
@@ -491,6 +489,10 @@ class Node:
             return self.__accessible.getStateSet().contains(atspi.SPI_STATE_SENSITIVE)
         elif attr == "showing":
             return self.__accessible.getStateSet().contains(atspi.SPI_STATE_SHOWING)
+        elif attr == "focusable":
+            return self.__accessible.getStateSet().contains(atspi.SPI_STATE_FOCUSABLE)
+        elif attr == "focused":
+            return self.__accessible.getStateSet().contains(atspi.SPI_STATE_FOCUSED)
 
         # Attributes from the Action object
         elif attr == "actions":
@@ -560,7 +562,7 @@ class Node:
             raise ReadOnlyError, attr
 
         # Read-only attributes synthesized from the Accessible's stateSet:
-        elif attr in ["sensitive", "showing"]:
+        elif attr in ["sensitive", "showing", "focusable", "focused"]:
             raise ReadOnlyError, attr
 
         # Read-only attributes from the Action object
@@ -621,8 +623,6 @@ class Node:
         """
         Type the given text into the node, with appropriate delays and
         logging.
-
-        FIXME: Doesn't work well at the moment
         """
         logger.log("Typing text into %s: '%s'"%(self.getLogString(), string))
 
@@ -634,20 +634,24 @@ class Node:
             self.caretOffset+=len(string) # FIXME: is this correct?
             print "new caret offset: %s"%self.caretOffset
 
-        # Another non-working implementation
-        # Focus the node and inject and keyboard event:
-        # Unfortunately, this doesn't work well with Evolution either
-        if False:
-            self.grabFocus()
+        if self.focusable:
+            if not self.focused:
+                try: print self.grabFocus()
+                except: print "Node is focusable but I can't grabFocus!"
+            rawinput.typeText(string)
+        else:
+            print "Node is not focusable; falling back to setting text"
+            node.text += string
             doDelay()
-            ev = atspi.EventGenerator()
-            ev.injectKeyboardString (string)
 
-        # This approach partially works:
-        if True:
-            self.text += string
-
-        doDelay()
+    def keyCombo(self, comboString):
+        if config.debugSearching: logger.log("Pressing keys '%s' into %s"%(combo, self.getLogString()))
+        if self.focusable:
+            if not self.focused:
+                try: self.grabFocus()
+                except: print "Node is focusable but I can't grabFocus!"
+        else: print "Node is not focusable; trying key combo anyway"
+        rawinput.keyCombo(comboString)
 
     def __str__ (self):
         """
@@ -781,9 +785,6 @@ class Node:
             return True
         else:
             return False
-
-    def grabFocus(self):
-        return self.__component.grabFocus ()
 
     # The canonical search method:
     def findChild(self, pred, recursive = True, debugName = None, retry = True, requireResult = True):

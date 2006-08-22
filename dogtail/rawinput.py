@@ -11,6 +11,8 @@ Zack Cerza <zcerza@redhat.com>
 """
 
 import atspi
+import gtk.keysyms
+import gtk.gdk
 from utils import doDelay
 from logging import debugLogger as logger
 ev = atspi.EventGenerator()
@@ -86,14 +88,57 @@ def typeText(string):
     Types the specified string, one character at a time.
     """
     ev.injectKeyboardString(string)
+    doDelay()
 
-import gtk.keysyms
+def __buildKeyStringsDict(keySymsDict):
+    syms = {}
+    keyStringsDict = {}
+    iter = keySymsDict.iteritems()
+    while True:
+        try:
+            item = iter.next()
+            """
+            if item[1] in syms.keys():
+                syms[item[1]].append(item[0])
+                print item[1], syms[item[1]]
+            else: 
+                try: syms[item[1]] = [item[0]]
+                except TypeError: pass
+            """
+            try:
+                if not keyStringsDict.has_key(item[1]):
+                    keyStringsDict[item[1]] = item[0]
+            except TypeError: pass
+        except StopIteration:
+            return keyStringsDict
+
 keySyms = gtk.keysyms.__dict__
+keyStrings = __buildKeyStringsDict(keySyms)
 
 keySymAliases = {
-        'enter' : 'Return',
-        'esc' : 'Escape'
+    'enter' : 'Return',
+    'esc' : 'Escape',
+    'alt' : 'Alt_L',
+    'control' : 'Control_L',
+    'ctrl' : 'Control_L',
+    'shift' : 'Shift_L',
+    'del' : 'Delete',
+    'ins' : 'Insert',
+    'pageup' : 'Page_Up',
+    'pagedown' : 'Page_Down',
+    ' ' : 'space'
 }
+
+def keySymToUniChar(keySym):
+    i = gtk.gdk.keyval_to_unicode(keySym)
+    if i: UniChar = unichr(i)
+    else: UniChar = ''
+    return UniChar
+
+def uniCharToKeySym(uniChar):
+    i = ord(uniChar)
+    keySym = gtk.gdk.unicode_to_keyval(i)
+    return keySym
 
 def pressKey(keyName):
     """
@@ -104,4 +149,27 @@ def pressKey(keyName):
     keyName = keySymAliases.get(keyName.lower(), keyName)
     keySym = keySyms[keyName]
     ev.generateKeyboardEvent(keySym, "", atspi.SPI_KEY_SYM)
+
+def keyCombo(comboString):
+    """
+    Generates the appropriate keyboard events to simulate a user pressing the
+    specified key combination.
+
+    comboString is the representation of the key combo to be generated.
+    e.g. '<Control><Alt>p' or '<Control><Shift>PageUp' or '<Control>q'
+    """
+    strings = []
+    for s in comboString.split('<'):
+        if s:
+            for S in s.split('>'):
+                if S:
+                    S = keySymAliases.get(S.lower(), S)
+                    strings.append(S)
+    for s in strings:
+        if not keySyms.has_key(s):
+            raise ValueError, "Cannot find key %s" % s
+
+    ev.generateKeyCombo(strings)
+    doDelay()
+
 

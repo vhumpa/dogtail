@@ -1,5 +1,16 @@
 2006-08-22  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/rawinput.py: Add keyCombo(), which takes a string in the same
+	format of gtk.accelerator_parse(), e.g. "<Control><Alt>Delete" and
+	generates the appropriate keyboard events to simulate the user pressing
+	that combination. Add __buildKeyStringsDict(), which essentially 
+	generates an inverted version of the keySyms dict. Add 
+	keySymToUniChar(), which takes a keysym and returns the corresponding
+	Unicode character, if one exists. Add uniCharToKeySym(), which does the
+	reverse. Also add a few more keysym aliases to the keySymAliases dict.
+
+2006-08-22  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/i18n.py: If we encounter a UnicodeDecodeError because of an
 	invalid string, print the exception plus a warning explanation, and 
 	contintue by decoding the string and replacing invalid characters with

@@ -137,7 +137,13 @@ class TranslatableString:
             if not isinstance(inString, unicode):
                 inString = inString.decode('utf-8')
             if not isinstance(outString, unicode):
-                outString = outString.decode('utf-8')
+                try:
+                    outString = outString.decode('utf-8')
+                except UnicodeDecodeError:
+                    import traceback
+                    traceback.print_exc()
+                    print "The following string is invalid and caused the above error:", outString
+                    outString = outString.decode('utf-8', 'replace')
             #if ts: print "re.match('"+inString+"','"+outString+"')"
             if inString[0] == '*':
                 inString = "\\" + inString

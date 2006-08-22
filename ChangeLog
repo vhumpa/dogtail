@@ -1,3 +1,10 @@
+2006-08-22  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/i18n.py: If we encounter a UnicodeDecodeError because of an
+	invalid string, print the exception plus a warning explanation, and 
+	contintue by decoding the string and replacing invalid characters with
+	question marks.
+
 2006-08-21  Zack Cerza <zcerza@redhat.com>
 
 	* recorder/dogtail-recorder.desktop: Move to the 'Programming' 

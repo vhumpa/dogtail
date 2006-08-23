@@ -1,3 +1,7 @@
+2006-08-23  Zack Cerza <zcerza@redhat.com>
+
+	* setup.py, MANIFEST.in: Remove mentions of textinput.glade.
+
 2006-08-22  Zack Cerza <zcerza@redhat.com>
 
 	* recorder/dogtail-recorder: Remove the text input UI. Implement actual

@@ -1,5 +1,12 @@
 2006-08-23  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/config.py: Add parameter 'typingDelay', defaulting to 0.075.
+
+	* dogtail/rawinput.py: Make typeText() use pressKey(). Add 
+	keySymAliases for '\t' and '\n'.
+
+2006-08-23  Zack Cerza <zcerza@redhat.com>
+
 	* setup.py, MANIFEST.in: Remove mentions of textinput.glade.
 
 2006-08-22  Zack Cerza <zcerza@redhat.com>

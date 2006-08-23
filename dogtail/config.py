@@ -35,6 +35,9 @@ class _Config(object):
     actionDelay(float):
     The delay after an action is executed.
 
+    typingDelay(float):
+    The delay after a character is typed on the keyboard.
+
     runInterval(float):
     The interval at which dogtail.utils.run() and dogtail.procedural.run() 
     check to see if the application has started up.
@@ -98,6 +101,7 @@ class _Config(object):
 
             # Timing
             'actionDelay' : 1.0,
+            'typingDelay' : 0.075,
             'runInterval' : 0.5,
             'runTimeout' : 30,
             'searchBackoffDuration' : 0.5,

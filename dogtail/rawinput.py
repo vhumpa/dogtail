@@ -13,9 +13,13 @@ Zack Cerza <zcerza@redhat.com>
 import atspi
 import gtk.keysyms
 import gtk.gdk
+from dogtail.config import config
 from utils import doDelay
 from logging import debugLogger as logger
 ev = atspi.EventGenerator()
+
+def doTypingDelay():
+    doDelay(config.typingDelay)
 
 def click (x, y, button = 1):
     """
@@ -87,8 +91,10 @@ def typeText(string):
     """
     Types the specified string, one character at a time.
     """
-    ev.injectKeyboardString(string)
-    doDelay()
+    if not isinstance(string, unicode):
+        string = string.decode('utf-8')
+    for char in string:
+        pressKey(char)
 
 def __buildKeyStringsDict(keySymsDict):
     syms = {}
@@ -126,7 +132,9 @@ keySymAliases = {
     'ins' : 'Insert',
     'pageup' : 'Page_Up',
     'pagedown' : 'Page_Down',
-    ' ' : 'space'
+    ' ' : 'space',
+    '\t' : 'Tab',
+    '\n' : 'Return'
 }
 
 def keySymToUniChar(keySym):
@@ -149,6 +157,7 @@ def pressKey(keyName):
     keyName = keySymAliases.get(keyName.lower(), keyName)
     keySym = keySyms[keyName]
     ev.generateKeyboardEvent(keySym, "", atspi.SPI_KEY_SYM)
+    doTypingDelay()
 
 def keyCombo(comboString):
     """

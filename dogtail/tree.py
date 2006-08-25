@@ -240,6 +240,10 @@ class Node:
     The node(s) that is/are a label for this node. Generated from
     'relations'.
 
+    'checked' (read-only boolean):
+    Is this node checked? Only valid for checkboxes. Generated from stateSet
+    based on presence of atspi.SPI_STATE_CHECKED.
+
     'sensitive' (read-only boolean):
     Is this node sensitive (i.e. not greyed out). Generated from stateSet
     based on presence of atspi.SPI_STATE_SENSITIVE
@@ -493,6 +497,8 @@ class Node:
             return self.__accessible.getStateSet().contains(atspi.SPI_STATE_FOCUSABLE)
         elif attr == "focused":
             return self.__accessible.getStateSet().contains(atspi.SPI_STATE_FOCUSED)
+        elif attr == "checked":
+            return self.__accessible.getStateSet().contains(atspi.SPI_STATE_CHECKED)
 
         # Attributes from the Action object
         elif attr == "actions":
@@ -562,7 +568,7 @@ class Node:
             raise ReadOnlyError, attr
 
         # Read-only attributes synthesized from the Accessible's stateSet:
-        elif attr in ["sensitive", "showing", "focusable", "focused"]:
+        elif attr in ["sensitive", "showing", "focusable", "focused", "checked"]:
             raise ReadOnlyError, attr
 
         # Read-only attributes from the Action object

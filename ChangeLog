@@ -1,3 +1,9 @@
+2006-08-25  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Add patch from Chris Lee to add the 'checked' Node
+	attribute, which indicates whether the Node is a check box that is 
+	currently checked.
+
 2006-08-23  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/config.py: Add parameter 'typingDelay', defaulting to 0.075.

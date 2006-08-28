@@ -1,3 +1,9 @@
+2006-08-28  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Ignore any SpiException, only when trying to access
+	root.children. This is so people using broken applications while 
+	trying to test non-broken applications don't have to suffer.
+
 2006-08-25  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/tree.py: Add patch from Chris Lee to add the 'checked' Node

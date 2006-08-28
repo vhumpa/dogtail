@@ -460,7 +460,12 @@ class Node:
             if self.__hideChildren: return
             children = []
             for i in xrange (self.__accessible.getChildCount ()):
-                a = self.__accessible.getChildAtIndex (i)
+                if isinstance(self, Root):
+                    try: a = self.__accessible.getChildAtIndex (i)
+                    except atspi.SpiException:
+                        import traceback
+                        traceback.print_exc()
+                else: a = self.__accessible.getChildAtIndex (i)
                 # Workaround to GNOME bug #321273
                 # http://bugzilla.gnome.org/show_bug.cgi?id=321273
                 if a is not None: children.append (Node (a))

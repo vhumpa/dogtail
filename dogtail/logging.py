@@ -160,7 +160,7 @@ class IconLogger:
     Writes entries to the tooltip of an icon in the notification area or the desktop.
     """
     trayicon = None
-    def __init__(self, config = None, module_list = None):
+    def __init__(self):
         if not IconLogger.trayicon:
             from trayicon import TrayIcon
             IconLogger.trayicon = TrayIcon()
@@ -180,10 +180,23 @@ class IconLogger:
 
 class DebugLogger:
     """
-    Writes entries to standard out, and to an IconLogger if possible.
+    Writes entries to standard out, and to an IconLogger if desired.
     """
-    def __init__(self):
-        self.iconLogger = IconLogger()
+    def __init__(self, useIconLogger = None):
+        """
+        useIconLogger: True or False. Defaults to using config.useIconLogger.
+        """
+        if useIconLogger is None: useIconLogger = config.useIconLogger
+        if useIconLogger == True:
+            self.addIconLogger(IconLogger())
+        self.useIconLogger = useIconLogger
+
+    def addIconLogger(self, iconLogger):
+        """
+        Don't call this method directly. Just set config.useIconLogger to True.
+        """
+        self.iconLogger = iconLogger
+        self.useIconLogger = True
 
     def log(self, message):
         """
@@ -191,7 +204,8 @@ class DebugLogger:
         function, but nice and simple for now.
         """
         # Try to use the IconLogger.
-        if self.iconLogger.works: self.iconLogger.message(message)
+        if self.useIconLogger and self.iconLogger.works:
+            self.iconLogger.message(message)
         # Also write to standard out.
         print message
 

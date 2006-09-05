@@ -1,3 +1,11 @@
+2006-09-05  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/logging.py: Don't use an IconLogger by default.
+
+	* dogtail/config.py: Add useIconLogger setting, which defaults to 
+	False. Setting it to True enables the IconLogger immediately. Add
+	documentation and a unit test to that effect.
+
 2006-08-28  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/tree.py: Ignore any SpiException, only when trying to access

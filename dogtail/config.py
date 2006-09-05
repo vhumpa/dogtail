@@ -85,6 +85,10 @@ class _Config(object):
     blinkOnActions (boolean):
     Whether we should blink a rectangle around a Node when an action is
     performed on it.
+
+    useIconLogger (boolean):
+    Whether we should place an icon in the notification area and print debug
+    messages to it.
     """
     __scriptName = staticmethod(_scriptName)
     __encoding = staticmethod(_encoding)
@@ -116,7 +120,10 @@ class _Config(object):
             'absoluteNodePaths' : False,
             'ensureSensitivity' : False,
             'debugTranslation' : False,
-            'blinkOnActions' : False
+            'blinkOnActions' : False,
+
+            # Logging
+            'useIconLogger' : False
     }
 
     options = {}
@@ -131,11 +138,16 @@ class _Config(object):
         _Config.__createDir(_Config.defaults['dataDir'])
 
     def __setattr__(self, name, value):
-        try:
-            if _Config.defaults[name] != value or _Config.options.get(name, _Config.invalidValue) != value:
-                if "Dir" in name: _Config.__createDir(value)
-                _Config.options[name] = value
-        except KeyError: raise AttributeError, name + " is not a valid option."
+        if not config.defaults.has_key(name):
+            raise AttributeError, name + " is not a valid option."
+
+        elif _Config.defaults[name] != value or \
+                _Config.options.get(name, _Config.invalidValue) != value:
+            if 'Dir' in name: _Config.__createDir(value)
+            elif name == 'useIconLogger':
+                import logging
+                logging.debugLogger.addIconLogger(logging.IconLogger())
+            _Config.options[name] = value
 
     def __getattr__(self, name):
         try: return _Config.options[name]
@@ -219,6 +231,15 @@ if __name__ == '__main__':
     config.dataDir = '/tmp/dt_data'
     failure = failure or not os.path.isdir('/tmp/dt_data')
     failOrPass(failure, "Changing default directories")
+
+    failure = True
+    config.useIconLogger = True
+    import logging
+    try:
+        if isinstance(logging.debugLogger.iconLogger, logging.IconLogger):
+            failure = False
+    except AttributeError: pass
+    failOrPass(failure, "Setting useIconLogger")
 
     # END tests
 

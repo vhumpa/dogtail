@@ -1,3 +1,8 @@
+2006-09-06  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py: Add patch from Tim Lee to fix up SuSe support.
+	Closes: #353601.
+
 2006-09-05  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/logging.py: Don't use an IconLogger by default.

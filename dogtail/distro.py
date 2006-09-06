@@ -257,6 +257,8 @@ class Suse(Distro):
     """
     Class representing one of the SuSE or SuSE-derived distributions
     """
+    def __init__(self):
+        self.packageDb = _RpmPackageDb()
 
 class Gentoo(Distro):
     """
@@ -288,6 +290,7 @@ elif os.path.exists ("/etc/redhat-release"):
     distro = RedHatOrFedora()
 elif os.path.exists ("/etc/SuSE-release"):
     print "SuSE (or derived distribution)"
+    distro = Suse()
 elif os.path.exists ("/etc/fedora-release"):
     print "Fedora (or derived distribution)"
     distro = RedHatOrFedora()

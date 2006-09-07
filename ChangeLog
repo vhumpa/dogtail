@@ -1,5 +1,10 @@
 2006-09-07  Zack Cerza <zcerza@redhat.com>
 
+	* scripts/dogtail-run-headless: Fix syntax error, and look for
+	gnome-settings-daemon in /usr/libexec before $PATH. Closes: #354518.
+
+2006-09-07  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/utils.py: Rewrite screenshot() to use GDK instead of 
 	ImageMagick.
 

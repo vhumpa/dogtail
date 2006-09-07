@@ -16,6 +16,21 @@ import gettext
 
 from logging import debugLogger as logger
 
+import traceback
+def safeDecode(string):
+    if not isinstance(string, unicode):
+        try:
+            string = string.decode('utf-8')
+        except UnicodeDecodeError:
+            traceback.print_exc()
+            print "The following string is invalid and caused the above error:", string
+            string = string.decode('utf-8', 'replace')
+    return string
+
+def safeEncode(string):
+    pass
+
+
 """
 Singleton list of TranslationDb instances, to be initialized by the script with
 whatever translation databases it wants.
@@ -49,8 +64,7 @@ class GettextTranslationDb(TranslationDb):
         self.__gnutranslations = gettext.GNUTranslations(open(moFile))
 
     def getTranslationsOf(self, srcName):
-        if not isinstance(srcName, unicode):
-            srcName = srcName.decode('utf-8')
+        srcName = safeDecode(srcName)
         # print "searching for translations of %s"%srcName
         # Use a dict to get uniqueness:
         results = {}
@@ -113,7 +127,7 @@ class TranslatableString:
         if isinstance(untranslatedString, unicode):
             untranslatedString = untranslatedString.encode('utf-8')
         else:
-            untranslatedString = untranslatedString.decode('utf-8')
+            untranslatedString = safeDecode(untranslatedString)
         self.untranslatedString = untranslatedString
         self.translatedStrings = translate(untranslatedString)
 
@@ -134,16 +148,8 @@ class TranslatableString:
             inString = str(inS)
             outString = outS
             inString = inString + '$'
-            if not isinstance(inString, unicode):
-                inString = inString.decode('utf-8')
-            if not isinstance(outString, unicode):
-                try:
-                    outString = outString.decode('utf-8')
-                except UnicodeDecodeError:
-                    import traceback
-                    traceback.print_exc()
-                    print "The following string is invalid and caused the above error:", outString
-                    outString = outString.decode('utf-8', 'replace')
+            inString = safeDecode(inString)
+            outString = safeDecode(outString)
             #if ts: print "re.match('"+inString+"','"+outString+"')"
             if inString[0] == '*':
                 inString = "\\" + inString
@@ -174,8 +180,8 @@ class TranslatableString:
             # build an output string, with commas in the correct places
             translations = ""
             for tString in self.translatedStrings:
-                translations += u'"%s", ' % tString.decode('utf-8')
-            result = u'"%s" (%s)' % (self.untranslatedString.decode('utf-8'), translations)
+                translations += u'"%s", ' % safeDecode(tString)
+            result = u'"%s" (%s)' % (safeDecode(self.untranslatedString, translations)
             return result.encode('utf-8')
         else:
             return '"%s"' % (self.untranslatedString)

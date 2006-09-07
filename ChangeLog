@@ -1,5 +1,11 @@
 2006-09-07  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/i18n.py: Add safeDecode(), a function based on the fix
+	committed on 2006-08-22. Use it instead of calling any string's 
+	decode() method directly. Closes: #354515. 
+
+2006-09-07  Zack Cerza <zcerza@redhat.com>
+
 	* scripts/dogtail-run-headless: Fix syntax error, and look for
 	gnome-settings-daemon in /usr/libexec before $PATH. Closes: #354518.
 

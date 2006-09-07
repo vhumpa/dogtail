@@ -18,7 +18,7 @@ from logging import debugLogger as logger
 from logging import TimeStamp
 from errors import DependencyNotFoundError
 
-def screenshot(windowname = 'root', file = 'screenshot.png', timeStamp = True, args = ''):
+def screenshot(file = 'screenshot.png', timeStamp = True):
     """
     This function wraps the ImageMagick import command to take a screenshot.
 
@@ -28,19 +28,13 @@ def screenshot(windowname = 'root', file = 'screenshot.png', timeStamp = True, a
     By default, screenshot filenames are in the format of foo_YYYYMMDD-hhmmss.png .
     The timeStamp argument may be set to False to name the file foo.png.
     """
-    IMVer = os.popen('import -version').readline()
-    IMVer = re.match('Version: ImageMagick ([0-9\.]+) .*', IMVer)
-    if IMVer is None:
-        raise DependencyNotFoundError, "ImageMagick"
-
+    if not isinstance(timeStamp, bool):
+        raise TypeError, "timeStampt must be True or False"
     # config is supposed to create this for us. If it's not there, bail.
     assert os.path.isdir(config.scratchDir)
 
-    if windowname == '':
-        windowname = "root"
-
     baseName = ''.join(file.split('.')[0:-1])
-    fileExt = file.split('.')[-1]
+    fileExt = file.split('.')[-1].lower()
     if not baseName:
         baseName = file
         fileExt = 'png'
@@ -54,18 +48,20 @@ def screenshot(windowname = 'root', file = 'screenshot.png', timeStamp = True, a
         path = config.scratchDir + newFile
 
     print path
-
-    # Generate the command and redirect STDERR to STDOUT
-    # This really needs window manipulation and pyspi state binding to be done
-    # to actually be really useful
-    answer = []
-    cmd = "import -window '%s' %s %s 2>&1" % (windowname, path, args)
-    answer = os.popen(cmd).readlines()
-
-    # If successful we should get nothing back. If not something went wrong
-    # and our mouse is now probably unusable
-    if answer:
-        raise ValueError, "Screenshot failed: " + answer[-1]
+    
+    import gtk.gdk
+    import gobject
+    rootWindow = gtk.gdk.get_default_root_window()
+    geometry = rootWindow.get_geometry()
+    pixbuf = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, False, 8, geometry[2], \
+            geometry[3])
+    gtk.gdk.Pixbuf.get_from_drawable(pixbuf, rootWindow, \
+            rootWindow.get_colormap(), 0, 0, 0, 0, geometry[2], geometry[3])
+    # gtk.gdk.Pixbuf.save() needs 'jpeg' and not 'jpg'
+    if fileExt == 'jpg': fileExt = 'jpeg'
+    try: pixbuf.save(path, fileExt)
+    except gobject.GError:
+        raise ValueError, "Failed to save screenshot in %s format" % fileExt
     assert os.path.exists(path)
     logger.log("Screenshot taken: " + path)
     return path

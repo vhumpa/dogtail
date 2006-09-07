@@ -1,3 +1,8 @@
+2006-09-07  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/utils.py: Rewrite screenshot() to use GDK instead of 
+	ImageMagick.
+
 2006-09-06  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/distro.py: Add patch from Tim Lee to fix up SuSe support.

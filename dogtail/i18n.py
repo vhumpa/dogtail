@@ -104,7 +104,7 @@ def translate(srcString):
     # Try to translate the string:
     for translationDb in translationDbs:
         for result in translationDb.getTranslationsOf(srcString):
-            result = result.encode('utf-8')
+            result = safeDecode(result)
             results[result]=True
 
     # No translations found:
@@ -125,7 +125,7 @@ class TranslatableString:
         the various translations it finds.
         """
         if isinstance(untranslatedString, unicode):
-            untranslatedString = untranslatedString.encode('utf-8')
+            untranslatedString = safeDecode(untranslatedString)
         else:
             untranslatedString = safeDecode(untranslatedString)
         self.untranslatedString = untranslatedString
@@ -181,8 +181,8 @@ class TranslatableString:
             translations = ""
             for tString in self.translatedStrings:
                 translations += u'"%s", ' % safeDecode(tString)
-            result = u'"%s" (%s)' % (safeDecode(self.untranslatedString, translations)
-            return result.encode('utf-8')
+            result = u'"%s" (%s)' % (safeDecode(self.untranslatedString), translations)
+            return safeDecode(result)
         else:
             return '"%s"' % (self.untranslatedString)
 

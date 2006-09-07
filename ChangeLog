@@ -1,5 +1,12 @@
 2006-09-07  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/i18n.py: Also use safeDecode() instead of calling any
+	string's encode() method directly. Now i18n.py should work exclusively
+	with Unicode internally, and the safe conversion means that dogtail
+	should never crash because of an invalid Unicode string ever again.
+
+2006-09-07  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/i18n.py: Add safeDecode(), a function based on the fix
 	committed on 2006-08-22. Use it instead of calling any string's 
 	decode() method directly. Closes: #354515. 

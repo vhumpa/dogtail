@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 __author__ = 'David Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.com>'
+DR_NAME = 'Script Recorder'
 
-# Event recorder.
-# FIXME: under construction
 import atspi
 import dogtail.tree
 import gtk.gdk
@@ -307,29 +306,12 @@ class ProceduralScriptWriter(ScriptWriter):
 
         self.recordLine("#!/usr/bin/python\nfrom dogtail.procedural import *\n")
     
-    def findAncestor(self, node, name = None, roleName = None, description = None):
-        while node.parent:
-            nameMatch = False
-            roleNameMatch = False
-            descMatch = False
-            if name != None: nameMatch = node.parent.name == name
-            else: nameMatch = True
-            if roleName != None: roleNameMatch = node.parent.roleName == roleName
-            else: roleNameMatch = True
-            if description != None: 
-                descMatch = node.parent.description == description
-            else: descMatch = True
-            match = nameMatch and roleNameMatch and descMatch
-            if match: return node.parent
-            node = node.parent
-        return None
-
     def setUpFocus(self, node):
         """
         Writes out the necessary focus.application() and focus.dialog() lines 
         to the script.
         """
-        application = self.findAncestor(node, roleName = 'application')
+        application = FakeNode.findAncestor(node, roleName = 'application')
         if application:
             needApp = True
             if self.currentApplication:
@@ -342,7 +324,7 @@ class ProceduralScriptWriter(ScriptWriter):
             print "    It is most likely not reporting its toplevel Accessible as having a"
             print "    role name of 'application'. Please file a bug against it!"
 
-        dialog = self.findAncestor(node, roleName = 'dialog')
+        dialog = FakeNode.findAncestor(node, roleName = 'dialog')
         if dialog:
             needDialog = True
             if dialog == self.currentDialog: needDialog = False
@@ -432,6 +414,25 @@ class FakeNode(dogtail.tree.Node):
         match = nameMatch and roleNameMatch and descMatch
         return not match
 
+    def findAncestor(node, name = None, roleName = None, description = None):
+        while node.parent:
+            nameMatch = False
+            roleNameMatch = False
+            descMatch = False
+            if name != None: nameMatch = node.parent.name == name
+            else: nameMatch = True
+            if roleName != None: roleNameMatch = node.parent.roleName == roleName
+            else: roleNameMatch = True
+            if description != None: 
+                descMatch = node.parent.description == description
+            else: descMatch = True
+            match = nameMatch and roleNameMatch and descMatch
+            if match: return node.parent
+            node = node.parent
+        return None
+    findAncestor = staticmethod(findAncestor)
+
+
 
 # Singleton EventRecorder
 global recorder
@@ -499,8 +500,6 @@ class EventRecorder:
         self.writer = None
 
     def onFocus(self, event):
-        #logEvent(event)
-
         sourceNode = dogtail.tree.Node(event.source)
         sourceNode = FakeNode(sourceNode)
         #if sourceNode == self.lastPressedNode or \
@@ -509,8 +508,6 @@ class EventRecorder:
         self.lastFocusedNode = sourceNode
 
     def onSelect(self, event):
-        #logEvent(event)
-
         sourceNode = dogtail.tree.Node(event.source)
         sourceNode = FakeNode(sourceNode)
         self.lastSelectedNode = sourceNode
@@ -587,6 +584,14 @@ class EventRecorder:
             # it with detectByCoordinates().
             possibleNodes = [self.lastFocusedNode]
         detectedNode = detectByCoordinates(possibleNodes, x, y)
+        print "starting check", str(detectedNode)
+        if detectedNode and ((detectedNode.name == DR_NAME and \
+                detectedNode.roleName == 'frame') or \
+                FakeNode.findAncestor(detectedNode, \
+                roleName = 'frame', name = DR_NAME)):
+            self.lastPressedNode = None
+            self.lastReleasedNode = None
+            return
         if detectedNode and not isinstance(detectedNode, FakeNode):
             detectedNode = FakeNode(detectedNode)
         if isPress: 

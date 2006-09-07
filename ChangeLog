@@ -1,5 +1,10 @@
 2006-09-07  Zack Cerza <zcerza@redhat.com>
 
+	* recorder/dogtail-recorder: Make sure the recorder can't record 
+	itself. Also remove some old comments.
+
+2006-09-07  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/i18n.py: Also use safeDecode() instead of calling any
 	string's encode() method directly. Now i18n.py should work exclusively
 	with Unicode internally, and the safe conversion means that dogtail

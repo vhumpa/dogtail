@@ -2,7 +2,7 @@
 
 	* sniff/sniff, recorder/dogtail-recorder: Add patch from Tim Lee so
 	sniff and dogtail-recorder can find glade files even if they're not 
-	installed into the /usr prefix.
+	installed into the /usr prefix. Closes: #353719, #353731.
 
 2006-09-11  Zack Cerza <zcerza@redhat.com>
 

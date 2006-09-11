@@ -1,3 +1,10 @@
+2006-09-11  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/utils.py, sniff/sniff.py, recorder/dogtail-recorder.py,
+	dogtail/tree.py: Add utility functions to check whether accessibility 
+	is enabled via GConf, and either present a dialog asking to enable it 
+	(for sniff & dogtail-recorder) or just bail (for scripts).
+
 2006-09-07  Zack Cerza <zcerza@redhat.com>
 
 	* recorder/dogtail-recorder: Make sure the recorder can't record 

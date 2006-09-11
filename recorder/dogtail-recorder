@@ -2,6 +2,9 @@
 __author__ = 'David Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.com>'
 DR_NAME = 'Script Recorder'
 
+from dogtail.utils import checkForA11yInteractively
+checkForA11yInteractively()
+
 import atspi
 import dogtail.tree
 import gtk.gdk

@@ -148,3 +148,61 @@ class Blinker:
             return False
 
         return True
+
+
+import sys
+import gconf
+gconfClient = gconf.client_get_default()
+a11yGConfKey = '/desktop/gnome/interface/accessibility'
+
+def isA11yEnabled():
+    """
+    Checks if accessibility is enabled via gconf.
+    """
+    return gconfClient.get_bool(a11yGConfKey)
+
+def bailBecauseA11yIsDisabled():
+    print "Dogtail requires that Assistive Technology support be enabled. Aborting..."
+    sys.exit(1)
+
+def enableA11y():
+    """
+    Enables accessibility via gconf.
+    """
+    return gconfClient.set_bool(a11yGConfKey, True)
+
+def checkForA11y():
+    """
+    Checks if accessibility is enabled, and halts execution if it is not.
+    """
+    if not isA11yEnabled(): bailBecauseA11yIsDisabled()
+
+def checkForA11yInteractively():
+    """
+    Checks if accessibility is enabled, and presents a dialog prompting the
+    user if it should be enabled if it is not already, then halts execution.
+    """
+    if isA11yEnabled(): return
+    import gtk
+    dialog = gtk.Dialog('Enable Assistive Technolofy Support?',
+                     None,
+                     gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                     (gtk.STOCK_QUIT, gtk.RESPONSE_CLOSE, 
+                         "_Enable", gtk.RESPONSE_ACCEPT))
+    question = """Dogtail requires that Assistive Technology Support be enabled for it to function. Would you like to enable Assistive Technology support now?
+
+Note that you will have to log out for the change to fully take effect.
+    """.strip()
+    dialog.set_default_response(gtk.RESPONSE_ACCEPT)
+    questionLabel = gtk.Label(question)
+    questionLabel.set_line_wrap(True)
+    dialog.vbox.pack_start(questionLabel)
+    dialog.show_all()
+    result = dialog.run()
+    if result == gtk.RESPONSE_ACCEPT:
+        print "Enabling accessibility..."
+        enableA11y()
+    elif result == gtk.RESPONSE_CLOSE:
+       bailBecauseA11yIsDisabled()
+    dialog.destroy()
+

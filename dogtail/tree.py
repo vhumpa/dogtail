@@ -60,6 +60,9 @@ __author__ = """Zack Cerza <zcerza@redhat.com>,
 David Malcolm <dmalcolm@redhat.com>
 """
 
+from utils import checkForA11y
+checkForA11y()
+
 import re
 import predicate
 from datetime import datetime

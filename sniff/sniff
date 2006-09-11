@@ -4,6 +4,9 @@
 appName = 'Sniff'
 appAuthors = ['Zack Cerza <zcerza@redhat.com>', 'David Malcolm <dmalcolm@redhat.com']
 
+from dogtail.utils import checkForA11yInteractively
+checkForA11yInteractively()
+
 from dogtail import tree
 from dogtail import utils
 import gobject

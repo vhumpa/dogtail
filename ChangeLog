@@ -1,3 +1,9 @@
+2006-09-11  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Replace newlines in node.name values with 
+	an escaped '\n' in ProceduralScriptWriter.recordClick(). Remove a debug
+	statement in EventRecorder.onKeyPress().
+
 2006-09-11  David Malcolm  <dmalcolm@redhat.com>
 
 	* dogtail/apps/wrappers/yelp.py, dogtail/apps/wrappers/mozilla.py, 

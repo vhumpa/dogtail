@@ -350,13 +350,13 @@ class ProceduralScriptWriter(ScriptWriter):
         for action in possibleActions:
             if action in widget.actions.keys():
                 foundAnAction = True
-                self.recordLine("%s('%s', roleName='%s')" % (action, widget.name, widget.roleName))
+                self.recordLine("%s('%s', roleName='%s')" % (action, widget.name.replace('\n','\\n'), widget.roleName))
                 break
         if not foundAnAction: 
             if hasattr(widget, 'select'):
-                self.recordLine("select('%s', roleName='%s')" % (widget.name, widget.roleName))
+                self.recordLine("select('%s', roleName='%s')" % (widget.name.replace('\n','\\n'), widget.roleName))
             else:
-                self.recordLine("click('%s', roleName='%s', raw=True)" % (widget.name, widget.roleName))
+                self.recordLine("click('%s', roleName='%s', raw=True)" % (widget.name.replace('\n','\\n'), widget.roleName))
         self.currentWidget = widget
         
     def recordTyping(self, string, type, node):
@@ -591,7 +591,6 @@ class EventRecorder:
             # it with detectByCoordinates().
             possibleNodes = [self.lastFocusedNode]
         detectedNode = detectByCoordinates(possibleNodes, x, y)
-        print "starting check", str(detectedNode)
         if detectedNode and ((detectedNode.name == DR_NAME and \
                 detectedNode.roleName == 'frame') or \
                 FakeNode.findAncestor(detectedNode, \

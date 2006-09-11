@@ -1,6 +1,12 @@
 2006-09-11  Zack Cerza <zcerza@redhat.com>
 
-	* dogtail/utils.py, sniff/sniff.py, recorder/dogtail-recorder.py,
+	* sniff/sniff, recorder/dogtail-recorder: Add patch from Tim Lee so
+	sniff and dogtail-recorder can find glade files even if they're not 
+	installed into the /usr prefix.
+
+2006-09-11  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/utils.py, sniff/sniff, recorder/dogtail-recorder,
 	dogtail/tree.py: Add utility functions to check whether accessibility 
 	is enabled via GConf, and either present a dialog asking to enable it 
 	(for sniff & dogtail-recorder) or just bail (for scripts).

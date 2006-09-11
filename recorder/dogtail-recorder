@@ -24,7 +24,11 @@ class RecorderGUI(gnome.Program):
         try:
             x = gtk.glade.XML('recorder.glade')
         except RuntimeError:
-            x = gtk.glade.XML('/usr/share/dogtail/glade/recorder.glade')
+            import sys
+            exec_root = sys.argv[0].split("/bin/")[0]
+            if exec_root[0] is not '/':
+                exec_root = "/usr"
+            x = gtk.glade.XML(exec_root + '/share/dogtail/glade/recorder.glade')
 
         self.window = x.get_widget('window')
 

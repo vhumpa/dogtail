@@ -13,9 +13,9 @@ class YelpApp(Application):
     def __init__(self):
         Application.__init__(self, root.application("gnome-help"))
 
-        self.version = packageDb.getVersion("yelp")
+        self.appVersion = packageDb.getVersion("yelp")
 
-        print "yelp version %s"%self.version
+        print "yelp version %s"%self.appVersion
 
     def checkError(self):
         """

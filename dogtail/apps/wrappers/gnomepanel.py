@@ -14,12 +14,12 @@ class GnomePanel(Application, DesktopPanel):
     def __init__(self):
         Application.__init__(self, root.application("gnome-panel"))
 
-        self.version = packageDb.getVersion("gnome-panel")
+        self.appVersion = packageDb.getVersion("gnome-panel")
 
-        print "gnome-panel version %s"%self.version
+        print "gnome-panel version %s"%self.appVersion
 
     def getApplicationsMenu(self):
-        if self.version>=Version([2,10.0]):
+        if self.appVersion>=Version([2,10.0]):
             # this works on FC5:
             return self.child(name = 'Applications', roleName = 'menu', recursive=True, debugName="Applications menu")
         else:

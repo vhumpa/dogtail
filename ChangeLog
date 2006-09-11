@@ -1,3 +1,10 @@
+2006-09-11  David Malcolm  <dmalcolm@redhat.com>
+
+	* dogtail/apps/wrappers/yelp.py, dogtail/apps/wrappers/mozilla.py, 
+	* dogtail/apps/wrappers/gnomepanel.py: rename self.version in each app 
+	wrapper to avoid a naming collision with the synthesized Tree.version 
+	attribute.
+
 2006-09-11  Zack Cerza <zcerza@redhat.com>
 
 	* sniff/sniff, recorder/dogtail-recorder: Add patch from Tim Lee so

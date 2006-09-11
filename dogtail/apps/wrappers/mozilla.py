@@ -13,8 +13,8 @@ class MozillaApp(Application):
     def __init__(self):
         Application.__init__(self, root.application("mozilla"))
 
-        self.version = packageDb.getVersion("firefox")
-        print "Firefox version %s"%self.version
+        self.mozVersion = packageDb.getVersion("firefox")
+        print "Firefox version %s"%self.mozVersion
 
 class FirefoxApp(MozillaApp, WebBrowser):
     """Utility wrapper for Firefox; implements the Webbrowser mixin interface"""

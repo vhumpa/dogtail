@@ -10,7 +10,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch: noarch
 BuildRequires: python
 BuildRequires: desktop-file-utils
-Requires: pyspi >= 0.5.5
+Requires: pyspi > 0.5.5
 Requires: pygtk2
 Requires: rpm-python
 Requires: xorg-x11-server-Xvfb
@@ -64,6 +64,7 @@ rm -rf $RPM_BUILD_ROOT
 * Fri Aug 11 2006 Zack Cerza <zcerza@redhat.com> - 0.5.3-1
 - Post-release version bump.
 - Add Requires for xorg-x11-xinit.
+- Fix pyspi Requires
 
 * Tue Aug 01 2006 Zack Cerza <zcerza@redhat.com> - 0.5.2-1
 - New upstream release.

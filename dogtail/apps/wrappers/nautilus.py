@@ -6,7 +6,6 @@ __author__ = 'David Malcolm <dmalcolm@redhat.com>'
 
 from dogtail.tree import *
 from dogtail.distro import packageDb
-from dogtail.apps.categories import *
 
 import os
 
@@ -18,8 +17,8 @@ class IsAnIcon(predicate.Predicate):
     def describeSearchResult(self):
         return 'icon'
 
-class NautilusApp(Application, FileBrowser):
-    """Utility wrapper for Nautilus; implements the FileBrowser mixin interface"""
+class NautilusApp(Application):
+    """Utility wrapper for Nautilus"""
 
     def __init__ (self):
         Application.__init__(self, root.application("nautilus"))

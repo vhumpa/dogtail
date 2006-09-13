@@ -9,7 +9,7 @@ from dogtail.distro import packageDb
 from dogtail.apps.categories import *
 from dogtail.version import Version
 
-class GnomePanel(Application, DesktopPanel):
+class GnomePanel(Application):
     """Useful test hooks for GNOME panel testcases"""
     def __init__(self):
         Application.__init__(self, root.application("gnome-panel"))

@@ -6,7 +6,6 @@ __author__ = 'David Malcolm <dmalcolm@redhat.com>'
 
 from dogtail.tree import *
 from dogtail.distro import packageDb
-from dogtail.apps.categories import *
 from dogtail.version import Version
 
 class YelpApp(Application):

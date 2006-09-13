@@ -6,10 +6,9 @@ __author__ = 'David Malcolm <dmalcolm@redhat.com>'
 
 from dogtail.tree import *
 from dogtail.distro import *
-from dogtail.apps.categories import *
 
-class EpiphanyApp(Application, WebBrowser):
-    """Utility wrapper for Epiphany; implements the Webbrowser mixin interface"""
+class EpiphanyApp(Application):
+    """Utility wrapper for Epiphany"""
 
     def __init__(self):
         Application.__init__(self, root.application("epiphany"))

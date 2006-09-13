@@ -1,3 +1,22 @@
+2006-09-13  David Malcolm  <dmalcolm@redhat.com>
+
+	* dogtail/apps/wrappers/kicker.py: remove
+
+	* dogtail/apps/wrappers/konqueror.py: remove
+
+	* dogtail/apps/wrappers/mozilla.py: remove
+	
+	* dogtail/apps/wrappers/epiphany.py, 
+	* dogtail/apps/wrappers/evolution.py,
+	* dogtail/apps/wrappers/gnomepanel.py, 
+	* dogtail/apps/wrappers/gnomepanel.py, 
+	* dogtail/apps/wrappers/yelp.py, 
+	* dogtail/apps/wrappers/nautilus.py: remove reference to categories
+
+	* dogtail/apps/categories.py: remove
+
+	* dogtail/apps/__init__.py: remove categories
+
 2006-09-13  Zack Cerza <zcerza@redhat.com>
 
 	* NEWS: Update.

@@ -12,8 +12,6 @@ from os import environ, path, remove
 from dogtail.distro import *
 from dogtail.version import Version
 
-from dogtail.apps.categories import *
-
 # Evolution folder browser (GtkTreeView?) seems to be implemented as a list of role='table cell' children (the rows), with each having a list of 'table cell' children (the table cells)
 # The table rows have NODE_CHILD_OF relations (with paths, in at-poke)
 #
@@ -25,7 +23,7 @@ dogtail.i18n.loadTranslationsFromPackageMoFiles('evolution-connector')
 
 # App-specific wrapper classes:
 
-class EvolutionApp(Application, EmailClient):
+class EvolutionApp(Application):
     """
     Useful test hooks for Evolution testcases
     """

@@ -1,3 +1,7 @@
+2006-09-13  Zack Cerza <zcerza@redhat.com>
+
+	* NEWS: Update.
+
 2006-09-11  Zack Cerza <zcerza@redhat.com>
 
 	* recorder/dogtail-recorder: Replace newlines in node.name values with 

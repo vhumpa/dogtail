@@ -1,9 +1,57 @@
-dogtail 0.5.3
+dogtail 0.6.0
 =============
 
 Features:
 
+ * Keystroke recording support in dogtail-recorder:
+
+    - Normal keypresses (e.g. typing 'foo bar baz') will be recorded as 
+      "type('foo bar baz')" in the procedural API. dogtail.tree.Node has a new
+      method, typeText(), which is called by dogtail.procedural.type().
+
+    - Nonprintable keypresses (e.g. typing Control-Shift-c) will be recorded as
+      "keyCombo('<Control><Shift>c')" in the procedural API. dogtail.tree.Node
+      has a new method, keyCombo(), which is called by 
+      dogtail.procedural.keyCombo().
+
+    - The now-unnecessary 'Input Text' button has been removed.
+
+ * dogtail.tree.Node has new attributes and a new method:
+
+    - grabFocus(): Attempts to cause the node to grab the keyboard focus.
+
+    - focusable: Whether the node is able to have keyboard focus.
+
+    - focused: Whether the node currently has keyboard focus.
+
+    - checked: Whether the node is a checkbox that is currently checked.
+
+ * Dogtail now checks if accessibility is enabled before it does anything. 
+   sniff and dogtail-recorder will prompt to enable it via a dialog, and 
+   scripts themselves will just refuse to run.
+
+ * Dogtail no longer uses the IconLogger (in the notification area) by default.
+   Set dogtail.config.config.useIconLogger to True to reenable it.
+
+ * dogtail.utils.screenshot() was rewritten to use GDK instead of ImageMagick.
+
 Bugfixes:
+
+ * Dogtail is now much more robust in dealing with possibly-invalid Unicode
+   strings passed to it via AT-SPI. (GNOME bug #354515)
+
+ * Dogtail will not crash when it receives an SpiException caused by a CORBA 
+   COMM_FAILURE, unless the source of that error is the application under test.
+
+ * While exceptions occuring inside callbacks used in dogtail-recorder will 
+   still not properly be raised, they are now printed to standard out.
+
+ * SuSe support in dogtail.distro is fixed. (GNOME bug #353601)
+
+ * sniff and dogtail-recorder will now find their glade files, even if they're
+   installed into a nonstandard prefix. (GNOME bug #353719, #353731)
+
+ * dogtail-run-headless had a few bugs fixed.
 
 
 dogtail 0.5.2

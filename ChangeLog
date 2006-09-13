@@ -1,5 +1,10 @@
 2006-09-13  David Malcolm  <dmalcolm@redhat.com>
 
+	* dogtail/apps: remove entire subdirectory structure: what remained is now in 
+	GNOME CVS inside dogtail-tests/appwrappers
+
+2006-09-13  David Malcolm  <dmalcolm@redhat.com>
+
 	* dogtail/apps/wrappers/kicker.py: remove
 
 	* dogtail/apps/wrappers/konqueror.py: remove

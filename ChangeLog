@@ -1,5 +1,36 @@
 2006-09-13  David Malcolm  <dmalcolm@redhat.com>
 
+	* examples/rhythmbox-test.py: removed
+
+	* examples/nautilus-test-icon-view-collage.py: removed (moved to 
+	dogtail-tests/nautilus)
+
+	* examples/google-search.py: removed (moved to dogtail-tests/epiphany)
+
+	* examples/gnome-panel-test-starting-every-app.py: removed (moved to 
+	dogtail-tests/gnome-panel)
+
+	* examples/gcalctool-test-fibonacci.py: removed (moved to 
+	dogtail-tests/gcalctool)
+
+	* examples/firefox-test-browsing-local-html-file.py: removed
+	
+	* examples/evolution-test-switching-components.py: 
+	* examples/data/CAN-2005-0806.mbox: 
+	* examples/evolution-test-survives-email-CAN-2005-0806.py: 
+	* examples/evolution-test-sending-email.py: 
+	* examples/evolution-test-first-time-wizard.py: 
+	* examples/evolution-test-configuring-imap-smtp.py: 
+	* examples/evolution-test-configuring-exchange.py: 
+	* examples/evolution-test-composing-html.py: removed (moved to 
+	dogtail-tests/evolution)
+
+	* examples/crack.py: removed (never worked)
+
+	* examples/abiword-test.py: removed (moved to dogtail-tests/abiword)
+
+2006-09-13  David Malcolm  <dmalcolm@redhat.com>
+
 	* dogtail/apps: remove entire subdirectory structure: what remained is now in 
 	GNOME CVS inside dogtail-tests/appwrappers
 

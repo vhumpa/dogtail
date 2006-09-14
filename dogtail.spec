@@ -1,6 +1,6 @@
 Summary: GUI test tool and automation framework
 Name: dogtail
-Version: 0.5.3
+Version: 0.6.0
 Release: 1%{?dist}
 License: GPL
 Group: User Interface/X
@@ -10,8 +10,9 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch: noarch
 BuildRequires: python
 BuildRequires: desktop-file-utils
-Requires: pyspi > 0.5.5
+Requires: pyspi >= 0.6.0
 Requires: pygtk2
+Requires: gnome-python2-gconf
 Requires: rpm-python
 Requires: xorg-x11-server-Xvfb
 Requires: xorg-x11-xinit
@@ -61,10 +62,11 @@ rm -rf $RPM_BUILD_ROOT
 %doc examples/
 
 %changelog
-* Fri Aug 11 2006 Zack Cerza <zcerza@redhat.com> - 0.5.3-1
-- Post-release version bump.
+* Wed Aug 13 2006 Zack Cerza <zcerza@redhat.com> - 0.6.0-1
+- New upstream release.
 - Add Requires for xorg-x11-xinit.
-- Fix pyspi Requires
+- Add Requires for gnome-python2-gconf.
+- Bump pyspi Requires.
 
 * Tue Aug 01 2006 Zack Cerza <zcerza@redhat.com> - 0.5.2-1
 - New upstream release.

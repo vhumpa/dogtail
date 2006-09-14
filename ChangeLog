@@ -1,3 +1,9 @@
+2006-09-13  Zack Cerza <zcerza@redhat.com>
+
+	* MANIFEST.in: Remove debian directory from tarball.
+
+	* setup.py: Remove references to dogtail.apps.wrappers.
+
 2006-09-13  David Malcolm  <dmalcolm@redhat.com>
 
 	* examples/rhythmbox-test.py: removed

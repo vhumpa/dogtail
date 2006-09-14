@@ -9,7 +9,7 @@ def examples():
     exList = os.listdir(os.curdir + '/examples/')
     result = []
     for ex in exList:
-        if ex.split('.')[-1] == 'py' and ex != 'crack.py':
+        if ex.split('.')[-1] == 'py':
             result = result + ['examples/' + ex]
     return result
 
@@ -58,7 +58,7 @@ Ed Rousseau <rousseau@redhat.com>,
 David Malcolm <dmalcolm@redhat.com>""",
         author_email = 'dogtail-list@gnome.org',
         url = 'http://people.redhat.com/zcerza/dogtail/',
-        packages = ['dogtail', 'dogtail.apps', 'dogtail.apps.wrappers'],
+        packages = ['dogtail'],
         scripts = scripts(),
         data_files = [
                                 ('share/doc/dogtail/examples',

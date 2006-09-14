@@ -51,7 +51,7 @@ def scripts():
 
 setup (
         name = 'dogtail',
-        version = '0.5.3',
+        version = '0.6.0',
         description = """GUI test tool and automation framework that uses Accessibility (a11y) technologies to communicate with desktop applications.""",
         author = """Zack Cerza <zcerza@redhat.com>,
 Ed Rousseau <rousseau@redhat.com>,

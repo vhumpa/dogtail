@@ -16,19 +16,21 @@ See INSTALL file.
 Dependencies
 ============
 
-pyspi 0.5.3 or newer:
+pyspi 0.6.0 or newer:
   http://people.redhat.com/zcerza/dogtail/releases/
 
 Python bindings for your distribution, e.g. python-apt or rpm-python
 
+PyGTK and GNOME-Python
+
 Applications to test, e.g. from the GNOME desktop:
   http://gnome.org/
 
+Xvfb and xinit:
+  http://xorg.freedesktop.org/
+
 ImageMagick (optional):
   http://www.imagemagick.org/
-
-Xvfb (optional):
-  http://xorg.freedesktop.org/
 
 cElementTree or ElementTree (optional):
   http://effbot.org/downloads/

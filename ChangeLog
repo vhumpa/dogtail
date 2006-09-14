@@ -1,5 +1,11 @@
 2006-09-13  Zack Cerza <zcerza@redhat.com>
 
+	* README: Update.
+
+	* setup.py, dogtail/__init__.py: Bump version numbers.
+
+2006-09-13  Zack Cerza <zcerza@redhat.com>
+
 	* MANIFEST.in: Remove debian directory from tarball.
 
 	* setup.py: Remove references to dogtail.apps.wrappers.

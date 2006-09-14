@@ -62,7 +62,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc examples/
 
 %changelog
-* Wed Aug 13 2006 Zack Cerza <zcerza@redhat.com> - 0.6.0-1
+* Wed Sep 13 2006 Zack Cerza <zcerza@redhat.com> - 0.6.0-1
 - New upstream release.
 - Add Requires for xorg-x11-xinit.
 - Add Requires for gnome-python2-gconf.

@@ -7,5 +7,5 @@ run('gedit')
 
 while True:
     click('Open...')
-    focus.dialog('Open File...')
+    focus.dialog(u'Open Files\u2026')
     click('Cancel')

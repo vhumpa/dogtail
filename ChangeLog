@@ -1,5 +1,14 @@
 2006-09-21  Zack Cerza <zcerza@redhat.com>
 
+	* examples/filechooser-stress-test.py: Apply a patch from Michal Babej
+	to correctly look for the u'Open files\u2026' dialog.
+
+	* examples/no-help-at-all.py: Apply a patch from Michal Babej fail 
+	gracefully if no argument was supplied, and also to start the 
+	requested app if it is not running.
+
+2006-09-21  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/logging.py: Refactor logging mechanism. DebugLogger is now
 	just Logger, and LogWriter is now a Logger subclass called 
 	ResultsLogger. Logger can (and will by default) write its output to a

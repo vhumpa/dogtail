@@ -15,6 +15,7 @@ This script is licensed under the GPL.
 __author__ = 'David Malcolm <dmalcolm@redhat.com>'
 
 from dogtail.tree import *
+from dogtail.utils import *
 import sys
 
 def writePCDataElement(name, content):
@@ -22,7 +23,10 @@ def writePCDataElement(name, content):
 
 
 def generateUnhelpfulHelp(appName):
-    app = root.application(appName)
+    try:
+        app = root.application(appName)
+    except SearchError:
+        run(appName)
     print '<?xml version="1.0"?>'
     print '<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">'
     print '<article>'
@@ -60,4 +64,9 @@ def generateUnhelpfulHelp(appName):
     print '</article>'
 
 if __name__=='__main__':
-    generateUnhelpfulHelp(sys.argv[1])
+    try:
+        generateUnhelpfulHelp(sys.argv[1])
+    except IndexError:
+        print "####################################"
+        print "please supply an application name on the cmdline"
+        print "####################################"

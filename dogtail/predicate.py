@@ -90,6 +90,7 @@ class IsAnApplicationNamed(Predicate):
     """Search subclass that looks for an application by name"""
     def __init__(self, appName):
         self.appName = TranslatableString(appName)
+        self.debugName = self.describeSearchResult()
 
     def satisfiedByNode(self, node):
         return node.roleName=='application' and stringMatches(self.appName, node.name)
@@ -186,6 +187,7 @@ class IsNamed(Predicate):
 
     def __init__(self, name):
         self.name = TranslatableString(name)
+        self.debugName = self.describeSearchResult()
 
     def satisfiedByNode(self, node):
         return stringMatches(self.name, node.name)
@@ -202,6 +204,7 @@ class IsAWindowNamed(Predicate):
     """Predicate subclass that looks for a top-level window by name"""
     def __init__(self, windowName):
         self.windowName = TranslatableString(windowName)
+        self.debugName = self.describeSearchResult()
 
     def satisfiedByNode(self, node):
         return node.roleName=='frame' and stringMatches(self.windowName, node.name)
@@ -227,6 +230,7 @@ class IsADialogNamed(Predicate):
     """Predicate subclass that looks for a top-level dialog by name"""
     def __init__(self, dialogName):
         self.dialogName = TranslatableString(dialogName)
+        self.debugName = self.describeSearchResult()
 
     def satisfiedByNode(self, node):
         return node.roleName=='dialog' and stringMatches(self.dialogName, node.name)
@@ -248,6 +252,7 @@ class IsLabelledAs(Predicate):
     """Predicate: is this node labelled with the text string (i.e. by another node with that as a name)"""
     def __init__(self, labelText):
         self.labelText = TranslatableString(labelText)
+        self.debugName = self.describeSearchResult()
 
     def satisfiedByNode(self, node):
         # FIXME
@@ -268,6 +273,7 @@ class IsAMenuNamed(Predicate):
     """Predicate subclass that looks for a menu by name"""
     def __init__(self, menuName):
         self.menuName = TranslatableString(menuName)
+        self.debugName = self.describeSearchResult()
 
     def satisfiedByNode(self, node):
         return node.roleName=='menu' and stringMatches(self.menuName, node.name)
@@ -285,6 +291,7 @@ class IsAMenuItemNamed(Predicate):
     """Predicate subclass that looks for a menu item by name"""
     def __init__(self, menuItemName):
         self.menuItemName = TranslatableString(menuItemName)
+        self.debugName = self.describeSearchResult()
 
     def satisfiedByNode(self, node):
         roleName = node.roleName
@@ -303,6 +310,7 @@ class IsATextEntryNamed(Predicate):
     """Predicate subclass that looks for a text entry by name"""
     def __init__(self, textEntryName):
         self.textEntryName = TranslatableString(textEntryName)
+        self.debugName = self.describeSearchResult()
 
     def satisfiedByNode(self, node):
         return node.roleName=='text' and stringMatches(self.textEntryName, node.name)
@@ -320,6 +328,7 @@ class IsAButtonNamed(Predicate):
     """Predicate subclass that looks for a button by name"""
     def __init__(self, buttonName):
         self.buttonName = TranslatableString(buttonName)
+        self.debugName = self.describeSearchResult()
 
     def satisfiedByNode(self, node):
         return node.roleName=='push button' and stringMatches(self.buttonName, node.name)
@@ -337,6 +346,7 @@ class IsATabNamed(Predicate):
     """Predicate subclass that looks for a tab by name"""
     def __init__(self, tabName):
         self.tabName = TranslatableString(tabName)
+        self.debugName = self.describeSearchResult()
 
     def satisfiedByNode(self, node):
         return node.roleName=='page tab' and stringMatches(self.tabName, node.name)

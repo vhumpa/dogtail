@@ -5,7 +5,7 @@ __author__ = "Dave Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.com>
 
 import os
 from version import Version
-
+from logging import debugLogger as logger
 
 class DistributionNotSupportedError(Exception):
     """
@@ -281,36 +281,36 @@ class JHBuild(Distro):
     def __init__(self):
         self.packageDb = JhBuildPackageDb()
 
-print "Detecting distribution:",
+message = "Detecting distribution: "
 if os.environ.get("CERTIFIED_GNOMIE", "no") == "yes":
-    print "JHBuild environment"
+    logger.log(message + "JHBuild environment")
     distro = JHBuild()
 elif os.path.exists ("/etc/redhat-release"):
-    print "Red Hat/Fedora/derived distribution"
+    logger.log(message + "Red Hat/Fedora/derived distribution")
     distro = RedHatOrFedora()
 elif os.path.exists ("/etc/SuSE-release"):
-    print "SuSE (or derived distribution)"
+    logger.log(message + "SuSE (or derived distribution)")
     distro = Suse()
 elif os.path.exists ("/etc/fedora-release"):
-    print "Fedora (or derived distribution)"
+    logger.log(message + "Fedora (or derived distribution)")
     distro = RedHatOrFedora()
 elif os.path.exists ("/usr/share/doc/ubuntu-minimal"):
-    print "Ubuntu (or derived distribution)"
+    logger.log(message + "Ubuntu (or derived distribution)")
     distro = Ubuntu()
 elif os.path.exists ("/etc/debian_version"):
-    print "Debian (or derived distribution)"
+    logger.log(message + "Debian (or derived distribution)")
     distro = Debian()
 elif os.path.exists ("/etc/gentoo-release"):
-    print "Gentoo (or derived distribution)"
+    logger.log(message + "Gentoo (or derived distribution)")
     distro = Gentoo()
 elif os.path.exists ("/etc/slackware-version"):
-    print "Slackware"
+    logger.log(message + "Slackware")
     raise DistributionNotSupportedError("Slackware")
 elif os.path.exists ("/var/lib/conarydb/conarydb"):
-    print "Conary-based distribution"
+    logger.log(message + "Conary-based distribution")
     distro = Conary()
 else:
-    print "Unknown"
+    logger.log(message + "Unknown")
     raise DistributionNotSupportedError("Unknown")
 
 packageDb = distro.packageDb

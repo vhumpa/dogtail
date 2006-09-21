@@ -24,16 +24,23 @@ from time import sleep
 class FocusError(Exception):
     pass
 
+import errors
+def focusFailed():
+    errors.warn('The requested object was not found')
+
 ENOARGS = "At least one argument is needed"
 
 class FocusBase:
     """
     The base for every class in the module. Does nothing special, really.
     """
+    node = None
+
     def __getattr__ (self, name):
         # Fold all the Node's AT-SPI properties into the Focus object.
         try: return getattr(self.node, name)
-        except AttributeError: raise AttributeError, name
+        except AttributeError: 
+            raise AttributeError, name
 
     def __setattr__ (self, name, value):
         # Fold all the Node's AT-SPI properties into the Focus object.
@@ -41,7 +48,8 @@ class FocusBase:
             self.__dict__[name] = value
         else:
             try: setattr(self.node, name, value)
-            except AttributeError: raise AttributeError, name
+            except AttributeError: 
+                raise AttributeError, name
 
 class FocusApplication (FocusBase):
     """
@@ -56,7 +64,10 @@ class FocusApplication (FocusBase):
             predicate = IsAnApplicationNamed(name)
             app = self.desktop.findChild(predicate, recursive = False, retry = False)
         except tree.SearchError, desc:
-            raise FocusError, name
+            if config.fatalErrors: raise FocusError, name
+            else:
+                focusFailed()
+                return
         if app: 
             FocusApplication.node = app
             FocusDialog.node = None
@@ -84,7 +95,11 @@ class FocusDialog (FocusBase):
         if result:
             FocusDialog.node = result
             FocusWidget.node = None
-        else: raise FocusError, predicate.debugName
+        else: 
+            if config.fatalErrors: raise FocusError, predicate.debugName
+            else:
+                focusFailed()
+                return
 
 class FocusWidget (FocusBase):
     """
@@ -113,11 +128,18 @@ class FocusWidget (FocusBase):
             try:
                 result = FocusApplication.node.findChild(predicate, requireResult = False, retry = False)
                 if result: FocusWidget.node = result
-            except AttributeError: raise FocusError, name
+            except AttributeError: 
+                if config.fatalErrors: raise FocusError, name
+                else:
+                    focusFailed()
+                    return
 
         if result == None:
             FocusWidget.node = result
-            raise FocusError, predicate.debugName
+            if config.fatalErrors: raise FocusError, predicate.debugName
+            else:
+                focusFailed()
+                return
 
 class Focus (FocusBase):
     """

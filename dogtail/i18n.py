@@ -16,14 +16,13 @@ import gettext
 
 from logging import debugLogger as logger
 
-import traceback
 def safeDecode(string):
     if not isinstance(string, unicode):
         try:
             string = string.decode('utf-8')
         except UnicodeDecodeError:
-            traceback.print_exc()
-            print "The following string is invalid and caused the above error:", string
+            #logger.log(traceback.format_exc())
+            #logger.log("The following string is invalid and caused the above error: '%s'" % string)
             string = string.decode('utf-8', 'replace')
     return string
 

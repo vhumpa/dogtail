@@ -86,9 +86,17 @@ class _Config(object):
     Whether we should blink a rectangle around a Node when an action is
     performed on it.
 
+    fatalErrors (boolean):
+    Whether errors encountered in dogtail.procedural should be considered
+    fatal. If True, exceptions will be raised. If False, warnings will be 
+    passed to the debug logger.
+
     useIconLogger (boolean):
     Whether we should place an icon in the notification area and print debug
     messages to it.
+
+    logDebugToFile (boolean):
+    Whether to write debug output to a log file.
     """
     __scriptName = staticmethod(_scriptName)
     __encoding = staticmethod(_encoding)
@@ -121,9 +129,11 @@ class _Config(object):
             'ensureSensitivity' : False,
             'debugTranslation' : False,
             'blinkOnActions' : False,
+            'fatalErrors' : False,
 
             # Logging
-            'useIconLogger' : False
+            'useIconLogger' : False,
+            'logDebugToFile' : True
     }
 
     options = {}
@@ -143,10 +153,17 @@ class _Config(object):
 
         elif _Config.defaults[name] != value or \
                 _Config.options.get(name, _Config.invalidValue) != value:
-            if 'Dir' in name: _Config.__createDir(value)
+            if 'Dir' in name:
+                _Config.__createDir(value)
+                if value[-1] != '/': value = value + '/'
             elif name == 'useIconLogger':
                 import logging
-                logging.debugLogger.addIconLogger(logging.IconLogger())
+                if value == True:
+                    logging.Logger.iconLogger = logging.IconLogger()
+                elif value == False:
+                    del logging.Logger.iconLogger
+                    logging.Logger.iconLogger = None
+                else: raise ValueError, value
             _Config.options[name] = value
 
     def __getattr__(self, name):

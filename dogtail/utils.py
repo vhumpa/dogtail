@@ -47,8 +47,6 @@ def screenshot(file = 'screenshot.png', timeStamp = True):
         newFile = baseName + '.' + fileExt
         path = config.scratchDir + newFile
 
-    print path
-    
     import gtk.gdk
     import gobject
     rootWindow = gtk.gdk.get_default_root_window()
@@ -112,7 +110,7 @@ def doDelay(delay=None):
     if delay is None:
         delay = config.defaultDelay
     if config.debugSleep:
-        logger.log("sleeping for %f"%delay)
+        logger.log("sleeping for %f" % delay)
     sleep(delay)
 
 class Blinker:
@@ -162,7 +160,7 @@ def isA11yEnabled():
     return gconfClient.get_bool(a11yGConfKey)
 
 def bailBecauseA11yIsDisabled():
-    print "Dogtail requires that Assistive Technology support be enabled. Aborting..."
+    logger.log("Dogtail requires that Assistive Technology support be enabled. Aborting...")
     sys.exit(1)
 
 def enableA11y():
@@ -200,7 +198,7 @@ Note that you will have to log out for the change to fully take effect.
     dialog.show_all()
     result = dialog.run()
     if result == gtk.RESPONSE_ACCEPT:
-        print "Enabling accessibility..."
+        logger.log("Enabling accessibility...")
         enableA11y()
     elif result == gtk.RESPONSE_CLOSE:
        bailBecauseA11yIsDisabled()

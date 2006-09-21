@@ -10,9 +10,11 @@ Zack Cerza <zcerza@redhat.com,
 David Malcolm <dmalcolm@redhat.com>
 """
 import os
+import sys
 import time
 import datetime
 from config import config
+import codecs
 
 # Timestamp class for file logs
 class TimeStamp:
@@ -79,82 +81,6 @@ class TimeStamp:
                     self.now = self.now + ":" + self.zeroPad(self.timetup[i])
         return self.now
 
-
-# Class that writes to the Log
-class LogWriter:
-    """
-    Writes entries into the Dogtail log
-    """
-    def __init__(self):
-        self.entry = {}
-        # Set the logDir - maybe we want to use mktemp(1) for this later.
-        self.logDir = config.logDir #'/tmp/dogtail-' + os.environ['LOGNAME'] + '/'
-        if not os.path.isdir(self.logDir): os.makedirs(self.logDir)
-        self.logfile = ''
-        self.scriptName = config.scriptName
-        if not self.scriptName: self.scriptName = 'log'
-        self.loghandle = "" # Handle to the logfile
-        self.stamper = TimeStamp()
-        # check to see if we can write to the logDir
-        if os.path.isdir(self.logDir):
-            # generate a logfile name and check if it already exists
-            self.logfile = self.logDir + self.stamper.fileStamp(self.scriptName)
-            i = 0
-            while os.path.exists(self.logfile):
-                # Append the pathname
-                if i == 0:
-                    self.logfile = self.logfile + "." + str(i)
-                else:
-                    logsplit = self.logfile.split(".")
-                    logsplit[-1] = str(i)
-                    self.logfile = ".".join(logsplit)
-                i += 1
-        else:
-            # If path doesn't exist, raise an exception
-            raise IOError, "Log path %s does not exist or is not a directory" % self.logDir
-
-        # Try to create the file and write the header info
-        try:
-            print "Creating logfile at %s ..." % self.logfile
-            date = datetime.datetime.strftime(datetime.datetime.now(), '%d %b %Y %H:%M:%S')
-            self.loghandle = open(self.logfile, 'w')
-            self.loghandle.write("##### " + self.scriptName + " Created on: " + date + "\n")
-            self.loghandle.flush()
-            self.loghandle.close()
-        except IOError:
-            print "Could not create and write to " + self.logfile
-
-
-    # Writes the result of a test case comparison to the log
-    def writeResult(self, entry):
-        """
-        Writes the log entry. Requires a 1 {key: value} pair dict for an argument or else it will throw an exception.
-        """
-        self.entry = entry
-        # We require a 1 key: value dict
-        # Strip all leading and trailing witespace from entry dict and convert
-    # to string for writing
-
-        if len(self.entry) == 1:
-            key = self.entry.keys()
-            value = self.entry.values()
-            key = key[0]
-            value = value[0]
-            self.entry = str(key) + ":      " + str(value)
-        else:
-            raise ValueError
-            print "Method argument requires a 1 {key: value} dict. Supplied argument not one {key: value}"
-
-        # Try to open and write the result to the log
-        try:
-            self.loghandle = open(self.logfile, 'a')
-            self.loghandle.write(self.stamper.entryStamp() + "      " + self.entry + "\n")
-            self.loghandle.flush()
-            self.loghandle.close()
-
-        except IOError:
-            print "Could not write to file " + self.logfile
-
 class IconLogger:
     """
     Writes entries to the tooltip of an icon in the notification area or the desktop.
@@ -178,35 +104,125 @@ class IconLogger:
         """
         IconLogger.trayicon.set_tooltip(msg)
 
-class DebugLogger:
+    def __del__(self):
+        IconLogger.trayicon.close()
+
+class Logger:
     """
     Writes entries to standard out, and to an IconLogger if desired.
     """
-    def __init__(self, useIconLogger = None):
+    iconLogger = None
+    stamper = TimeStamp()
+    def __init__(self, logName, file = False, stdOut = True):
         """
-        useIconLogger: True or False. Defaults to using config.useIconLogger.
-        """
-        if useIconLogger is None: useIconLogger = config.useIconLogger
-        if useIconLogger == True:
-            self.addIconLogger(IconLogger())
-        self.useIconLogger = useIconLogger
+        FIXME! make this log to a file based on the name arg.
 
-    def addIconLogger(self, iconLogger):
+        name: the name of the log
+
+        file: The file object to log to.
+
+        stdOut: Whether to log to standard out.
         """
-        Don't call this method directly. Just set config.useIconLogger to True.
-        """
-        self.iconLogger = iconLogger
-        self.useIconLogger = True
+        self.logName = logName
+        self.stdOut = stdOut
+        self.file = file # Handle to the logfile
+        if not self.file: return
+
+        logDir = config.logDir
+        if not os.path.isdir(logDir): os.makedirs(logDir)
+
+        scriptName = config.scriptName
+        if not scriptName: scriptName = 'log'
+        self.fileName = scriptName
+
+        # check to see if we can write to the logDir
+        if os.path.isdir(logDir):
+            # generate a logfile name and check if it already exists
+            self.fileName = logDir + self.stamper.fileStamp(self.fileName) + '_' + self.logName
+            i = 0
+            while os.path.exists(self.fileName):
+                # Append the pathname
+                if i == 0:
+                    self.fileName = self.fileName + "." + str(i)
+                else:
+                    logsplit = self.fileName.split(".")
+                    logsplit[-1] = str(i)
+                    self.fileName = ".".join(logsplit)
+                i += 1
+        else:
+            # If path doesn't exist, raise an exception
+            raise IOError, "Log path %s does not exist or is not a directory" % logDir
+
+        # Try to create the file and write the header info
+        try:
+            print "Creating logfile at %s ..." % self.fileName
+            self.file = codecs.open(self.fileName, mode = 'wb', encoding = 'utf-8')
+            self.file.write("##### " + os.path.basename(self.fileName) + '\n')
+            self.file.flush()
+            #self.file.close()
+        except IOError:
+            print "Could not create and write to " + self.fileName
 
     def log(self, message):
         """
         Hook used for logging messages. Might eventually be a virtual
         function, but nice and simple for now.
         """
-        # Try to use the IconLogger.
-        if self.useIconLogger and self.iconLogger.works:
-            self.iconLogger.message(message)
-        # Also write to standard out.
-        print message
+        message = message.decode('utf-8', 'replace')
 
-debugLogger = DebugLogger()
+        # Try to use the IconLogger.
+        if self.iconLogger and self.iconLogger.works:
+            self.iconLogger.message(message)
+        
+        # Also write to standard out.
+        if self.stdOut: print message
+
+        # Try to open and write the result to the log file.
+        if not self.file: return
+        try:
+            #self.file = open(self.fileName, 'a')
+            self.file.write(message + '\n')
+            self.file.flush()
+            #self.file.close()
+        except IOError:
+            print "Could not write to file " + self.fileName
+
+class ResultsLogger(Logger):
+    """
+    Writes entries into the Dogtail log
+    """
+    def __init__(self, stdOut = True):
+        Logger.__init__(self, 'results', file = True, stdOut = stdOut)
+        # Set the logDir - maybe we want to use mktemp(1) for this later.
+
+    # Writes the result of a test case comparison to the log
+    def log(self, entry):
+        """
+        Writes the log entry. Requires a 1 {key: value} pair dict for an argument or else it will throw an exception.
+        """
+        # We require a 1 key: value dict
+        # Strip all leading and trailing witespace from entry dict and convert
+    # to string for writing
+
+        if len(entry) == 1:
+            key = entry.keys()
+            value = entry.values()
+            key = key[0]
+            value = value[0]
+            entry = str(key) + ":      " + str(value)
+        else:
+            raise ValueError, entry
+            print "Method argument requires a 1 {key: value} dict. Supplied argument not one {key: value}"
+
+        Logger.log(self, self.stamper.entryStamp() + "      " + entry)
+
+debugLogger = Logger('debug', file = True)
+
+import traceback
+def exceptionHook(exc, value, tb):
+    tbStringList = traceback.format_exception(exc, value, tb)
+    tbString = ''.join(tbStringList)
+    debugLogger.log(tbString)
+    sys.exc_clear()
+
+sys.excepthook = exceptionHook

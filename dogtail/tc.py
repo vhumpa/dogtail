@@ -12,7 +12,7 @@ import time
 import datetime
 import os.path
 from config import config
-from logging import LogWriter, TimeStamp
+from logging import ResultsLogger, TimeStamp, debugLogger
 from errors import DependencyNotFoundError
 
 
@@ -20,7 +20,7 @@ class TC:
     """
     The Test Case Superclass
     """
-    writer = LogWriter()
+    logger = ResultsLogger()
     def __init__(self):
         self.encoding = config.encoding
         # ascii + unicode. 8 bit extended char has been ripped out
@@ -57,14 +57,14 @@ class TC:
                 self.result = {self.label: "Passed"}
             else:
                 self.result = {self.label: "Failed - " + self.encoding + " strings do not match. " + self.baseline + " expected: Got " + self.undertest}
-            # Pass the test result to the LogWriter for writing
-            TC.writer.writeResult(self.result)
+            # Pass the test result to the ResultsLogger for writing
+            TC.logger.log(self.result)
             return self.result
 
         else:
             # We should probably raise an exception here
             self.result = {self.label: "ERROR - " + self.encoding + " is not a supported encoding type"}
-            TC.writer.writeResult(self.result)
+            TC.logger.log(self.result)
             return self.result
 
 
@@ -141,7 +141,7 @@ determining pass/fail criteria.
                 else:
                     fanswer = answer[0].strip()
                     self.result = {self.label: "Failed - " + fanswer}
-                TC.writer.writeResult(self.result)
+                TC.logger.log(self.result)
                 return self.result
             else: # otherwise run the metric code
                 # Build the cmd
@@ -173,7 +173,7 @@ determining pass/fail criteria.
                     else:
                         under = self.threshold - fanswer
                         self.result = {self.label: "Passed - " + "compare results under threshold by: " + str(under) + " dB"}
-                TC.writer.writeResult(self.result)
+                TC.logger.log(self.result)
                 return self.result
 
             # delete the composite image file if self.dfile is default
@@ -181,11 +181,11 @@ determining pass/fail criteria.
                 try:
                     os.remove(self.dfile)
                 except IOError:
-                    print "Could not delete tempfile " + self.dfile
+                    debugLogger.log("Could not delete tempfile " + self.dfile)
 
         else: # unsupported metric given
             self.result = {self.label: "Failed - " + self.metric + " is not in the list of supported metrics"}
-            TC.writer.writeResult(self.result)
+            TC.logger.log(self.result)
             return self.result
 
 
@@ -230,11 +230,11 @@ class TCNumber(TC):
                 self.result = {self.label: "Passed - numbers are the same"}
             else:
                 self.result = {self.label: "Failed - " + str(self.baseline) + " expected: Got " + str(self.undertest)}
-            TC.writer.writeResult(self.result)
+            TC.logger.log(self.result)
             return self.result
         else:
             self.result = {self.label: "Failed - " + self.type + " is not in list of supported types"}
-            TC.writer.writeResult(self.result)
+            TC.logger.log(self.result)
             return self.result
 
 

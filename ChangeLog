@@ -1,3 +1,47 @@
+2006-09-21  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/logging.py: Refactor logging mechanism. DebugLogger is now
+	just Logger, and LogWriter is now a Logger subclass called 
+	ResultsLogger. Logger can (and will by default) write its output to a
+	file in config.logDir. To disable the logging of debug information to
+	a file, set config.logDebugToFile to False. ResultsLogger now also
+	prints its results to standard out.
+
+	* dogtail/distro.py, dogtail/tree.py, dogtail/utils.py: 
+	Replace all print statements with calls to the debug logger.
+
+	* dogtail/tc.py: Update to reflect changes in dogtail.logging.
+
+	* dogtail/procedural.py: Don't raise a FocusError if 
+	config.fatalErrors is False. Instead, spit a warning out via 
+	dogtail.errors.warn(), which relays to the debug logger.
+
+	* dogtail/errors.py: Add warn(), which is the mechanism by which an
+	exception is replaced by a warning if config.fatalErrors is False. 
+	Uses dogtail.logging.debugLogger, which is a dogtail.logging.Logger
+	instance.
+
+	* dogtail/config.py: Add two new parameters: 'fatalErrors', which
+	specifies whether errors encountered while using dogtail.procedural
+	should be considered fatal; and 'logDebugToFile', which specifies
+	whether to write debug output to a file. They default to False and
+	True, respectively.
+
+	* dogtail/predicate.py: Give debugNames to all the Predicates that 
+	were missing them.
+
+	* dogtail/i18n.py: Don't spam warnings and probably-useless tracebacks
+	when a broken app spews fake UTF-8.
+
+	* dogtail/__init__.py: Post-release version bump. Add the errors 
+	module to __all__.
+
+	* NEWS, setup.py: Post-release version bump.
+
+2006-09-13  Zack Cerza <zcerza@redhat.com>
+
+	Released 0.6.0.
+
 2006-09-13  Zack Cerza <zcerza@redhat.com>
 
 	* README: Update.

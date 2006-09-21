@@ -175,7 +175,7 @@ class Action:
                 raise NotSensitiveError, self
             else:
                 nSE = NotSensitiveError(self)
-                print "Warning: " + str(nSE)
+                logger.log("Warning: " + str(nSE))
         if config.blinkOnActions: self.node.blink()
         result = self.__action.doAction (self.__index)
         doDelay()
@@ -467,7 +467,7 @@ class Node:
                     try: a = self.__accessible.getChildAtIndex (i)
                     except atspi.SpiException:
                         import traceback
-                        traceback.print_exc()
+                        logger.log(traceback.format_exc())
                 else: a = self.__accessible.getChildAtIndex (i)
                 # Workaround to GNOME bug #321273
                 # http://bugzilla.gnome.org/show_bug.cgi?id=321273
@@ -643,18 +643,18 @@ class Node:
         # Non-working implementation
         # Unfortunately, the call to AccessibleText_setCaretOffset fails for Evolution's gtkhtml composer for some reason
         if False:
-            print "caret offset: %s"%self.caretOffset
+            logger.log("caret offset: %s" % self.caretOffset)
             self.__editableText.insertText (self.caretOffset, text)
             self.caretOffset+=len(string) # FIXME: is this correct?
-            print "new caret offset: %s"%self.caretOffset
+            logger.log("new caret offset: %s" % self.caretOffset)
 
         if self.focusable:
             if not self.focused:
-                try: print self.grabFocus()
-                except: print "Node is focusable but I can't grabFocus!"
+                try: self.grabFocus()
+                except: logger.log("Node is focusable but I can't grabFocus!")
             rawinput.typeText(string)
         else:
-            print "Node is not focusable; falling back to setting text"
+            logger.log("Node is not focusable; falling back to setting text")
             node.text += string
             doDelay()
 
@@ -663,8 +663,8 @@ class Node:
         if self.focusable:
             if not self.focused:
                 try: self.grabFocus()
-                except: print "Node is focusable but I can't grabFocus!"
-        else: print "Node is not focusable; trying key combo anyway"
+                except: logger.log("Node is focusable but I can't grabFocus!")
+        else: logger.log("Node is not focusable; trying key combo anyway")
         rawinput.keyCombo(comboString)
 
     def __str__ (self):
@@ -727,7 +727,7 @@ class Node:
         that means
         """
         if config.debugSearchPaths:
-            print "getAbsoluteSearchPath(%s)"%self
+            logger.log("getAbsoluteSearchPath(%s)" % self)
 
         if self.roleName=='application':
             result =path.SearchPath()
@@ -737,7 +737,7 @@ class Node:
             if self.parent:
                 (ancestor, pred, isRecursive) = self.getRelativeSearch()
                 if config.debugSearchPaths:
-                    print "got ancestor: %s"%ancestor
+                    logger.log("got ancestor: %s" % ancestor)
 
                 ancestorPath = ancestor.getAbsoluteSearchPath()
                 ancestorPath.append(pred, isRecursive)
@@ -755,7 +755,7 @@ class Node:
         FIXME: should this be private?
         """
         if config.debugSearchPaths:
-            print "getRelativeSearchPath(%s)"%self
+            logger.log("getRelativeSearchPath(%s)" % self)
 
         assert self
         assert self.parent
@@ -855,7 +855,7 @@ class Node:
         numAttempts = 0
         while numAttempts<config.searchCutoffCount:
             if numAttempts>=config.searchWarningThreshold or config.debugSearching:
-                print "searching for %s (attempt %i)"%(describeSearch(self, pred, recursive, debugName), numAttempts)
+                logger.log("searching for %s (attempt %i)" % (describeSearch(self, pred, recursive, debugName), numAttempts))
 
             result = findFirstChildSatisfying(self, pred, recursive)
             if result:
@@ -869,7 +869,7 @@ class Node:
                 if not retry: break
                 numAttempts+=1
                 if config.debugSearching or config.debugSleep:
-                    print "sleeping for %f"%config.searchBackoffDuration
+                    logger.log("sleeping for %f" % config.searchBackoffDuration)
                 sleep(config.searchBackoffDuration)
         if requireResult:
             raise SearchError(describeSearch(self, pred, recursive, debugName))
@@ -1248,12 +1248,12 @@ try:
     root.debugName= 'root'
 except AssertionError:
     # Warn if AT-SPI's desktop object doesn't show up.
-    print "Error: AT-SPI's desktop is not visible. Do you have accessibility enabled?"
+    logger.log("Error: AT-SPI's desktop is not visible. Do you have accessibility enabled?")
 
 # Check that there are applications running. Warn if none are.
 children = root.children
 if not children:
-    print "Warning: AT-SPI's desktop is visible but it has no children. Are you running any AT-SPI-aware applications?"
+    logger.log("Warning: AT-SPI's desktop is visible but it has no children. Are you running any AT-SPI-aware applications?")
 del children
 
 # Convenient place to set some debug variables:

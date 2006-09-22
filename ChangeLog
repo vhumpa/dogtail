@@ -1,3 +1,8 @@
+2006-09-22  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/rawinput.py: Make pressKey(), which is used by typText(), 
+	use UniCharToKeySym(). Now typeText('foo, bar; baz!?!') works again.
+
 2006-09-21  Zack Cerza <zcerza@redhat.com>
 
 	* examples/filechooser-stress-test.py: Apply a patch from Michal Babej

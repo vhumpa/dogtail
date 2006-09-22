@@ -13,7 +13,7 @@ Zack Cerza <zcerza@redhat.com>
 import atspi
 import gtk.keysyms
 import gtk.gdk
-from dogtail.config import config
+from config import config
 from utils import doDelay
 from logging import debugLogger as logger
 ev = atspi.EventGenerator()
@@ -154,8 +154,9 @@ def pressKey(keyName):
     keyName is the English name of the key as seen on the keyboard. Ex: 'enter'
     Names are looked up in the keySyms dict.
     """
-    keyName = keySymAliases.get(keyName.lower(), keyName)
-    keySym = keySyms[keyName]
+    #keyName = keySymAliases.get(keyName.lower(), keyName)
+    #keySym = keySyms[keyName]
+    keySym = uniCharToKeySym(keyName)
     ev.generateKeyboardEvent(keySym, "", atspi.SPI_KEY_SYM)
     doTypingDelay()
 

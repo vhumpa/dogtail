@@ -18,6 +18,7 @@ __author__ = 'Zack Cerza <zcerza@redhat.com>'
 import tree
 from predicate import GenericPredicate, IsADialogNamed, IsAnApplicationNamed
 from config import config
+import rawinput
 from time import sleep
 
 #FocusError = "FocusError: %s not found"
@@ -326,10 +327,16 @@ class Select (Action):
         sleep(delay)
         
 def type(text):
-    focus.widget.node.typeText(text)
+    if focus.widget.node:
+        focus.widget.node.typeText(text)
+    else:
+        rawinput.typeText(text)
 
 def keyCombo(combo):
-    focus.widget.node.keyCombo(combo)
+    if focus.widget.node:
+        focus.widget.node.keyCombo(combo)
+    else:
+        rawinput.keyCombo(combo)
 
 def run(application, arguments = '', appName = ''):
     from utils import run as utilsRun

@@ -15,9 +15,10 @@ import atspi
 program = gnome.program_init(appName, '0.1')
 import gtk.glade
 
-try:
+import os
+if os.path.exists('sniff.glade'):
     x = gtk.glade.XML('sniff.glade')
-except RuntimeError:
+else:
     import sys
     exec_root = sys.argv[0].split("/bin/")[0]
     if exec_root[0] is not '/':

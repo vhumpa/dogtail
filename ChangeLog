@@ -1,5 +1,10 @@
 2006-09-26  Zack Cerza <zcerza@redhat.com>
 
+	* recorder/dogtail-recorder, sniff/sniff: Stop whining if the glade
+	file isn't in the current directory.
+
+2006-09-26  Zack Cerza <zcerza@redhat.com>
+
 	* recorder/dogtail-recorder, recorder/recorder.glade: Implement script
 	playback using python's threading module.
 

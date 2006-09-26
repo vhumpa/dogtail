@@ -32,9 +32,9 @@ class RecorderGUI(gnome.Program):
         appAuthors = ['Zack Cerza <zcerza@redhat.com>']
         program = gnome.program_init(appName, '0.1')
 
-        try:
+        if os.path.exists('recorder.glade'):
             x = gtk.glade.XML('recorder.glade')
-        except RuntimeError:
+        else:
             import sys
             exec_root = sys.argv[0].split("/bin/")[0]
             if exec_root[0] is not '/':

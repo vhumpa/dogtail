@@ -38,16 +38,20 @@ class RecorderGUI(gnome.Program):
             self.window.set_icon_from_file('/usr/share/icons/hicolor/scalable/apps/dogtail-head.svg')
 
         self.recordButton = x.get_widget('recordButton')
-        self.saveButton = x.get_widget('saveButton')
-        self.saveButton.set_sensitive(False)
+        self.playButton = x.get_widget('playButton')
+        self.playButton.set_sensitive(False)
         self.clearButton = x.get_widget('clearButton')
         self.clearButton.set_sensitive(False)
-        self.quitButton = x.get_widget('quitButton')
+        self.saveButton = x.get_widget('saveButton')
+        self.saveButton.set_sensitive(False)
         self.scriptTextView = x.get_widget('scriptTextView')
         self.scriptTextView.set_editable(False)
         #self.writerComboBox = x.get_widget('writerComboBox')
         #self.writerComboBox.set_active(0)
         #self.writerComboBox.set_sensitive(True)
+
+        # The following line added because self.writerComboBox is gone:
+        recorder.writerClass = ProceduralScriptWriter
 
         self.connectSignals()
 
@@ -59,7 +63,7 @@ class RecorderGUI(gnome.Program):
         self.recordButton.connect('clicked', self.toggleRecording, self.scriptTextView)
         self.clearButton.connect('clicked', self.clearScript, self.scriptTextView)
         self.saveButton.connect('clicked', self.saveScript)
-        self.quitButton.connect('clicked', self.quit)
+        self.window.connect('delete_event', self.quit)
 
     def setWriterClass (self, comboBox):
         selected = comboBox.get_active_text()
@@ -77,6 +81,7 @@ class RecorderGUI(gnome.Program):
         
         if label == recordID:
             #self.writerComboBox.set_sensitive(False)
+            self.playButton.set_sensitive(False)
             self.clearButton.set_sensitive(False)
             self.saveButton.set_sensitive(False)
             self.scriptTextView.set_editable(False)
@@ -85,6 +90,7 @@ class RecorderGUI(gnome.Program):
         
         elif label == stopID:
             #self.writerComboBox.set_sensitive(True)
+            self.playButton.set_sensitive(True)
             self.clearButton.set_sensitive(True)
             self.saveButton.set_sensitive(True)
             self.scriptTextView.set_editable(True)
@@ -94,6 +100,16 @@ class RecorderGUI(gnome.Program):
     def stopRecording(self):
         self.recordButton.set_label('gtk-media-stop')
         self.toggleRecording()
+
+    def playScript(self, button = None, scriptTextView = None):
+        self.recordButton.set_sensitive(False)
+        self.playButton.set_sensitive(False)
+        self.scriptTextView.set_editable(False)
+        script = self.scriptTextView.get_text()
+        # FIXME: play script...
+        self.playButton.set_sensitive(True)
+        self.recordButton.set_sensitive(True)
+        self.scriptTextView.set_editable(True)
 
     def clearScript(self, button = None, scriptTextView = None):
         self.scriptTextView.get_buffer().set_text('')

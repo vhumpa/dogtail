@@ -21,8 +21,8 @@
                             </widget>
                         </child>
                         <child>
-                            <widget class="GtkButton" id="clearButton">
-                                <property name="label">gtk-clear</property>
+                            <widget class="GtkButton" id="playButton">
+                                <property name="label">gtk-media-play</property>
                                 <property name="use_stock">True</property>
                                 <property name="visible">True</property>
                             </widget>
@@ -31,9 +31,8 @@
                             </packing>
                         </child>
                         <child>
-                            <widget class="GtkButton" id="saveButton">
-                                <property name="is_focus">True</property>
-                                <property name="label">gtk-save</property>
+                            <widget class="GtkButton" id="clearButton">
+                                <property name="label">gtk-clear</property>
                                 <property name="use_stock">True</property>
                                 <property name="visible">True</property>
                             </widget>
@@ -42,9 +41,9 @@
                             </packing>
                         </child>
                         <child>
-                            <widget class="GtkButton" id="quitButton">
+                            <widget class="GtkButton" id="saveButton">
                                 <property name="is_focus">True</property>
-                                <property name="label">gtk-quit</property>
+                                <property name="label">gtk-save</property>
                                 <property name="use_stock">True</property>
                                 <property name="visible">True</property>
                             </widget>

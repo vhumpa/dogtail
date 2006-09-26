@@ -1,5 +1,10 @@
 2006-09-26  Zack Cerza <zcerza@redhat.com>
 
+	* recorder/dogtail-recorder, recorder/recorder.glade: Remove Quit button
+	and add Play button. The Play button isn't fully implemented yet.
+
+2006-09-26  Zack Cerza <zcerza@redhat.com>
+
 	* recorder/dogtail-recorder, recorder/recorder.glade: Remove combo box
 	since OOScriptWriter needs fixing. Also remove the expander since a
 	GTK bug was keeping it from expanding properly.

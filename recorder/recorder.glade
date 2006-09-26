@@ -2,41 +2,12 @@
 <!DOCTYPE glade-interface SYSTEM "http://gazpacho.sicem.biz/gazpacho-0.1.dtd">
 <glade-interface>
     <widget class="GtkWindow" id="window">
-        <property name="default_width">440</property>
+        <property name="default_height">200</property>
         <property name="title" context="yes" translatable="yes">Script Recorder</property>
         <property name="visible">True</property>
         <child>
             <widget class="GtkVBox" id="vbox1">
                 <property name="visible">True</property>
-                <child>
-                    <widget class="GtkHBox" id="hbox1">
-                        <property name="visible">True</property>
-                        <child>
-                            <widget class="GtkLabel" id="label1">
-                                <property name="label" context="yes" translatable="yes">Script type:</property>
-                                <property name="visible">True</property>
-                                <property name="xpad">4</property>
-                            </widget>
-                            <packing>
-                                <property name="expand">False</property>
-                            </packing>
-                        </child>
-                        <child>
-                            <widget class="GtkComboBox" id="writerComboBox">
-                                <property name="items" context="yes" translatable="yes">Procedural
-Object-Oriented</property>
-                                <property name="visible">True</property>
-                            </widget>
-                            <packing>
-                                <property name="expand">False</property>
-                                <property name="position">1</property>
-                            </packing>
-                        </child>
-                    </widget>
-                    <packing>
-                        <property name="expand">False</property>
-                    </packing>
-                </child>
                 <child>
                     <widget class="GtkHButtonBox" id="hbuttonbox1">
                         <property name="layout_style">start</property>
@@ -84,40 +55,42 @@ Object-Oriented</property>
                     </widget>
                     <packing>
                         <property name="expand">False</property>
-                        <property name="position">1</property>
                     </packing>
                 </child>
                 <child>
-                    <widget class="GtkExpander" id="scriptExpander">
-                        <property name="is_focus">True</property>
-                        <property name="label" context="yes" translatable="yes">Show script</property>
+                    <widget class="GtkVBox" id="vbox2">
                         <property name="spacing">1</property>
-                        <property name="use_underline">True</property>
                         <property name="visible">True</property>
                         <child>
-                            <widget class="GtkVBox" id="vbox2">
-                                <property name="height_request">200</property>
-                                <property name="spacing">1</property>
+                            <widget class="GtkLabel" id="scriptViewLabel">
+                                <property name="label" context="yes" translatable="yes"> Script:</property>
                                 <property name="visible">True</property>
+                                <property name="xalign">0.0</property>
+                            </widget>
+                            <packing>
+                                <property name="expand">False</property>
+                            </packing>
+                        </child>
+                        <child>
+                            <widget class="GtkScrolledWindow" id="scrolledwindow1">
+                                <property name="hscrollbar_policy">automatic</property>
+                                <property name="visible">True</property>
+                                <property name="vscrollbar_policy">automatic</property>
                                 <child>
-                                    <widget class="GtkScrolledWindow" id="scrolledwindow1">
-                                        <property name="hscrollbar_policy">automatic</property>
+                                    <widget class="GtkTextView" id="scriptTextView">
+                                        <property name="editable">False</property>
+                                        <property name="is_focus">True</property>
                                         <property name="visible">True</property>
-                                        <property name="vscrollbar_policy">automatic</property>
-                                        <child>
-                                            <widget class="GtkTextView" id="scriptTextView">
-                                                <property name="editable">False</property>
-                                                <property name="is_focus">True</property>
-                                                <property name="visible">True</property>
-                                            </widget>
-                                        </child>
                                     </widget>
                                 </child>
                             </widget>
+                            <packing>
+                                <property name="position">1</property>
+                            </packing>
                         </child>
                     </widget>
                     <packing>
-                        <property name="position">2</property>
+                        <property name="position">1</property>
                     </packing>
                 </child>
             </widget>

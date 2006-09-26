@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 __author__ = 'David Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.com>'
 DR_NAME = 'Script Recorder'
+import os
+os.environ['GTK_MODULES']=''
 
 from dogtail.utils import checkForA11yInteractively
 checkForA11yInteractively()
@@ -11,6 +13,15 @@ import gtk.gdk
 import dogtail.rawinput
 
 # Begin GUI code
+import threading
+class PlaybackThread(threading.Thread):
+    def __init__(self, script):
+        threading.Thread.__init__(self)
+        self.script = script
+
+    def run(self):
+        exec self.script
+
 import gobject
 import gnome
 import gtk.glade
@@ -61,6 +72,7 @@ class RecorderGUI(gnome.Program):
     def connectSignals(self):
         #self.writerComboBox.connect('changed', self.setWriterClass)
         self.recordButton.connect('clicked', self.toggleRecording, self.scriptTextView)
+        self.playButton.connect('clicked', self.playScript, self.scriptTextView)
         self.clearButton.connect('clicked', self.clearScript, self.scriptTextView)
         self.saveButton.connect('clicked', self.saveScript)
         self.window.connect('delete_event', self.quit)
@@ -105,8 +117,16 @@ class RecorderGUI(gnome.Program):
         self.recordButton.set_sensitive(False)
         self.playButton.set_sensitive(False)
         self.scriptTextView.set_editable(False)
-        script = self.scriptTextView.get_text()
-        # FIXME: play script...
+
+        buffer = self.scriptTextView.get_buffer()
+        startIter = buffer.get_start_iter()
+        endIter = buffer.get_end_iter()
+        scriptText = buffer.get_text(startIter, endIter)
+
+        self.playbackThread = PlaybackThread(scriptText)
+        self.playbackThread.start()
+        self.playbackThread.join()
+
         self.playButton.set_sensitive(True)
         self.recordButton.set_sensitive(True)
         self.scriptTextView.set_editable(True)

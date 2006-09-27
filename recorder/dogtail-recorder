@@ -11,6 +11,7 @@ import atspi
 import dogtail.tree
 import gtk.gdk
 import dogtail.rawinput
+import re
 
 # Begin GUI code
 import threading
@@ -375,24 +376,32 @@ class ProceduralScriptWriter(ScriptWriter):
                 self.recordLine("focus.dialog('%s')" % dialog.name)
                 self.currentDialog = dialog
         
-    def recordClick(self, node):
+    def recordClick(self, node, button):
         if node == None: return False
 
         self.setUpFocus(node)
         
         widget = node
-        possibleActions = ['click', 'activate', 'open', 'menu']
+        #possibleActions = ['click', 'activate', 'open', 'menu']
+        possibleActions = ['click', 'activate', 'menu']
         foundAnAction = False
         for action in possibleActions:
             if action in widget.actions.keys():
+                if button == 1 and action == 'menu': break
                 foundAnAction = True
-                self.recordLine("%s('%s', roleName='%s')" % (action, widget.name.replace('\n','\\n'), widget.roleName))
+                self.recordLine("%s('%s', roleName='%s')" % \
+                        (action, widget.name.replace('\n','\\n'), widget.roleName))
                 break
         if not foundAnAction: 
-            if hasattr(widget, 'select'):
-                self.recordLine("select('%s', roleName='%s')" % (widget.name.replace('\n','\\n'), widget.roleName))
+            if hasattr(widget, 'select') and button != 1:
+                self.recordLine("select('%s', roleName='%s')" % \
+                        (widget.name.replace('\n','\\n'), widget.roleName))
             else:
-                self.recordLine("click('%s', roleName='%s', raw=True)" % (widget.name.replace('\n','\\n'), widget.roleName))
+                if button != 1: btn = ', button = ' + str(button)
+                else: btn = ''
+                s = "click('%s', roleName='%s', raw=True%s)" % \
+                        (widget.name.replace('\n','\\n'), widget.roleName, btn)
+                self.recordLine(s)
         self.currentWidget = widget
         
     def recordTyping(self, string, type, node):
@@ -561,12 +570,10 @@ class EventRecorder:
         self.typedTextBuffer = ""
 
         isPress = isRelease = False
-        if "mouse:button:1" not in event.type:
-            return
-        elif event.type == "mouse:button:1p":
-            isPress = True
-        elif event.type == "mouse:button:1r":
-            isRelease = True
+        g=re.match('mouse:button:(\d)(p|r)', event.type).groups()
+        button = int(g[0])
+        if g[1] == 'p': isPress = True
+        elif g[1] == 'r': isRelease = True
 
         # The source node is always "main" - which sucks. We have to detect
         # the real source ourselves.
@@ -642,7 +649,7 @@ class EventRecorder:
             self.lastReleasedNode = detectedNode
         
         if isRelease and detectedNode:
-            self.writer.recordClick(detectedNode)
+            self.writer.recordClick(detectedNode, button)
 
     def __checkModMask(fullMask, partMask, toCheck):
         result = False

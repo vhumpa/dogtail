@@ -1,3 +1,12 @@
+2006-09-27  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Add support for recording right clicks.
+	It mostly works, but I'm seeing some inconsistency regarding what gets
+	focus when a right-click event occurs. For example, when a nautilus
+	icon seems to retain focus only about half the times it is 
+	right-clicked; the other half, the context menu receives the focus.
+	Obviously, when that happens, the recorder records the wrong event.
+
 2006-09-26  Zack Cerza <zcerza@redhat.com>
 
 	* recorder/dogtail-recorder, sniff/sniff: Stop whining if the glade

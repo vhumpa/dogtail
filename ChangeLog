@@ -1,3 +1,7 @@
+2006-10-02  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/utils.py: Fix 'Technolofy' typo :)
+
 2006-09-27  Zack Cerza <zcerza@redhat.com>
 
 	* recorder/dogtail-recorder: Add support for recording right clicks.

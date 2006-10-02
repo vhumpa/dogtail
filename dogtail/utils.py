@@ -182,7 +182,7 @@ def checkForA11yInteractively():
     """
     if isA11yEnabled(): return
     import gtk
-    dialog = gtk.Dialog('Enable Assistive Technolofy Support?',
+    dialog = gtk.Dialog('Enable Assistive Technology Support?',
                      None,
                      gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
                      (gtk.STOCK_QUIT, gtk.RESPONSE_CLOSE, 

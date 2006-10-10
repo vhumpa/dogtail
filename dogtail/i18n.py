@@ -139,19 +139,21 @@ class TranslatableString:
         def stringsMatch(inS, outS):
             """
             Compares a regular expression to a string
-            """
-            # The old way just checked equality ...
-            #matched = inString == outString
 
-            # ... But we want regular expressions!
+            inS: the regular expression (or normal string)
+            outS: the normal string to be compared against
+            """
             inString = str(inS)
             outString = outS
+            if inString == outString:
+                return True
             inString = inString + '$'
             inString = safeDecode(inString)
             outString = safeDecode(outString)
-            #if ts: print "re.match('"+inString+"','"+outString+"')"
             if inString[0] == '*':
                 inString = "\\" + inString
+            # Escape all parentheses, since grouping will never be needed here
+            inString = re.sub('([\(\)])', r'\\\1', inString)
             match = re.match(inString, outString)
             matched = match is not None
             return matched

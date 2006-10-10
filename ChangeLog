@@ -1,3 +1,12 @@
+2006-10-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/i18n.py: Make TranslatableString.matchedBy() check for 
+	equality before trying to match via regular expression. This will
+	ensure that traditional, exact-string searches will work regardless of
+	the presence of any regexy-looking characters. Additionaly escape '('
+	and ')', since grouping will never need to be used in this context.
+	Closes: #348891.
+
 2006-10-02  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/utils.py: Fix 'Technolofy' typo :)

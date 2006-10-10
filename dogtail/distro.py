@@ -325,10 +325,10 @@ elif os.path.exists ("/etc/slackware-version"):
 elif os.path.exists ("/var/lib/conarydb/conarydb"):
     logger.log(message + "Conary-based distribution")
     distro = Conary()
-elif os.path.exists ("/etc/release"):
-    if re.match (".*Solaris", open ("/etc/release").readlines()[0]):
-        print "Solaris distribution"
-        distro = Solaris()
+elif os.path.exists ("/etc/release") and \
+        re.match (".*Solaris", open ("/etc/release").readline()):
+    print "Solaris distribution"
+    distro = Solaris()
 else:
     logger.log(message + "Unknown")
     raise DistributionNotSupportedError("Unknown")

@@ -1,5 +1,10 @@
 2006-10-10  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/distro.py: Add patch from Brian Cameron to detect Solaris.
+	Closes: #360479. Also, check for Fedora before checking for Red Hat.
+
+2006-10-10  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/i18n.py: Make TranslatableString.matchedBy() check for 
 	equality before trying to match via regular expression. This will
 	ensure that traditional, exact-string searches will work regardless of

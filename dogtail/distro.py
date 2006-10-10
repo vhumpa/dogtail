@@ -4,6 +4,7 @@ Authors: Dave Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.com>"""
 __author__ = "Dave Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.com>"
 
 import os
+import re
 from version import Version
 from logging import debugLogger as logger
 
@@ -205,6 +206,14 @@ class _ConaryPackageDb(PackageDb):
             raise PackageNotFoundError, packageName
         return dbVersions[0].trailingRevision().asString().split("-")[0]
 
+# getVersion not implemented because on Solaris multiple modules are installed
+# in single packages, so it is hard to tell what version number of a specific
+# module.
+#
+class _SolarisPackageDb(PackageDb):
+    def __init__(self):
+        PackageDb.__init__(self)
+
 class JhBuildPackageDb(PackageDb):
     def __init__(self):
         PackageDb.__init__(self)
@@ -274,6 +283,13 @@ class Conary(Distro):
     def __init__(self):
         self.packageDb = _ConaryPackageDb()
 
+class Solaris(Distro):
+    """
+    Class representing a Solaris distribution
+    """
+    def __init__(self):
+        self.packageDb = _SolarisPackageDb()
+
 class JHBuild(Distro):
     """
     Class representing a JHBuild environment
@@ -285,14 +301,14 @@ message = "Detecting distribution: "
 if os.environ.get("CERTIFIED_GNOMIE", "no") == "yes":
     logger.log(message + "JHBuild environment")
     distro = JHBuild()
-elif os.path.exists ("/etc/redhat-release"):
-    logger.log(message + "Red Hat/Fedora/derived distribution")
-    distro = RedHatOrFedora()
 elif os.path.exists ("/etc/SuSE-release"):
     logger.log(message + "SuSE (or derived distribution)")
     distro = Suse()
 elif os.path.exists ("/etc/fedora-release"):
     logger.log(message + "Fedora (or derived distribution)")
+    distro = RedHatOrFedora()
+elif os.path.exists ("/etc/redhat-release"):
+    logger.log(message + "Red Hat/Fedora/derived distribution")
     distro = RedHatOrFedora()
 elif os.path.exists ("/usr/share/doc/ubuntu-minimal"):
     logger.log(message + "Ubuntu (or derived distribution)")
@@ -309,6 +325,10 @@ elif os.path.exists ("/etc/slackware-version"):
 elif os.path.exists ("/var/lib/conarydb/conarydb"):
     logger.log(message + "Conary-based distribution")
     distro = Conary()
+elif os.path.exists ("/etc/release"):
+    if re.match (".*Solaris", open ("/etc/release").readlines()[0]):
+        print "Solaris distribution"
+        distro = Solaris()
 else:
     logger.log(message + "Unknown")
     raise DistributionNotSupportedError("Unknown")

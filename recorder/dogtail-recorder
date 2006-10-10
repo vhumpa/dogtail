@@ -26,6 +26,22 @@ class PlaybackThread(threading.Thread):
 import gobject
 import gnome
 import gtk.glade
+
+try:
+    import gtksourceview
+    useGtkSourceView = True
+except:
+    useGtkSourceView = False
+
+def createSourceView():
+    langManager = gtksourceview.SourceLanguagesManager()
+    lang = langManager.get_language_from_mime_type("text/x-python")
+    buffer = gtksourceview.SourceBuffer()
+    sourceView = gtksourceview.SourceView(buffer)
+    buffer.set_language(lang)
+    buffer.set_highlight(True)
+    return sourceView
+
 class RecorderGUI(gnome.Program):
     def __init__(self):
         gnome.Program.__init__(self)
@@ -56,7 +72,16 @@ class RecorderGUI(gnome.Program):
         self.clearButton.set_sensitive(False)
         self.saveButton = x.get_widget('saveButton')
         self.saveButton.set_sensitive(False)
-        self.scriptTextView = x.get_widget('scriptTextView')
+        if useGtkSourceView:
+            oldTextView = x.get_widget('scriptTextView')
+            parent = oldTextView.get_parent()
+            parent.remove(oldTextView)
+            sourceView = createSourceView()
+            parent.add(sourceView)
+            sourceView.show()
+            self.scriptTextView = sourceView
+        else:
+            self.scriptTextView = x.get_widget('scriptTextView')
         self.scriptTextView.set_editable(False)
         #self.writerComboBox = x.get_widget('writerComboBox')
         #self.writerComboBox.set_active(0)

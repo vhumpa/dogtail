@@ -1,5 +1,11 @@
 2006-10-10  Zack Cerza <zcerza@redhat.com>
 
+	* recorder/dogtail-recorder: Re-add Dave Malcolm's patch to add syntax
+	hilighting to the script view, which was accidentally dropped. Closes: 
+	#345374.
+
+2006-10-10  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/distro.py: Add patch from Brian Cameron to detect Solaris.
 	Closes: #360479. Also, check for Fedora before checking for Red Hat.
 

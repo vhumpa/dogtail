@@ -1,5 +1,9 @@
 2006-10-11  Zack Cerza <zcerza@redhat.com>
 
+	* NEWS: Update with changes since 0.6.0.
+
+2006-10-11  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/rawinput.py: Make typeText('foo\nbar') work again.
 
 2006-10-10  Zack Cerza <zcerza@redhat.com>
@@ -69,7 +73,7 @@
 
 2006-09-22  Zack Cerza <zcerza@redhat.com>
 
-	* dogtail/rawinput.py: Make pressKey(), which is used by typText(), 
+	* dogtail/rawinput.py: Make pressKey(), which is used by typeText(), 
 	use UniCharToKeySym(). Now typeText('foo, bar; baz!?!') works again.
 
 2006-09-21  Zack Cerza <zcerza@redhat.com>

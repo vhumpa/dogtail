@@ -3,7 +3,48 @@ dogtail 0.6.1
 
 Features:
 
+ * dogtail-recorder has a Play button now.
+
+ * dogtail-recorder now records right-clicks. That it didn't previously was an
+   oversight. Note that there is some inconsistency when dealing with context
+   menus, as the events often get fired in the wrong order.
+
+ * New logging mechanism:
+
+    - Debug output is now written to a file. To disable this, set 
+      dogtail.config.config.logDebugToFile to False.
+
+    - The procedural API defaults to not raising FocusErrors, and instead
+      issuing warnings via the debug logging mechanism (which prints to 
+      standard out along with writing to a file). To re-enable FocusErrors, set
+      dogtail.config.config.fatalErrors to True.
+
+ * Brian Cameron submitted a patch to make dogtail.distro correctly detect that
+   it is running on Solaris.
+
 Bugfixes:
+
+ * dogtail-recorder no longer offers the broken Object-Oriented backend as a
+   choice. If it gets fixed, it will be offered again.
+
+ * dogtail-recorder can be properly exited by clicking on the window manager
+   close button. In fact, the Quit button was removed also.
+
+ * dogtail-recorder's syntax hilighting works again, thanks to a patch from 
+   Dave Malcolm.
+
+ * Searching for nodes with parentheses in their names will no longer fail.
+
+ * The various pressKey() functions were blowing up on punctuation and 
+   newlines. Fixed.
+
+ * Predicate subclasses in dogtail.predicate which were missing debugNames have
+   gotten them back.
+
+ * Warnings are no longer issued when dogtail encounters invalid Unicode.
+
+ * Where several of our example scripts were broken, Michal Babej noticed and
+   submitted patches fixing them.
 
 
 dogtail 0.6.0

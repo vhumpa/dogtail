@@ -152,11 +152,15 @@ def pressKey(keyName):
     """
     Presses (and releases) the key specified by keyName.
     keyName is the English name of the key as seen on the keyboard. Ex: 'enter'
-    Names are looked up in the keySyms dict.
+    Names are looked up in the keySyms dict. If they are not found there, 
+    they are looked up by uniCharToKeySym().
     """
-    #keyName = keySymAliases.get(keyName.lower(), keyName)
-    #keySym = keySyms[keyName]
-    keySym = uniCharToKeySym(keyName)
+    try:
+        keyName = keySymAliases.get(keyName.lower(), keyName)
+        keySym = keySyms[keyName]
+    except KeyError:
+        try: keySym = uniCharToKeySym(keyName)
+        except TypeError: raise KeyError, keyName
     ev.generateKeyboardEvent(keySym, "", atspi.SPI_KEY_SYM)
     doTypingDelay()
 

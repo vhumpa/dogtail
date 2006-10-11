@@ -1,3 +1,7 @@
+2006-10-11  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/rawinput.py: Make typeText('foo\nbar') work again.
+
 2006-10-10  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/distro.py: Fix up Solaris detection so that an /etc/release

@@ -1,5 +1,12 @@
 2006-10-12  Zack Cerza <zcerza@redhat.com>
 
+	* recorder/dogtail-recorder: Keep track of which 'frame' (window) the
+	widget we're poking is under. If necessary, write out 'focus.frame()'
+	lines for that frame. This should keep us from getting confused about
+	which non-dialog window of a given application we care about.
+
+2006-10-12  Zack Cerza <zcerza@redhat.com>
+
 	* recorder/dogtail-recorder: Be consistent about what name we use for
 	the recorder internally.
 

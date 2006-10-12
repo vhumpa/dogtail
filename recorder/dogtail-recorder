@@ -367,6 +367,7 @@ class ProceduralScriptWriter(ScriptWriter):
     
     currentWidget = None
     currentDialog = None
+    currentFrame = None
     currentApplication = None
 
     def __init__(self, scriptTextView = None):
@@ -399,6 +400,15 @@ class ProceduralScriptWriter(ScriptWriter):
             if needDialog:
                 self.recordLine("focus.dialog('%s')" % dialog.name)
                 self.currentDialog = dialog
+        else:
+            frame = FakeNode.findAncestor(node, roleName='frame')
+            if frame:
+                needFrame = True
+                if frame == self.currentFrame: needFrame = False
+                if needFrame:
+                    self.recordLine("focus.frame('%s')" % frame.name)
+                    self.currentFrame = frame
+
         
     def recordClick(self, node, button):
         if node == None: return False

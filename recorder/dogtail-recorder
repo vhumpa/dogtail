@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 __author__ = 'David Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.com>'
-DR_NAME = 'Script Recorder'
+appName = 'Script Recorder'
 import os
 os.environ['GTK_MODULES']=''
 
@@ -45,7 +45,6 @@ def createSourceView():
 class RecorderGUI(gnome.Program):
     def __init__(self):
         gnome.Program.__init__(self)
-        appName = 'Recorder'
         appAuthors = ['Zack Cerza <zcerza@redhat.com>']
         program = gnome.program_init(appName, '0.1')
 
@@ -659,10 +658,10 @@ class EventRecorder:
             # it with detectByCoordinates().
             possibleNodes = [self.lastFocusedNode]
         detectedNode = detectByCoordinates(possibleNodes, x, y)
-        if detectedNode and ((detectedNode.name == DR_NAME and \
+        if detectedNode and ((detectedNode.name == appName and \
                 detectedNode.roleName == 'frame') or \
                 FakeNode.findAncestor(detectedNode, \
-                roleName = 'frame', name = DR_NAME)):
+                roleName = 'frame', name = appName)):
             self.lastPressedNode = None
             self.lastReleasedNode = None
             return

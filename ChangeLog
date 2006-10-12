@@ -1,3 +1,8 @@
+2006-10-12  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Be consistent about what name we use for
+	the recorder internally.
+
 2006-10-11  Zack Cerza <zcerza@redhat.com>
 
 	* NEWS: Update with changes since 0.6.0.

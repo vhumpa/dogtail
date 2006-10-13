@@ -46,6 +46,9 @@ Bugfixes:
  * Where several of our example scripts were broken, Michal Babej noticed and
    submitted patches fixing them.
 
+ * dogtail's tarball is 90% smaller! Some overly large test images were 
+   replaced with very, very small ones that still do the job.
+
 
 dogtail 0.6.0
 =============

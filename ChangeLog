@@ -1,5 +1,9 @@
 2006-10-13  Zack Cerza <zcerza@redhat.com>
 
+	* NEWS: Update.
+
+2006-10-13  Zack Cerza <zcerza@redhat.com>
+
 	* examples/data/GNOME-Street1.png, examples/data/GNOME-Street.png,
 	examples/data/g-star1.png, examples/data/g-star.png: Remove and 
 	replace with far smaller test images.

@@ -1,3 +1,14 @@
+2006-10-13  Zack Cerza <zcerza@redhat.com>
+
+	* examples/data/GNOME-Street1.png, examples/data/GNOME-Street.png,
+	examples/data/g-star1.png, examples/data/g-star.png: Remove and 
+	replace with far smaller test images.
+
+	* examples/data/10b.png, examples/data/10w.png, examples/data/20b.png,
+	examples/data/20w.png: Add, to replace older, larger test images.
+
+	* dogtail/tc.py: Update to reflect the change in test images.
+
 2006-10-12  Zack Cerza <zcerza@redhat.com>
 
 	* recorder/dogtail-recorder: Keep track of which 'frame' (window) the

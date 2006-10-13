@@ -382,8 +382,8 @@ if __name__ == '__main__':
     # Test to see that image compares work - this a simple compare with defaults
     # Load our variabes
     label = "unit test case 3.0"
-    baseline = "../examples/data/GNOME-Street.png"
-    undertest = "../examples/data/GNOME-Street1.png"
+    baseline = "../examples/data/20w.png"
+    undertest = "../examples/data/20b.png"
     result = {}
 
     # Create a TCImage instance
@@ -397,8 +397,8 @@ if __name__ == '__main__':
 
     # Default compare with different images (the sizes differ)
     label = "unit test case 3.1"
-    baseline = "../examples/data/GNOME-Street.png"
-    undertest = "../examples/data/g-star.png"
+    baseline = "../examples/data/20w.png"
+    undertest = "../examples/data/10w.png"
     result = {}
 
     # Fire off the compare
@@ -409,8 +409,8 @@ if __name__ == '__main__':
 
     # Image compare pass with the metrics option
     label = "unit test case 3.2"
-    baseline = "../examples/data/GNOME-Street.png"
-    undertest = "../examples/data/GNOME-Street1.png"
+    baseline = "../examples/data/20w.png"
+    undertest = "../examples/data/20b.png"
     result = {}
     metrics = ("MAE", "MSE", "PSE", "PSNR"," RMSE")
 
@@ -421,8 +421,8 @@ if __name__ == '__main__':
 
     # Image compare fail metrics
     label = "unit test case 3.3"
-    baseline = "../examples/data/g-star.png"
-    undertest = "../examples/data/g-star1.png"
+    baseline = "../examples/data/10w.png"
+    undertest = "../examples/data/10b.png"
     result = {}
     metrics = ("MAE", "MSE", "PSE", "PSNR"," RMSE")
 
@@ -433,8 +433,8 @@ if __name__ == '__main__':
 
     # Image comapre threshold metrics - only PNSR should pass
     label = "unit test case 3.4"
-    baseline = "../examples/data/g-star.png"
-    undertest = "../examples/data/g-star1.png"
+    baseline = "../examples/data/10w.png"
+    undertest = "../examples/data/10b.png"
     result = {}
     metrics = ("MAE", "MSE", "PSE", "PSNR"," RMSE")
     bound = 5
@@ -446,8 +446,8 @@ if __name__ == '__main__':
 
     # Bogus metric test
     label = "unit test case 3.5"
-    baseline = "../examples/data/g-star.png"
-    undertest = "../examples/data/g-star1.png"
+    baseline = "../examples/data/10w.png"
+    undertest = "../examples/data/10b.png"
     result = {}
     metrics = "Guess"
 

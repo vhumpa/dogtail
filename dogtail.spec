@@ -62,8 +62,8 @@ rm -rf $RPM_BUILD_ROOT
 %doc examples/
 
 %changelog
-* Fri Oct 13 2006 Zack Cerza <zcerza@redhat.com> - 0.6.1-1
-- Post-release version bump.
+* Mon Oct 16 2006 Zack Cerza <zcerza@redhat.com> - 0.6.1-1
+- New upstream release.
 
 * Wed Sep 13 2006 Zack Cerza <zcerza@redhat.com> - 0.6.0-1
 - New upstream release.

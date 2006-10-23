@@ -1,3 +1,7 @@
+2006-10-23  Zack Cerza <zcerza@redhat.com>
+
+	* setup.py, dogtail/__init__.py, NEWS: Post-release version bump.
+
 2006-10-13  Zack Cerza <zcerza@redhat.com>
 
 	* Released 0.6.1.

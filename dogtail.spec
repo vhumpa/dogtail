@@ -1,6 +1,6 @@
 Summary: GUI test tool and automation framework
 Name: dogtail
-Version: 0.6.1
+Version: 0.6.2
 Release: 1%{?dist}
 License: GPL
 Group: User Interface/X
@@ -62,6 +62,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc examples/
 
 %changelog
+* Mon Oct 23 2006 Zack Cerza <zcerza@redhat.com> - 0.6.2-1
+- Post-release version bump.
+
 * Mon Oct 16 2006 Zack Cerza <zcerza@redhat.com> - 0.6.1-1
 - New upstream release.
 

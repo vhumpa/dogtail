@@ -340,7 +340,7 @@ def keyCombo(combo):
 
 def run(application, arguments = '', appName = ''):
     from utils import run as utilsRun
-    utilsRun(application + arguments, appName = appName)
+    utilsRun(application + ' ' + arguments, appName = appName)
     focus.application(application)
 
 focus = Focus()

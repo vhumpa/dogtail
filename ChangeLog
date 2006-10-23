@@ -1,5 +1,10 @@
 2006-10-23  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/procedural.py: Make run() insert a space while concatenating
+	the binary name and arguments to pass. Closes: #364553.
+
+2006-10-23  Zack Cerza <zcerza@redhat.com>
+
 	* setup.py, dogtail/__init__.py, NEWS: Post-release version bump.
 
 2006-10-13  Zack Cerza <zcerza@redhat.com>

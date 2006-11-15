@@ -460,7 +460,7 @@ class Node:
         elif attr =="indexInParent":
             return self.__accessible.getIndexInParent()
         elif attr == "children":
-            if self.__hideChildren: return
+            if self.__hideChildren: return []
             children = []
             for i in xrange (self.__accessible.getChildCount ()):
                 if isinstance(self, Root):
@@ -547,7 +547,7 @@ class Node:
                 return self.parent._Node__selection.isChildSelected(self.indexInParent)
         elif attr == "selectedChildren":
             if self.__hideChildren:
-                return
+                return []
             selectedChildren = []
             parent = self.parent
             if parent and self.parent._Node__selection:
@@ -883,8 +883,9 @@ class Node:
 
         selfList = []
 
+
         try: children = self.children
-        except: return None
+        except: return []
 
         for child in children:
             if child.satisfies(pred): selfList.append(child)
@@ -1060,7 +1061,7 @@ class Link(Node):
             return self.__hyperlink.getURI(self.__index)
         else:
             if name == 'children':
-                return
+                return []
             try:
                 result = getattr(self.__node, name)
                 return result

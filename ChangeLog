@@ -1,3 +1,10 @@
+2006-11-15  David Malcolm  <dmalcolm@redhat.com>
+
+	* dogtail/tree.py: ensure that a Node and a Link's children attribute
+	always is a list and hence iteratable (previously returned None for 
+	Link instances and for Node instances that had __hideChildren set);
+	similar fix for the Node.findChildren method
+
 2006-10-23  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/procedural.py: Make run() insert a space while concatenating

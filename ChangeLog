@@ -1,3 +1,9 @@
+2006-11-17  Zack Cerza <zcerza@redhat.com>
+
+	* examples/test-events.py: Make sure dogtail.tree is imported. Closes: 
+	#374898. Also add warning that the script is outdated, may do evil, and
+	will probably be removed soon.
+
 2006-11-15  David Malcolm  <dmalcolm@redhat.com>
 
 	* dogtail/tree.py: ensure that a Node and a Link's children attribute

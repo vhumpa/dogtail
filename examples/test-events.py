@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # Dogtail demo script
+# Note that this script is outdated and may cause your session to lock up until
+# it is killed. It will most likely be deleted in the next release.
 __author__ = 'David Malcolm <dmalcolm@redhat.com>'
 
 import atspi
-import dogtail
+import dogtail.tree
 
 # Test of event callbacks
 # Under construction

@@ -90,6 +90,8 @@ except ImportError:
     #print "Warning: Dogtail could not import the Python bindings for libwnck. Window-manager manipulation will not be available."
     gotWnck = False
 
+haveWarnedAboutChildrenLimit = False
+
 class SearchError(Exception):
     pass
 
@@ -462,7 +464,14 @@ class Node:
         elif attr == "children":
             if self.__hideChildren: return []
             children = []
-            for i in xrange (self.__accessible.getChildCount ()):
+            childCount = self.__accessible.getChildCount()
+            if childCount > config.childrenLimit:
+                global haveWarnedAboutChildrenLimit
+                if not haveWarnedAboutChildrenLimit:
+                    logger.log("Only returning %s children. You may change config.childrenLimit if you wish. This message will only be printed once." % str(config.childrenLimit))
+                    haveWarnedAboutChildrenLimit = True
+                childCount = config.childrenLimit
+            for i in xrange (childCount):
                 if isinstance(self, Root):
                     try: a = self.__accessible.getChildAtIndex (i)
                     except atspi.SpiException:

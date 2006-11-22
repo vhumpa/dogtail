@@ -1,3 +1,13 @@
+2006-11-22  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/config.py: Add parameter 'childrenLimit', which is an integer
+	representing how many children of a Node instance to return at maximum.
+	The default is 100.
+
+	* dogtail/tree.py: Only return config.childrenLimit children. Log a 
+	warning to the debug logger the first time the list is clipped, but
+	remain silent on subsequent occurences.
+
 2006-11-17  Zack Cerza <zcerza@redhat.com>
 
 	* examples/test-events.py: Make sure dogtail.tree is imported. Closes: 

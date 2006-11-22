@@ -58,6 +58,10 @@ class _Config(object):
     defaultDelay (float):
     Default time in seconds to sleep when delaying.
 
+    childrenLimit (int):
+    When there are a very large number of children of a node, only return
+    this many, starting with the first.
+
     debugSearching (boolean):
     Whether to write info on search backoff and retry to the debug log.
 
@@ -111,7 +115,7 @@ class _Config(object):
             'configFile' : None,
             'baseFile' : None,
 
-            # Timing
+            # Timing and Limits
             'actionDelay' : 1.0,
             'typingDelay' : 0.075,
             'runInterval' : 0.5,
@@ -120,6 +124,7 @@ class _Config(object):
             'searchWarningThreshold' : 3,
             'searchCutoffCount' : 20,
             'defaultDelay' : 0.5,
+            'childrenLimit' : 100,
 
             # Debug
             'debugSearching' : False,

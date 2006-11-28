@@ -1,3 +1,9 @@
+2006-11-28  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/config.py: When creating the default directories for logs, 
+	etc. (/tmp/dogtail/*), create them world-writable so that they may be 
+	shared by multiple users.
+
 2006-11-22  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/config.py: Add parameter 'childrenLimit', which is an integer

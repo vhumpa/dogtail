@@ -148,9 +148,9 @@ class _Config(object):
     def __init__(self):
         scriptName = _scriptName()
         encoding = _encoding()
-        _Config.__createDir(_Config.defaults['scratchDir'])
-        _Config.__createDir(_Config.defaults['logDir'])
-        _Config.__createDir(_Config.defaults['dataDir'])
+        _Config.__createDir(_Config.defaults['scratchDir'], 0777)
+        _Config.__createDir(_Config.defaults['logDir'], 0777)
+        _Config.__createDir(_Config.defaults['dataDir'], 0777)
 
     def __setattr__(self, name, value):
         if not config.defaults.has_key(name):
@@ -177,9 +177,11 @@ class _Config(object):
             try: return _Config.defaults[name]
             except KeyError: raise AttributeError, name + " is not a valid option."
 
-    def __createDir(cls, dirName):
+    def __createDir(cls, dirName, perms = None):
         """
         Creates a directory (if it doesn't currently exist), creating any parent directories it needs.
+
+        If perms is None, create with default permissions.
         """
         dirName = os.path.abspath(dirName)
         #print "Checking for %s ..." % dirName,
@@ -190,13 +192,15 @@ class _Config(object):
             if not os.path.isdir(parentDirName):
                 #print "Not found."
                 #print "Parent %s ..." % parentDirName
-                _Config.__createDir(parentDirName)
+                _Config.__createDir(parentDirName, perms)
                 print "Creating %s ..." % dirName
                 os.mkdir(dirName)
+                if perms: os.chmod(dirName, perms)
             else:
                 #print "Found."
                 print "Creating %s ..." % dirName
                 os.mkdir(dirName)
+                if perms: os.chmod(dirName, perms)
         #else: print "Found."
     __createDir = classmethod(__createDir)
 

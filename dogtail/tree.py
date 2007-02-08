@@ -558,8 +558,7 @@ class Node:
             if self.__hideChildren:
                 return []
             selectedChildren = []
-            parent = self.parent
-            if parent and self.parent._Node__selection:
+            if self.__selection:
                 for i in xrange(self.__selection.getNSelectedChildren()):
                     selectedChildren.append(Node(self.__selection.getSelectedChild(i)))
             return selectedChildren

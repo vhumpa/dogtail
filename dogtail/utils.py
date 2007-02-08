@@ -157,7 +157,11 @@ def isA11yEnabled():
     """
     Checks if accessibility is enabled via gconf.
     """
-    return gconfClient.get_bool(a11yGConfKey)
+    gconfEnabled = gconfClient.get_bool(a11yGConfKey)
+    if os.environ.get('GTK_MODULES','').find('gail:atk-bridge') == -1:
+        envEnabled = False
+    else: envEnabled = True
+    return (gconfEnabled or envEnabled)
 
 def bailBecauseA11yIsDisabled():
     logger.log("Dogtail requires that Assistive Technology support be enabled. Aborting...")

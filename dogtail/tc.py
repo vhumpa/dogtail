@@ -119,6 +119,7 @@ determining pass/fail criteria.
             splabel = label.split(" ")
             label = "".join(splabel)
             self.dfile = self.scratchDir + x.fileStamp(label)
+            if (self.dfile[-4:].lower() != ".png"): self.dfile += ".png"
             self.deldfile = 1
         else: # or use the supplied one with no deletion
             self.dfile = dfile
@@ -278,7 +279,7 @@ if __name__ == '__main__':
     label = " unit test case 2.0"
     encoding = "utf-8"
     baseline = u"groß"
-    undertest = u"gro\xc3\xa1"
+    undertest = u"gro\xdf"
     result = {}
 
     # Fire off a UTF-8 compare

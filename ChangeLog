@@ -1,3 +1,8 @@
+2007-02-09  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tc.py: Add patch from Michal Babej that removes some 
+	confusion in TCImage.compare(), and also fixes a unit test.
+
 2007-02-08  Daniel Drake  <d.drake@mmm.com>
 
 	* dogtail/tree.py: Fix wrong logic in Node.selectedChildren

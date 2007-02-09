@@ -19,8 +19,7 @@ from dogtail.utils import *
 import sys
 
 def writePCDataElement(name, content):
-    print '\t\t<%s>%s</%s>'%(name, content, name) # FIXME: escape the content
-
+    print '<%s>%s</%s>'%(name, cgi.escape(content), name)
 
 def generateUnhelpfulHelp(appName):
     try:

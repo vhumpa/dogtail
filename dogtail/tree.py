@@ -983,7 +983,7 @@ class Node:
         if no such child is found, and will eventually raise an exception. It
         also logs the search.
         """
-        return self.findChild (predicate.IsLabelled(labelText), recursive)
+        return self.findChild (predicate.IsLabelledAs(labelText), recursive)
 
     def childNamed(self, childName, recursive=True):
         """

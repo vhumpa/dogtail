@@ -366,5 +366,47 @@ class PredicateTests(unittest.TestCase):
         self.assertEquals(makeCamel("Evolution - Mail"), "evolutionMail")
         self.assertEquals(makeCamel('self.assertEquals(makeCamel("Evolution - Mail"), "evolutionMail")'), "selfAssertequalsMakecamelEvolutionMailEvolutionmail")
 
+    def testPredicates(self):
+        class DummyNode:
+            def __init__(self, name = '', roleName = '', description = ''):
+                self.name = name
+                self.roleName = roleName
+                self.description = description
+                self.labeller = None
+
+        dn1 = DummyNode('dummy name 1', 'dummy role 1', 'dummy desc 1')
+        dn2 = DummyNode('dummy name 2', 'dummy role 2', 'dummy desc 2')
+
+        dummyApp = DummyNode('dummy', 'application')
+        self.assertTrue(IsAnApplicationNamed(dummyApp.name).satisfiedByNode(dummyApp))
+
+        self.assertTrue(IsNamed(dn1.name).satisfiedByNode(dn1))
+
+        dummyWin = DummyNode('dummy', 'frame')
+        self.assertTrue(IsAWindowNamed(dummyWin.name).satisfiedByNode(dummyWin))
+        self.assertTrue(IsAWindow().satisfiedByNode(dummyWin))
+
+        dummyDlg = DummyNode('dummy', 'dialog')
+        self.assertTrue(IsADialogNamed(dummyDlg.name).satisfiedByNode(dummyDlg))
+
+        dn2.labeller = dn1
+        #IsLabelledBy
+        self.assertTrue(IsLabelledAs(dn1.name).satisfiedByNode(dn2))
+
+        dummyMenu = DummyNode('dummy', 'menu')
+        self.assertTrue(IsAMenuNamed(dummyMenu.name).satisfiedByNode(dummyMenu))
+
+        dummyMenuItem = DummyNode('dummy', 'menu item')
+        self.assertTrue(IsAMenuItemNamed(dummyMenuItem.name).satisfiedByNode(dummyMenuItem))
+
+        dummyText = DummyNode('dummy', 'text')
+        self.assertTrue(IsATextEntryNamed(dummyText.name).satisfiedByNode(dummyText))
+
+        dummyButton = DummyNode('dummy', 'push button')
+        self.assertTrue(IsAButtonNamed(dummyButton.name).satisfiedByNode(dummyButton))
+        
+        dummyTab = DummyNode('dummy', 'page tab')
+        self.assertTrue(IsATabNamed(dummyTab.name).satisfiedByNode(dummyTab))
+
 if __name__ == "__main__":
     unittest.main()

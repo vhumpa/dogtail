@@ -18,7 +18,7 @@ def examples_data():
     dataList = os.listdir(os.curdir + '/examples/data/')
     result = []
     for data in dataList:
-        if data != 'CVS':
+        if data != '.svn':
             result = result + ['examples/data/' + data]
     return result
 
@@ -45,7 +45,7 @@ def scripts():
     list = os.listdir(os.curdir + '/scripts/')
     result = ['sniff/sniff', 'recorder/dogtail-recorder']
     for file in list:
-        if file != 'CVS':
+        if file != '.svn':
             result = result + ['scripts/' + file]
     return result
 

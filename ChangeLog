@@ -1,3 +1,9 @@
+2007-05-03  Zack Cerza <zcerza@redhat.com>
+	
+	* sniff/sniff: Add patch from Michal Babej to correctly reset the 
+	actions label when a Node with no actions is selected. Closes:
+	#432999.
+
 2007-03-16  Zack Cerza <zcerza@redhat.com>
 
 	* setup.py: Add patch from Fernando Herrera to fix building from a

@@ -117,10 +117,9 @@ def setUpTable(node):
     nameTextLabel.set_text(node.name)
     roleNameTextLabel.set_text(node.roleName)
     descTextLabel.set_text(node.description)
-    if node.actions:
-        str = ''
-        for action in node.actions.values(): str = ' '.join([str, action.name]).strip()
-        actionsTextLabel.set_text(str)
+    str = ''
+    if node.actions: str = ' '.join(action.name for action in node.actions.values())
+    actionsTextLabel.set_text(str)
 
     global textTextViewBufferChangedLastHandlerID
     # Have we connected this signal yet? If so, disconnect it before proceeding.

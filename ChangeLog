@@ -1,3 +1,12 @@
+2007-05-11  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py, recorder/dogtail-recorder,
+	scripts/dogtail-run-headless, sniff/sniff: Replace 'except:' with
+	'except: Exception', since we don't want KeyboardInterrupt and
+	SystemExit to be ignored in any of those cases. See:
+	http://www.python.org/dev/peps/pep-0352/. Also catch only ImportError
+	in once case inside of dogtail-recorder.
+
 2007-05-03  Zack Cerza <zcerza@redhat.com>
 	
 	* sniff/sniff: Add patch from Michal Babej to correctly reset the 

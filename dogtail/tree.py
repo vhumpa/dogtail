@@ -659,7 +659,7 @@ class Node:
         if self.focusable:
             if not self.focused:
                 try: self.grabFocus()
-                except: logger.log("Node is focusable but I can't grabFocus!")
+                except Exception: logger.log("Node is focusable but I can't grabFocus!")
             rawinput.typeText(string)
         else:
             logger.log("Node is not focusable; falling back to setting text")
@@ -671,7 +671,7 @@ class Node:
         if self.focusable:
             if not self.focused:
                 try: self.grabFocus()
-                except: logger.log("Node is focusable but I can't grabFocus!")
+                except Exception: logger.log("Node is focusable but I can't grabFocus!")
         else: logger.log("Node is not focusable; trying key combo anyway")
         rawinput.keyCombo(comboString)
 
@@ -833,7 +833,7 @@ class Node:
             assert isinstance(pred, predicate.Predicate)
 
             try: children = parent.children
-            except: return None
+            except Exception: return None
 
             for child in children:
                 # print child
@@ -893,7 +893,7 @@ class Node:
 
 
         try: children = self.children
-        except: return []
+        except Exception: return []
 
         for child in children:
             if child.satisfies(pred): selfList.append(child)
@@ -1018,7 +1018,7 @@ class Node:
             result.append(self.description)
         try:
             children = self.children
-        except: return result
+        except Exception: return result
         for child in children:
             result.extend(child.getUserVisibleStrings())
         return result

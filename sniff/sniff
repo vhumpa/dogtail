@@ -29,7 +29,7 @@ sniff = x.get_widget(appName)
 
 try:
     sniff.set_icon_from_file('../icons/dogtail-head.svg')
-except:
+except Exception:
     sniff.set_icon_from_file('/usr/share/icons/hicolor/scalable/apps/dogtail-head.svg')
 
 view = x.get_widget('treeTreeView')

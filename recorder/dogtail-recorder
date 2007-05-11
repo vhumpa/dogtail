@@ -30,7 +30,7 @@ import gtk.glade
 try:
     import gtksourceview
     useGtkSourceView = True
-except:
+except ImportError:
     useGtkSourceView = False
 
 def createSourceView():
@@ -61,7 +61,7 @@ class RecorderGUI(gnome.Program):
 
         try:
             self.window.set_icon_from_file('../icons/dogtail-head.svg')
-        except:
+        except Exception:
             self.window.set_icon_from_file('/usr/share/icons/hicolor/scalable/apps/dogtail-head.svg')
 
         self.recordButton = x.get_widget('recordButton')
@@ -823,23 +823,23 @@ class EventRecorder:
 import traceback
 def marshalOnFocus(event):
     try: recorder.onFocus(event)
-    except: traceback.print_exc()
+    except Exception: traceback.print_exc()
 
 def marshalOnSelect(event):
     try: recorder.onSelect(event)
-    except: traceback.print_exc()
+    except Exception: traceback.print_exc()
 
 def marshalOnMouseButton(event):
     try: recorder.onMouseButton(event)
-    except: traceback.print_exc()
+    except Exception: traceback.print_exc()
 
 def marshalOnKeyPress(event):
     try: recorder.onKeyPress(event)
-    except: traceback.print_exc()
+    except Exception: traceback.print_exc()
 
 def marshalOnWindowCreate(event):
     try: recorder.onWindowCreate(event)
-    except: traceback.print_exc()
+    except Exception: traceback.print_exc()
 
 recorder = EventRecorder()
 recorderGUI = RecorderGUI()

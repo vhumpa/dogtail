@@ -216,7 +216,7 @@ class ResultsLogger(Logger):
 
         Logger.log(self, self.stamper.entryStamp() + "      " + entry)
 
-debugLogger = Logger('debug', file = True)
+debugLogger = Logger('debug', config.logDebugToFile)
 
 import traceback
 def exceptionHook(exc, value, tb):

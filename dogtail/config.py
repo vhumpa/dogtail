@@ -161,6 +161,9 @@ class _Config(object):
             if 'Dir' in name:
                 _Config.__createDir(value)
                 if value[-1] != '/': value = value + '/'
+            elif name == 'logDebugToFile':
+                import logging
+                logging.debugLogger = logging.Logger('debug', value)
             elif name == 'useIconLogger':
                 import logging
                 if value == True:

@@ -1,5 +1,11 @@
 2007-05-25  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/logging.py: Actually obey config.logDebugToFile.
+
+	* dogtail/config.py: Implement runtime changing of logDebugToFile.
+
+2007-05-25  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/config.py: Fix logic in first unit test.
 
 2007-05-11  Zack Cerza <zcerza@redhat.com>

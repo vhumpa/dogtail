@@ -229,10 +229,10 @@ if __name__ == '__main__':
 
     # BEGIN tests
 
-    failure = True
+    failure = False
     for option in config.defaults.keys():
-        #print failure, getattr(config, option), config.defaults[option]
-        failure = not failure and ( getattr(config, option) == config.defaults[option])
+        print failure, getattr(config, option), config.defaults[option]
+        failure = failure or not (getattr(config, option) == config.defaults[option])
     failOrPass(failure, "Reading all default values")
 
     failure = True

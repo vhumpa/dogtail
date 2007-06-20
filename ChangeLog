@@ -1,3 +1,8 @@
+2007-06-20  Zack Cerza <zcerza@redhat.com>
+	
+	* examples/filechooser-stress-test.py: Add patch from Jan Hutař to add
+	i18n support.
+
 2007-05-25  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/logging.py: Actually obey config.logDebugToFile.

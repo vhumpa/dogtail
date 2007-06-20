@@ -3,9 +3,15 @@
 
 from dogtail.procedural import *
 
+import dogtail.i18n
+dogtail.i18n.loadTranslationsFromPackageMoFiles('gedit')
+
 run('gedit')
 
 while True:
     click('Open...')
-    focus.dialog(u'Open Files\u2026')
+    try:
+        focus.dialog(u'Open Files\u2026')
+    except FocusError:
+        focus.dialog(u'Open Files...')
     click('Cancel')

@@ -1,4 +1,9 @@
 2007-06-20  Zack Cerza <zcerza@redhat.com>
+
+	* examples/no-help-at-all.py: Add patch from Jan Hutař to use 
+	cgi.escape() where necessary.
+
+2007-06-20  Zack Cerza <zcerza@redhat.com>
 	
 	* examples/filechooser-stress-test.py: Add patch from Jan Hutař to add
 	i18n support.

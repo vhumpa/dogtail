@@ -3,13 +3,6 @@
 Author: Zack Cerza <zcerza@redhat.com>"""
 __author__ = "Zack Cerza <zcerza@redhat.com>"
 
-# Just exit on ^C. Maybe something less drastic should happen, though...
-# Anyway, I'd *love* to be able to unregister this signal handler.
-import signal, sys
-def signalHandler (signal, frame):
-    sys.exit(0)
-signal.signal(signal.SIGINT, signalHandler)
-
 spacer = ' '
 def plain (node, depth = 0):
     """

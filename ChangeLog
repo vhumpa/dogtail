@@ -1,3 +1,7 @@
+2007-06-22  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/dump.py: Remove SIGINT handler.
+
 2007-06-20  Zack Cerza <zcerza@redhat.com>
 
 	* examples/no-help-at-all.py: Add patch from Jan Hutař to use 

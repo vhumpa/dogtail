@@ -1,3 +1,8 @@
+2007-07-25  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/i18n.py: Fix duplicate checking in
+	loadTranslationsFromPackageMoFiles(). Closes: #452232.
+
 2007-06-22  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/dump.py: Remove SIGINT handler.

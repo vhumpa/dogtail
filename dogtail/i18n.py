@@ -238,7 +238,7 @@ def loadTranslationsFromPackageMoFiles(packageName, getDependencies=True):
             # Searching the popt mo-files for translations makes gettext bail out,
             # so we ignore them here. This is
             # https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=172155 .
-            if 'popt.mo' not in moFile:
+            if 'popt.mo' not in moFile and not (moFiles.has_key(moFile)):
                 try:
                     translationDbs.append(GettextTranslationDb(moFile))
                     moFiles[moFile] = None

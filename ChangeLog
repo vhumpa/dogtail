@@ -1,3 +1,7 @@
+2007-10-22  Zack Cerza <zcerza@redhat.com>
+
+	* MAINTAINERS: Updated.
+
 2007-07-25  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/i18n.py: Fix duplicate checking in

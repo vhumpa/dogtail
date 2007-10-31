@@ -1,3 +1,13 @@
+2007-10-31  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Add a patch from Cole Robinson to both make
+	all focus.*() queries return a Boolean based on their success and to
+	make the failure warning more verbose.
+
+	* dogtail/config.py, dogtail/logging.py: Add a patch from Cole
+	Robinson to allow the logging of debug information to stdout to be
+	disabled via config.logDebugToStdOut. Still enabled by default.
+
 2007-10-22  Zack Cerza <zcerza@redhat.com>
 
 	* MAINTAINERS: Updated.

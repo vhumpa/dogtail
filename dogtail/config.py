@@ -101,6 +101,9 @@ class _Config(object):
 
     logDebugToFile (boolean):
     Whether to write debug output to a log file.
+
+    logDebugToStdOut (boolean):
+    Whether to print log output to console or not (default True).
     """
     __scriptName = staticmethod(_scriptName)
     __encoding = staticmethod(_encoding)
@@ -130,6 +133,7 @@ class _Config(object):
             'debugSearching' : False,
             'debugSleep' : False,
             'debugSearchPaths' : False,
+            'logDebugToStdOut' : True,
             'absoluteNodePaths' : False,
             'ensureSensitivity' : False,
             'debugTranslation' : False,

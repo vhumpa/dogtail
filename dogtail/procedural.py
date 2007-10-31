@@ -26,8 +26,10 @@ class FocusError(Exception):
     pass
 
 import errors
-def focusFailed():
-    errors.warn('The requested object was not found')
+def focusFailed(type, name):
+    if type is None or type == '':
+        type = "widget"
+    errors.warn('The requested %s \'%s\' could not be focused.' % (type, name))
 
 ENOARGS = "At least one argument is needed"
 
@@ -67,12 +69,13 @@ class FocusApplication (FocusBase):
         except tree.SearchError, desc:
             if config.fatalErrors: raise FocusError, name
             else:
-                focusFailed()
-                return
+                focusFailed('Application', name)
+                return False
         if app: 
             FocusApplication.node = app
             FocusDialog.node = None
             FocusWidget.node = None
+        return True
 
 class FocusDesktop (FocusBase):
     """
@@ -99,8 +102,9 @@ class FocusDialog (FocusBase):
         else: 
             if config.fatalErrors: raise FocusError, predicate.debugName
             else:
-                focusFailed()
-                return
+                focusFailed('Dialog', name)
+                return False
+        return True
 
 class FocusWidget (FocusBase):
     """
@@ -132,15 +136,16 @@ class FocusWidget (FocusBase):
             except AttributeError: 
                 if config.fatalErrors: raise FocusError, name
                 else:
-                    focusFailed()
-                    return
+                    focusFailed(roleName, name)
+                    return False
 
         if result == None:
             FocusWidget.node = result
             if config.fatalErrors: raise FocusError, predicate.debugName
             else:
-                focusFailed()
-                return
+                focusFailed(roleName, name)
+                return False
+        return True
 
 class Focus (FocusBase):
     """
@@ -165,55 +170,55 @@ class Focus (FocusBase):
         """
         A shortcut to self.widget(name, roleName = 'push button')
         """
-        self.widget(name = name, roleName = 'push button')
+        return self.widget(name = name, roleName = 'push button')
 
     def frame (self, name):
         """
         A shortcut to self.widget(name, roleName = 'frame')
         """
-        self.widget(name = name, roleName = 'frame')
+        return self.widget(name = name, roleName = 'frame')
 
     def icon (self, name):
         """
         A shortcut to self.widget(name, roleName = 'icon')
         """
-        self.widget(name = name, roleName = 'icon')
+        return self.widget(name = name, roleName = 'icon')
 
     def menu (self, name):
         """
         A shortcut to self.widget(name, roleName = 'menu')
         """
-        self.widget(name = name, roleName = 'menu')
+        return self.widget(name = name, roleName = 'menu')
 
     def menuItem (self, name):
         """
         A shortcut to self.widget(name, roleName = 'menu item')
         """
-        self.widget(name = name, roleName = 'menu item')
+        return self.widget(name = name, roleName = 'menu item')
 
     def table (self, name = ''):
         """
         A shortcut to self.widget(name, roleName 'table')
         """
-        self.widget(name = name, roleName = 'table')
+        return self.widget(name = name, roleName = 'table')
 
     def tableCell (self, name = ''):
         """
         A shortcut to self.widget(name, roleName 'table cell')
         """
-        self.widget(name = name, roleName = 'table cell')
+        return self.widget(name = name, roleName = 'table cell')
 
     def text (self, name = ''):
         """
         A shortcut to self.widget(name, roleName = 'text')
         """
-        self.widget(name = name, roleName = 'text')
+        return self.widget(name = name, roleName = 'text')
 
     def window (self, name):
         """
         A shortcut to self.widget(name, roleName = 'window')
         """
-        self.widget(name = name, roleName = 'window')
+        return self.widget(name = name, roleName = 'window')
 
 class Action (FocusWidget):
     """

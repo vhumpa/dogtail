@@ -162,6 +162,7 @@ class Logger:
             #self.file.close()
         except IOError:
             print "Could not create and write to " + self.fileName
+            self.file = False
 
     def log(self, message):
         """
@@ -175,7 +176,7 @@ class Logger:
             self.iconLogger.message(message)
         
         # Also write to standard out.
-        if self.stdOut: print message
+        if self.stdOut and config.logDebugToStdOut: print message
 
         # Try to open and write the result to the log file.
         if not self.file: return

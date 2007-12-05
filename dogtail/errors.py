@@ -1,4 +1,4 @@
-# -*- coding: <utf-8> -*-
+# -*- coding: utf-8 -*-
 """
 General exceptions; not overly module-specific
 """

@@ -1,4 +1,4 @@
-# -*- coding: <utf-8> -*-
+# -*- coding: utf-8 -*-
 """Test Case magic
 
 Author: Ed Rousseau <rousseau@redhat.com>"""

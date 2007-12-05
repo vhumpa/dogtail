@@ -8,10 +8,10 @@ from dogtail.utils import checkForA11yInteractively
 checkForA11yInteractively()
 
 from dogtail import tree
+pyatspi = tree.pyatspi
 from dogtail import utils
 import gobject
 import gnome
-import atspi
 program = gnome.program_init(appName, '0.1')
 import gtk.glade
 
@@ -93,15 +93,17 @@ def buttonPress(widget, event, *userParams):
                     view.get_path_at_pos(int(event.x), int(event.y))
     except TypeError: return
     node = model[path][0]
+    if node == None: return
     setUpTable(node)
 
     if event.button == 3:
         menu = gtk.Menu()
         menuItem = None
         if node.actions:
-            for action in node.actions.values():
-                menuItem = gtk.MenuItem(action.name.capitalize())
-                menuItem.connect('activate', menuItemActivate, action.do)
+            for action in node.actions.keys():
+                menuItem = gtk.MenuItem(action.capitalize())
+                menuItem.connect('activate', menuItemActivate, node.doAction, \
+                        action)
                 menuItem.show()
                 menu.append(menuItem)
         if not menuItem: return
@@ -114,11 +116,12 @@ textTextViewBufferChangedLastHandlerID = 3.141592654
 
 def setUpTable(node):
     """Generic code for setting up the table under the TreeView"""
+    if node == None: return
     nameTextLabel.set_text(node.name)
     roleNameTextLabel.set_text(node.roleName)
     descTextLabel.set_text(node.description)
     str = ''
-    if node.actions: str = ' '.join(action.name for action in node.actions.values())
+    if node.actions: str = ' '.join(node.actions.keys())
     actionsTextLabel.set_text(str)
 
     global textTextViewBufferChangedLastHandlerID
@@ -130,19 +133,20 @@ def setUpTable(node):
     if node.text is not None:
         buffer = textTextView.get_buffer()
         buffer.set_text(node.text)
-        # Eeew! I'm touching tree's privates.
-        if node._Node__editableText:
+        try:
+            node.queryEditableText()
             # Remember the handler ID of this connection.
             textTextView.set_sensitive(True)
             textTextViewBufferChangedLastHandlerID = \
                     buffer.connect('changed', changeText, node)
-        else:
+        except NotImplementedError:
             textTextView.set_sensitive(False)
     else:
         textTextView.get_buffer().set_text('')
         textTextView.set_sensitive(False)
 
 def changeText(textBuffer, node):
+    if node == None: return
     node.text = textBuffer.get_text(textBuffer.get_start_iter(), \
                     textBuffer.get_end_iter())
 
@@ -185,8 +189,10 @@ def getSelectedNode():
     return node
 
 def menuItemActivate(menuItem, *userParams):
+    if len(userParams) < 2: return
     method = userParams[0]
-    if method: method()
+    arg = userParams[1]
+    method(arg)
 
 def refreshAll(menuItem, *userParams):
     global model
@@ -199,11 +205,13 @@ def addNodeToModel(node, parentInTreeView = None):
     return iter
 
 def addChildren(node, parentInTreeView = None):
+    if node == None: return
     global model
     for child in node.children:
         iter = addNodeToModel(child, parentInTreeView)
 
 def showNode(node, parentInTreeView = None):
+    if node == None: return
     global model
     iter = addNodeToModel(node, parentInTreeView)
     addChildren(node, iter)
@@ -249,90 +257,92 @@ vseparator_xpm = loadIcon("vseparator.xpm")
 window_xpm = loadIcon("window.xpm")
 
 iconForRole = { \
-        atspi.SPI_ROLE_INVALID : None, \
-        atspi.SPI_ROLE_ACCEL_LABEL : label_xpm, \
-        atspi.SPI_ROLE_ALERT : None, \
-        atspi.SPI_ROLE_ANIMATION : None, \
-        atspi.SPI_ROLE_ARROW : None, \
-        atspi.SPI_ROLE_CALENDAR : None, \
-        atspi.SPI_ROLE_CANVAS : None, \
-        atspi.SPI_ROLE_CHECK_BOX : checkbutton_xpm, \
-        atspi.SPI_ROLE_CHECK_MENU_ITEM : checkmenuitem_xpm, \
-        atspi.SPI_ROLE_COLOR_CHOOSER : colorselection_xpm, \
-        atspi.SPI_ROLE_COLUMN_HEADER : None, \
-        atspi.SPI_ROLE_COMBO_BOX : combo_xpm, \
-        atspi.SPI_ROLE_DATE_EDITOR : None, \
-        atspi.SPI_ROLE_DESKTOP_ICON : None, \
-        atspi.SPI_ROLE_DESKTOP_FRAME : None, \
-        atspi.SPI_ROLE_DIAL : None, \
-        atspi.SPI_ROLE_DIALOG : dialog_xpm, \
-        atspi.SPI_ROLE_DIRECTORY_PANE : None, \
-        atspi.SPI_ROLE_DRAWING_AREA : None, \
-        atspi.SPI_ROLE_FILE_CHOOSER : None, \
-        atspi.SPI_ROLE_FILLER : None, \
-        atspi.SPI_ROLE_FONT_CHOOSER : None, \
-        atspi.SPI_ROLE_FRAME : window_xpm, \
-        atspi.SPI_ROLE_GLASS_PANE : None, \
-        atspi.SPI_ROLE_HTML_CONTAINER : None, \
-        atspi.SPI_ROLE_ICON : image_xpm, \
-        atspi.SPI_ROLE_IMAGE : image_xpm, \
-        atspi.SPI_ROLE_INTERNAL_FRAME : None, \
-        atspi.SPI_ROLE_LABEL : label_xpm, \
-        atspi.SPI_ROLE_LAYERED_PANE : viewport_xpm, \
-        atspi.SPI_ROLE_LIST : None, \
-        atspi.SPI_ROLE_LIST_ITEM : None, \
-        atspi.SPI_ROLE_MENU : menuitem_xpm, \
-        atspi.SPI_ROLE_MENU_BAR : menubar_xpm, \
-        atspi.SPI_ROLE_MENU_ITEM : menuitem_xpm, \
-        atspi.SPI_ROLE_OPTION_PANE : None, \
-        atspi.SPI_ROLE_PAGE_TAB : notebook_xpm, \
-        atspi.SPI_ROLE_PAGE_TAB_LIST : notebook_xpm, \
-        atspi.SPI_ROLE_PANEL : viewport_xpm, \
-        atspi.SPI_ROLE_PASSWORD_TEXT : None, \
-        atspi.SPI_ROLE_POPUP_MENU : None, \
-        atspi.SPI_ROLE_PROGRESS_BAR : None, \
-        atspi.SPI_ROLE_PUSH_BUTTON : button_xpm, \
-        atspi.SPI_ROLE_RADIO_BUTTON : None, \
-        atspi.SPI_ROLE_RADIO_MENU_ITEM : None, \
-        atspi.SPI_ROLE_ROOT_PANE : viewport_xpm, \
-        atspi.SPI_ROLE_ROW_HEADER : None, \
-        atspi.SPI_ROLE_SCROLL_BAR : vscrollbar_xpm, \
-        atspi.SPI_ROLE_SCROLL_PANE : scrolledwindow_xpm, \
-        atspi.SPI_ROLE_SEPARATOR : vseparator_xpm, \
-        atspi.SPI_ROLE_SLIDER : None, \
-        atspi.SPI_ROLE_SPIN_BUTTON : spinbutton_xpm, \
-        atspi.SPI_ROLE_SPLIT_PANE : None, \
-        atspi.SPI_ROLE_STATUS_BAR : statusbar_xpm, \
-        atspi.SPI_ROLE_TABLE : table_xpm, \
-        atspi.SPI_ROLE_TABLE_CELL : treeitem_xpm, \
-        atspi.SPI_ROLE_TABLE_COLUMN_HEADER : None, \
-        atspi.SPI_ROLE_TABLE_ROW_HEADER : None, \
-        atspi.SPI_ROLE_TEAROFF_MENU_ITEM : None, \
-        atspi.SPI_ROLE_TERMINAL : None, \
-        atspi.SPI_ROLE_TEXT : text_xpm, \
-        atspi.SPI_ROLE_TOGGLE_BUTTON : None, \
-        atspi.SPI_ROLE_TOOL_BAR : toolbar_xpm, \
-        atspi.SPI_ROLE_TOOL_TIP : None, \
-        atspi.SPI_ROLE_TREE : tree_xpm, \
-        atspi.SPI_ROLE_TREE_TABLE : tree_xpm, \
-        atspi.SPI_ROLE_UNKNOWN : unknown_xpm, \
-        atspi.SPI_ROLE_VIEWPORT : viewport_xpm, \
-        atspi.SPI_ROLE_WINDOW : window_xpm, \
-        atspi.SPI_ROLE_EXTENDED : None, \
-        atspi.SPI_ROLE_HEADER : None, \
-        atspi.SPI_ROLE_FOOTER : None, \
-        atspi.SPI_ROLE_PARAGRAPH : None, \
-        atspi.SPI_ROLE_RULER : None, \
-        atspi.SPI_ROLE_APPLICATION : None, \
-        atspi.SPI_ROLE_AUTOCOMPLETE : None, \
-        atspi.SPI_ROLE_EDITBAR : None, \
-        atspi.SPI_ROLE_EMBEDDED : None, \
-        atspi.SPI_ROLE_LAST_DEFINED: None }
+        pyatspi.ROLE_INVALID : None, \
+        # pyatspi doesn't have the following... not even sure if it exists 
+        # anywhere.
+        #atspi.SPI_ROLE_ACCEL_LABEL : label_xpm, \
+        pyatspi.ROLE_ALERT : None, \
+        pyatspi.ROLE_ANIMATION : None, \
+        pyatspi.ROLE_ARROW : None, \
+        pyatspi.ROLE_CALENDAR : None, \
+        pyatspi.ROLE_CANVAS : None, \
+        pyatspi.ROLE_CHECK_BOX : checkbutton_xpm, \
+        pyatspi.ROLE_CHECK_MENU_ITEM : checkmenuitem_xpm, \
+        pyatspi.ROLE_COLOR_CHOOSER : colorselection_xpm, \
+        pyatspi.ROLE_COLUMN_HEADER : None, \
+        pyatspi.ROLE_COMBO_BOX : combo_xpm, \
+        pyatspi.ROLE_DATE_EDITOR : None, \
+        pyatspi.ROLE_DESKTOP_ICON : None, \
+        pyatspi.ROLE_DESKTOP_FRAME : None, \
+        pyatspi.ROLE_DIAL : None, \
+        pyatspi.ROLE_DIALOG : dialog_xpm, \
+        pyatspi.ROLE_DIRECTORY_PANE : None, \
+        pyatspi.ROLE_DRAWING_AREA : None, \
+        pyatspi.ROLE_FILE_CHOOSER : None, \
+        pyatspi.ROLE_FILLER : None, \
+        pyatspi.ROLE_FONT_CHOOSER : None, \
+        pyatspi.ROLE_FRAME : window_xpm, \
+        pyatspi.ROLE_GLASS_PANE : None, \
+        pyatspi.ROLE_HTML_CONTAINER : None, \
+        pyatspi.ROLE_ICON : image_xpm, \
+        pyatspi.ROLE_IMAGE : image_xpm, \
+        pyatspi.ROLE_INTERNAL_FRAME : None, \
+        pyatspi.ROLE_LABEL : label_xpm, \
+        pyatspi.ROLE_LAYERED_PANE : viewport_xpm, \
+        pyatspi.ROLE_LIST : None, \
+        pyatspi.ROLE_LIST_ITEM : None, \
+        pyatspi.ROLE_MENU : menuitem_xpm, \
+        pyatspi.ROLE_MENU_BAR : menubar_xpm, \
+        pyatspi.ROLE_MENU_ITEM : menuitem_xpm, \
+        pyatspi.ROLE_OPTION_PANE : None, \
+        pyatspi.ROLE_PAGE_TAB : notebook_xpm, \
+        pyatspi.ROLE_PAGE_TAB_LIST : notebook_xpm, \
+        pyatspi.ROLE_PANEL : viewport_xpm, \
+        pyatspi.ROLE_PASSWORD_TEXT : None, \
+        pyatspi.ROLE_POPUP_MENU : None, \
+        pyatspi.ROLE_PROGRESS_BAR : None, \
+        pyatspi.ROLE_PUSH_BUTTON : button_xpm, \
+        pyatspi.ROLE_RADIO_BUTTON : None, \
+        pyatspi.ROLE_RADIO_MENU_ITEM : None, \
+        pyatspi.ROLE_ROOT_PANE : viewport_xpm, \
+        pyatspi.ROLE_ROW_HEADER : None, \
+        pyatspi.ROLE_SCROLL_BAR : vscrollbar_xpm, \
+        pyatspi.ROLE_SCROLL_PANE : scrolledwindow_xpm, \
+        pyatspi.ROLE_SEPARATOR : vseparator_xpm, \
+        pyatspi.ROLE_SLIDER : None, \
+        pyatspi.ROLE_SPIN_BUTTON : spinbutton_xpm, \
+        pyatspi.ROLE_SPLIT_PANE : None, \
+        pyatspi.ROLE_STATUS_BAR : statusbar_xpm, \
+        pyatspi.ROLE_TABLE : table_xpm, \
+        pyatspi.ROLE_TABLE_CELL : treeitem_xpm, \
+        pyatspi.ROLE_TABLE_COLUMN_HEADER : None, \
+        pyatspi.ROLE_TABLE_ROW_HEADER : None, \
+        pyatspi.ROLE_TEAROFF_MENU_ITEM : None, \
+        pyatspi.ROLE_TERMINAL : None, \
+        pyatspi.ROLE_TEXT : text_xpm, \
+        pyatspi.ROLE_TOGGLE_BUTTON : None, \
+        pyatspi.ROLE_TOOL_BAR : toolbar_xpm, \
+        pyatspi.ROLE_TOOL_TIP : None, \
+        pyatspi.ROLE_TREE : tree_xpm, \
+        pyatspi.ROLE_TREE_TABLE : tree_xpm, \
+        pyatspi.ROLE_UNKNOWN : unknown_xpm, \
+        pyatspi.ROLE_VIEWPORT : viewport_xpm, \
+        pyatspi.ROLE_WINDOW : window_xpm, \
+        pyatspi.ROLE_EXTENDED : None, \
+        pyatspi.ROLE_HEADER : None, \
+        pyatspi.ROLE_FOOTER : None, \
+        pyatspi.ROLE_PARAGRAPH : None, \
+        pyatspi.ROLE_RULER : None, \
+        pyatspi.ROLE_APPLICATION : None, \
+        pyatspi.ROLE_AUTOCOMPLETE : None, \
+        pyatspi.ROLE_EDITBAR : None, \
+        pyatspi.ROLE_EMBEDDED : None, \
+        pyatspi.ROLE_LAST_DEFINED: None }
 
 def getPixbufForNode(node):
     theme = gtk.icon_theme_get_default()
     try:
-        if node.role==atspi.SPI_ROLE_APPLICATION:
+        if node.role==pyatspi.ROLE_APPLICATION:
             # FIXME: Use the pixbuf from libwcnk (if available):
             # wnckApp = Application(node).getWnckApplication()
             # if wnckApp
@@ -344,14 +354,14 @@ def getPixbufForNode(node):
             return iconForRole[node.role]
         else:
             return theme.load_icon("gnome-fs-desktop", 24, gtk.ICON_LOOKUP_USE_BUILTIN)
-    except atspi.SpiException:
+    except Exception:
         return theme.load_icon("gtk-dialog-error", 24, gtk.ICON_LOOKUP_USE_BUILTIN)
 
 def getNodeAttr(column, cell, model, iter, attr):
     node = model.get_value(iter, MODEL_FIELD_NODE)
     try:
         text = getattr(node, attr)
-    except atspi.SpiException:
+    except Exception:
         text = "(broken node)"
     cell.set_property('text', text)
 

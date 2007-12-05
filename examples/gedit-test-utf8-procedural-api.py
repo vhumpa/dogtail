@@ -47,7 +47,7 @@ focus.widget.text = utfdemo.read()
 screenshot()
 
 # Click gedit's Save button.
-click('Save')
+click.button('Save')
 
 # Focus gedit's Save As... dialog
 try:
@@ -72,6 +72,7 @@ focus.widget.text = 'UTF8demo.txt'
 click('Save')
 
 # Let's quit now.
+click('File')
 click('Quit')
 
 # We have driven gedit now lets check to see if the saved file is the same as

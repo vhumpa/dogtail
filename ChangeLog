@@ -1,3 +1,20 @@
+2007-11-30  Zack Cerza <zcerza@redhat.com>
+
+	* Makefile: Minor update.
+
+2007-11-30  Zack Cerza <zcerza@redhat.com>
+
+	* NEWS: Add a note about a broken unit test due to #498557.
+
+2007-11-30  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Port Accessible.Hypertext and Hyperlink support.
+	tree.Link is now called LinkAnchor and is no longer a subclass of
+	Node. The new behavior is now that when a Hypertext interface is found
+	on a Node, that node will have one extra child Node per
+	Hyperlink/anchor pair. The child Nodes will have a role name of 'hyper
+	link' and the 'URL' property. Also, remove much dead code.
+
 2007-10-31  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/procedural.py: Add a patch from Cole Robinson to both make
@@ -10,7 +27,97 @@
 
 2007-10-22  Zack Cerza <zcerza@redhat.com>
 
+	* examples/gedit-test-utf8-procedural-api.py, 
+	examples/gedit-test-utf8-tree-api.py: Tweak slightly to work with the
+	new dogtail behavior of click() using raw mouse events.
+
+2007-10-22  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Remove all calls to time.sleep().
+
+2007-10-22  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Add some missing doDelay()'s. Also remove a chunk
+	of dead code.
+
+2007-10-22  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/errors.py, dogtail/tc.py: Fix encoding headers.
+
+2007-10-22  Zack Cerza <zcerza@redhat.com>
+
 	* MAINTAINERS: Updated.
+
+2007-08-29  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Update and clean up the toplevel docstring.
+
+2007-08-29  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Rewrite Node.__doc__.
+
+2007-08-29  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Remove some redundant documentation from
+	Node.__doc__.
+
+2007-08-23  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Port the Action class over. Mainly needed to get at
+	keybindings.
+
+2007-08-23  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/__init__.py: Make __init__.py import pyatspi.
+
+2007-08-23  Zack Cerza <zcerza@redhat.com>
+
+	* tests/Node.py: Update unit tests with API changes: Node States (from
+	the old stateSet) are accessed directly, e.g. node.sensitive;
+	read-only attributes now raise AttributeError instead of
+	ReadOnlyError; atspi.SpiException has been replaced by
+	CORBA.COMM_FAILURE.
+
+	* dogtail/tree.py: Replace ReadOnlyError with AttributeError. Also
+	make Node.doAction() raise NotSensitiveError if necessary.
+
+2007-08-23  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Fix Application.window() to not try to initialize
+	the Window class.
+
+2007-08-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Port setting of Node.combovalue and additionally 
+	allow retrieval of the value.
+
+2007-08-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Port Node.caretOffset.
+
+2007-08-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Add most of the rest of the checks from the old
+	Node.children into the new one, i.e. children limits and null-child
+	filtering. Also, when filtering null children, warn if
+	config.debugSearching is True.
+
+2007-07-27  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Handle broken nodes more gracefully.
+
+2007-07-27  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Minor change in how we keep track of
+	keyboard press/release events.
+
+2007-07-26  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Port dogtail-recorder to pyatspi. Remove
+	some dead code. Add lots of comments. The keyboard modifier processing
+	had to be rewritten. As a bonus, things like <Shift><Home> should
+	actually get noticed now. Also, the madness that was FakeNode is no
+	more.
 
 2007-07-25  Zack Cerza <zcerza@redhat.com>
 
@@ -21,15 +128,56 @@
 
 	* dogtail/dump.py: Remove SIGINT handler.
 
+2007-06-22  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Port Selection stuff to pyatspi and convert to use
+	normal instance methods and properties.
+
 2007-06-20  Zack Cerza <zcerza@redhat.com>
 
 	* examples/no-help-at-all.py: Add patch from Jan Hutař to use
 	cgi.escape() where necessary.
 
 2007-06-20  Zack Cerza <zcerza@redhat.com>
-	
+
 	* examples/filechooser-stress-test.py: Add patch from Jan Hutař to add
 	i18n support.
+
+2007-05-31  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Fix a minor bug in Node._fastFindChild() that
+	caused a non-recursive search to halt completely if a null child was
+	encountered.
+
+2007-05-30  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Move some documentation into the new properties.
+	Remove some unhelpful documentation. Further clean up bits of
+	documentation here and there. Note: not done with docs yet :)
+
+2007-05-29  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Remove actual search code from Node.findChild() and
+	use pyatspi.utils.findDescendent, via a new Node._fastFindChild()
+	function.
+
+2007-05-29  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/predicate.py: Turn all predicates' satisfiedByNode() functions
+	into pseudo-staticmethods, so we can pass those methods directly to the
+	search methods in pyatspi.utils.
+
+2007-05-25  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Port Sniff to pyatspi. It should all work now, but
+	there could be a bug or two.
+
+2007-05-25  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Begin port from pyspi to pyatspi. Disable __init__,
+	__getattr__, __setattr__, __str__ while their functionality is ported.
+	Attributes that were accessed via __[gs]attr__ are now declared as
+	properties, to make the code easier to read and document.
 
 2007-05-25  Zack Cerza <zcerza@redhat.com>
 
@@ -40,6 +188,11 @@
 2007-05-25  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/config.py: Fix logic in first unit test.
+
+2007-05-16  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/rawinput.py: Port from pyspi to pyatspi. Use ctypes and Xlib
+	to do the keystring -> keycode keycode conversion.
 
 2007-05-11  Zack Cerza <zcerza@redhat.com>
 

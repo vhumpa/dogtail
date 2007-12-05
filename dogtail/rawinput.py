@@ -10,13 +10,13 @@ David Malcolm <dmalcolm@redhat.com>,
 Zack Cerza <zcerza@redhat.com>
 """
 
-import atspi
 import gtk.keysyms
 import gtk.gdk
 from config import config
 from utils import doDelay
 from logging import debugLogger as logger
-ev = atspi.EventGenerator()
+from pyatspi import Registry as registry
+from pyatspi import (KEY_SYM, KEY_PRESS, KEY_PRESSRELEASE, KEY_RELEASE)
 
 def doTypingDelay():
     doDelay(config.typingDelay)
@@ -26,7 +26,7 @@ def click (x, y, button = 1):
     Synthesize a mouse button click at (x,y)
     """
     logger.log("Mouse button %s click at (%s,%s)"%(button,x,y))
-    ev.click(x, y, button)
+    registry.generateMouseEvent(x, y, 'b%sc' % button)
     doDelay()
 
 def doubleClick (x, y, button = 1):
@@ -34,7 +34,7 @@ def doubleClick (x, y, button = 1):
     Synthesize a mouse button double-click at (x,y)
     """
     logger.log("Mouse button %s doubleclick at (%s,%s)"%(button,x,y))
-    ev.doubleClick(x,y,button)
+    registry.generateMouseEvent(x,y, 'b%sd' % button)
     doDelay()
 
 def press (x, y, button = 1):
@@ -42,7 +42,7 @@ def press (x, y, button = 1):
     Synthesize a mouse button press at (x,y)
     """
     logger.log("Mouse button %s press at (%s,%s)"%(button,x,y))
-    ev.press(x,y, button)
+    registry.generateMouseEvent(x,y, 'b%sp' % button)
     doDelay()
 
 def release (x, y, button = 1):
@@ -50,7 +50,7 @@ def release (x, y, button = 1):
     Synthesize a mouse button release at (x,y)
     """
     logger.log("Mouse button %s release at (%s,%s)"%(button,x,y))
-    ev.release(x,y,button)
+    registry.generateMouseEvent(x,y, 'b%sr' % button)
     doDelay()
 
 def absoluteMotion (x, y):
@@ -58,33 +58,29 @@ def absoluteMotion (x, y):
     Synthesize mouse absolute motion to (x,y)
     """
     logger.log("Mouse absolute motion to (%s,%s)"%(x,y))
-    ev.absoluteMotion(x,y)
+    registry.generateMouseEvent(x,y, 'abs')
     doDelay()
 
 def relativeMotion (x, y):
     logger.log("Mouse relative motion of (%s,%s)"%(x,y))
-    ev.relativeMotion(x,y)
+    registry.generateMouseEvent(x,y, 'rel')
     doDelay()
 
 def drag(fromXY, toXY, button = 1):
     """
     Synthesize a mouse press, drag, and release on the screen.
-    Wraps atspi.EventGenerator.drag, but with logging and delays.
     """
     logger.log("Mouse button %s drag from %s to %s"%(button, fromXY, toXY))
 
-    # A direct call to ev.drag doesn't work, delays seem to be needed
-    # for nautilus icon view to work, at least:
-
     (x,y) = fromXY
-    ev.press (x, y, button)
+    press (x, y, button)
     #doDelay()
 
     (x,y) = toXY
-    ev.absoluteMotion(x,y)
+    absoluteMotion(x,y)
     doDelay()
 
-    ev.release (x, y, button)
+    release (x, y, button)
     doDelay()
 
 def typeText(string):
@@ -161,8 +157,42 @@ def pressKey(keyName):
     except KeyError:
         try: keySym = uniCharToKeySym(keyName)
         except TypeError: raise KeyError, keyName
-    ev.generateKeyboardEvent(keySym, "", atspi.SPI_KEY_SYM)
+    registry.generateKeyboardEvent(keySym, None, KEY_SYM)
     doTypingDelay()
+
+import ctypes
+xlib = None
+dpy = 0
+def keyStringToKeyCode(keyString):
+    def loadXlib():
+        global xlib
+        global dpy
+        if xlib == None:
+            xlib = ctypes.CDLL('libX11.so')
+        if dpy == 0:
+            dpy = ctypes.c_ulong(xlib.XOpenDisplay(None))
+
+    def closeDpy():
+        global dpy
+        xlib.XCloseDisplay(dpy)
+        dpy = 0
+
+    def keyStringToKeySym(keyString, cleanup=False):
+        loadXlib()
+        string = ctypes.c_char_p(keyString)
+        sym = ctypes.c_ulong(xlib.XStringToKeysym(string))
+        if cleanup: closeDpy()
+        return sym.value
+        
+    def keySymToKeyCode(keySym, cleanup=False):
+        loadXlib()
+        sym = ctypes.c_ulong(keySym)
+        code = ctypes.c_byte(xlib.XKeysymToKeycode(dpy, sym))
+        if cleanup: closeDpy()
+        return code.value
+
+    return keySymToKeyCode(keyStringToKeySym(keyString))
+
 
 def keyCombo(comboString):
     """
@@ -183,7 +213,19 @@ def keyCombo(comboString):
         if not keySyms.has_key(s):
             raise ValueError, "Cannot find key %s" % s
 
-    ev.generateKeyCombo(strings)
-    doDelay()
+    modifiers = strings[:-1]
+    finalKey = strings[-1]
 
+    for modifier in modifiers:
+        code = keyStringToKeyCode(modifier)
+        registry.generateKeyboardEvent(code, None, KEY_PRESS)
+
+    code = keyStringToKeyCode(finalKey)
+    registry.generateKeyboardEvent(code, None, KEY_PRESSRELEASE)
+
+    for modifier in modifiers:
+        code = keyStringToKeyCode(modifier)
+        registry.generateKeyboardEvent(code, None, KEY_RELEASE)
+
+    doDelay()
 

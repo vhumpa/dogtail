@@ -17,7 +17,8 @@ __author__="Dave Malcolm <dmalcolm@redhat.com>"
 import unittest
 import time
 import dogtail.tree
-import atspi
+import pyatspi
+from CORBA import COMM_FAILURE
 
 class GtkDemoTest(unittest.TestCase):
     """
@@ -48,7 +49,7 @@ class TestNodeAttributes(GtkDemoTest):
     """
     def testGetBogus(self):
         "Getting a non-existant attribute should raise an attribute error"
-        self.assertRaises(AttributeError, self.app.__getattr__,  "thisIsNotAnAttribute")
+        self.assertRaises(AttributeError, getattr, self.app, "thisIsNotAnAttribute")
 
     #FIXME: should setattr for a non-existant attr be allowed?
     
@@ -63,7 +64,7 @@ class TestNodeAttributes(GtkDemoTest):
 
     def testSetName(self):
         "Node.name should be read-only"
-        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "name", "hello world")
+        self.assertRaises(AttributeError, self.app.__setattr__,  "name", "hello world")
     
     # 'roleName' (read-only string):
     def testGetRoleName(self):
@@ -74,16 +75,16 @@ class TestNodeAttributes(GtkDemoTest):
 
     def testSetRoleName(self):
         "Node.roleName should be read-only"
-        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "roleName", "hello world")
+        self.assertRaises(AttributeError, self.app.__setattr__,  "roleName", "hello world")
 
     # 'role' (read-only atspi role enum):
     def testGetRole(self):
         "Node.role for a gtk-demo app should be SPI_ROLE_APPLICATION"
-        self.assertEquals(self.app.role, atspi.SPI_ROLE_APPLICATION)
+        self.assertEquals(self.app.role, pyatspi.ROLE_APPLICATION)
 
     def testSetRole(self):
         "Node.role should be read-only"
-        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "role", "hello world")
+        self.assertRaises(AttributeError, self.app.__setattr__,  "role", "hello world")
 
     # 'description' (read-only string):
     def testGetDescription(self):
@@ -92,7 +93,7 @@ class TestNodeAttributes(GtkDemoTest):
 
     def testSetDescription(self):
         "Node.description should be read-only"
-        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "description", "hello world")
+        self.assertRaises(AttributeError, self.app.__setattr__,  "description", "hello world")
 
     # 'parent' (read-only Node instance):
     def testGetParent(self):
@@ -104,7 +105,7 @@ class TestNodeAttributes(GtkDemoTest):
 
     def testSetParent(self):
         "Node.parent should be read-only"
-        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "parent", None)
+        self.assertRaises(AttributeError, self.app.__setattr__,  "parent", None)
 
     # 'children' (read-only list of Node instances):
     def testGetChildren(self):
@@ -116,7 +117,7 @@ class TestNodeAttributes(GtkDemoTest):
 
     def testSetChildren(self):
         "Node.children should be read-only"
-        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "children", [])
+        self.assertRaises(AttributeError, self.app.__setattr__,  "children", [])
 
     # 'text' (string):
     def testSimpleTextEntry(self):
@@ -177,13 +178,12 @@ class TestNodeAttributes(GtkDemoTest):
 
     # 'stateSet' (read-only StateSet instance):
     def testGetStateSet(self):
-        "Node.stateSet should not contain SPI_STATE_SENSITIVE for the gtk-demo app node"
-        val = self.app.stateSet
-        self.assert_(not val.contains(atspi.SPI_STATE_SENSITIVE))
+        "Node.sensitive should be False for the gtk-demo app node"
+        self.assert_(not self.app.sensitive)
 
     def testSetStateSet(self):
         "Node.stateSet should be read-only"
-        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "stateSet", [])
+        self.assertRaises(AttributeError, self.app.__setattr__,  "stateSet", [])
 
     # 'relations' (read-only list of atspi.Relation instances):
     def testGetRelations(self):
@@ -192,7 +192,7 @@ class TestNodeAttributes(GtkDemoTest):
 
     def testSetRelations(self):
         "Node.relations should be read-only"
-        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "relations", [])
+        self.assertRaises(AttributeError, self.app.__setattr__,  "relations", [])
 
     # 'labellee' (read-only list of Node instances):
     def testGetLabellee(self):
@@ -201,7 +201,7 @@ class TestNodeAttributes(GtkDemoTest):
 
     def testSetLabellee(self):
         "Node.labellee should be read-only"
-        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "labellee", None)
+        self.assertRaises(AttributeError, self.app.__setattr__,  "labellee", None)
 
     # 'labeller' (read-only list of Node instances):
     def testGetLabeller(self):
@@ -210,7 +210,7 @@ class TestNodeAttributes(GtkDemoTest):
 
     def testSetLabeller(self):
         "Node.labeller should be read-only"
-        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "labeller", None)
+        self.assertRaises(AttributeError, self.app.__setattr__,  "labeller", None)
 
     # 'sensitive' (read-only boolean):
     def testGetSensitive(self):
@@ -223,7 +223,7 @@ class TestNodeAttributes(GtkDemoTest):
 
     def testSetSensitive(self):
         "Node.sensitive should be read-only"
-        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "sensitive", True)
+        self.assertRaises(AttributeError, self.app.__setattr__,  "sensitive", True)
 
     # 'showing' (read-only boolean):
     def testGetShowing(self):
@@ -233,7 +233,7 @@ class TestNodeAttributes(GtkDemoTest):
 
     def testSetShowing(self):
         "Node.showing should be read-only"
-        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "showing", True)
+        self.assertRaises(AttributeError, self.app.__setattr__,  "showing", True)
 
     # 'actions' (read-only list of Action instances):
     def testGetActions(self):
@@ -243,7 +243,7 @@ class TestNodeAttributes(GtkDemoTest):
    
     def testSetActions(self):
         "Node.actions should be read-only"
-        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "actions", [])
+        self.assertRaises(AttributeError, self.app.__setattr__,  "actions", [])
 
     # 'extents' (readonly tuple):
     def testGetExtents(self):
@@ -254,7 +254,7 @@ class TestNodeAttributes(GtkDemoTest):
 
     def testSetExtents(self):
         "Node.extents should be read-only"
-        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "extents", (0,0,640,480))
+        self.assertRaises(AttributeError, self.app.__setattr__,  "extents", (0,0,640,480))
 
     # 'position' (readonly tuple):
     def testGetPosition(self):
@@ -263,7 +263,7 @@ class TestNodeAttributes(GtkDemoTest):
 
     def testSetPosition(self):
         "Node.position should be read-only"
-        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "position", (0,0))
+        self.assertRaises(AttributeError, self.app.__setattr__,  "position", (0,0))
 
     # 'size' (readonly tuple):
     def testGetSize(self):
@@ -274,15 +274,15 @@ class TestNodeAttributes(GtkDemoTest):
 
     def testSetSize(self):
         "Node.size should be read-only"
-        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "size", (640,480))
+        self.assertRaises(AttributeError, self.app.__setattr__,  "size", (640,480))
 
-    # 'toolkit' (readonly string):
+    # 'toolkitName' (readonly string):
     def testGetToolkit(self):
-        self.assertEquals(self.app.toolkit, "GAIL")
+        self.assertEquals(self.app.toolkitName, "GAIL")
 
     def testSetToolkit(self):
         "Node.toolkit should be read-only"
-        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "toolkit", "GAIL")
+        self.assertRaises(AttributeError, self.app.__setattr__,  "toolkit", "GAIL")
 
     # 'version'
     def testGetVersion(self):
@@ -292,16 +292,16 @@ class TestNodeAttributes(GtkDemoTest):
 
     def testSetVersion(self):
         "Node.version should be read-only"
-        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "version", 42)
+        self.assertRaises(AttributeError, self.app.__setattr__,  "version", 42)
 
     # 'ID'
     def testGetID(self):
-        "Node.ID should be numeric"
-        self.assertEquals(type(self.app.ID), type(42))
+        "Node.id should be numeric"
+        self.assertEquals(type(self.app.id), type(42))
 
     def testSetID(self):
-        "Node.ID should be read-only"
-        self.assertRaises(dogtail.tree.ReadOnlyError, self.app.__setattr__,  "ID", 42)
+        "Node.id should be read-only"
+        self.assertRaises(AttributeError, setattr, self.app, "id", 42)
 
 class TestSelection(GtkDemoTest):
     def testTabs(self):
@@ -351,7 +351,7 @@ class TestExceptions(GtkDemoTest):
         os.kill(self.pid, signal.SIGKILL)
 
         # Ensure that we get an exception when we try to work further with it:
-        self.assertRaises(atspi.SpiException, self.app.__getattr__, "name")
+        self.assertRaises(COMM_FAILURE, getattr, self.app, "name")
 
 if __name__ == '__main__':
     unittest.main()

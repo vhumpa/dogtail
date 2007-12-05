@@ -60,4 +60,5 @@ desktop.doAction('activate')
 saveas.button('Save').click()
 
 # Let's quit now.
+filemenu.click()
 filemenu.menuItem('Quit').click()

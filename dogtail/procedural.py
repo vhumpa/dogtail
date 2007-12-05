@@ -19,7 +19,6 @@ import tree
 from predicate import GenericPredicate, IsADialogNamed, IsAnApplicationNamed
 from config import config
 import rawinput
-from time import sleep
 
 #FocusError = "FocusError: %s not found"
 class FocusError(Exception):
@@ -238,7 +237,6 @@ class Action (FocusWidget):
         if name or roleName or description:
             FocusWidget.__call__(self, name = name, roleName = roleName, description = description)
         self.node.doAction(self.action)
-        sleep(delay)
 
     def __getattr__ (self, attr):
         return getattr(FocusWidget.node, attr)
@@ -294,15 +292,16 @@ class Click (Action):
     def __init__ (self):
         Action.__init__(self, 'click')
 
-    def __call__ (self, name = '', roleName = '', description = '', raw = False, button = primary, delay = config.actionDelay):
+    def __call__ (self, name = '', roleName = '', description = '', raw = True, button = primary, delay = config.actionDelay):
         """
-        If coords or button are specified, execute a raw mouse event. If not, just pass the rest of the arguments to Action.
+        By default, execute a raw mouse event.
+        If raw is False or if button evaluates to False, just pass the rest of 
+        the arguments to Action.
         """
         if raw and button:
             # We're doing a raw mouse click
             FocusWidget.__call__(self, name = name, roleName = roleName, description = description)
-            Click.node.rawClick(button)
-            sleep(delay)
+            Click.node.click(button)
         else:
             Action.__call__(self, name = name, roleName = roleName, description = description, delay = delay)
 
@@ -329,7 +328,6 @@ class Select (Action):
             FocusWidget.__call__(self, name = name, roleName = roleName, description = description)
         func = getattr(self.node, self.action)
         func()
-        sleep(delay)
         
 def type(text):
     if focus.widget.node:

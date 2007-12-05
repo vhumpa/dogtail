@@ -7,8 +7,10 @@ os.environ['GTK_MODULES']=''
 from dogtail.utils import checkForA11yInteractively
 checkForA11yInteractively()
 
-import atspi
 import dogtail.tree
+pyatspi = dogtail.tree.pyatspi
+Accessibility = dogtail.tree.Accessibility
+from dogtail.predicate import GenericPredicate
 import gtk.gdk
 import dogtail.rawinput
 import re
@@ -204,12 +206,8 @@ class RecorderGUI(gnome.Program):
 # End GUI code
 
 def logEvent(event):
-    source = event.source
-    if isinstance(source, atspi.Accessible):
-        sourceStr = " source:%s"%(str(dogtail.tree.Node(source)))
-    else:
-        sourceStr = ""
-    print "Got event: %s%s"%(event.type, sourceStr)
+    print str(event)
+    return
 
 class ScriptWriter:
     """
@@ -380,7 +378,11 @@ class ProceduralScriptWriter(ScriptWriter):
         Writes out the necessary focus.application() and focus.dialog() lines 
         to the script.
         """
-        application = FakeNode.findAncestor(node, roleName = 'application')
+        if node is None:
+            #print "Node is None!"
+            return
+
+        application = node.getApplication()
         if application:
             needApp = True
             if self.currentApplication:
@@ -393,7 +395,7 @@ class ProceduralScriptWriter(ScriptWriter):
             print "    It is most likely not reporting its toplevel Accessible as having a"
             print "    role name of 'application'. Please file a bug against it!"
 
-        dialog = FakeNode.findAncestor(node, roleName = 'dialog')
+        dialog = node.findAncestor(GenericPredicate(roleName = 'dialog'))
         if dialog:
             needDialog = True
             if dialog == self.currentDialog: needDialog = False
@@ -401,7 +403,7 @@ class ProceduralScriptWriter(ScriptWriter):
                 self.recordLine("focus.dialog('%s')" % dialog.name)
                 self.currentDialog = dialog
         else:
-            frame = FakeNode.findAncestor(node, roleName='frame')
+            frame = node.findAncestor(GenericPredicate(roleName='frame'))
             if frame:
                 needFrame = True
                 if frame == self.currentFrame: needFrame = False
@@ -448,78 +450,6 @@ class ProceduralScriptWriter(ScriptWriter):
         self.setUpFocus(node)
         self.recordLine("keyCombo(\"" + string + "\")")
 
-class FakeNode(dogtail.tree.Node):
-    """A "cached pseudo-copy" of a Node
-
-    This class exists for cases where we know we're going to need information
-    about a Node instance at a point in time where it's no longer safe to
-    assume that the Accessible it wraps is still valid. It is designed to
-    cache enough information to allow all of the necessary Node methods to
-    execute properly and return something meaningful.
-
-    As it is often necessary to know the Node instance's parent, it creates
-    FakeNode instances of each and every one of its ancestors.
-    """
-    def __init__(self, node):
-        if node == None: raise TypeError, node
-
-        self.__node = node
-        self.name = self.__node.name
-        self.roleName = self.__node.roleName
-        self.description = self.__node.description
-        self.actions = self.__node.actions
-        self.debugName = self.__node.debugName
-
-        self.text = self.__node.text
-
-        self.position = self.__node.position
-
-        self.size = self.__node.size
-
-        if node.parent: self.parent = FakeNode(self.__node.parent)
-        else: self.parent = None
-
-        if node.labellee: self.labellee = FakeNode(self.__node.labellee)
-        else: self.labellee = None
-
-    def __getattr__(self, name):
-        raise AttributeError, name
-
-    def __setattr__(self, name, value):
-        self.__dict__[name] = value
-
-    def __cmp__(self, otherNode):
-        if not otherNode: return True
-
-        nameMatch = False
-        roleNameMatch = False
-        descMatch = False
-        nameMatch = otherNode.name == self.name
-        roleNameMatch = otherNode.roleName == self.roleName
-        descMatch = otherNode.description == self.description
-        match = nameMatch and roleNameMatch and descMatch
-        return not match
-
-    def findAncestor(node, name = None, roleName = None, description = None):
-        while node.parent:
-            nameMatch = False
-            roleNameMatch = False
-            descMatch = False
-            if name != None: nameMatch = node.parent.name == name
-            else: nameMatch = True
-            if roleName != None: roleNameMatch = node.parent.roleName == roleName
-            else: roleNameMatch = True
-            if description != None: 
-                descMatch = node.parent.description == description
-            else: descMatch = True
-            match = nameMatch and roleNameMatch and descMatch
-            if match: return node.parent
-            node = node.parent
-        return None
-    findAncestor = staticmethod(findAncestor)
-
-
-
 # Singleton EventRecorder
 global recorder
 
@@ -528,14 +458,14 @@ class EventRecorder:
     Event Recorder
     """
     modifiers = {
-            atspi.Accessibility_MODIFIER_NUMLOCK: 'NumLock',
-            atspi.Accessibility_MODIFIER_META3: 'Meta3',
-            atspi.Accessibility_MODIFIER_META2: 'Meta2',
-            atspi.Accessibility_MODIFIER_META: 'Meta',
-            atspi.Accessibility_MODIFIER_ALT: 'Alt',
-            atspi.Accessibility_MODIFIER_CONTROL: 'Control',
-            atspi.Accessibility_MODIFIER_SHIFTLOCK: 'ShiftLock',
-            atspi.Accessibility_MODIFIER_SHIFT: 'Shift' }
+            pyatspi.MODIFIER_NUMLOCK: 'NumLock',
+            pyatspi.MODIFIER_META3: 'Meta3',
+            pyatspi.MODIFIER_META2: 'Meta2',
+            pyatspi.MODIFIER_META: 'Meta',
+            pyatspi.MODIFIER_ALT: 'Alt',
+            pyatspi.MODIFIER_CONTROL: 'Control',
+            pyatspi.MODIFIER_SHIFTLOCK: 'ShiftLock',
+            pyatspi.MODIFIER_SHIFT: 'Shift' }
 
     def __init__(self, writerClass = ProceduralScriptWriter):
         self.writer = None
@@ -547,56 +477,67 @@ class EventRecorder:
         self.typedTextBuffer = ""
         self.lastTypedNode = None
         self.absoluteNodePaths = True
-        self.listeners = []
+        self.modMasks = []
+        for mask in range(0, (1 << max(self.modifiers.keys()) + 1)):
+            self.modMasks.append(mask)
+        self.modsDown = {}
 
         import gtk.keysyms
 
     def __registerEvents(self):
-        # Only specific events are recorded:
-        listeners = []
-
         # Focus events:
-        listeners.append(atspi.EventListener(marshalOnFocus, ["focus:"]))
+        pyatspi.Registry.registerEventListener(marshalOnFocus, "focus:")
 
         # State Changed events:
-        listeners.append(atspi.EventListener(marshalOnSelect, ["object:state-changed:selected"]))
+        pyatspi.Registry.registerEventListener(marshalOnSelect, "object:state-changed:selected")
 
         # Mouse button events:
-        listeners.append(atspi.EventListener(marshalOnMouseButton, ["mouse:button"]))
+        pyatspi.Registry.registerEventListener(marshalOnMouseButton, "mouse:button")
 
         # Keystroke events:
-        listeners.append(atspi.DeviceListener(marshalOnKeyPress))
+        pyatspi.Registry.registerKeystrokeListener(marshalOnKeyPress, [], self.modMasks, [pyatspi.KEY_PRESSED_EVENT, pyatspi.KEY_RELEASED_EVENT], True, True, False)
 
         # Window creation:
-        #listeners.append(atspi.EventListener(marshalOnWindowCreate, ["window:create"]))
+        #pyatspi.Registry.registerEventListener(marshalOnWindowCreate, "window:create")
 
-        return listeners
+        
+    def __deregisterEvents(self):
+        # Focus events:
+        pyatspi.Registry.deregisterEventListener(marshalOnFocus, "focus:")
+
+        # State Changed events:
+        pyatspi.Registry.deregisterEventListener(marshalOnSelect, "object:state-changed:selected")
+        
+        # Mouse button events:
+        pyatspi.Registry.deregisterEventListener(marshalOnMouseButton, "mouse:button")
+        
+        # Keystroke events:
+        pyatspi.Registry.deregisterKeystrokeListener(marshalOnKeyPress, [], self.modMasks, [pyatspi.KEY_PRESSED_EVENT, pyatspi.KEY_RELEASED_EVENT])
+        
+        # Window creation:
+        #pyatspi.Registry.deregisterEventListener(marshalOnWindowCreate, "window:create")
+        
 
     def startRecording(self, unused = None, scriptTextView = None):
         self.writer = self.writerClass(scriptTextView)
-        self.listeners = self.__registerEvents()
+        self.__registerEvents()
         # set lastKeyPressTimeStamp to 1, which is an invalid value.
         self.lastKeyPressTimeStamp = 1
-        atspi.event_main()
+        pyatspi.Registry.start(False, False)
 
     def stopRecording(self, unused = None, scriptTextView = None):
-        for listener in self.listeners:
-            listener.deregister()
-        atspi.event_quit()
+        self.__deregisterEvents()
+        pyatspi.Registry.stop()
         self.writer = None
 
     def onFocus(self, event):
-        sourceNode = dogtail.tree.Node(event.source)
-        sourceNode = FakeNode(sourceNode)
         #if sourceNode == self.lastPressedNode or \
         #        sourceNode == self.lastReleasedNode:
-        #    sourceNode._FakeNode__node.blink()
-        self.lastFocusedNode = sourceNode
+        #    sourceNode.blink()
+        self.lastFocusedNode = event.source
 
     def onSelect(self, event):
-        sourceNode = dogtail.tree.Node(event.source)
-        sourceNode = FakeNode(sourceNode)
-        self.lastSelectedNode = sourceNode
+        self.lastSelectedNode = event.source
 
     def onMouseButton(self, event):
         #logEvent(event)
@@ -604,7 +545,7 @@ class EventRecorder:
         self.typedTextBuffer = ""
 
         isPress = isRelease = False
-        g=re.match('mouse:button:(\d)(p|r)', event.type).groups()
+        g=re.match('(\d)(p|r)', event.type.minor).groups()
         button = int(g[0])
         if g[1] == 'p': isPress = True
         elif g[1] == 'r': isRelease = True
@@ -627,8 +568,6 @@ class EventRecorder:
                 for child in node.children:
                     result.append(child)
                     result.extend(getAllDescendants(child))
-                    #for grandChild in child.children:
-                    #    result.append(grandChild)
                 return result
             def smallestNode(nodes):
                 # Return the node with the smallest area
@@ -650,8 +589,6 @@ class EventRecorder:
                     # find the child itself.
                     if node.roleName == 'table':
                         detectedNode = None
-                        if not hasattr(node, 'children'):
-                            node = node._FakeNode__node
                         # getAllDescendants() is very expensive :(
                         possibleNodes = getAllDescendants(node)
                         probableNodes = [n for n in possibleNodes if \
@@ -670,13 +607,11 @@ class EventRecorder:
         detectedNode = detectByCoordinates(possibleNodes, x, y)
         if detectedNode and ((detectedNode.name == appName and \
                 detectedNode.roleName == 'frame') or \
-                FakeNode.findAncestor(detectedNode, \
-                roleName = 'frame', name = appName)):
+                detectedNode.findAncestor(\
+                GenericPredicate(roleName = 'frame', name = appName))):
             self.lastPressedNode = None
             self.lastReleasedNode = None
             return
-        if detectedNode and not isinstance(detectedNode, FakeNode):
-            detectedNode = FakeNode(detectedNode)
         if isPress: 
             self.lastPressedNode = detectedNode
         elif isRelease:
@@ -685,72 +620,81 @@ class EventRecorder:
         if isRelease and detectedNode:
             self.writer.recordClick(detectedNode, button)
 
-    def __checkModMask(fullMask, partMask, toCheck):
-        result = False
-        if fullMask == 0 or partMask == 0:
-            return (partMask, result)
-        if partMask - toCheck >= 0:
-            partMask = partMask - toCheck
-            result = True
-        return (partMask, result)
-    __checkModMask = staticmethod(__checkModMask)
-
-    def __getModifiers(self, modMask, keyChar):
-        partMask = modMask
-        modsDict = {}
-        keys = self.modifiers.keys()
-        keys.sort()
-        for i in keys[::-1]:
-            (partMask, pressed) = self.__checkModMask(modMask, partMask, i)
-            if pressed: modsDict[self.modifiers[i]] = i
-        # Screw capslock.
-        if modsDict.has_key('ShiftLock'):
-            del modsDict['ShiftLock']
-        # Shift+foo is not considered a key combo if foo is printable
-        if modsDict.has_key('Shift') and not keyChar == '':
-            del modsDict['Shift']
-        return modsDict
-
     def onKeyPress(self, event):
+        # Keystroke recording callback.
+    
         # The Fn key on my Thinkpad has a keyID of 0. Ignore it.
-        if not event.keyID: return
-        if event.type == atspi.SPI_KEY_PRESSED:
-            type = "pressed"
-        elif event.type == atspi.SPI_KEY_RELEASED:
-            type = "released"
-            return
+        if not event.id: return
+        
+        isPress = isRelease = False
+        if event.type == pyatspi.KEY_PRESSED:
+            isPress = True
+        elif event.type == pyatspi.KEY_RELEASED:
+            isRelease = True
 
-        self.lastKeyPressTimeStamp = event.timeStamp
+        #logEvent(event)
+
+        # This elapsed time code isn't used right now.
+        self.lastKeyPressTimeStamp = event.timestamp
         if self.lastKeyPressTimeStamp < 0:
-            elapsedTime = event.timeStamp - self.lastKeyPressTimeStamp
+            elapsedTime = event.timestamp - self.lastKeyPressTimeStamp
         else:
             elapsedTime = 0
 
-        if self.lastFocusedNode:
-            self.lastFocusedNode.text = self.lastFocusedNode._FakeNode__node.text
+        # Get the name of the key in question.
+        keyString = dogtail.rawinput.keyStrings[event.id]
+        # If the key is printable, get its character.
+        keyChar = dogtail.rawinput.keySymToUniChar(event.id)
+        #print "string '%s' char '%s'" % (keyString, keyChar)
 
-        keyString = dogtail.rawinput.keyStrings[event.keyID]
-        keyChar = dogtail.rawinput.keySymToUniChar(event.keyID)
-
-        # If the only key being pressed is a modifier, don't do anything.
-        if keyString.startswith("Alt_") or keyString.startswith("Control_") \
-                or keyString.startswith("Meta_") or \
-                keyString.startswith("Shift") or keyString == 'Caps_Lock':
+        # Is the only key being pressed a modifier?
+        if keyString.startswith("Alt_") or \
+                keyString.startswith("Control_") or \
+                keyString.startswith("Meta_") or \
+                keyString.startswith("Shift") or \
+                keyString == 'Caps_Lock':
             isJustAMod = True
+            #print "Just a mod: %s" % keyString
+        else: isJustAMod = False
+            
+        
+        # We keep track of which modifiers are down here.
+        def mod(string):
+            if isPress:
+                self.modsDown[string] = None
+            elif isRelease and self.modsDown.has_key(string):
+                del self.modsDown[string]
+
+        if isJustAMod:
+            # If this is just a modifier event, note that the modifier's
+            # state and then we're done.
+            mod(keyString)
             return
-        else:
-            isJustAMod = False
+        
+        # If this is a release event, we're done.
+        if isRelease: return
 
-        modsDict = self.__getModifiers(event.modifiers, keyChar)
-
+        # This builds modifier strings in the format a dogtail script
+        # needs, e.g. <Ctrl><Alt>
         def buildModifierString(modsDict):
             s = ''
             if modsDict:
                 for mod in modsDict.keys():
-                    s = s + '<' + mod + '>'
+                    #if not 'Shift' in mod and event.is_text:
+                    if not ('Shift' in mod and keyChar):
+                        s = s + '<' + mod.split('_')[0] + '>'
             return s
+        modString = buildModifierString(self.modsDown)
 
-        modString = buildModifierString(modsDict)
+        # Okay, so now it's time to make some decisions about how to 
+        #  record this event. This mainly depends on whether or not it's
+        #  a key combo. 
+        # If it's a key combo, we're going to write it out right away.
+        # If it's not, we store characters in a buffer and flush the 
+        #  buffer by writing out a script line when it makes sense.
+        # But if we have changed our keyboard focus since the last time
+        #  we've been called, we're going to flush the buffer and start
+        #  a new one.
 
         # If modifiers are present, we're dealing with a key combo
         if modString: combo = True
@@ -765,6 +709,7 @@ class EventRecorder:
             # We treat nonprintable characters like key combos.
             combo = True
 
+        # If our focus has changed, we're going to flush the buffer.
         if not combo and self.lastTypedNode is not None and \
                 (self.lastTypedNode != self.lastFocusedNode):
             #print "changed node, flushing"
@@ -809,8 +754,8 @@ class EventRecorder:
 
     def onWindowCreate(self, event):
         # logEvent(event)
-        sourceNode = dogtail.tree.Node(event.source)
-        # print "Window creation: %s"%str(sourceNode)
+        sourceNode = event.source
+        print "Window creation: %s" % str(sourceNode)
 
     def getLogStringForNode(self, node):
         if self.absoluteNodePaths:
@@ -818,8 +763,8 @@ class EventRecorder:
         else:
             return node
 
-# Under construction.  These ought to be methods, but am having Python assertion
-# failures in refcounting when trying to hook them up using lambda expressions; grrr...
+# We wrap our callbacks because we don't necessarily want to fail
+# when an exception is raised.
 import traceback
 def marshalOnFocus(event):
     try: recorder.onFocus(event)

@@ -91,9 +91,12 @@ class IsAnApplicationNamed(Predicate):
     def __init__(self, appName):
         self.appName = TranslatableString(appName)
         self.debugName = self.describeSearchResult()
+        self.satisfiedByNode = self._genCompareFunc()
 
-    def satisfiedByNode(self, node):
-        return node.roleName=='application' and stringMatches(self.appName, node.name)
+    def _genCompareFunc(self):
+        def satisfiedByNode(node):
+            return node.roleName=='application' and stringMatches(self.appName, node.name)
+        return satisfiedByNode
 
     def describeSearchResult(self):
         return '%s application'%self.appName
@@ -135,25 +138,29 @@ class GenericPredicate(Predicate):
                 self.debugName += " description='%s'"%description
         assert self.debugName
 
+        self.satisfiedByNode = self._genCompareFunc()
 
-    def satisfiedByNode(self, node):
-        # labelled nodes are handled specially:
-        if self.label:
-            # this reverses the search; we're looking for a node with LABELLED_BY
-            # and then checking the label, rather than looking for a label and
-            # then returning whatever LABEL_FOR targets
-            if node.labeller:
-                return stringMatches(self.label, node.labeller.name)
-            else: return False
-        else:
-            # Ensure the node matches any criteria that were set:
-            if self.name:
-                if not stringMatches(self.name,node.name): return False
-            if self.roleName:
-                if self.roleName!=node.roleName: return False
-            if self.description:
-                if self.description!=node.description: return False
-            return True
+
+    def _genCompareFunc(self):
+        def satisfiedByNode(node):
+            # labelled nodes are handled specially:
+            if self.label:
+                # this reverses the search; we're looking for a node with LABELLED_BY
+                # and then checking the label, rather than looking for a label and
+                # then returning whatever LABEL_FOR targets
+                if node.labeller:
+                    return stringMatches(self.label, node.labeller.name)
+                else: return False
+            else:
+                # Ensure the node matches any criteria that were set:
+                if self.name:
+                    if not stringMatches(self.name,node.name): return False
+                if self.roleName:
+                    if self.roleName!=node.roleName: return False
+                if self.description:
+                    if self.description!=node.description: return False
+                return True
+        return satisfiedByNode
 
     def describeSearchResult(self):
         return self.debugName
@@ -188,9 +195,12 @@ class IsNamed(Predicate):
     def __init__(self, name):
         self.name = TranslatableString(name)
         self.debugName = self.describeSearchResult()
+        self.satisfiedByNode = self._genCompareFunc()
 
-    def satisfiedByNode(self, node):
-        return stringMatches(self.name, node.name)
+    def _genCompareFunc(self):
+        def satisfiedByNode(node):
+            return stringMatches(self.name, node.name)
+        return satisfiedByNode
 
     def describeSearchResult(self):
         return "named %s"%self.name
@@ -205,9 +215,12 @@ class IsAWindowNamed(Predicate):
     def __init__(self, windowName):
         self.windowName = TranslatableString(windowName)
         self.debugName = self.describeSearchResult()
+        self.satisfiedByNode = self._genCompareFunc()
 
-    def satisfiedByNode(self, node):
-        return node.roleName=='frame' and stringMatches(self.windowName, node.name)
+    def _genCompareFunc(self):
+        def satisfiedByNode(node):
+            return node.roleName=='frame' and stringMatches(self.windowName, node.name)
+        return satisfiedByNode
 
     def describeSearchResult(self):
         return "%s window"%self.windowName
@@ -220,8 +233,8 @@ class IsAWindowNamed(Predicate):
 
 class IsAWindow(Predicate):
     """Predicate subclass that looks for top-level windows"""
-    def satisfiedByNode(self, node):
-        return node.roleName=='frame'
+    def __init__(self):
+        self.satisfiedByNode = lambda node: node.roleName == 'frame'
 
     def describeSearchResult(self):
         return "window"
@@ -231,9 +244,12 @@ class IsADialogNamed(Predicate):
     def __init__(self, dialogName):
         self.dialogName = TranslatableString(dialogName)
         self.debugName = self.describeSearchResult()
+        self.satisfiedByNode = self._genCompareFunc()
 
-    def satisfiedByNode(self, node):
-        return node.roleName=='dialog' and stringMatches(self.dialogName, node.name)
+    def _genCompareFunc(self):
+        def satisfiedByNode(node):
+            return node.roleName=='dialog' and stringMatches(self.dialogName, node.name)
+        return satisfiedByNode
 
     def describeSearchResult(self):
         return '%s dialog'%self.dialogName
@@ -253,12 +269,15 @@ class IsLabelledAs(Predicate):
     def __init__(self, labelText):
         self.labelText = TranslatableString(labelText)
         self.debugName = self.describeSearchResult()
+        self.satisfiedByNode = self._genCompareFunc()
 
-    def satisfiedByNode(self, node):
-        # FIXME
-        if node.labeller:
-            return stringMatches(self.labelText, node.labeller.name)
-        else: return False
+    def _genCompareFunc(self):
+        def satisfiedByNode(node):
+            # FIXME
+            if node.labeller:
+                return stringMatches(self.labelText, node.labeller.name)
+            else: return False
+        return satisfiedByNode
 
     def describeSearchResult(self):
         return 'labelled %s'%self.labelText
@@ -274,9 +293,8 @@ class IsAMenuNamed(Predicate):
     def __init__(self, menuName):
         self.menuName = TranslatableString(menuName)
         self.debugName = self.describeSearchResult()
-
-    def satisfiedByNode(self, node):
-        return node.roleName=='menu' and stringMatches(self.menuName, node.name)
+        self.satisfiedByNode = lambda node: node.roleName=='menu' and \
+                stringMatches(self.menuName, node.name)
 
     def describeSearchResult(self):
         return '%s menu'%(self.menuName)
@@ -292,10 +310,9 @@ class IsAMenuItemNamed(Predicate):
     def __init__(self, menuItemName):
         self.menuItemName = TranslatableString(menuItemName)
         self.debugName = self.describeSearchResult()
-
-    def satisfiedByNode(self, node):
-        roleName = node.roleName
-        return (roleName=='menu item' or roleName=='check menu item' or roleName=='radio menu item') and stringMatches(self.menuItemName, node.name)
+        self.satisfiedByNode = lambda node: \
+                node.roleName.endswith('menu item') and \
+                stringMatches(self.menuItemName, node.name)
 
     def describeSearchResult(self):
         return '%s menuitem'%(self.menuItemName)
@@ -311,9 +328,8 @@ class IsATextEntryNamed(Predicate):
     def __init__(self, textEntryName):
         self.textEntryName = TranslatableString(textEntryName)
         self.debugName = self.describeSearchResult()
-
-    def satisfiedByNode(self, node):
-        return node.roleName=='text' and stringMatches(self.textEntryName, node.name)
+        self.satisfiedByNode = lambda node: node.roleName == 'text' and \
+                stringMatches(self.textEntryName, node.name)
 
     def describeSearchResult(self):
         return '%s textentry'%(self.textEntryName)
@@ -329,9 +345,8 @@ class IsAButtonNamed(Predicate):
     def __init__(self, buttonName):
         self.buttonName = TranslatableString(buttonName)
         self.debugName = self.describeSearchResult()
-
-    def satisfiedByNode(self, node):
-        return node.roleName=='push button' and stringMatches(self.buttonName, node.name)
+        self.satisfiedByNode = lambda node: node.roleName == 'push button' \
+                and stringMatches(self.buttonName, node.name)
 
     def describeSearchResult(self):
         return '%s button'%(self.buttonName)
@@ -347,9 +362,8 @@ class IsATabNamed(Predicate):
     def __init__(self, tabName):
         self.tabName = TranslatableString(tabName)
         self.debugName = self.describeSearchResult()
-
-    def satisfiedByNode(self, node):
-        return node.roleName=='page tab' and stringMatches(self.tabName, node.name)
+        self.satisfiedByNode = lambda node: node.roleName=='page tab' and \
+                stringMatches(self.tabName, node.name)
 
     def describeSearchResult(self):
         return '%s tab'%(self.tabName)

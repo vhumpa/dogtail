@@ -18,7 +18,7 @@ export camelCAPS='[a-z_][a-zA-Z0-9_]*$$'
 export StudlyCaps='[a-zA-Z_][a-zA-Z0-9_]*$$'
 
 check:
-	pylint --indent-string="	" --class-rgx=${StudlyCaps} --function-rgx=${camelCAPS} --method-rgx=${camelCAPS} --variable-rgx=${camelCAPS} --argument-rgx=${camelCaps} dogtail sniff/sniff examples/*.py
+	pylint --indent-string="    " --class-rgx=${StudlyCaps} --function-rgx=${camelCAPS} --method-rgx=${camelCAPS} --variable-rgx=${camelCAPS} --argument-rgx=${camelCaps} dogtail sniff/sniff examples/*.py recorder/dogtail-recorder scripts/*.py
 
 tarball:
 	python setup.py sdist

@@ -62,6 +62,9 @@ def showAbout(*args):
     about.set_authors(appAuthors)
     about.set_comments('Explore your desktop with Dogtail')
     about.set_website('http://people.redhat.com/zcerza/dogtail/')
+    def close(w, res):
+        if res == gtk.RESPONSE_CANCEL: w.destroy()
+    about.connect("response", close)
     about.show_all()
 
 def connectSignals():

@@ -218,6 +218,26 @@ class ScriptWriter:
         self.scriptTextView = scriptTextView
         self.debug = False
 
+    def _hasPreamble(self):
+        print "preamble?"
+        if self.scriptTextView:
+            pLines = self.preamble.strip().split('\n')
+            buffer = self.scriptTextView.get_buffer()
+            if buffer.get_line_count() < len(pLines): return False
+            i = 0
+            match = False
+            for i in range(len(pLines)):
+                iter1 = buffer.get_iter_at_line(i)
+                iter2 = iter1.copy()
+                iter2.forward_to_line_end()
+                bLine = iter1.get_text(iter2)
+                print "'''%s''' =? '''%s'''" % (bLine, pLines[i])
+                if bLine == pLines[i]: match = True
+                else: return False
+            return match
+        else: return self.scriptBuffer.startswith(preamble)
+    hasPreamble = property(_hasPreamble)
+
     def recordLine(self, string):
         print string
         if self.scriptTextView:
@@ -249,12 +269,14 @@ class OOScriptWriter(ScriptWriter):
     Concrete Writer subclass which writes out Python scripts in an object-oriented
     style
     """
+    preamble = "#!/usr/bin/python\nfrom dogtail.tree import *\n"
+
     def __init__(self, scriptTextView = None):
         ScriptWriter.__init__(self, scriptTextView)
 
         self.debugVariables = False
 
-        self.recordLine("#!/usr/bin/python\nfrom dogtail.tree import *\n")
+        if not self.hasPreamble: self.recordLine(self.preamble)
 
         # maintain a dict from variable names to search paths
         self.variables = {}
@@ -367,11 +389,12 @@ class ProceduralScriptWriter(ScriptWriter):
     currentDialog = None
     currentFrame = None
     currentApplication = None
+    preamble = "#!/usr/bin/python\nfrom dogtail.procedural import *\n"
 
     def __init__(self, scriptTextView = None):
         ScriptWriter.__init__(self, scriptTextView)
 
-        self.recordLine("#!/usr/bin/python\nfrom dogtail.procedural import *\n")
+        if not self.hasPreamble: self.recordLine(self.preamble)
     
     def setUpFocus(self, node):
         """

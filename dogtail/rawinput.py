@@ -160,10 +160,20 @@ def pressKey(keyName):
     registry.generateKeyboardEvent(keySym, None, KEY_SYM)
     doTypingDelay()
 
-import ctypes
-xlib = None
-dpy = 0
-def keyStringToKeyCode(keyString):
+def gdkKeyStringToKeyCode(keyString):
+    """
+    Use GDK to get the keycode for a given keystring.
+    """
+    keymap = gtk.gdk.keymap_get_default()
+    entries = keymap.get_entries_for_keyval( \
+            gtk.gdk.keyval_from_name(keyString))
+    try: return entries[0][0]
+    except TypeError: pass
+
+def xlibKeyStringToKeyCode(keyString):
+    """
+    Use xlib (via ctypes) to get the keycode for a given keystring.
+    """
     def loadXlib():
         global xlib
         global dpy
@@ -192,6 +202,21 @@ def keyStringToKeyCode(keyString):
         return code.value
 
     return keySymToKeyCode(keyStringToKeySym(keyString))
+
+try:
+    import ctypes
+    xlib = None
+    dpy = 0
+    keyStringToKeyCode = xlibKeyStringToKeyCode
+except ImportError:
+    keyStringToKeyCode = gdkKeyStringToKeyCode
+
+keyStringToKeyCode.__doc__ += """
+    Note that the keycode returned by this function is often incorrect when
+    the requested keystring is obtained by holding down the Shift key.
+    
+    Generally you should use uniCharToKeySym() and should only need this
+    function for nonprintable keys anyway."""
 
 
 def keyCombo(comboString):

@@ -1,5 +1,11 @@
 2007-12-07  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/rawinput.py: Fall back to using a gtk.gdk.Keymap
+	implementation of keyStringToKeyCode() if ctypes is not available.
+	This will probably become the default implementation.
+
+2007-12-07  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tree.py: Add a patch from Michal Babej to fix a python 2.4
 	compatibility issue. Closes: #502324.
 

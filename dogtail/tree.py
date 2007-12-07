@@ -179,7 +179,7 @@ class Node:
 
     def __setupUserData(self):
         try: len(self.user_data)
-        except AttributeError: self.user_data = {}
+        except (AttributeError, TypeError): self.user_data = {}
 
     def _getDebugName(self):
         self.__setupUserData()

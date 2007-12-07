@@ -1,3 +1,8 @@
+2007-12-07  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Add a patch from Michal Babej to fix a python 2.4
+	compatibility issue. Closes: #502324.
+
 2007-12-06  Zack Cerza <zcerza@redhat.com>
 
 	* recorder/dogtail-recorder: Only write the script preamble once.

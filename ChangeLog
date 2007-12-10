@@ -1,5 +1,9 @@
 2007-12-10  Zack Cerza <zcerza@redhat.com>
 
+	* sniff/sniff: Expand the root node of the TreeView on startup.
+
+2007-12-10  Zack Cerza <zcerza@redhat.com>
+
 	* sniff/sniff: Move SniffModel.getNodeAttr() to SniffController, modify
 	it to be specific to the 'name' property of a node. That function is
 	now called nameDataFunc(). The behavior of nameDataFunc() has also

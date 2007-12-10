@@ -138,6 +138,9 @@ class SniffController(object):
             column.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
             column.set_resizable(True)
         self.view.show()
+        path = 0
+        self.view.expand_row(path, False)
+        self.rowExpanded(self.view, self.model.get_iter(path), path)
 
     def nameDataFunc(self, column, cell, model, iter):
         node = model.getNode(iter)

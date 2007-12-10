@@ -1,5 +1,10 @@
 2007-12-10  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/tree.py: Add AccessibleValue support. Thanks to Pelya for
+	submitting a patch before the port was merged.
+
+2007-12-10  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tree.py: Fix typo.
 
 2007-12-10  Zack Cerza <zcerza@redhat.com>

@@ -493,6 +493,28 @@ class Node:
     selectedChildren = property(_getSelectedChildren, doc = \
         "Returns a list of children that are selected.")
 
+    ##
+    # Value
+    ##
+
+    def _getValue(self):
+        try: return self.queryValue().getCurrentValue()
+        except NotImplementedError: pass
+
+    def _setValue(self, value):
+        self.setCurrentValue(value)
+
+    value = property(_getValue, setValue)
+
+    def _getValueMin(self):
+        try: return self.queryValue().getMinimumValue()
+        except NotImplementedError: pass
+    valueMin = property(_getValueMin)
+
+    def _getValueMax(self):
+        try: return self.queryValue().getMaximumValue()
+        except NotImplementedError: pass
+    valueMax = property(_getValueMax)
 
     def typeText(self, string):
         """

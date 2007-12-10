@@ -1,5 +1,10 @@
 2007-12-10  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/tree.py: Make Action.__node public (i.e. rename to 
+	Action.node).
+
+2007-12-10  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tree.py: Force Node._getChildren() to return an empty list
 	if the node's parent is a hyper link.
 

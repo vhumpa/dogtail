@@ -135,7 +135,7 @@ class Action:
              'menu')
 
     def __init__ (self, node, action, index):
-        self.__node = node
+        self.node = node
         self.__action = action
         self.__index = index
 
@@ -156,8 +156,8 @@ class Action:
         """
         Performs the given tree.Action, with appropriate delays and logging.
         """
-        logger.log("%s on %s"%(self.name, self.__node.getLogString()))
-        if not self.__node.sensitive:
+        logger.log("%s on %s"%(self.name, self.node.getLogString()))
+        if not self.node.sensitive:
             if config.ensureSensitivity:
                 raise NotSensitiveError, self
             else:

@@ -888,7 +888,8 @@ class Root (Node):
         """
         Get all applications.
         """
-        return root.findAllChildrenSatisfying(predicate.GenericPredicate(roleName="application"), recursive=False)
+        return root.findChildren(predicate.GenericPredicate( \
+                roleName="application"), recursive=False)
 
     def application(self, appName):
         """

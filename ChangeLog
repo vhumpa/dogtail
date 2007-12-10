@@ -1,3 +1,10 @@
+2007-12-10  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Refactor sniff. Organize into 3 classes: SniffApp with 
+	methods	for setting up the application; SniffModel as a subclass of
+	gtk.TreeStore; SniffController for poking at the SniffModel and
+	gtk.TreeView instances.
+
 2007-12-07  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/rawinput.py: Fall back to using a gtk.gdk.Keymap

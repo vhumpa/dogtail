@@ -1,230 +1,326 @@
 #!/usr/bin/env python
 # -*- coding: UTF8 -*-
+"""
+http://en.wikipedia.org/wiki/Model-view-controller
 
-appName = 'Sniff'
-appAuthors = ['Zack Cerza <zcerza@redhat.com>', 'David Malcolm <dmalcolm@redhat.com']
+The SniffApp class sets up all of sniff's widgets.
 
+Data storage is handled by the SniffModel class.
+There is no SniffView class; we just use a GtkTreeView.
+Data display is handled by the SniffController class.
+"""
 from dogtail.utils import checkForA11yInteractively
 checkForA11yInteractively()
-
 from dogtail import tree
 pyatspi = tree.pyatspi
 from dogtail import utils
 import gobject
-import gnome
-program = gnome.program_init(appName, '0.1')
-import gtk.glade
+import gtk
 
-import os
-if os.path.exists('sniff.glade'):
-    x = gtk.glade.XML('sniff.glade')
-else:
-    import sys
-    exec_root = sys.argv[0].split("/bin/")[0]
-    if exec_root[0] is not '/':
-        exec_root = "/usr"
-    x = gtk.glade.XML(exec_root + '/share/dogtail/glade/sniff.glade')
+class SniffApp(object):
+    appName = 'Sniff'
+    appAuthors = ['Zack Cerza <zcerza@redhat.com>', \
+            'David Malcolm <dmalcolm@redhat.com']
 
-sniff = x.get_widget(appName)
+    def __init__(self):
 
-try:
-    sniff.set_icon_from_file('../icons/dogtail-head.svg')
-except Exception:
-    sniff.set_icon_from_file('/usr/share/icons/hicolor/scalable/apps/dogtail-head.svg')
+        import gnome
+        self.program = gnome.program_init(self.appName, '0.1')
+        import gtk.glade
 
-view = x.get_widget('treeTreeView')
+        import os
+        if os.path.exists('sniff.glade'):
+            self.x = gtk.glade.XML('sniff.glade')
+        else:
+            import sys
+            exec_root = sys.argv[0].split("/bin/")[0]
+            if exec_root[0] is not '/':
+                exec_root = "/usr"
+            self.x = gtk.glade.XML(exec_root + \
+                    '/share/dogtail/glade/sniff.glade')
 
-nameTextLabel = x.get_widget('nameTextLabel')
-roleNameTextLabel = x.get_widget('roleNameTextLabel')
-descTextLabel = x.get_widget('descTextLabel')
-actionsTextLabel = x.get_widget('actionsTextLabel')
-textLabel = x.get_widget('textLabel')
-textTextView = x.get_widget('textTextView')
+        self.app = self.x.get_widget(self.appName)
 
-# Indices of the various fields of the tree model:
-MODEL_FIELD_NODE = 0
-MODEL_FIELD_NAME = 1
-MODEL_FIELD_ROLENAME = 2
-MODEL_FIELD_DESCRIPTION = 3
-MODEL_FIELD_PIXBUF = 4
-
-def quit(*args):
-    gtk.main_quit()
-
-def expandAll(widget, *args):
-    global view
-    if args[0] == True: view.expand_all()
-    elif args[0] == False: view.collapse_all()
-
-def showAbout(*args):
-    about = gtk.AboutDialog()
-    about.set_name(appName)
-    about.set_authors(appAuthors)
-    about.set_comments('Explore your desktop with Dogtail')
-    about.set_website('http://people.redhat.com/zcerza/dogtail/')
-    def close(w, res):
-        if res == gtk.RESPONSE_CANCEL: w.destroy()
-    about.connect("response", close)
-    about.show_all()
-
-def connectSignals():
-    sniff.connect('delete_event', quit)
-
-    quit1 = x.get_widget('quit1')
-    quit1.connect('activate', quit)
-
-    expand_all1 = x.get_widget('expand_all1')
-    expand_all1.connect('activate', expandAll, True)
-    collapse_all1 = x.get_widget('collapse_all1')
-    collapse_all1.connect('activate', expandAll, False)
-
-    about1 = x.get_widget('about1')
-    about1.connect('activate', showAbout)
-
-    refreshMenuItem = x.get_widget('refresh1')
-    refreshMenuItem.connect('activate', refreshAll)
-
-    view.connect('button-press-event', buttonPress)
-    view.connect('row-expanded', rowExpanded)
-    view.connect('row-collapsed', rowCollapsed)
-    treeSelection = view.get_selection()
-    treeSelection.connect('changed', selectionChanged)
-
-def buttonPress(widget, event, *userParams):
-    global model
-    try: path, treeViewCol, relX, relY = \
-                    view.get_path_at_pos(int(event.x), int(event.y))
-    except TypeError: return
-    node = model[path][0]
-    if node == None: return
-    setUpTable(node)
-
-    if event.button == 3:
-        menu = gtk.Menu()
-        menuItem = None
-        if node.actions:
-            for action in node.actions.keys():
-                menuItem = gtk.MenuItem(action.capitalize())
-                menuItem.connect('activate', menuItemActivate, node.doAction, \
-                        action)
-                menuItem.show()
-                menu.append(menuItem)
-        if not menuItem: return
-        menu.show()
-        menu.popup(None, None, None, event.button, event.time)
-
-# I hate globals too. I think we need one here, though.
-# Make it a non-integer, so we can know if it has been set yet (later).
-textTextViewBufferChangedLastHandlerID = 3.141592654
-
-def setUpTable(node):
-    """Generic code for setting up the table under the TreeView"""
-    if node == None: return
-    nameTextLabel.set_text(node.name)
-    roleNameTextLabel.set_text(node.roleName)
-    descTextLabel.set_text(node.description)
-    str = ''
-    if node.actions: str = ' '.join(node.actions.keys())
-    actionsTextLabel.set_text(str)
-
-    global textTextViewBufferChangedLastHandlerID
-    # Have we connected this signal yet? If so, disconnect it before proceeding.
-    if int(textTextViewBufferChangedLastHandlerID) == \
-            textTextViewBufferChangedLastHandlerID:
-        textTextView.get_buffer().disconnect(textTextViewBufferChangedLastHandlerID)
-
-    if node.text is not None:
-        buffer = textTextView.get_buffer()
-        buffer.set_text(node.text)
         try:
-            node.queryEditableText()
-            # Remember the handler ID of this connection.
-            textTextView.set_sensitive(True)
-            textTextViewBufferChangedLastHandlerID = \
-                    buffer.connect('changed', changeText, node)
-        except NotImplementedError:
-            textTextView.set_sensitive(False)
-    else:
-        textTextView.get_buffer().set_text('')
-        textTextView.set_sensitive(False)
+            self.app.set_icon_from_file('../icons/dogtail-head.svg')
+        except Exception:
+            self.app.set_icon_from_file( \
+                    '/usr/share/icons/hicolor/scalable/apps/dogtail-head.svg')
 
-def changeText(textBuffer, node):
-    if node == None: return
-    node.text = textBuffer.get_text(textBuffer.get_start_iter(), \
-                    textBuffer.get_end_iter())
 
-def rowExpanded(treeview, iter, path, *userParams):
-    global model
-    row = model[path]
-    childRows = row.iterchildren()
-    node = row[0]
-    childNodes = node.children
-    for childNode in childNodes:
-        childRow = childRows.next()
-        addChildren(childNode, childRow.iter)
+        self.setUpWidgets()
+        self.connectSignals()
+        self.app.show_all()
+        gtk.main()
 
-def rowCollapsed(treeview, iter, path, *userParams):
-    global model
-    row = model[path]
-    childRows = row.iterchildren()
-    try:
+    def setUpWidgets(self):
+        self.quit1 = self.x.get_widget('quit1')
+        self.expand_all1 = self.x.get_widget('expand_all1')
+        self.collapse_all1 = self.x.get_widget('collapse_all1')
+        self.about1 = self.x.get_widget('about1')
+        self.refreshMenuItem = self.x.get_widget('refresh1')
+        self.about = None
+
+        view = self.x.get_widget('treeTreeView')
+        nameTextLabel = self.x.get_widget('nameTextLabel')
+        roleNameTextLabel = self.x.get_widget('roleNameTextLabel')
+        descTextLabel = self.x.get_widget('descTextLabel')
+        actionsTextLabel = self.x.get_widget('actionsTextLabel')
+        textLabel = self.x.get_widget('textLabel')
+        textTextView = self.x.get_widget('textTextView')
+        self.tree = SniffController(view, nameTextLabel, roleNameTextLabel, \
+                descTextLabel, actionsTextLabel, textLabel, textTextView)
+
+    def connectSignals(self):
+        self.app.connect('delete_event', self.quit, self)
+        self.quit1.connect('activate', self.quit, self)
+        self.expand_all1.connect('activate', self.tree.expandAll, True)
+        self.collapse_all1.connect('activate', self.tree.expandAll, False)
+        self.about1.connect('activate', self.showAbout, self)
+        self.refreshMenuItem.connect('activate', self.tree.reset)
+
+    def showAbout(self, *args):
+        if not self.about:
+            self.about = gtk.AboutDialog()
+            self.about.set_name(self.appName)
+            self.about.set_authors(self.appAuthors)
+            self.about.set_comments('Explore your desktop with Dogtail')
+            self.about.set_website('http://people.redhat.com/zcerza/dogtail/')
+            self.about.connect("response", self.hideAbout)
+        self.about.show_all()
+
+    def hideAbout(self, window, response):
+        if response == gtk.RESPONSE_CANCEL: window.hide()
+
+    def quit(self, *args):
+        gtk.main_quit()
+
+
+class SniffController(object):
+    def __init__(self, view, nameLabel, roleNameLabel, descLabel, \
+            actionsLabel, textLabel, textView):
+        self.nameTextLabel = nameLabel
+        self.nameTextLabel.set_text('')
+        self.roleNameTextLabel = roleNameLabel
+        self.roleNameTextLabel.set_text('')
+        self.descTextLabel = descLabel
+        self.descTextLabel.set_text('')
+        self.actionsTextLabel = actionsLabel
+        self.actionsTextLabel.set_text('')
+        self.textLabel = textLabel
+        self.textTextView = textView
+        self.textTextViewBufferChangedLastHandlerID = 3.141592654
+        self.textTextView.set_sensitive(False)
+        self.textTextView.get_buffer().set_text('')
+        self.view = view
+        self.treeSelection = self.view.get_selection()
+        self.model = SniffModel()
+        self.setUpView()
+        self.connectSignals()
+
+    def setUpView(self):
+        self.view.set_model(self.model)
+
+        col = gtk.TreeViewColumn()
+        cellRenderer = gtk.CellRendererPixbuf()
+        col.pack_start(cellRenderer, expand = False)
+        col.set_cell_data_func(cellRenderer, self.getCellPixbufForNode)
+
+        cellRenderer = gtk.CellRendererText()
+        col.pack_end(cellRenderer, expand = False)
+        col.set_cell_data_func(cellRenderer, self.model.getNodeAttr, 'name')
+
+        col.set_title('Name')
+
+        self.view.insert_column(col, -1)
+
+        for column in self.view.get_columns():
+            column.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
+            column.set_resizable(True)
+        self.view.show()
+
+    def reset(self, *args):
+        self.model.reset()
+        rootPath = self.model.get_path(self.model.get_iter_root())
+        self.view.expand_row(rootPath, False)
+
+    def connectSignals(self):
+        self.view.connect('button-press-event', self.buttonPress)
+        self.view.connect('row-expanded', self.rowExpanded, self.model)
+        self.view.connect('row-collapsed', self.rowCollapsed)
+        self.treeSelection.connect('changed', self.selectionChanged)
+
+    def selectionChanged(self, treeSelection):
+        node = self.getSelectedNode()
+        if node: node.blink()
+
+    def getSelectedNode(self):
+        (store, iter) = self.view.get_selection().get_selected()
+        if not iter: node = None
+        else: node = self.model[iter][0]
+        return node
+
+    def expandAll(self, widget, *args):
+        if args[0] == True: self.view.expand_all()
+        elif args[0] == False: self.view.collapse_all()
+
+    def rowExpanded(self, treeview, iter, path, *userParams):
+        row = self.model[path]
+        childRows = row.iterchildren()
         while True:
-            childRow = childRows.next()
-            grandChildRows = childRow.iterchildren()
             try:
-                while True:
-                    grandChildRow = grandChildRows.next()
-                    model.remove(grandChildRow.iter)
-            except StopIteration: pass
-    except StopIteration: pass
+                childRow = childRows.next()
+                self.model.populateChildren(childRow.iter)
+            except StopIteration: break
 
-def selectionChanged(treeSelection):
-    # print "selection changed"
-    node = getSelectedNode()
-    if node: node.blink()
+    def rowCollapsed(self, treeview, iter, path, *userParams):
+        row = self.model[path]
+        childRows = row.iterchildren()
+        try:
+            while True:
+                childRow = childRows.next()
+                grandChildRows = childRow.iterchildren()
+                try:
+                    while True:
+                        grandChildRow = grandChildRows.next()
+                        self.model.remove(grandChildRow.iter)
+                except StopIteration: pass
+        except StopIteration: pass
 
-def getSelectedNode():
-    global model
-    global view
-    (store, iter) = view.get_selection().get_selected()
-    if not iter: node = None
-    else: node = model[iter][0]
-    return node
+    def menuItemActivate(self, menuItem, *userParams):
+        if len(userParams) < 2: return
+        method = userParams[0]
+        arg = userParams[1]
+        method(arg)
 
-def menuItemActivate(menuItem, *userParams):
-    if len(userParams) < 2: return
-    method = userParams[0]
-    arg = userParams[1]
-    method(arg)
+    def buttonPress(self, widget, event, *userParams):
+        try: path, treeViewCol, relX, relY = \
+                        self.view.get_path_at_pos(int(event.x), int(event.y))
+        except TypeError: return
+        node = self.model[path][self.model.nodeColumn]
+        if node == None: return
+        self.setUpTable(node)
 
-def refreshAll(menuItem, *userParams):
-    global model
-    resetModel()
+        if event.button == 3:
+            menu = gtk.Menu()
+            menuItem = None
+            if node.actions:
+                for action in node.actions.keys():
+                    menuItem = gtk.MenuItem(action.capitalize())
+                    menuItem.connect('activate', self.menuItemActivate, \
+                            node.doAction, action)
+                    menuItem.show()
+                    menu.append(menuItem)
+            if not menuItem: return
+            menu.show()
+            menu.popup(None, None, None, event.button, event.time)
 
-def addNodeToModel(node, parentInTreeView = None):
-    global model
-    iter = model.insert_before(parentInTreeView, None)
-    model.set_value(iter, MODEL_FIELD_NODE, node)
-    return iter
+    def setUpTable(self, node):
+        """Generic code for setting up the table under the TreeView"""
+        if node == None: return
+        self.nameTextLabel.set_text(node.name)
+        self.roleNameTextLabel.set_text(node.roleName)
+        self.descTextLabel.set_text(node.description)
+        str = ''
+        if node.actions: str = ' '.join(node.actions.keys())
+        self.actionsTextLabel.set_text(str)
 
-def addChildren(node, parentInTreeView = None):
-    if node == None: return
-    global model
-    for child in node.children:
-        iter = addNodeToModel(child, parentInTreeView)
+        # Have we connected this signal yet? 
+        # If so, disconnect it before proceeding.
+        if int(self.textTextViewBufferChangedLastHandlerID) == \
+                self.textTextViewBufferChangedLastHandlerID:
+            self.textTextView.get_buffer().disconnect( \
+                    self.textTextViewBufferChangedLastHandlerID)
 
-def showNode(node, parentInTreeView = None):
-    if node == None: return
-    global model
-    iter = addNodeToModel(node, parentInTreeView)
-    addChildren(node, iter)
+        if node.text is not None:
+            buffer = self.textTextView.get_buffer()
+            buffer.set_text(node.text)
+            try:
+                node.queryEditableText()
+                # Remember the handler ID of this connection.
+                self.textTextView.set_sensitive(True)
+                self.textTextViewBufferChangedLastHandlerID = \
+                        buffer.connect('changed', self.changeText, node)
+            except NotImplementedError:
+                self.textTextView.set_sensitive(False)
+        else:
+            self.textTextView.get_buffer().set_text('')
+            self.textTextView.set_sensitive(False)
 
-def resetModel():
-    global model
-    model.clear()
-    showNode(tree.root)
-    rootPath = model.get_path(model.get_iter_root())
-    view.expand_row(rootPath, False)
+    def changeText(self, textBuffer, node):
+        if node == None: return
+        node.text = textBuffer.get_text(textBuffer.get_start_iter(), \
+                        textBuffer.get_end_iter())
+
+    def getPixbufForNode(self, node):
+        theme = gtk.icon_theme_get_default()
+        try:
+            if node.role == pyatspi.ROLE_APPLICATION:
+                # FIXME: Use the pixbuf from libwcnk (if available):
+                # wnckApp = Application(node).getWnckApplication()
+                # if wnckApp
+                try: 
+                    return theme.load_icon(node.name, 24, \
+                            gtk.ICON_LOOKUP_USE_BUILTIN)
+                except gobject.GError:
+                    try: 
+                        return theme.load_icon(node.name.lower(), 24, \
+                            gtk.ICON_LOOKUP_USE_BUILTIN)
+                    except gobject.GError: 
+                        return None
+            elif node.parent:
+                return iconForRole[node.role]
+            else:
+                return theme.load_icon("gnome-fs-desktop", 24, \
+                        gtk.ICON_LOOKUP_USE_BUILTIN)
+        except Exception:
+            return theme.load_icon("gtk-dialog-error", 24, \
+                    gtk.ICON_LOOKUP_USE_BUILTIN)
+
+    def getCellPixbufForNode(self, column, cell, model, iter):
+        node = self.model.getNode(iter)
+        pixbuf = self.getPixbufForNode(node)
+        cell.set_property('pixbuf', pixbuf)
+
+class SniffModel(gtk.TreeStore):
+    nodeColumn = 0
+    nameColumn = 1
+    roleNameColumn = 2
+    descriptionColumn = 3
+    pixbufColumn = 4
+
+    def __init__(self):
+        gtk.TreeStore.__init__(self, gobject.TYPE_PYOBJECT, \
+                gobject.TYPE_STRING, gobject.TYPE_STRING, gobject.TYPE_STRING)
+        self.appendAndPopulate(None, tree.root)
+
+    def reset(self, *args):
+        self.clear()
+        self.appendAndPopulate(None, tree.root)
+
+    def append(self, parentIter, node):
+        return gtk.TreeStore.append(self, parentIter, (node, node.name, \
+                node.roleName, node.description))
+
+    def populateChildren(self, iter):
+        node = self.getNode(iter)
+        for child in node.children: self.append(iter, child)
+
+    def appendAndPopulate(self, iter, node):
+        childIter = self.append(iter, node)
+        self.populateChildren(childIter)
+
+    def getNode(self, iter):
+        return self.get_value(iter, self.nodeColumn)
+
+    def getNodeAttr(self, column, cell, model, iter, attr):
+        node = self.getNode(iter)
+        try:
+            text = getattr(node, attr)
+        except Exception:
+            text = "(broken node)"
+        cell.set_property('text', text)
+
 
 def loadIcon(iconName):
     try:
@@ -342,77 +438,8 @@ iconForRole = { \
         pyatspi.ROLE_EMBEDDED : None, \
         pyatspi.ROLE_LAST_DEFINED: None }
 
-def getPixbufForNode(node):
-    theme = gtk.icon_theme_get_default()
-    try:
-        if node.role==pyatspi.ROLE_APPLICATION:
-            # FIXME: Use the pixbuf from libwcnk (if available):
-            # wnckApp = Application(node).getWnckApplication()
-            # if wnckApp
-            try: return theme.load_icon(node.name, 24, gtk.ICON_LOOKUP_USE_BUILTIN)
-            except gobject.GError:
-                try: return theme.load_icon(node.name.lower(), 24, gtk.ICON_LOOKUP_USE_BUILTIN)
-                except gobject.GError: return None
-        elif node.parent:
-            return iconForRole[node.role]
-        else:
-            return theme.load_icon("gnome-fs-desktop", 24, gtk.ICON_LOOKUP_USE_BUILTIN)
-    except Exception:
-        return theme.load_icon("gtk-dialog-error", 24, gtk.ICON_LOOKUP_USE_BUILTIN)
-
-def getNodeAttr(column, cell, model, iter, attr):
-    node = model.get_value(iter, MODEL_FIELD_NODE)
-    try:
-        text = getattr(node, attr)
-    except Exception:
-        text = "(broken node)"
-    cell.set_property('text', text)
-
-def getCellPixbufForNode(column, cell, model, iter):
-    node = model.get_value(iter, MODEL_FIELD_NODE)
-    pixbuf = getPixbufForNode(node)
-    cell.set_property('pixbuf', pixbuf)
 
 def main():
-    connectSignals()
-
-    nameTextLabel.set_text('')
-    roleNameTextLabel.set_text('')
-    descTextLabel.set_text('')
-    actionsTextLabel.set_text('')
-    textTextView.set_sensitive(False)
-    textTextView.get_buffer().set_text('')
-
-    global sniff, view, model
-
-    col = gtk.TreeViewColumn()
-    cellRenderer = gtk.CellRendererPixbuf()
-    col.pack_start(cellRenderer, expand = False)
-    col.set_cell_data_func(cellRenderer, getCellPixbufForNode)
-
-    cellRenderer = gtk.CellRendererText()
-    col.pack_end(cellRenderer, expand = False)
-    col.set_cell_data_func(cellRenderer, getNodeAttr, 'name')
-
-    col.set_title('Name')
-
-    view.insert_column(col, -1)
-    #view.insert_column_with_data_func(-1, "Role Name", \
-    #               gtk.CellRendererText(), getNodeAttr, 'roleName')
-    #view.insert_column_with_data_func(-1, "Description", \
-    #               gtk.CellRendererText(), getNodeAttr, 'description')
-    for column in view.get_columns():
-        column.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
-        column.set_resizable(True)
-    view.show()
-    sniff.show_all ()
-
-    model = gtk.TreeStore(gobject.TYPE_PYOBJECT, gobject.TYPE_STRING, \
-                    gobject.TYPE_STRING, gobject.TYPE_STRING)
-    view.set_model(model)
-
-    resetModel()
-
-    gtk.main()
+    sniff = SniffApp()
 
 if __name__ == '__main__': main()

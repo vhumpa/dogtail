@@ -128,7 +128,7 @@ class SniffController(object):
 
         cellRenderer = gtk.CellRendererText()
         col.pack_end(cellRenderer, expand = False)
-        col.set_cell_data_func(cellRenderer, self.model.getNodeAttr, 'name')
+        col.set_cell_data_func(cellRenderer, self.nameDataFunc)
 
         col.set_title('Name')
 
@@ -138,6 +138,16 @@ class SniffController(object):
             column.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
             column.set_resizable(True)
         self.view.show()
+
+    def nameDataFunc(self, column, cell, model, iter):
+        node = model.getNode(iter)
+        try:
+            name = node.name
+        except Exception:
+            model.deadRows.add( \
+                    gtk.TreeRowReference(model, model.get_path(iter)))
+            return
+        cell.set_property('text', name)
 
     def reset(self, *args):
         self.model.reset()
@@ -157,7 +167,7 @@ class SniffController(object):
     def getSelectedNode(self):
         (store, iter) = self.view.get_selection().get_selected()
         if not iter: node = None
-        else: node = self.model[iter][0]
+        else: node = self.model.getNode(iter)
         return node
 
     def expandAll(self, widget, *args):
@@ -197,7 +207,7 @@ class SniffController(object):
         try: path, treeViewCol, relX, relY = \
                         self.view.get_path_at_pos(int(event.x), int(event.y))
         except TypeError: return
-        node = self.model[path][self.model.nodeColumn]
+        node = self.model.getNode(self.model.get_iter(path))
         if node == None: return
         self.setUpTable(node)
 
@@ -282,25 +292,29 @@ class SniffController(object):
         pixbuf = self.getPixbufForNode(node)
         cell.set_property('pixbuf', pixbuf)
 
+
 class SniffModel(gtk.TreeStore):
     nodeColumn = 0
-    nameColumn = 1
-    roleNameColumn = 2
-    descriptionColumn = 3
-    pixbufColumn = 4
+    deadRows = set()
 
-    def __init__(self):
-        gtk.TreeStore.__init__(self, gobject.TYPE_PYOBJECT, \
-                gobject.TYPE_STRING, gobject.TYPE_STRING, gobject.TYPE_STRING)
-        self.appendAndPopulate(None, tree.root)
+    def __init__(self, root = tree.root):
+        gtk.TreeStore.__init__(self, gobject.TYPE_PYOBJECT)
+        if root: self.appendAndPopulate(None, root)
+        gobject.timeout_add(1000, self.checkNodes)
+
+    def checkNodes(self):
+        for row in self.deadRows:
+            if row.valid():
+                self.remove(self.get_iter(row.get_path()))
+        self.deadRows.clear()
+        return True
 
     def reset(self, *args):
         self.clear()
         self.appendAndPopulate(None, tree.root)
 
     def append(self, parentIter, node):
-        return gtk.TreeStore.append(self, parentIter, (node, node.name, \
-                node.roleName, node.description))
+        return gtk.TreeStore.append(self, parentIter, (node,))
 
     def populateChildren(self, iter):
         node = self.getNode(iter)
@@ -313,13 +327,6 @@ class SniffModel(gtk.TreeStore):
     def getNode(self, iter):
         return self.get_value(iter, self.nodeColumn)
 
-    def getNodeAttr(self, column, cell, model, iter, attr):
-        node = self.getNode(iter)
-        try:
-            text = getattr(node, attr)
-        except Exception:
-            text = "(broken node)"
-        cell.set_property('text', text)
 
 
 def loadIcon(iconName):

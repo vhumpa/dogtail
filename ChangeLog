@@ -1,5 +1,18 @@
 2007-12-10  Zack Cerza <zcerza@redhat.com>
 
+	* sniff/sniff: Move SniffModel.getNodeAttr() to SniffController, modify
+	it to be specific to the 'name' property of a node. That function is
+	now called nameDataFunc(). The behavior of nameDataFunc() has also
+	been changed: instead of changing the text of the TreeView cell
+	representing a defunct Node to '(broken node)', it now flags the row
+	for removal by adding a reference to it to SniffModel.deadNodes. Every
+	1000ms SniffModel will prune such rows from itself. In my tests, this
+	caused no extra measurable increase in CPU utilization.	Also, remove
+	all columns in SniffModel other than the node column, as the rest were
+	not being used anyway.
+
+2007-12-10  Zack Cerza <zcerza@redhat.com>
+
 	* sniff/sniff: Refactor sniff. Organize into 3 classes: SniffApp with 
 	methods	for setting up the application; SniffModel as a subclass of
 	gtk.TreeStore; SniffController for poking at the SniffModel and

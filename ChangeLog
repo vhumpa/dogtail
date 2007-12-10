@@ -1,5 +1,10 @@
 2007-12-10  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/tree.py: Force Node._getChildren() to return an empty list
+	if the node's parent is a hyper link.
+
+2007-12-10  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tree.py: Er, fix typo in last commit.
 
 2007-12-10  Zack Cerza <zcerza@redhat.com>

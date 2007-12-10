@@ -197,6 +197,9 @@ class Node:
     ##
 
     def _getChildren(self):
+        if self.parent and self.parent.roleName == 'hyper link':
+            print self.parent.role
+            return []
         children = []
         childCount = self.childCount
         if childCount > config.childrenLimit:

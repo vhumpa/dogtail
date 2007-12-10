@@ -504,7 +504,7 @@ class Node:
     def _setValue(self, value):
         self.setCurrentValue(value)
 
-    value = property(_getValue, setValue)
+    value = property(_getValue, _setValue)
 
     def _getValueMin(self):
         try: return self.queryValue().getMinimumValue()

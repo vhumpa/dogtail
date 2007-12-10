@@ -1,5 +1,9 @@
 2007-12-10  Zack Cerza <zcerza@redhat.com>
 
+	* sniff/sniff: Show lines interconnecting TreeView rows.
+
+2007-12-10  Zack Cerza <zcerza@redhat.com>
+
 	* sniff/sniff: Expand the root node of the TreeView on startup.
 
 2007-12-10  Zack Cerza <zcerza@redhat.com>

@@ -119,6 +119,8 @@ class SniffController(object):
         self.connectSignals()
 
     def setUpView(self):
+        self.view.set_enable_tree_lines(True)
+
         self.view.set_model(self.model)
 
         col = gtk.TreeViewColumn()

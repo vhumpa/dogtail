@@ -1,5 +1,12 @@
 2007-12-10  Zack Cerza <zcerza@redhat.com>
 
+	* sniff/sniff: Improve the removal of dead nodes from SniffModel,
+	mainly by removing the highest-level dead node in the case that an
+	entire subtree is found to be dead. Thanks to Michal Babej for the
+	initial patch. Closes: #503056.
+
+2007-12-10  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tree.py: Make Action.__node public (i.e. rename to 
 	Action.node).
 

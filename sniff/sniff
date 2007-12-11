@@ -149,8 +149,7 @@ class SniffController(object):
         try:
             name = node.name
         except Exception:
-            model.deadRows.add( \
-                    gtk.TreeRowReference(model, model.get_path(iter)))
+            model.addDeadRow(iter)
             return
         cell.set_property('text', name)
 
@@ -305,12 +304,18 @@ class SniffModel(gtk.TreeStore):
     def __init__(self, root = tree.root):
         gtk.TreeStore.__init__(self, gobject.TYPE_PYOBJECT)
         if root: self.appendAndPopulate(None, root)
-        gobject.timeout_add(1000, self.checkNodes)
+        gobject.timeout_add(200, self.checkNodes)
 
     def checkNodes(self):
         for row in self.deadRows:
-            if row.valid():
-                self.remove(self.get_iter(row.get_path()))
+            if not row.valid(): continue
+            path = row.get_path()
+            print str(path)
+            try:
+                iter = self.get_iter(path)
+            except ValueError:
+                continue
+            self.remove(iter)
         self.deadRows.clear()
         return True
 
@@ -332,7 +337,29 @@ class SniffModel(gtk.TreeStore):
     def getNode(self, iter):
         return self.get_value(iter, self.nodeColumn)
 
-
+    def addDeadRow(self, iter):
+        path = self.get_path(iter)
+        for deadRow in self.deadRows:
+            deadPath = deadRow.get_path()
+            if path == deadPath or self.is_ancestor(self.get_iter(path), \
+                    self.get_iter(deadPath)):
+                # Its parent is already in deadRows.
+                return
+        node = None
+        while node == None and iter != None:
+            # Here we see if iter is 'dead'. If so, we check its parent.
+            # Rinse, repeat.
+            node = self.getNode(iter)
+            try:
+                node.name
+            except:
+                node = None
+                deadIter = iter
+                iter = self.iter_parent(iter)
+        # We've found the highest level row.
+        path = self.get_path(deadIter)
+        self.deadRows.add(gtk.TreeRowReference(self, path))
+        return path
 
 def loadIcon(iconName):
     try:

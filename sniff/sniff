@@ -59,6 +59,8 @@ class SniffApp(object):
         self.collapse_all1 = self.x.get_widget('collapse_all1')
         self.about1 = self.x.get_widget('about1')
         self.refreshMenuItem = self.x.get_widget('refresh1')
+        self.setRootMenuItem = self.x.get_widget('setRootMenuItem')
+        self.unsetRootMenuItem = self.x.get_widget('unsetRootMenuItem')
         self.about = None
 
         view = self.x.get_widget('treeTreeView')
@@ -77,7 +79,9 @@ class SniffApp(object):
         self.expand_all1.connect('activate', self.tree.expandAll, True)
         self.collapse_all1.connect('activate', self.tree.expandAll, False)
         self.about1.connect('activate', self.showAbout, self)
-        self.refreshMenuItem.connect('activate', self.tree.reset)
+        self.refreshMenuItem.connect('activate', self.tree.refresh)
+        self.setRootMenuItem.connect('activate', self.tree.changeRoot, True)
+        self.unsetRootMenuItem.connect('activate', self.tree.changeRoot, False)
 
     def showAbout(self, *args):
         if not self.about:
@@ -153,8 +157,15 @@ class SniffController(object):
             return
         cell.set_property('text', name)
 
-    def reset(self, *args):
-        self.model.reset()
+    def changeRoot(self, menuItem, toSelected = True, *args):
+        if toSelected: node = self.getSelectedNode()
+        if toSelected and node: self.model.changeRoot(node)
+        elif not toSelected: self.model.reset()
+        else: return
+        self.refresh(refreshModel = False)
+
+    def refresh(self, menuItem = None, refreshModel = True, *args):
+        if refreshModel: self.model.refresh()
         rootPath = self.model.get_path(self.model.get_iter_root())
         self.view.expand_row(rootPath, False)
 
@@ -303,7 +314,8 @@ class SniffModel(gtk.TreeStore):
 
     def __init__(self, root = tree.root):
         gtk.TreeStore.__init__(self, gobject.TYPE_PYOBJECT)
-        if root: self.appendAndPopulate(None, root)
+        self.rootNode = self.initialRootNode = root
+        self.appendAndPopulate(None, self.rootNode)
         gobject.timeout_add(200, self.checkNodes)
 
     def checkNodes(self):
@@ -319,9 +331,18 @@ class SniffModel(gtk.TreeStore):
         self.deadRows.clear()
         return True
 
-    def reset(self, *args):
+    def changeRoot(self, node):
+        self.rootNode = node
+        self.refresh()
+
+    def reset(self):
+        self.rootNode = self.initialRootNode
+        self.refresh()
+
+    def refresh(self):
+        self.deadRows.clear()
         self.clear()
-        self.appendAndPopulate(None, tree.root)
+        self.appendAndPopulate(None, self.rootNode)
 
     def append(self, parentIter, node):
         return gtk.TreeStore.append(self, parentIter, (node,))

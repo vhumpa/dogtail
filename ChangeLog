@@ -1,5 +1,11 @@
 2007-12-11  Zack Cerza <zcerza@redhat.com>
 
+	* sniff/sniff, sniff/glade: Add 'Set Root' and 'Unset Root' menu items
+	to Sniff's View menu. Useful if you want to dig into a single app and
+	want to reduce the amount of scrolling around necessary slightly.
+
+2007-12-11  Zack Cerza <zcerza@redhat.com>
+
 	* sniff/sniff: Improve the removal of dead nodes from SniffModel,
 	mainly by removing the highest-level dead node in the case that an
 	entire subtree is found to be dead. Thanks to Michal Babej for the

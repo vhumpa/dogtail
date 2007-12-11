@@ -86,6 +86,24 @@
 		  </child>
 
 		  <child>
+		    <widget class="GtkMenuItem" id="setRootMenuItem">
+		      <property name="visible">True</property>
+		      <property name="label" translatable="yes">_Set Root</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_setRootMenuItem_activate" last_modification_time="Tue, 11 Dec 2007 20:54:23 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkMenuItem" id="unsetRootMenuItem">
+		      <property name="visible">True</property>
+		      <property name="label" translatable="yes">_Unset Root</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_unsetRootMenuItem_activate" last_modification_time="Tue, 11 Dec 2007 21:18:55 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
 		    <widget class="GtkSeparatorMenuItem" id="separator3">
 		      <property name="visible">True</property>
 		    </widget>

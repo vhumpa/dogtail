@@ -1,4 +1,4 @@
-2007-12-10  Zack Cerza <zcerza@redhat.com>
+2007-12-11  Zack Cerza <zcerza@redhat.com>
 
 	* sniff/sniff: Improve the removal of dead nodes from SniffModel,
 	mainly by removing the highest-level dead node in the case that an

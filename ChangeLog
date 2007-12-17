@@ -1,3 +1,17 @@
+2007-12-17  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Overhaul sniff to use pyatspi events to be notified
+	when a node is renamed or gains/loses children. As a result,
+	SniffModel does not use its addDeadNode() and checkNodes() methods.
+	Those methods have not yet been removed, however. This change will
+	result in properly-written applications working far better than before
+	in sniff. Improperly-written apps (e.g. Firefox, but they know this)
+	will behave better than sniff in 0.6.1; checkNodes() was causing
+	serious slowdowns in some cases since it's fairly heavy code that
+	needs to be looped continuously. Since sniff now has to do a lot less
+	work than it did ever before, it should be somewhat faster in all
+	cases.
+
 2007-12-11  Zack Cerza <zcerza@redhat.com>
 
 	* sniff/sniff, sniff/glade: Add 'Set Root' and 'Unset Root' menu items

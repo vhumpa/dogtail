@@ -11,8 +11,11 @@ Data display is handled by the SniffController class.
 """
 from dogtail.utils import checkForA11yInteractively
 checkForA11yInteractively()
+from dogtail.config import config
+config.logDebugToFile = False
 from dogtail import tree
 pyatspi = tree.pyatspi
+import CORBA
 from dogtail import utils
 import gobject
 import gtk
@@ -130,11 +133,11 @@ class SniffController(object):
         col = gtk.TreeViewColumn()
         cellRenderer = gtk.CellRendererPixbuf()
         col.pack_start(cellRenderer, expand = False)
-        col.set_cell_data_func(cellRenderer, self.getCellPixbufForNode)
+        col.add_attribute(cellRenderer, 'pixbuf', self.model.pixbufColumn)
 
         cellRenderer = gtk.CellRendererText()
         col.pack_end(cellRenderer, expand = False)
-        col.set_cell_data_func(cellRenderer, self.nameDataFunc)
+        col.add_attribute(cellRenderer, 'text', self.model.nameColumn)
 
         col.set_title('Name')
 
@@ -147,15 +150,6 @@ class SniffController(object):
         path = 0
         self.view.expand_row(path, False)
         self.rowExpanded(self.view, self.model.get_iter(path), path)
-
-    def nameDataFunc(self, column, cell, model, iter):
-        node = model.getNode(iter)
-        try:
-            name = node.name
-        except Exception:
-            model.addDeadRow(iter)
-            return
-        cell.set_property('text', name)
 
     def changeRoot(self, menuItem, toSelected = True, *args):
         if toSelected: node = self.getSelectedNode()
@@ -174,6 +168,14 @@ class SniffController(object):
         self.view.connect('row-expanded', self.rowExpanded, self.model)
         self.view.connect('row-collapsed', self.rowCollapsed)
         self.treeSelection.connect('changed', self.selectionChanged)
+        pyatspi.Registry.registerEventListener(self.model.nodeChanged, \
+                'object:children-changed')
+        pyatspi.Registry.registerEventListener(self.model.nodeChanged, \
+                'object:property-change:accessible-name')
+        pyatspi.Registry.registerEventListener(self.model.nodeChanged, \
+                'object:property-change:accessible-state')
+        pyatspi.Registry.registerEventListener(self.model.nodeChanged, \
+                'object:state-changed')
 
     def selectionChanged(self, treeSelection):
         node = self.getSelectedNode()
@@ -277,6 +279,262 @@ class SniffController(object):
         node.text = textBuffer.get_text(textBuffer.get_start_iter(), \
                         textBuffer.get_end_iter())
 
+
+class SniffModel(gtk.TreeStore):
+    nodeColumn = 0
+    nameColumn = 1
+    pixbufColumn = 2
+    deadRows = set()
+    cache = {}
+
+    def __init__(self, root = tree.root):
+        gtk.TreeStore.__init__(self, gobject.TYPE_PYOBJECT, \
+                gobject.TYPE_STRING, gtk.gdk.Pixbuf)
+        self.rootNode = self.initialRootNode = root
+        self.appendAndPopulate(None, self.rootNode)
+        #gobject.timeout_add(1000, self.checkNodes)
+
+    def __contains__(self, item):
+        if isinstance(item, tree.Node):
+            if item in self.cache:
+                row = self.cache[item]
+                # If row is None, we need to call getPath() to be sure
+                if not row: return self.getPath(item) is not None
+                elif row in self: return True
+            return False
+        elif isinstance(item, gtk.TreeIter): 
+            return self.iter_is_valid(item)
+        elif isinstance(item, list) or isinstance(item, tuple):
+            try: iter = self.get_iter(item)
+            except ValueError: return False
+            return iter in self
+        elif isinstance(item, gtk.TreeRowReference):
+            try: return item.valid() and item.get_path() in self
+            except TypeError: print type(item.get_path())
+        else:
+            raise TypeError
+
+    def checkNodes(self):
+        print len(self.cache), len(self.deadRows),
+        try:
+            for node in self.cache.keys():
+                path = self.getPath(node)
+                if path is None:
+                    try: del self.cache[node]
+                    except KeyError: pass
+                    continue
+                iter = self.get_iter(path)
+                try:
+                    if node.roleName == 'invalid':
+                        self.addDeadRow(self.get_iter(path))
+                except (LookupError, CORBA.COMM_FAILURE):
+                    self.addDeadRow(self.get_iter(path))
+        except:
+            import traceback
+            traceback.print_exc()
+        try:
+            print len(self.cache), len(self.deadRows)
+            for row in self.deadRows:
+                if not row.valid(): continue
+                path = row.get_path()
+                try:
+                    iter = self.get_iter(path)
+                except ValueError:
+                    continue
+                self.remove(iter)
+                gobject.timeout_add(1000, self.__populateCB, \
+                        self.get_iter(path[:-1]))
+            print "clearing"
+            self.deadRows.clear()
+        except:
+            import traceback
+            traceback.print_exc()
+        finally:
+            return True
+
+    def changeRoot(self, node):
+        self.rootNode = node
+        self.refresh()
+
+    def reset(self):
+        self.rootNode = self.initialRootNode
+        self.refresh()
+
+    def refresh(self):
+        self.deadRows.clear()
+        self.cache.clear()
+        self.clear()
+        self.appendAndPopulate(None, self.rootNode)
+
+    def append(self, parentIter, node):
+        if node: self.cache[node] = None
+        pb = self.getPixbufForNode(node)
+        return gtk.TreeStore.append(self, parentIter, (node, node.name, pb))
+
+    def remove(self, iter):
+        node = self.getNode(iter)
+        try: del self.cache[node]
+        finally: return gtk.TreeStore.remove(self, iter)
+
+    def populateChildren(self, iter):
+        if not self.iter_is_valid(iter): return False
+        result = True
+        node = self.getNode(iter)
+        for child in node.children: 
+            if child in self: continue
+            result = result and self.append(iter, child)
+        return result
+
+    def appendAndPopulate(self, iter, node):
+        childIter = self.append(iter, node)
+        return self.populateChildren(childIter)
+
+    def getNode(self, iter):
+        if not self.iter_is_valid(iter): return None
+        return self.get_value(iter, self.nodeColumn)
+
+    def getPath(self, node):
+        if not node: raise ValueError
+        row = self.cache.get(node, None)
+        if row and row.valid(): return row.get_path()
+        elif row and not row.valid():
+            print "invalid row in cache! %s %s" % (node, str(row.get_path()))
+            del self.cache[node]
+
+        #if not node or not node in self: return None
+        #elif node in self and self.cache[node]:
+        #    row = self.cache[node]
+        #    if row.valid(): return row.get_path()
+        #    else: del self.cache[node]
+        path = []
+        
+        if node == self.rootNode:
+            return (0,)
+
+        child = node
+        keepLooking = True
+        while keepLooking:
+            if child.parent and child.indexInParent < 0:
+                # Figure out indexInParent the hard way.
+                # If we get a ValueError, child has already been removed from
+                # the model (because its real widget has been destroyed)
+                try: indexInParent = child.parent.children.index(child)
+                except ValueError: return
+            else: indexInParent = child.indexInParent
+
+            if child == self.rootNode:
+                path.insert(0, 0)
+                keepLooking = False
+            elif child.role == pyatspi.ROLE_APPLICATION:
+                path.insert(0, list(tree.root.children).index(child))
+                path.insert(0, 0)
+                keepLooking = False
+            elif not child.parent and indexInParent < 0:
+                return None
+            else:
+                path.insert(0, indexInParent)
+            child = child.parent
+            if not child: break
+        path = tuple(path)
+        try:
+            nodeByPath = self.getNode(self.get_iter(path))
+            if node != nodeByPath:
+                return None
+                #print "%s is not %s!" % (node, nodeByPath)
+        except ValueError:
+            #print "I smell a bug in %s..." % node.getApplication()
+            return None
+
+        self.cache[node] = gtk.TreeRowReference(self, path)
+        return path
+
+
+    def addDeadRow(self, iter):
+        if not iter: raise ValueError
+        path = self.get_path(iter)
+        for deadRow in self.deadRows:
+            deadPath = deadRow.get_path()
+            if path == deadPath or self.is_ancestor(self.get_iter(deadPath), \
+                    self.get_iter(path)):
+                # Its parent is already in deadRows.
+                return
+        node = None
+        while node == None and iter != None:
+            # Here we see if iter is 'dead'. If so, we check its parent.
+            # Rinse, repeat.
+            node = self.getNode(iter)
+            try:
+                node.name
+                node.children
+            except (LookupError, CORBA.COMM_FAILURE):
+                node = None
+                deadIter = iter
+                iter = self.iter_parent(iter)
+                continue
+            if node.role == pyatspi.ROLE_INVALID:
+                node = None
+                deadIter = iter
+                iter = self.iter_parent(iter)
+            else:
+                # Looks like this node is ok
+                break
+        # We've found the highest level row.
+        try:
+            path = self.get_path(deadIter)
+            self.deadRows.add(gtk.TreeRowReference(self, path))
+        except UnboundLocalError: pass
+
+    def nodeChanged(self, event):
+        node = event.source
+        if not node: return
+        app = node.getApplication()
+        if app and app.name == 'sniff': return
+        if node in self:
+            path = self.getPath(node)
+            try:
+                iter = self.get_iter(path)
+            except (ValueError, TypeError):
+                return
+            #print event.type.major, event.type.minor, event.source.name
+            if event.type.major == "property-change":
+                if event.type.minor == "accessible-name":
+                    node = self.getNode(iter)
+                    self.set_value(iter, self.nameColumn, node.name)
+                elif event.type.minor == "accessible-state":
+                    print "state", str(event.source)
+            elif event.type.major == "state-change":
+                print "state2", str(event.source)
+            elif event.type.major == "children-changed":
+                if event.type.minor == 'add':
+                    for child in node.children:
+                        if not child in self:
+                            if len(child) > 0:
+                                self.appendAndPopulate(iter, child)
+                            else:
+                                # If it has no children now, give it a sec
+                                # to come up with some.
+                                gobject.timeout_add(1000, \
+                                        self.__addNodeCB, iter, child)
+                elif event.type.minor == 'remove':
+                    self.__removeNodeCB(iter, node, path)
+
+    
+    def __addNodeCB(self, iter, parent):
+        self.appendAndPopulate(iter, parent)
+        return False
+
+    def __removeNodeCB(self, iter, parent, path):
+        childRow = self.iter_children(iter)
+        while childRow:
+            node = self.getNode(childRow)
+            if node and self.getNode(childRow) not in parent:
+                self.remove(childRow)
+            else: childRow = self.iter_next(childRow)
+
+    def __populateCB(self, iter):
+        self.populateChildren(iter)
+        return False
+
     def getPixbufForNode(self, node):
         theme = gtk.icon_theme_get_default()
         try:
@@ -302,85 +560,6 @@ class SniffController(object):
             return theme.load_icon("gtk-dialog-error", 24, \
                     gtk.ICON_LOOKUP_USE_BUILTIN)
 
-    def getCellPixbufForNode(self, column, cell, model, iter):
-        node = self.model.getNode(iter)
-        pixbuf = self.getPixbufForNode(node)
-        cell.set_property('pixbuf', pixbuf)
-
-
-class SniffModel(gtk.TreeStore):
-    nodeColumn = 0
-    deadRows = set()
-
-    def __init__(self, root = tree.root):
-        gtk.TreeStore.__init__(self, gobject.TYPE_PYOBJECT)
-        self.rootNode = self.initialRootNode = root
-        self.appendAndPopulate(None, self.rootNode)
-        gobject.timeout_add(200, self.checkNodes)
-
-    def checkNodes(self):
-        for row in self.deadRows:
-            if not row.valid(): continue
-            path = row.get_path()
-            print str(path)
-            try:
-                iter = self.get_iter(path)
-            except ValueError:
-                continue
-            self.remove(iter)
-        self.deadRows.clear()
-        return True
-
-    def changeRoot(self, node):
-        self.rootNode = node
-        self.refresh()
-
-    def reset(self):
-        self.rootNode = self.initialRootNode
-        self.refresh()
-
-    def refresh(self):
-        self.deadRows.clear()
-        self.clear()
-        self.appendAndPopulate(None, self.rootNode)
-
-    def append(self, parentIter, node):
-        return gtk.TreeStore.append(self, parentIter, (node,))
-
-    def populateChildren(self, iter):
-        node = self.getNode(iter)
-        for child in node.children: self.append(iter, child)
-
-    def appendAndPopulate(self, iter, node):
-        childIter = self.append(iter, node)
-        self.populateChildren(childIter)
-
-    def getNode(self, iter):
-        return self.get_value(iter, self.nodeColumn)
-
-    def addDeadRow(self, iter):
-        path = self.get_path(iter)
-        for deadRow in self.deadRows:
-            deadPath = deadRow.get_path()
-            if path == deadPath or self.is_ancestor(self.get_iter(path), \
-                    self.get_iter(deadPath)):
-                # Its parent is already in deadRows.
-                return
-        node = None
-        while node == None and iter != None:
-            # Here we see if iter is 'dead'. If so, we check its parent.
-            # Rinse, repeat.
-            node = self.getNode(iter)
-            try:
-                node.name
-            except:
-                node = None
-                deadIter = iter
-                iter = self.iter_parent(iter)
-        # We've found the highest level row.
-        path = self.get_path(deadIter)
-        self.deadRows.add(gtk.TreeRowReference(self, path))
-        return path
 
 def loadIcon(iconName):
     try:
@@ -416,87 +595,87 @@ vseparator_xpm = loadIcon("vseparator.xpm")
 window_xpm = loadIcon("window.xpm")
 
 iconForRole = { \
-        pyatspi.ROLE_INVALID : None, \
-        # pyatspi doesn't have the following... not even sure if it exists 
-        # anywhere.
-        #atspi.SPI_ROLE_ACCEL_LABEL : label_xpm, \
-        pyatspi.ROLE_ALERT : None, \
-        pyatspi.ROLE_ANIMATION : None, \
-        pyatspi.ROLE_ARROW : None, \
-        pyatspi.ROLE_CALENDAR : None, \
-        pyatspi.ROLE_CANVAS : None, \
-        pyatspi.ROLE_CHECK_BOX : checkbutton_xpm, \
-        pyatspi.ROLE_CHECK_MENU_ITEM : checkmenuitem_xpm, \
-        pyatspi.ROLE_COLOR_CHOOSER : colorselection_xpm, \
-        pyatspi.ROLE_COLUMN_HEADER : None, \
-        pyatspi.ROLE_COMBO_BOX : combo_xpm, \
-        pyatspi.ROLE_DATE_EDITOR : None, \
-        pyatspi.ROLE_DESKTOP_ICON : None, \
-        pyatspi.ROLE_DESKTOP_FRAME : None, \
-        pyatspi.ROLE_DIAL : None, \
-        pyatspi.ROLE_DIALOG : dialog_xpm, \
-        pyatspi.ROLE_DIRECTORY_PANE : None, \
-        pyatspi.ROLE_DRAWING_AREA : None, \
-        pyatspi.ROLE_FILE_CHOOSER : None, \
-        pyatspi.ROLE_FILLER : None, \
-        pyatspi.ROLE_FONT_CHOOSER : None, \
-        pyatspi.ROLE_FRAME : window_xpm, \
-        pyatspi.ROLE_GLASS_PANE : None, \
-        pyatspi.ROLE_HTML_CONTAINER : None, \
-        pyatspi.ROLE_ICON : image_xpm, \
-        pyatspi.ROLE_IMAGE : image_xpm, \
-        pyatspi.ROLE_INTERNAL_FRAME : None, \
-        pyatspi.ROLE_LABEL : label_xpm, \
-        pyatspi.ROLE_LAYERED_PANE : viewport_xpm, \
-        pyatspi.ROLE_LIST : None, \
-        pyatspi.ROLE_LIST_ITEM : None, \
-        pyatspi.ROLE_MENU : menuitem_xpm, \
-        pyatspi.ROLE_MENU_BAR : menubar_xpm, \
-        pyatspi.ROLE_MENU_ITEM : menuitem_xpm, \
-        pyatspi.ROLE_OPTION_PANE : None, \
-        pyatspi.ROLE_PAGE_TAB : notebook_xpm, \
-        pyatspi.ROLE_PAGE_TAB_LIST : notebook_xpm, \
-        pyatspi.ROLE_PANEL : viewport_xpm, \
-        pyatspi.ROLE_PASSWORD_TEXT : None, \
-        pyatspi.ROLE_POPUP_MENU : None, \
-        pyatspi.ROLE_PROGRESS_BAR : None, \
-        pyatspi.ROLE_PUSH_BUTTON : button_xpm, \
-        pyatspi.ROLE_RADIO_BUTTON : None, \
-        pyatspi.ROLE_RADIO_MENU_ITEM : None, \
-        pyatspi.ROLE_ROOT_PANE : viewport_xpm, \
-        pyatspi.ROLE_ROW_HEADER : None, \
-        pyatspi.ROLE_SCROLL_BAR : vscrollbar_xpm, \
-        pyatspi.ROLE_SCROLL_PANE : scrolledwindow_xpm, \
-        pyatspi.ROLE_SEPARATOR : vseparator_xpm, \
-        pyatspi.ROLE_SLIDER : None, \
-        pyatspi.ROLE_SPIN_BUTTON : spinbutton_xpm, \
-        pyatspi.ROLE_SPLIT_PANE : None, \
-        pyatspi.ROLE_STATUS_BAR : statusbar_xpm, \
-        pyatspi.ROLE_TABLE : table_xpm, \
-        pyatspi.ROLE_TABLE_CELL : treeitem_xpm, \
-        pyatspi.ROLE_TABLE_COLUMN_HEADER : None, \
-        pyatspi.ROLE_TABLE_ROW_HEADER : None, \
-        pyatspi.ROLE_TEAROFF_MENU_ITEM : None, \
-        pyatspi.ROLE_TERMINAL : None, \
-        pyatspi.ROLE_TEXT : text_xpm, \
-        pyatspi.ROLE_TOGGLE_BUTTON : None, \
-        pyatspi.ROLE_TOOL_BAR : toolbar_xpm, \
-        pyatspi.ROLE_TOOL_TIP : None, \
-        pyatspi.ROLE_TREE : tree_xpm, \
-        pyatspi.ROLE_TREE_TABLE : tree_xpm, \
-        pyatspi.ROLE_UNKNOWN : unknown_xpm, \
-        pyatspi.ROLE_VIEWPORT : viewport_xpm, \
-        pyatspi.ROLE_WINDOW : window_xpm, \
-        pyatspi.ROLE_EXTENDED : None, \
-        pyatspi.ROLE_HEADER : None, \
-        pyatspi.ROLE_FOOTER : None, \
-        pyatspi.ROLE_PARAGRAPH : None, \
-        pyatspi.ROLE_RULER : None, \
-        pyatspi.ROLE_APPLICATION : None, \
-        pyatspi.ROLE_AUTOCOMPLETE : None, \
-        pyatspi.ROLE_EDITBAR : None, \
-        pyatspi.ROLE_EMBEDDED : None, \
-        pyatspi.ROLE_LAST_DEFINED: None }
+    pyatspi.ROLE_INVALID : None, \
+    # pyatspi doesn't have the following... not even sure if it exists 
+    # anywhere.
+    #atspi.SPI_ROLE_ACCEL_LABEL : label_xpm, \
+    pyatspi.ROLE_ALERT : None, \
+    pyatspi.ROLE_ANIMATION : None, \
+    pyatspi.ROLE_ARROW : None, \
+    pyatspi.ROLE_CALENDAR : None, \
+    pyatspi.ROLE_CANVAS : None, \
+    pyatspi.ROLE_CHECK_BOX : checkbutton_xpm, \
+    pyatspi.ROLE_CHECK_MENU_ITEM : checkmenuitem_xpm, \
+    pyatspi.ROLE_COLOR_CHOOSER : colorselection_xpm, \
+    pyatspi.ROLE_COLUMN_HEADER : None, \
+    pyatspi.ROLE_COMBO_BOX : combo_xpm, \
+    pyatspi.ROLE_DATE_EDITOR : None, \
+    pyatspi.ROLE_DESKTOP_ICON : None, \
+    pyatspi.ROLE_DESKTOP_FRAME : None, \
+    pyatspi.ROLE_DIAL : None, \
+    pyatspi.ROLE_DIALOG : dialog_xpm, \
+    pyatspi.ROLE_DIRECTORY_PANE : None, \
+    pyatspi.ROLE_DRAWING_AREA : None, \
+    pyatspi.ROLE_FILE_CHOOSER : None, \
+    pyatspi.ROLE_FILLER : None, \
+    pyatspi.ROLE_FONT_CHOOSER : None, \
+    pyatspi.ROLE_FRAME : window_xpm, \
+    pyatspi.ROLE_GLASS_PANE : None, \
+    pyatspi.ROLE_HTML_CONTAINER : None, \
+    pyatspi.ROLE_ICON : image_xpm, \
+    pyatspi.ROLE_IMAGE : image_xpm, \
+    pyatspi.ROLE_INTERNAL_FRAME : None, \
+    pyatspi.ROLE_LABEL : label_xpm, \
+    pyatspi.ROLE_LAYERED_PANE : viewport_xpm, \
+    pyatspi.ROLE_LIST : None, \
+    pyatspi.ROLE_LIST_ITEM : None, \
+    pyatspi.ROLE_MENU : menuitem_xpm, \
+    pyatspi.ROLE_MENU_BAR : menubar_xpm, \
+    pyatspi.ROLE_MENU_ITEM : menuitem_xpm, \
+    pyatspi.ROLE_OPTION_PANE : None, \
+    pyatspi.ROLE_PAGE_TAB : notebook_xpm, \
+    pyatspi.ROLE_PAGE_TAB_LIST : notebook_xpm, \
+    pyatspi.ROLE_PANEL : viewport_xpm, \
+    pyatspi.ROLE_PASSWORD_TEXT : None, \
+    pyatspi.ROLE_POPUP_MENU : None, \
+    pyatspi.ROLE_PROGRESS_BAR : None, \
+    pyatspi.ROLE_PUSH_BUTTON : button_xpm, \
+    pyatspi.ROLE_RADIO_BUTTON : None, \
+    pyatspi.ROLE_RADIO_MENU_ITEM : None, \
+    pyatspi.ROLE_ROOT_PANE : viewport_xpm, \
+    pyatspi.ROLE_ROW_HEADER : None, \
+    pyatspi.ROLE_SCROLL_BAR : vscrollbar_xpm, \
+    pyatspi.ROLE_SCROLL_PANE : scrolledwindow_xpm, \
+    pyatspi.ROLE_SEPARATOR : vseparator_xpm, \
+    pyatspi.ROLE_SLIDER : None, \
+    pyatspi.ROLE_SPIN_BUTTON : spinbutton_xpm, \
+    pyatspi.ROLE_SPLIT_PANE : None, \
+    pyatspi.ROLE_STATUS_BAR : statusbar_xpm, \
+    pyatspi.ROLE_TABLE : table_xpm, \
+    pyatspi.ROLE_TABLE_CELL : treeitem_xpm, \
+    pyatspi.ROLE_TABLE_COLUMN_HEADER : None, \
+    pyatspi.ROLE_TABLE_ROW_HEADER : None, \
+    pyatspi.ROLE_TEAROFF_MENU_ITEM : None, \
+    pyatspi.ROLE_TERMINAL : None, \
+    pyatspi.ROLE_TEXT : text_xpm, \
+    pyatspi.ROLE_TOGGLE_BUTTON : None, \
+    pyatspi.ROLE_TOOL_BAR : toolbar_xpm, \
+    pyatspi.ROLE_TOOL_TIP : None, \
+    pyatspi.ROLE_TREE : tree_xpm, \
+    pyatspi.ROLE_TREE_TABLE : tree_xpm, \
+    pyatspi.ROLE_UNKNOWN : unknown_xpm, \
+    pyatspi.ROLE_VIEWPORT : viewport_xpm, \
+    pyatspi.ROLE_WINDOW : window_xpm, \
+    pyatspi.ROLE_EXTENDED : None, \
+    pyatspi.ROLE_HEADER : None, \
+    pyatspi.ROLE_FOOTER : None, \
+    pyatspi.ROLE_PARAGRAPH : None, \
+    pyatspi.ROLE_RULER : None, \
+    pyatspi.ROLE_APPLICATION : None, \
+    pyatspi.ROLE_AUTOCOMPLETE : None, \
+    pyatspi.ROLE_EDITBAR : None, \
+    pyatspi.ROLE_EMBEDDED : None, \
+    pyatspi.ROLE_LAST_DEFINED: None }
 
 
 def main():

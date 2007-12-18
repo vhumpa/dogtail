@@ -1,3 +1,9 @@
+2007-12-18  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Remove the 'finally' from a try-except-finally, since
+	that would be the first time we broke compatibility with python 2.4,
+	and it's far from worth it :)
+
 2007-12-17  Zack Cerza <zcerza@redhat.com>
 
 	* sniff/sniff: Overhaul sniff to use pyatspi events to be notified

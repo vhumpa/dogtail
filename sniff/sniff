@@ -349,8 +349,8 @@ class SniffModel(gtk.TreeStore):
         except:
             import traceback
             traceback.print_exc()
-        finally:
             return True
+        return True
 
     def changeRoot(self, node):
         self.rootNode = node

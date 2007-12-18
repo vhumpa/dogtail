@@ -81,46 +81,15 @@ class TimeStamp:
                     self.now = self.now + ":" + self.zeroPad(self.timetup[i])
         return self.now
 
-class IconLogger:
-    """
-    Writes entries to the tooltip of an icon in the notification area or the desktop.
-    """
-    trayicon = None
-    def __init__(self):
-        if not IconLogger.trayicon:
-            from trayicon import TrayIcon
-            IconLogger.trayicon = TrayIcon()
-            if IconLogger.trayicon.proc: self.works = True
-            else: self.works = False
-            iconName = 'dogtail-tail-48.png'
-            iconPath = '/usr/share/icons/hicolor/48x48/apps/' + iconName
-            if os.path.exists(iconPath):
-                IconLogger.trayicon.set_icon(iconPath)
-            self.message('dogtail running...')
-
-    def message(self, msg):
-        """
-        Display a message to the user
-        """
-        IconLogger.trayicon.set_tooltip(msg)
-
-    def __del__(self):
-        IconLogger.trayicon.close()
-
 class Logger:
     """
-    Writes entries to standard out, and to an IconLogger if desired.
+    Writes entries to standard out.
     """
-    iconLogger = None
     stamper = TimeStamp()
     def __init__(self, logName, file = False, stdOut = True):
         """
-        FIXME! make this log to a file based on the name arg.
-
         name: the name of the log
-
         file: The file object to log to.
-
         stdOut: Whether to log to standard out.
         """
         self.logName = logName
@@ -128,41 +97,49 @@ class Logger:
         self.file = file # Handle to the logfile
         if not self.file: return
 
-        logDir = config.logDir
-        if not os.path.isdir(logDir): os.makedirs(logDir)
-
         scriptName = config.scriptName
         if not scriptName: scriptName = 'log'
         self.fileName = scriptName
 
         # check to see if we can write to the logDir
-        if os.path.isdir(logDir):
-            # generate a logfile name and check if it already exists
-            self.fileName = logDir + self.stamper.fileStamp(self.fileName) + '_' + self.logName
-            i = 0
-            while os.path.exists(self.fileName):
-                # Append the pathname
-                if i == 0:
-                    self.fileName = self.fileName + "." + str(i)
-                else:
-                    logsplit = self.fileName.split(".")
-                    logsplit[-1] = str(i)
-                    self.fileName = ".".join(logsplit)
-                i += 1
+        if os.path.isdir(config.logDir):
+            self.findUniqueName()
         else:
             # If path doesn't exist, raise an exception
-            raise IOError, "Log path %s does not exist or is not a directory" % logDir
+            raise IOError, \
+                    "Log path %s does not exist or is not a directory" % logDir
 
+        #self.createFile()
+
+
+    def findUniqueName(self):
+        # generate a logfile name and check if it already exists
+        self.fileName = config.logDir + self.stamper.fileStamp(self.fileName) \
+                + '_' + self.logName
+        i = 0
+        while os.path.exists(self.fileName):
+            # Append the pathname
+            if i == 0:
+                self.fileName = self.fileName + "." + str(i)
+            else:
+                logsplit = self.fileName.split(".")
+                logsplit[-1] = str(i)
+                self.fileName = ".".join(logsplit)
+            i += 1
+
+    def createFile(self):
         # Try to create the file and write the header info
         try:
             print "Creating logfile at %s ..." % self.fileName
-            self.file = codecs.open(self.fileName, mode = 'wb', encoding = 'utf-8')
+            self.file = codecs.open(self.fileName, mode = 'wb', encoding = \
+                    'utf-8')
             self.file.write("##### " + os.path.basename(self.fileName) + '\n')
             self.file.flush()
-            #self.file.close()
+            return True
         except IOError:
             print "Could not create and write to " + self.fileName
             self.file = False
+            return False
 
     def log(self, message):
         """
@@ -171,15 +148,13 @@ class Logger:
         """
         message = message.decode('utf-8', 'replace')
 
-        # Try to use the IconLogger.
-        if self.iconLogger and self.iconLogger.works:
-            self.iconLogger.message(message)
-        
         # Also write to standard out.
         if self.stdOut and config.logDebugToStdOut: print message
 
         # Try to open and write the result to the log file.
-        if not self.file: return
+        if isinstance(self.file, bool): 
+            if not config.logDebugToFile: return
+            elif not self.createFile(): return
         try:
             #self.file = open(self.fileName, 'a')
             self.file.write(message + '\n')
@@ -194,7 +169,6 @@ class ResultsLogger(Logger):
     """
     def __init__(self, stdOut = True):
         Logger.__init__(self, 'results', file = True, stdOut = stdOut)
-        # Set the logDir - maybe we want to use mktemp(1) for this later.
 
     # Writes the result of a test case comparison to the log
     def log(self, entry):

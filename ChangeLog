@@ -1,5 +1,15 @@
 2007-12-18  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/logging.py: Remove IconLogger. Make Logger not create
+	logfiles until its log() method is called. This means sniff won't be
+	creating empty logs all the time.
+
+	* dogtail/config.py: Clean up some cruft and remove IconLogger stuff.
+
+	* dogtail/trayicon.py: Removed.
+
+2007-12-18  Zack Cerza <zcerza@redhat.com>
+
 	* sniff/sniff: Remove the 'finally' from a try-except-finally, since
 	that would be the first time we broke compatibility with python 2.4,
 	and it's far from worth it :)

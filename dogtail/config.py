@@ -7,12 +7,6 @@ import os
 import sys
 import locale
 
-def _scriptName():
-    return os.path.basename(sys.argv[0]).replace('.py','')
-
-def _encoding():
-    return locale.getpreferredencoding().lower()
-
 class _Config(object):
     """
     Contains configuration parameters for the dogtail run.
@@ -95,26 +89,27 @@ class _Config(object):
     fatal. If True, exceptions will be raised. If False, warnings will be 
     passed to the debug logger.
 
-    useIconLogger (boolean):
-    Whether we should place an icon in the notification area and print debug
-    messages to it.
-
     logDebugToFile (boolean):
     Whether to write debug output to a log file.
 
     logDebugToStdOut (boolean):
     Whether to print log output to console or not (default True).
     """
-    __scriptName = staticmethod(_scriptName)
-    __encoding = staticmethod(_encoding)
+    def _getScriptName(self):
+        return os.path.basename(sys.argv[0]).replace('.py','')
+    scriptName = property(_getScriptName)
+
+    def _getEncoding(self):
+        return locale.getpreferredencoding().lower()
+    encoding = property(_getEncoding)
 
     defaults = {
             # Storage
             'scratchDir' : '/tmp/dogtail/',
             'dataDir' : '/tmp/dogtail/data/',
             'logDir' : '/tmp/dogtail/logs/',
-            'scriptName' : _scriptName(),
-            'encoding' : _encoding(),
+            'scriptName' : scriptName.fget(None),
+            'encoding' : encoding.fget(None),
             'configFile' : None,
             'baseFile' : None,
 
@@ -141,7 +136,6 @@ class _Config(object):
             'fatalErrors' : False,
 
             # Logging
-            'useIconLogger' : False,
             'logDebugToFile' : True
     }
 
@@ -150,11 +144,9 @@ class _Config(object):
     invalidValue = "__INVALID__"
 
     def __init__(self):
-        scriptName = _scriptName()
-        encoding = _encoding()
-        _Config.__createDir(_Config.defaults['scratchDir'], 0777)
-        _Config.__createDir(_Config.defaults['logDir'], 0777)
-        _Config.__createDir(_Config.defaults['dataDir'], 0777)
+        _Config.__createDir(_Config.defaults['scratchDir'])
+        _Config.__createDir(_Config.defaults['logDir'])
+        _Config.__createDir(_Config.defaults['dataDir'])
 
     def __setattr__(self, name, value):
         if not config.defaults.has_key(name):
@@ -164,51 +156,34 @@ class _Config(object):
                 _Config.options.get(name, _Config.invalidValue) != value:
             if 'Dir' in name:
                 _Config.__createDir(value)
-                if value[-1] != '/': value = value + '/'
+                if value[-1] != os.path.sep: value = value + os.path.sep
             elif name == 'logDebugToFile':
                 import logging
                 logging.debugLogger = logging.Logger('debug', value)
-            elif name == 'useIconLogger':
-                import logging
-                if value == True:
-                    logging.Logger.iconLogger = logging.IconLogger()
-                elif value == False:
-                    del logging.Logger.iconLogger
-                    logging.Logger.iconLogger = None
-                else: raise ValueError, value
             _Config.options[name] = value
 
     def __getattr__(self, name):
         try: return _Config.options[name]
         except KeyError:
             try: return _Config.defaults[name]
-            except KeyError: raise AttributeError, name + " is not a valid option."
+            except KeyError: raise AttributeError, name + \
+                    " is not a valid option."
 
-    def __createDir(cls, dirName, perms = None):
+    def __createDir(cls, dirName, perms = 0777):
         """
-        Creates a directory (if it doesn't currently exist), creating any parent directories it needs.
+        Creates a directory (if it doesn't currently exist), creating any 
+        parent directories it needs.
 
-        If perms is None, create with default permissions.
+        If perms is None, create with python's default permissions.
         """
         dirName = os.path.abspath(dirName)
         #print "Checking for %s ..." % dirName,
         if not os.path.isdir(dirName):
-            #print "Not found."
-            parentDirName = os.path.sep + os.path.sep.join(os.path.split(dirName + os.path.sep)[0].split(os.path.sep)[1:-1])
-            #print "Checking for parent %s ..." % parentDirName,
-            if not os.path.isdir(parentDirName):
-                #print "Not found."
-                #print "Parent %s ..." % parentDirName
-                _Config.__createDir(parentDirName, perms)
-                print "Creating %s ..." % dirName
-                os.mkdir(dirName)
-                if perms: os.chmod(dirName, perms)
-            else:
-                #print "Found."
-                print "Creating %s ..." % dirName
-                os.mkdir(dirName)
-                if perms: os.chmod(dirName, perms)
-        #else: print "Found."
+            if perms: 
+                umask = os.umask(0)
+                os.makedirs(dirName, perms)
+                os.umask(umask)
+            else: os.makedirs(dirName)
     __createDir = classmethod(__createDir)
 
     def load(self, dict):
@@ -238,8 +213,9 @@ if __name__ == '__main__':
 
     failure = False
     for option in config.defaults.keys():
-        print failure, getattr(config, option), config.defaults[option]
-        failure = failure or not (getattr(config, option) == config.defaults[option])
+        failure = failure or not (getattr(config, option) == \
+                config.defaults[option])
+        print failure, option, getattr(config, option), config.defaults[option]
     failOrPass(failure, "Reading all default values")
 
     failure = True
@@ -264,15 +240,6 @@ if __name__ == '__main__':
     config.dataDir = '/tmp/dt_data'
     failure = failure or not os.path.isdir('/tmp/dt_data')
     failOrPass(failure, "Changing default directories")
-
-    failure = True
-    config.useIconLogger = True
-    import logging
-    try:
-        if isinstance(logging.debugLogger.iconLogger, logging.IconLogger):
-            failure = False
-    except AttributeError: pass
-    failOrPass(failure, "Setting useIconLogger")
 
     # END tests
 

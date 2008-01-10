@@ -5,7 +5,8 @@ Features:
 
 Bugfixes:
 
-note: tests/Node.py's TestNodeAttributes is failing due to GNOME bug #498557.
+note: tests/Node.py's TestNodeAttributes is failing due to GNOME bugs #498557 
+      and #498563
 
 
 dogtail 0.6.1

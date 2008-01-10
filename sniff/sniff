@@ -13,6 +13,7 @@ from dogtail.utils import checkForA11yInteractively
 checkForA11yInteractively()
 from dogtail.config import config
 config.logDebugToFile = False
+config.childrenLimit = 100000
 from dogtail import tree
 pyatspi = tree.pyatspi
 import CORBA
@@ -172,10 +173,10 @@ class SniffController(object):
                 'object:children-changed')
         pyatspi.Registry.registerEventListener(self.model.nodeChanged, \
                 'object:property-change:accessible-name')
-        pyatspi.Registry.registerEventListener(self.model.nodeChanged, \
-                'object:property-change:accessible-state')
-        pyatspi.Registry.registerEventListener(self.model.nodeChanged, \
-                'object:state-changed')
+        #pyatspi.Registry.registerEventListener(self.model.nodeChanged, \
+        #        'object:property-change:accessible-state')
+        #pyatspi.Registry.registerEventListener(self.model.nodeChanged, \
+        #        'object:state-changed')
 
     def selectionChanged(self, treeSelection):
         node = self.getSelectedNode()
@@ -285,6 +286,7 @@ class SniffModel(gtk.TreeStore):
     nameColumn = 1
     pixbufColumn = 2
     deadRows = set()
+    eventQueue = []
     cache = {}
 
     def __init__(self, root = tree.root):
@@ -299,7 +301,9 @@ class SniffModel(gtk.TreeStore):
             if item in self.cache:
                 row = self.cache[item]
                 # If row is None, we need to call getPath() to be sure
-                if not row: return self.getPath(item) is not None
+                if not row: 
+                    path = self.getPath(item)
+                    return path is not None
                 elif row in self: return True
             return False
         elif isinstance(item, gtk.TreeIter): 
@@ -309,8 +313,7 @@ class SniffModel(gtk.TreeStore):
             except ValueError: return False
             return iter in self
         elif isinstance(item, gtk.TreeRowReference):
-            try: return item.valid() and item.get_path() in self
-            except TypeError: print type(item.get_path())
+            return item.valid() and item.get_path() in self
         else:
             raise TypeError
 
@@ -335,7 +338,7 @@ class SniffModel(gtk.TreeStore):
         try:
             print len(self.cache), len(self.deadRows)
             for row in self.deadRows:
-                if not row.valid(): continue
+                if not row in self: continue
                 path = row.get_path()
                 try:
                     iter = self.get_iter(path)
@@ -377,7 +380,7 @@ class SniffModel(gtk.TreeStore):
         finally: return gtk.TreeStore.remove(self, iter)
 
     def populateChildren(self, iter):
-        if not self.iter_is_valid(iter): return False
+        if not iter in self: return False
         result = True
         node = self.getNode(iter)
         for child in node.children: 
@@ -390,64 +393,55 @@ class SniffModel(gtk.TreeStore):
         return self.populateChildren(childIter)
 
     def getNode(self, iter):
-        if not self.iter_is_valid(iter): return None
+        if not iter in self: return None
         return self.get_value(iter, self.nodeColumn)
 
     def getPath(self, node):
         if not node: raise ValueError
+        indexInParent = node.indexInParent
         row = self.cache.get(node, None)
-        if row and row.valid(): return row.get_path()
-        elif row and not row.valid():
-            print "invalid row in cache! %s %s" % (node, str(row.get_path()))
-            del self.cache[node]
-
-        #if not node or not node in self: return None
-        #elif node in self and self.cache[node]:
-        #    row = self.cache[node]
-        #    if row.valid(): return row.get_path()
-        #    else: del self.cache[node]
         path = []
-        
-        if node == self.rootNode:
-            return (0,)
+        needParent = True
+        if row:
+            if row in self: path = row.get_path()
+            else: del self.cache[node]
+        elif node == self.rootNode:
+            indexInParent = 0
+            needParent = False
+        elif node.role == pyatspi.ROLE_APPLICATION or node.roleName == \
+                'application':
+            path = [0]
+            indexInParent = list(tree.root.children).index(node)
+            needParent = False
+        elif not node.parent: return None
+        elif len(node.parent) >= indexInParent - 1 and \
+                node.parent[indexInParent] != node:
+            return None
+            siblings = node.parent.children
+            sibIndex = siblings.index(node)
+            try: 
+                if siblings[sibIndex] != node: return None
+                else: indexInParent = sibIndex
+            except ValueError: return None
+        if type(path) == list:
+            if needParent:
+                parentPath = self.getPath(node.parent)
+                if parentPath is None: return None
+                else: path = list(parentPath)
+            path.append(indexInParent)
 
-        child = node
-        keepLooking = True
-        while keepLooking:
-            if child.parent and child.indexInParent < 0:
-                # Figure out indexInParent the hard way.
-                # If we get a ValueError, child has already been removed from
-                # the model (because its real widget has been destroyed)
-                try: indexInParent = child.parent.children.index(child)
-                except ValueError: return
-            else: indexInParent = child.indexInParent
-
-            if child == self.rootNode:
-                path.insert(0, 0)
-                keepLooking = False
-            elif child.role == pyatspi.ROLE_APPLICATION:
-                path.insert(0, list(tree.root.children).index(child))
-                path.insert(0, 0)
-                keepLooking = False
-            elif not child.parent and indexInParent < 0:
-                return None
-            else:
-                path.insert(0, indexInParent)
-            child = child.parent
-            if not child: break
         path = tuple(path)
         try:
             nodeByPath = self.getNode(self.get_iter(path))
             if node != nodeByPath:
-                return None
                 #print "%s is not %s!" % (node, nodeByPath)
+                return None
         except ValueError:
             #print "I smell a bug in %s..." % node.getApplication()
             return None
 
         self.cache[node] = gtk.TreeRowReference(self, path)
         return path
-
 
     def addDeadRow(self, iter):
         if not iter: raise ValueError
@@ -484,41 +478,52 @@ class SniffModel(gtk.TreeStore):
             self.deadRows.add(gtk.TreeRowReference(self, path))
         except UnboundLocalError: pass
 
+    def processEvents(self):
+        if not len(self.eventQueue): return
+        queueCopy = self.eventQueue[:]
+        for event in queueCopy:
+            self.processChangedNode(event)
+            self.eventQueue.remove(event)
+        return False
+
     def nodeChanged(self, event):
         node = event.source
-        if not node: return
-        app = node.getApplication()
+        if not node or not node in self: return
+        app = event.host_application
         if app and app.name == 'sniff': return
-        if node in self:
-            path = self.getPath(node)
-            try:
-                iter = self.get_iter(path)
-            except (ValueError, TypeError):
-                return
-            #print event.type.major, event.type.minor, event.source.name
-            if event.type.major == "property-change":
-                if event.type.minor == "accessible-name":
-                    node = self.getNode(iter)
-                    self.set_value(iter, self.nameColumn, node.name)
-                elif event.type.minor == "accessible-state":
-                    print "state", str(event.source)
-            elif event.type.major == "state-change":
-                print "state2", str(event.source)
-            elif event.type.major == "children-changed":
-                if event.type.minor == 'add':
-                    for child in node.children:
-                        if not child in self:
-                            if len(child) > 0:
-                                self.appendAndPopulate(iter, child)
-                            else:
-                                # If it has no children now, give it a sec
-                                # to come up with some.
-                                gobject.timeout_add(1000, \
-                                        self.__addNodeCB, iter, child)
-                elif event.type.minor == 'remove':
-                    self.__removeNodeCB(iter, node, path)
+        self.eventQueue.append(event)
+        gobject.idle_add(self.processEvents)
 
-    
+    def processChangedNode(self, event):
+        node = event.source
+        if not node or not node in self: return
+        path = self.getPath(node)
+        try:
+            iter = self.get_iter(path)
+        except (ValueError, TypeError):
+            return
+        if event.type.major == "property-change":
+            if event.type.minor == "accessible-name":
+                node = self.getNode(iter)
+                self.set_value(iter, self.nameColumn, node.name)
+            elif event.type.minor == "accessible-state":
+                print str(event)
+        elif event.type.major == "state-changed":
+            print str(event)
+        elif event.type.major == "children-changed":
+            if event.type.minor == 'add':
+                for child in node.children:
+                    if not child in self:
+                        if len(child) > 0:
+                            self.appendAndPopulate(iter, child)
+                        else:
+                            # If it has no children now, give it a sec
+                            # to come up with some.
+                            gobject.timeout_add(1000, \
+                                    self.__addNodeCB, iter, child)
+            elif event.type.minor == 'remove':
+                self.__removeNodeCB(iter, node, path)
+
     def __addNodeCB(self, iter, parent):
         self.appendAndPopulate(iter, parent)
         return False
@@ -681,4 +686,5 @@ iconForRole = { \
 def main():
     sniff = SniffApp()
 
-if __name__ == '__main__': main()
+if __name__ == '__main__': 
+    main()

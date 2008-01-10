@@ -1,3 +1,9 @@
+2008-01-10  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Instead of processing events synchronously, put them in
+	a queue to be processed during an idle function. Rewrite
+	SniffModel.getPath().
+
 2007-12-18  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/logging.py: Remove IconLogger. Make Logger not create

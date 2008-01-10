@@ -180,7 +180,9 @@ class SniffController(object):
 
     def selectionChanged(self, treeSelection):
         node = self.getSelectedNode()
-        if node: node.blink()
+        if node:
+            self.setUpTable(node)
+            node.blink()
 
     def getSelectedNode(self):
         (store, iter) = self.view.get_selection().get_selected()
@@ -227,7 +229,6 @@ class SniffController(object):
         except TypeError: return
         node = self.model.getNode(self.model.get_iter(path))
         if node == None: return
-        self.setUpTable(node)
 
         if event.button == 3:
             menu = gtk.Menu()

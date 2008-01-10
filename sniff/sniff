@@ -67,15 +67,7 @@ class SniffApp(object):
         self.unsetRootMenuItem = self.x.get_widget('unsetRootMenuItem')
         self.about = None
 
-        view = self.x.get_widget('treeTreeView')
-        nameTextLabel = self.x.get_widget('nameTextLabel')
-        roleNameTextLabel = self.x.get_widget('roleNameTextLabel')
-        descTextLabel = self.x.get_widget('descTextLabel')
-        actionsTextLabel = self.x.get_widget('actionsTextLabel')
-        textLabel = self.x.get_widget('textLabel')
-        textTextView = self.x.get_widget('textTextView')
-        self.tree = SniffController(view, nameTextLabel, roleNameTextLabel, \
-                descTextLabel, actionsTextLabel, textLabel, textTextView)
+        self.tree = SniffController(self.x)
 
     def connectSignals(self):
         self.app.connect('delete_event', self.quit, self)
@@ -105,22 +97,27 @@ class SniffApp(object):
 
 
 class SniffController(object):
-    def __init__(self, view, nameLabel, roleNameLabel, descLabel, \
-            actionsLabel, textLabel, textView):
-        self.nameTextLabel = nameLabel
+    invalidBufferCallbackID = None
+
+    def __init__(self, gladeXML):
+        self.x = gladeXML
+        self.nameTextLabel = self.x.get_widget('nameTextLabel')
         self.nameTextLabel.set_text('')
-        self.roleNameTextLabel = roleNameLabel
+        self.roleNameTextLabel = self.x.get_widget('roleNameTextLabel')
         self.roleNameTextLabel.set_text('')
-        self.descTextLabel = descLabel
+        self.descTextLabel = self.x.get_widget('descTextLabel')
         self.descTextLabel.set_text('')
-        self.actionsTextLabel = actionsLabel
+        self.actionsTextLabel = self.x.get_widget('actionsTextLabel')
         self.actionsTextLabel.set_text('')
-        self.textLabel = textLabel
-        self.textTextView = textView
-        self.textTextViewBufferChangedLastHandlerID = 3.141592654
+        self.textTextView = self.x.get_widget('textTextView')
+        self.textTextViewBufferCallbackID = self.invalidBufferCallbackID
         self.textTextView.set_sensitive(False)
         self.textTextView.get_buffer().set_text('')
-        self.view = view
+        self.labelerButton = self.x.get_widget('labelerButton')
+        self.labelerButton.set_sensitive(False)
+        self.labeleeButton = self.x.get_widget('labeleeButton')
+        self.labeleeButton.set_sensitive(False)
+        self.view = self.x.get_widget('treeTreeView')
         self.treeSelection = self.view.get_selection()
         self.model = SniffModel()
         self.setUpView()
@@ -165,6 +162,7 @@ class SniffController(object):
         self.view.expand_row(rootPath, False)
 
     def connectSignals(self):
+        self.labelerButton.connect('clicked', self.showRelationTarget)
         self.view.connect('button-press-event', self.buttonPress)
         self.view.connect('row-expanded', self.rowExpanded, self.model)
         self.view.connect('row-collapsed', self.rowCollapsed)
@@ -244,6 +242,14 @@ class SniffController(object):
             menu.show()
             menu.popup(None, None, None, event.button, event.time)
 
+    def showRelationTarget(self, button, *args):
+        if button == self.labelerButton:
+            target = self.getSelectedNode().labeler
+        elif button == self.labeleeButton:
+            target = self.getSelectedNode().labelee
+        else: return
+        if not target.dead: target.blink()
+
     def setUpTable(self, node):
         """Generic code for setting up the table under the TreeView"""
         if node == None: return
@@ -256,10 +262,10 @@ class SniffController(object):
 
         # Have we connected this signal yet? 
         # If so, disconnect it before proceeding.
-        if int(self.textTextViewBufferChangedLastHandlerID) == \
-                self.textTextViewBufferChangedLastHandlerID:
+        if self.textTextViewBufferCallbackID != self.invalidBufferCallbackID:
             self.textTextView.get_buffer().disconnect( \
-                    self.textTextViewBufferChangedLastHandlerID)
+                    self.textTextViewBufferCallbackID)
+            self.textTextViewBufferCallbackID = self.invalidBufferCallbackID
 
         if node.text is not None:
             buffer = self.textTextView.get_buffer()
@@ -268,13 +274,20 @@ class SniffController(object):
                 node.queryEditableText()
                 # Remember the handler ID of this connection.
                 self.textTextView.set_sensitive(True)
-                self.textTextViewBufferChangedLastHandlerID = \
+                self.textTextViewBufferCallbackID = \
                         buffer.connect('changed', self.changeText, node)
             except NotImplementedError:
                 self.textTextView.set_sensitive(False)
         else:
             self.textTextView.get_buffer().set_text('')
             self.textTextView.set_sensitive(False)
+
+        if node.labeler and not node.labeler.dead: 
+            self.labelerButton.set_sensitive(True)
+        else: self.labelerButton.set_sensitive(False)
+        if node.labelee and not node.labelee.dead: 
+            self.labeleeButton.set_sensitive(True)
+        else: self.labeleeButton.set_sensitive(False)
 
     def changeText(self, textBuffer, node):
         if node == None: return

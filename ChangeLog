@@ -1,5 +1,15 @@
 2008-01-10  Zack Cerza <zcerza@redhat.com>
 
+	* sniff/glade, sniff/sniff: Split bottom pane into tabs: first is
+	name, roleName, description, actions; second is (editable)text; third
+	is relations. Currently there are only two relations: labeler and
+	labelee. Relations in sniff are currently represented as buttons,
+	which, when clicked, call the relation targets' blink() method. Also
+	fix a minor bug in SniffController.setUpTable() where sometimes we
+	would try to disconnect a signal handler multiple times.
+
+2008-01-10  Zack Cerza <zcerza@redhat.com>
+
 	* NEWS: Add a note about a broken unit test due to #498563.
 
 2008-01-10  Zack Cerza <zcerza@redhat.com>

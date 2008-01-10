@@ -81,6 +81,8 @@ try:
 except ImportError:
     raise ImportError, "Error importing the AT-SPI bindings"
 
+from CORBA import COMM_FAILURE, OBJECT_NOT_EXIST
+
 # We optionally import the bindings for libwnck.
 try:
     import wnck
@@ -195,6 +197,15 @@ class Node:
     ##
     # Accessible
     ##
+    def _getDead(self):
+        try:
+            if self.roleName == 'invalid': return True
+            n = self.role
+            n = self.name
+            n = self[0]
+        except (LookupError, COMM_FAILURE, OBJECT_NOT_EXIST): return True
+        return False
+    dead = property(_getDead, doc = "Is the node dead (defunct) ?")
 
     def _getChildren(self):
         if self.parent and self.parent.roleName == 'hyper link':

@@ -1,5 +1,11 @@
 2008-01-10  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/tree.py: Add Node.dead property; useful if you're unsure if
+	the accessible you're about to poke at is still valid, and don't feel
+	like trying to catch 3 or more different exceptions.
+
+2008-01-10  Zack Cerza <zcerza@redhat.com>
+
 	* sniff/sniff: Call SniffController.setUpTable() inside
 	selectionChanged() instead of buttonPress().
 

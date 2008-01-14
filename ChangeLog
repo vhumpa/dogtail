@@ -1,3 +1,7 @@
+2008-01-14  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Fix a stupid error in the Node.dead check.
+
 2008-01-10  Zack Cerza <zcerza@redhat.com>
 
 	* sniff/glade, sniff/sniff: Split bottom pane into tabs: first is

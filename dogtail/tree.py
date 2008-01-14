@@ -202,7 +202,7 @@ class Node:
             if self.roleName == 'invalid': return True
             n = self.role
             n = self.name
-            n = self[0]
+            if len(self) > 0: n = self[0]
         except (LookupError, COMM_FAILURE, OBJECT_NOT_EXIST): return True
         return False
     dead = property(_getDead, doc = "Is the node dead (defunct) ?")

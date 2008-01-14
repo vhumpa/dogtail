@@ -1,5 +1,12 @@
 2008-01-14  Zack Cerza <zcerza@redhat.com>
 
+	* sniff/sniff, sniff/sniff.glade: Make the relation buttons only
+	visible when a target exists. Also prepare
+	SniffController.showRelationTarget() more prepared for when we add
+	more relations to dogtail and sniff.
+
+2008-01-14  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tree.py: Fix a stupid error in the Node.dead check.
 
 2008-01-10  Zack Cerza <zcerza@redhat.com>

@@ -554,7 +554,7 @@
 
 		  <child>
 		    <widget class="GtkButton" id="labelerButton">
-		      <property name="visible">True</property>
+		      <property name="sensitive">False</property>
 		      <property name="can_default">True</property>
 		      <property name="can_focus">True</property>
 		      <property name="label" translatable="yes">Labeler</property>
@@ -566,7 +566,7 @@
 
 		  <child>
 		    <widget class="GtkButton" id="labeleeButton">
-		      <property name="visible">True</property>
+		      <property name="sensitive">False</property>
 		      <property name="can_default">True</property>
 		      <property name="can_focus">True</property>
 		      <property name="label" translatable="yes">Labelee</property>

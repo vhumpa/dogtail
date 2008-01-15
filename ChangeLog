@@ -1,5 +1,10 @@
 2008-01-15  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/tree.py: Change Node.valueMin and valueMax to Node.minValue
+	and maxValue; add minValueIncrement.
+
+2008-01-15  Zack Cerza <zcerza@redhat.com>
+
 	* sniff/sniff: Remove SniffModel.checkNodes() and
 	SniffModel.addDeadNode() as we're not using them now that we have
 	events working. While there are applications that don't have proper

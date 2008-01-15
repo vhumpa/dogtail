@@ -520,15 +520,20 @@ class Node:
 
     value = property(_getValue, _setValue)
 
-    def _getValueMin(self):
+    def _getMinValue(self):
         try: return self.queryValue().getMinimumValue()
         except NotImplementedError: pass
-    valueMin = property(_getValueMin)
+    minValue = property(_getMinValue)
 
-    def _getValueMax(self):
+    def _getMinValueIncrement(self):
+        try: return self.queryValue().getMinimumIncrement
+        except NotImplementedError: pass
+    minValueIncrement = property(_getMinValueIncrement)
+
+    def _getMaxValue(self):
         try: return self.queryValue().getMaximumValue()
         except NotImplementedError: pass
-    valueMax = property(_getValueMax)
+    maxValue = property(_getMaxValue)
 
     def typeText(self, string):
         """

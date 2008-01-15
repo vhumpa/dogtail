@@ -345,7 +345,6 @@ class SniffModel(gtk.TreeStore):
                 gobject.TYPE_STRING, gtk.gdk.Pixbuf)
         self.rootNode = self.initialRootNode = root
         self.appendAndPopulate(None, self.rootNode)
-        #gobject.timeout_add(1000, self.checkNodes)
 
     def __contains__(self, item):
         if isinstance(item, tree.Node):
@@ -367,44 +366,6 @@ class SniffModel(gtk.TreeStore):
             return item.valid() and item.get_path() in self
         else:
             raise TypeError
-
-    def checkNodes(self):
-        print len(self.cache), len(self.deadRows),
-        try:
-            for node in self.cache.keys():
-                path = self.getPath(node)
-                if path is None:
-                    try: del self.cache[node]
-                    except KeyError: pass
-                    continue
-                iter = self.get_iter(path)
-                try:
-                    if node.roleName == 'invalid':
-                        self.addDeadRow(self.get_iter(path))
-                except (LookupError, CORBA.COMM_FAILURE):
-                    self.addDeadRow(self.get_iter(path))
-        except:
-            import traceback
-            traceback.print_exc()
-        try:
-            print len(self.cache), len(self.deadRows)
-            for row in self.deadRows:
-                if not row in self: continue
-                path = row.get_path()
-                try:
-                    iter = self.get_iter(path)
-                except ValueError:
-                    continue
-                self.remove(iter)
-                gobject.timeout_add(1000, self.__populateCB, \
-                        self.get_iter(path[:-1]))
-            print "clearing"
-            self.deadRows.clear()
-        except:
-            import traceback
-            traceback.print_exc()
-            return True
-        return True
 
     def changeRoot(self, node):
         self.rootNode = node
@@ -493,41 +454,6 @@ class SniffModel(gtk.TreeStore):
 
         self.cache[node] = gtk.TreeRowReference(self, path)
         return path
-
-    def addDeadRow(self, iter):
-        if not iter: raise ValueError
-        path = self.get_path(iter)
-        for deadRow in self.deadRows:
-            deadPath = deadRow.get_path()
-            if path == deadPath or self.is_ancestor(self.get_iter(deadPath), \
-                    self.get_iter(path)):
-                # Its parent is already in deadRows.
-                return
-        node = None
-        while node == None and iter != None:
-            # Here we see if iter is 'dead'. If so, we check its parent.
-            # Rinse, repeat.
-            node = self.getNode(iter)
-            try:
-                node.name
-                node.children
-            except (LookupError, CORBA.COMM_FAILURE):
-                node = None
-                deadIter = iter
-                iter = self.iter_parent(iter)
-                continue
-            if node.role == pyatspi.ROLE_INVALID:
-                node = None
-                deadIter = iter
-                iter = self.iter_parent(iter)
-            else:
-                # Looks like this node is ok
-                break
-        # We've found the highest level row.
-        try:
-            path = self.get_path(deadIter)
-            self.deadRows.add(gtk.TreeRowReference(self, path))
-        except UnboundLocalError: pass
 
     def processEvents(self):
         if not len(self.eventQueue): return

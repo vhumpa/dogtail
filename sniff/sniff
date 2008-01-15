@@ -117,95 +117,106 @@ class SniffController(object):
         self.labelerButton.set_sensitive(False)
         self.labeleeButton = self.x.get_widget('labeleeButton')
         self.labeleeButton.set_sensitive(False)
-        self.view = self.x.get_widget('treeTreeView')
-        self.treeSelection = self.view.get_selection()
-        self.model = SniffModel()
-        self.setUpView()
+        self.stateView = self.x.get_widget('stateTreeView')
+        self.stateModel = StateModel()
+        self.setUpStateView()
+        self.treeView = self.x.get_widget('treeTreeView')
+        self.treeSelection = self.treeView.get_selection()
+        self.treeModel = SniffModel()
+        self.setUpTreeView()
         self.connectSignals()
 
-    def setUpView(self):
-        self.view.set_enable_tree_lines(True)
+    def setUpStateView(self):
+        self.stateView.set_model(self.stateModel)
+        cellRenderer = gtk.CellRendererText()
+        col = gtk.TreeViewColumn('Present States', cellRenderer, \
+                text=self.stateModel.stateColumn)
+        col.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
+        self.stateView.insert_column(col, -1)
 
-        self.view.set_model(self.model)
+    def setUpTreeView(self):
+        self.treeView.set_enable_tree_lines(True)
+
+        self.treeView.set_model(self.treeModel)
 
         col = gtk.TreeViewColumn()
         cellRenderer = gtk.CellRendererPixbuf()
         col.pack_start(cellRenderer, expand = False)
-        col.add_attribute(cellRenderer, 'pixbuf', self.model.pixbufColumn)
+        col.add_attribute(cellRenderer, 'pixbuf', self.treeModel.pixbufColumn)
 
         cellRenderer = gtk.CellRendererText()
         col.pack_end(cellRenderer, expand = False)
-        col.add_attribute(cellRenderer, 'text', self.model.nameColumn)
+        col.add_attribute(cellRenderer, 'text', self.treeModel.nameColumn)
 
         col.set_title('Name')
 
-        self.view.insert_column(col, -1)
+        self.treeView.insert_column(col, -1)
 
-        for column in self.view.get_columns():
+        for column in self.treeView.get_columns():
             column.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
             column.set_resizable(True)
-        self.view.show()
+        self.treeView.show()
         path = 0
-        self.view.expand_row(path, False)
-        self.rowExpanded(self.view, self.model.get_iter(path), path)
+        self.treeView.expand_row(path, False)
+        self.rowExpanded(self.treeView, self.treeModel.get_iter(path), path)
 
     def changeRoot(self, menuItem, toSelected = True, *args):
         if toSelected: node = self.getSelectedNode()
-        if toSelected and node: self.model.changeRoot(node)
-        elif not toSelected: self.model.reset()
+        if toSelected and node: self.treeModel.changeRoot(node)
+        elif not toSelected: self.treeModel.reset()
         else: return
         self.refresh(refreshModel = False)
 
     def refresh(self, menuItem = None, refreshModel = True, *args):
-        if refreshModel: self.model.refresh()
-        rootPath = self.model.get_path(self.model.get_iter_root())
-        self.view.expand_row(rootPath, False)
+        if refreshModel: self.treeModel.refresh()
+        rootPath = self.treeModel.get_path(self.treeModel.get_iter_root())
+        self.treeView.expand_row(rootPath, False)
 
     def connectSignals(self):
         self.labelerButton.connect('clicked', self.showRelationTarget, \
                 'labeler')
         self.labeleeButton.connect('clicked', self.showRelationTarget, \
                 'labelee')
-        self.view.connect('button-press-event', self.buttonPress)
-        self.view.connect('row-expanded', self.rowExpanded, self.model)
-        self.view.connect('row-collapsed', self.rowCollapsed)
+        self.treeView.connect('button-press-event', self.buttonPress)
+        self.treeView.connect('row-expanded', self.rowExpanded, self.treeModel)
+        self.treeView.connect('row-collapsed', self.rowCollapsed)
         self.treeSelection.connect('changed', self.selectionChanged)
-        pyatspi.Registry.registerEventListener(self.model.nodeChanged, \
+        pyatspi.Registry.registerEventListener(self.treeModel.nodeChanged, \
                 'object:children-changed')
-        pyatspi.Registry.registerEventListener(self.model.nodeChanged, \
+        pyatspi.Registry.registerEventListener(self.treeModel.nodeChanged, \
                 'object:property-change:accessible-name')
-        #pyatspi.Registry.registerEventListener(self.model.nodeChanged, \
+        #pyatspi.Registry.registerEventListener(self.treeModel.nodeChanged, \
         #        'object:property-change:accessible-state')
-        #pyatspi.Registry.registerEventListener(self.model.nodeChanged, \
+        #pyatspi.Registry.registerEventListener(self.treeModel.nodeChanged, \
         #        'object:state-changed')
 
     def selectionChanged(self, treeSelection):
         node = self.getSelectedNode()
         if node:
-            self.setUpTable(node)
+            self.setUpBottomPane(node)
             node.blink()
 
     def getSelectedNode(self):
-        (store, iter) = self.view.get_selection().get_selected()
+        (store, iter) = self.treeView.get_selection().get_selected()
         if not iter: node = None
-        else: node = self.model.getNode(iter)
+        else: node = self.treeModel.getNode(iter)
         return node
 
     def expandAll(self, widget, *args):
-        if args[0] == True: self.view.expand_all()
-        elif args[0] == False: self.view.collapse_all()
+        if args[0] == True: self.treeView.expand_all()
+        elif args[0] == False: self.treeView.collapse_all()
 
     def rowExpanded(self, treeview, iter, path, *userParams):
-        row = self.model[path]
+        row = self.treeModel[path]
         childRows = row.iterchildren()
         while True:
             try:
                 childRow = childRows.next()
-                self.model.populateChildren(childRow.iter)
+                self.treeModel.populateChildren(childRow.iter)
             except StopIteration: break
 
     def rowCollapsed(self, treeview, iter, path, *userParams):
-        row = self.model[path]
+        row = self.treeModel[path]
         childRows = row.iterchildren()
         try:
             while True:
@@ -214,7 +225,7 @@ class SniffController(object):
                 try:
                     while True:
                         grandChildRow = grandChildRows.next()
-                        self.model.remove(grandChildRow.iter)
+                        self.treeModel.remove(grandChildRow.iter)
                 except StopIteration: pass
         except StopIteration: pass
 
@@ -226,9 +237,10 @@ class SniffController(object):
 
     def buttonPress(self, widget, event, *userParams):
         try: path, treeViewCol, relX, relY = \
-                        self.view.get_path_at_pos(int(event.x), int(event.y))
+                        self.treeView.get_path_at_pos(int(event.x), \
+                        int(event.y))
         except TypeError: return
-        node = self.model.getNode(self.model.get_iter(path))
+        node = self.treeModel.getNode(self.treeModel.get_iter(path))
         if node == None: return
 
         if event.button == 3:
@@ -253,7 +265,7 @@ class SniffController(object):
             import traceback
             traceback.print_exc()
 
-    def setUpTable(self, node):
+    def setUpBottomPane(self, node):
         """Generic code for setting up the table under the TreeView"""
         if node == None: return
         self.nameTextLabel.set_text(node.name)
@@ -301,6 +313,8 @@ class SniffController(object):
         else:
             self.labeleeButton.set_sensitive(False)
             self.labeleeButton.hide()
+
+        self.stateModel.setNode(node)
 
     def changeText(self, textBuffer, node):
         if node == None: return
@@ -591,6 +605,20 @@ class SniffModel(gtk.TreeStore):
         except Exception:
             return theme.load_icon("gtk-dialog-error", 24, \
                     gtk.ICON_LOOKUP_USE_BUILTIN)
+
+class StateModel(gtk.ListStore):
+    stateColumn = 0
+    statesSupported = ['checked', 'focusable', 'focused', 'sensitive', \
+            'showing']
+
+    def __init__(self):
+        gtk.ListStore.__init__(self, gobject.TYPE_STRING)
+
+    def setNode(self, node):
+        self.clear()
+        for stateName in self.statesSupported:
+            if getattr(node, stateName) is True:
+                self.append((stateName.capitalize(),))
 
 
 def loadIcon(iconName):

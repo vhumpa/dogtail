@@ -1,3 +1,8 @@
+2008-01-15  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff, sniff.glade: Add a new tab to the bottom pane that
+	lists the present states (just the ones supported by dogtail).
+
 2008-01-14  Zack Cerza <zcerza@redhat.com>
 
 	* sniff/sniff, sniff/sniff.glade: Make the relation buttons only

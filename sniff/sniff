@@ -178,6 +178,7 @@ class SniffController(object):
         self.labeleeButton.connect('clicked', self.showRelationTarget, \
                 'labelee')
         self.treeView.connect('button-press-event', self.buttonPress)
+        self.treeView.connect('key-press-event', self.keyPress)
         self.treeView.connect('row-expanded', self.rowExpanded, self.treeModel)
         self.treeView.connect('row-collapsed', self.rowCollapsed)
         self.treeSelection.connect('changed', self.selectionChanged)
@@ -234,6 +235,15 @@ class SniffController(object):
         method = userParams[0]
         arg = userParams[1]
         method(arg)
+
+    def keyPress(self, widget, event, *userParams):
+        if event.keyval == gtk.keysyms.Return:
+            path = self.treeSelection.get_selected_rows()[1][0]
+            if self.treeView.row_expanded(path):
+                self.treeView.collapse_row(path)
+            else:
+                self.treeView.expand_row(path, False)
+        return False
 
     def buttonPress(self, widget, event, *userParams):
         try: path, treeViewCol, relX, relY = \

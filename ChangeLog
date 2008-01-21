@@ -1,3 +1,10 @@
+2008-01-21  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/wrapped.py: Add dogtail.wrapped module, with superclasses
+	for Node and Application wrappers to use in custom application
+	wrappers. We need this because dogtail.tree.{Node,Application} are no
+	longer wrapper classes, and thus can't be subclasses directly.
+
 2008-01-15  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/tree.py: Change Node.valueMin and valueMax to Node.minValue

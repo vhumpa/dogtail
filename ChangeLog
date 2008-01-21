@@ -1,5 +1,10 @@
 2008-01-21  Zack Cerza <zcerza@redhat.com>
 
+	* scripts/dogtail-run-headless: Use a real GNOME session instead of a
+	"fake" one.
+
+2008-01-21  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/wrapped.py: Add dogtail.wrapped module, with superclasses
 	for Node and Application wrappers to use in custom application
 	wrappers. We need this because dogtail.tree.{Node,Application} are no

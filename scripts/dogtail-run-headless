@@ -142,15 +142,7 @@ def main(argv):
         xinitrc.write('#!/bin/sh\n')
         
         if opt in (shortOpts[1], longOpts[1]):
-            # (Fake) GNOME session
-
-            # Damn binaries, always ambling about the filesystem
-            if os.path.exists('/usr/libexec/gnome-settings-daemon'):
-                xinitrc.write('/usr/libexec/')
-            xinitrc.write('gnome-settings-daemon &\n')
-            xinitrc.write('gnome-panel &\n')
-            xinitrc.write('nautilus -n &\n')
-            xinitrc.write('metacity &\n')
+            xinitrc.write('gnome-session &\n')
             xinitrc.write('sleep 10\n')
             xinitrc.write('cd %s && dogtail-detect-session && sh -c "%s"; echo -n $? > %s\n' % (os.getcwdu(), script, exitCodeFile))
             xinitrc.close()

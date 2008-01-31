@@ -2,6 +2,8 @@
 """
 Handles raw input using AT-SPI event generation.
 
+Note: Think of keyvals as keysyms, and keynames as keystrings.
+
 Authors: David Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.com>
 """
 
@@ -92,32 +94,7 @@ def typeText(string):
     for char in string:
         pressKey(char)
 
-def __buildKeyStringsDict(keySymsDict):
-    syms = {}
-    keyStringsDict = {}
-    iter = keySymsDict.iteritems()
-    while True:
-        try:
-            item = iter.next()
-            """
-            if item[1] in syms.keys():
-                syms[item[1]].append(item[0])
-                print item[1], syms[item[1]]
-            else: 
-                try: syms[item[1]] = [item[0]]
-                except TypeError: pass
-            """
-            try:
-                if not keyStringsDict.has_key(item[1]):
-                    keyStringsDict[item[1]] = item[0]
-            except TypeError: pass
-        except StopIteration:
-            return keyStringsDict
-
-keySyms = gtk.keysyms.__dict__
-keyStrings = __buildKeyStringsDict(keySyms)
-
-keySymAliases = {
+keyNameAliases = {
     'enter' : 'Return',
     'esc' : 'Escape',
     'alt' : 'Alt_L',
@@ -140,84 +117,51 @@ def keySymToUniChar(keySym):
     return UniChar
 
 def uniCharToKeySym(uniChar):
+    # OK, if it's not actually unicode we can fix that, right?
+    if not isinstance(uniChar, unicode): uniChar = unicode(uniChar)
     i = ord(uniChar)
     keySym = gtk.gdk.unicode_to_keyval(i)
     return keySym
+
+def keySymToKeyName(keySym):
+    return gtk.gdk.keyval_name(keySym)
+
+def keyNameToKeySym(keyName):
+    try:
+        keyName = keyNameAliases.get(keyName.lower(), keyName)
+        keySym = gtk.gdk.keyval_from_name(keyName)
+        if not keySym: keySym = getattr(gtk.keysyms, keyName)
+    except AttributeError:
+        try: keySym = uniCharToKeySym(keyName)
+        except TypeError: raise KeyError, keyName
+    return keySym
+
+def keyNameToKeyCode(keyName):
+    """
+    Use GDK to get the keycode for a given keystring.
+
+    Note that the keycode returned by this function is often incorrect when
+    the requested keystring is obtained by holding down the Shift key.
+    
+    Generally you should use uniCharToKeySym() and should only need this
+    function for nonprintable keys anyway.
+    """
+    keymap = gtk.gdk.keymap_get_default()
+    entries = keymap.get_entries_for_keyval( \
+            gtk.gdk.keyval_from_name(keyName))
+    try: return entries[0][0]
+    except TypeError: pass
 
 def pressKey(keyName):
     """
     Presses (and releases) the key specified by keyName.
     keyName is the English name of the key as seen on the keyboard. Ex: 'enter'
-    Names are looked up in the keySyms dict. If they are not found there, 
-    they are looked up by uniCharToKeySym().
+    Names are looked up in gtk.keysyms. If they are not found there, they are
+    looked up by uniCharToKeySym().
     """
-    try:
-        keyName = keySymAliases.get(keyName.lower(), keyName)
-        keySym = keySyms[keyName]
-    except KeyError:
-        try: keySym = uniCharToKeySym(keyName)
-        except TypeError: raise KeyError, keyName
+    keySym = keyNameToKeySym(keyName)
     registry.generateKeyboardEvent(keySym, None, KEY_SYM)
     doTypingDelay()
-
-def gdkKeyStringToKeyCode(keyString):
-    """
-    Use GDK to get the keycode for a given keystring.
-    """
-    keymap = gtk.gdk.keymap_get_default()
-    entries = keymap.get_entries_for_keyval( \
-            gtk.gdk.keyval_from_name(keyString))
-    try: return entries[0][0]
-    except TypeError: pass
-
-def xlibKeyStringToKeyCode(keyString):
-    """
-    Use xlib (via ctypes) to get the keycode for a given keystring.
-    """
-    def loadXlib():
-        global xlib
-        global dpy
-        if xlib == None:
-            xlib = ctypes.CDLL('libX11.so')
-        if dpy == 0:
-            dpy = ctypes.c_ulong(xlib.XOpenDisplay(None))
-
-    def closeDpy():
-        global dpy
-        xlib.XCloseDisplay(dpy)
-        dpy = 0
-
-    def keyStringToKeySym(keyString, cleanup=False):
-        loadXlib()
-        string = ctypes.c_char_p(keyString)
-        sym = ctypes.c_ulong(xlib.XStringToKeysym(string))
-        if cleanup: closeDpy()
-        return sym.value
-        
-    def keySymToKeyCode(keySym, cleanup=False):
-        loadXlib()
-        sym = ctypes.c_ulong(keySym)
-        code = ctypes.c_byte(xlib.XKeysymToKeycode(dpy, sym))
-        if cleanup: closeDpy()
-        return code.value
-
-    return keySymToKeyCode(keyStringToKeySym(keyString))
-
-try:
-    import ctypes
-    xlib = None
-    dpy = 0
-    keyStringToKeyCode = xlibKeyStringToKeyCode
-except ImportError:
-    keyStringToKeyCode = gdkKeyStringToKeyCode
-
-keyStringToKeyCode.__doc__ += """
-    Note that the keycode returned by this function is often incorrect when
-    the requested keystring is obtained by holding down the Shift key.
-    
-    Generally you should use uniCharToKeySym() and should only need this
-    function for nonprintable keys anyway."""
-
 
 def keyCombo(comboString):
     """
@@ -232,24 +176,24 @@ def keyCombo(comboString):
         if s:
             for S in s.split('>'):
                 if S:
-                    S = keySymAliases.get(S.lower(), S)
+                    S = keyNameAliases.get(S.lower(), S)
                     strings.append(S)
     for s in strings:
-        if not keySyms.has_key(s):
+        if not hasattr(gtk.keysyms, s):
             raise ValueError, "Cannot find key %s" % s
 
     modifiers = strings[:-1]
     finalKey = strings[-1]
 
     for modifier in modifiers:
-        code = keyStringToKeyCode(modifier)
+        code = keyNameToKeyCode(modifier)
         registry.generateKeyboardEvent(code, None, KEY_PRESS)
 
-    code = keyStringToKeyCode(finalKey)
+    code = keyNameToKeyCode(finalKey)
     registry.generateKeyboardEvent(code, None, KEY_PRESSRELEASE)
 
     for modifier in modifiers:
-        code = keyStringToKeyCode(modifier)
+        code = keyNameToKeyCode(modifier)
         registry.generateKeyboardEvent(code, None, KEY_RELEASE)
 
     doDelay()

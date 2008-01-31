@@ -1,5 +1,9 @@
 2008-01-31  Zack Cerza <zcerza@redhat.com>
 
+	* setup.py, dogtail/__init__.py: Bump version to 0.6.91.
+
+2008-01-31  Zack Cerza <zcerza@redhat.com>
+
 	* Makefile, MANIFEST.in: Remove mentions of debian/ and dogtail.spec.
 
 2008-01-31  Zack Cerza <zcerza@redhat.com>

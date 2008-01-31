@@ -1,7 +1,6 @@
 include COPYING
 include MANIFEST.in
 include Makefile
-include dogtail.spec
 include HACKING
 include INSTALL
 include NEWS

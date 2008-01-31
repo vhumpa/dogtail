@@ -43,10 +43,6 @@ srpm: rpm_prep
 	mv rpms/SRPMS/* dist/
 	rm -rf rpms/
 
-deb:
-	fakeroot debian/rules clean
-	dpkg-buildpackage -rfakeroot -us -uc
-
 apidocs:
 	rm -rf website/doc/*
 	#find website/doc -not -type d -not -regex '.*/\.svn/.*' -exec rm {} \;

@@ -1,5 +1,9 @@
 2008-01-31  Zack Cerza <zcerza@redhat.com>
 
+	* Makefile, MANIFEST.in: Remove mentions of debian/ and dogtail.spec.
+
+2008-01-31  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail.spec: Remove; see Fedora CVS for the canonical spec file.
 
 2008-01-31  Zack Cerza <zcerza@redhat.com>

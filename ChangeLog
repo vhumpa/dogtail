@@ -1,5 +1,9 @@
 2008-01-31  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail.spec: Remove; see Fedora CVS for the canonical spec file.
+
+2008-01-31  Zack Cerza <zcerza@redhat.com>
+
 	* debian/: Remove as it's so out-of-date it's probably dangerous, and
 	Debian doesn't use it anyway.
 

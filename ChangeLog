@@ -1,5 +1,13 @@
 2008-02-06  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/dump.py: Properly print Node.actions; ditch "xml" output as
+	it was not even really a good start.
+
+	* dogtail/tree.py: Strip some useless information of out
+	Action.__str__().
+
+2008-02-06  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/__init__.py: Fix inconsistent version number.
 
 2008-02-06  Zack Cerza <zcerza@redhat.com>

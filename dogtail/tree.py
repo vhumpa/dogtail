@@ -151,8 +151,8 @@ class Action:
     keyBinding = property(_getKeyBinding)
 
     def __str__ (self):
-        return "[action | %s | %s | %s | %s]" % \
-            (self.__index, self.name, self.description, self.keyBinding)
+        return "[action | %s | %s ]" % \
+            (self.name, self.keyBinding)
 
     def do (self):
         """

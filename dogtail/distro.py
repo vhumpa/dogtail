@@ -327,7 +327,7 @@ elif os.path.exists ("/var/lib/conarydb/conarydb"):
     distro = Conary()
 elif os.path.exists ("/etc/release") and \
         re.match (".*Solaris", open ("/etc/release").readline()):
-    print "Solaris distribution"
+    logger.log(message + "Solaris distribution")
     distro = Solaris()
 else:
     logger.log(message + "Unknown")

@@ -205,6 +205,12 @@ def isMoFile(filename, language = ''):
     else:
         return False
 
+def loadAllTranslationsForLanguage(language):
+    import distro
+    result = []
+    for moFile in distro.packageDb.getMoFiles(language):
+        translationDbs.append(GettextTranslationDb(moFile))
+
 def getMoFilesForPackage(packageName, language = '', getDependencies=True):
     """
     Look up the named package and find all gettext mo files within it and its

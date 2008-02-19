@@ -1,5 +1,9 @@
 2008-02-19  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/i18n.py: Add loadAllTranslationsForLanguage().
+
+2008-02-19  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/distro.py: Make distribution detection code a little less
 	ugly. Remove docstrings from the Distro subclasses. Clean up some other 
 	documentation.

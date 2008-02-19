@@ -343,8 +343,9 @@ def keyCombo(combo):
 
 def run(application, arguments = '', appName = ''):
     from utils import run as utilsRun
-    utilsRun(application + ' ' + arguments, appName = appName)
+    pid = utilsRun(application + ' ' + arguments, appName = appName)
     focus.application(application)
+    return pid
 
 focus = Focus()
 click = Click()

@@ -11,6 +11,7 @@ David Malcolm <dmalcolm@redhat.com>
 """
 
 import os
+import subprocess
 import re
 from config import config
 from time import sleep
@@ -70,12 +71,11 @@ def run(string, timeout=config.runTimeout, interval=config.runInterval, desktop=
     If dumb is omitted or is False, polls at interval seconds until the application is finished starting, or until timeout is reached.
     If dumb is True, returns when timeout is reached.
     """
-    from os import environ, spawnvpe, P_NOWAIT
     if not desktop: from tree import root as desktop
     args = string.split()
     name = args[0]
-    environ['GTK_MODULES'] = 'gail:atk-bridge'
-    pid = spawnvpe (P_NOWAIT, name, args, environ)
+    os.environ['GTK_MODULES'] = 'gail:atk-bridge'
+    pid = subprocess.Popen(args, env = os.environ).pid
 
     if not appName:
         appName=args[0]

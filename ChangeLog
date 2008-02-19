@@ -1,5 +1,11 @@
 2008-02-19  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/utils.py: Use subprocess.Popen() instead of os.spawnvpe().
+
+	* dogtail/procedural.py: Make run() return the PID.
+
+2008-02-19  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/i18n.py: Add loadAllTranslationsForLanguage().
 
 2008-02-19  Zack Cerza <zcerza@redhat.com>

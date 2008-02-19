@@ -1,5 +1,10 @@
 2008-02-19  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/tree.py, dogtail/dump.py: Allow tree.Node.dump() to output
+	to a file instead of stdout.
+
+2008-02-19  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/utils.py: Use subprocess.Popen() instead of os.spawnvpe().
 
 	* dogtail/procedural.py: Make run() return the PID.

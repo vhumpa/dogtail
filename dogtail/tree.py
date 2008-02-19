@@ -588,10 +588,10 @@ class Node:
         assert isinstance(pred, predicate.Predicate)
         return pred.satisfiedByNode(self)
 
-    def dump (self, type = 'plain'):
+    def dump (self, type = 'plain', fileName = None):
         import dump
         dumper = getattr (dump, type)
-        dumper (self)
+        dumper (self, fileName)
 
     def getAbsoluteSearchPath(self):
         """

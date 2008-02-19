@@ -238,6 +238,41 @@ class TCNumber(TC):
             TC.logger.log(self.result)
             return self.result
 
+class TCBool(TC):
+    def __init__(self): pass
+
+    def compare(self, label, _bool):
+        """
+        If _bool is True, pass.
+        If _bool is False, fail.
+        """
+        if type(_bool) is not bool: raise TypeError
+        if _bool: result = {label: "Passed"}
+        else: result = {label: "Failed"}
+        TC.logger.log(result)
+
+from tree import Node
+class TCNode(TC):
+    def __init__(self): pass
+
+    def compare(self, label, baseline, undertest):
+        """
+        If baseline is None, simply check that undertest is a Node.
+        If baseline is a Node, check that it is equal to undertest.
+        """
+        if baseline is not None and not isinstance(baseline, Node): 
+            raise TypeError
+
+        if not isinstance(undertest, Node):
+            result = {label: "Failed - %s is not a Node" % undertest}
+        elif baseline is None:
+            result = {label: "Passed - %s is a Node" % undertest}
+        elif isinstance(baseline, Node):
+            if baseline == undertest: 
+                result = {label: "Passed - %s == %s" % (baseline, undertest)}
+            else: result = {label: "Failed - %s != %s" % (baseline, undertest)}
+        TC.logger.log(result)
+
 
 if __name__ == '__main__':
     # import the test modules

@@ -1,5 +1,9 @@
 2008-02-19  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/tc.py: Add TCBool and TCNode.
+
+2008-02-19  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tree.py, dogtail/dump.py: Allow tree.Node.dump() to output
 	to a file instead of stdout.
 

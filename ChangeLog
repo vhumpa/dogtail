@@ -1,3 +1,17 @@
+2008-02-19  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py: Make distribution detection code a little less
+	ugly. Remove docstrings from the Distro subclasses. Clean up some other 
+	documentation.
+
+	* dogtail/i18n.py: Don't import the distro module until we actually
+	need it.
+
+	* dogtail/logging.py: Add an optional 'newline' arg to Logger.log(),
+	which defaults to True. Passing False will cause the logger to not
+	print or write a newline at the end of the message. Also stop catching
+	some IOErrors, as that made the code awkward for no good reason.
+
 2008-02-06  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/dump.py: Properly print Node.actions; ditch "xml" output as

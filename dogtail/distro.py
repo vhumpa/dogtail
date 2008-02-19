@@ -34,7 +34,8 @@ global distro
 
 class PackageDb:
     """
-    Class to abstract the details of whatever software package database is in use (RPM, APT, etc)
+    Class to abstract the details of whatever software package database is in
+    use (RPM, APT, etc)
     """
     def __init__(self):
         self.prefix = '/usr'
@@ -42,20 +43,24 @@ class PackageDb:
 
     def getVersion(self, packageName):
         """
-        Method to get the version of an installed package as a Version instance (or raise an exception if not found)
+        Method to get the version of an installed package as a Version 
+        instance (or raise an exception if not found)
+        
         Note: does not know about distributions' internal revision numbers.
         """
         raise NotImplementedError
 
     def getFiles(self, packageName):
         """
-        Method to get a list of filenames owned by the package, or raise an exception if not found.
+        Method to get a list of filenames owned by the package, or raise an 
+        exception if not found.
         """
         raise NotImplementedError
 
     def getMoFiles(self, locale = None):
         """
-        Method to get a list of all .mo files on the system, optionally for a specific locale.
+        Method to get a list of all .mo files on the system, optionally for a
+        specific locale.
         """
         moFiles = {}
 
@@ -181,14 +186,17 @@ class _PortagePackageDb(PackageDb):
         PackageDb.__init__(self)
 
     def getVersion(self, packageName):
-        # the portage utilities are almost always going to be in /usr/lib/portage/pym
+        # the portage utilities are almost always going to be in 
+        # /usr/lib/portage/pym
         import sys
         sys.path.append ('/usr/lib/portage/pym')
         import portage
-        # FIXME: this takes the first package returned in the list, in the case that there are
-        # slotted packages, and removes the leading category such as 'sys-apps'
+        # FIXME: this takes the first package returned in the list, in the 
+        # case that there are slotted packages, and removes the leading 
+        # category such as 'sys-apps'
         gentooPackageName = portage.db["/"]["vartree"].dbapi.match(packageName)[0].split('/')[1];
-        # this removes the distribution specific versioning returning only the upstream version
+        # this removes the distribution specific versioning returning only the
+        # upstream version
         upstreamVersion = portage.pkgsplit(gentooPackageName)[1]
         #print "Version of package is: " + upstreamVersion
         return Version.fromString(upstreamVersion);
@@ -209,7 +217,6 @@ class _ConaryPackageDb(PackageDb):
 # getVersion not implemented because on Solaris multiple modules are installed
 # in single packages, so it is hard to tell what version number of a specific
 # module.
-#
 class _SolarisPackageDb(PackageDb):
     def __init__(self):
         PackageDb.__init__(self)
@@ -236,101 +243,80 @@ class Distro:
     """
     Class representing a distribution.
 
-    Scripts may want to do arbitrary logic based on whichever distro is in use (e.g. handling differences in names of packages, distribution-specific patches, etc.)
+    Scripts may want to do arbitrary logic based on whichever distro is in use
+    (e.g. handling differences in names of packages, distribution-specific 
+    patches, etc.)
 
-    We can either create methods in the Distro class to handle these, or we can use constructs like isinstance(distro, Ubuntu) to handle this. We can even create hierarchies of distro subclasses to handle this kind of thing (could get messy fast though)
+    We can either create methods in the Distro class to handle these, or we 
+    can use constructs like isinstance(distro, Ubuntu) to handle this. We can
+    even create hierarchies of distro subclasses to handle this kind of thing
+    (could get messy fast though)
     """
 
-class RedHatOrFedora(Distro):
-    """
-    Class representing one of Red Hat Linux, Fedora, Red Hat Enterprise Linux, or one of the rebuild-style derivatives
-    """
+class Fedora(Distro):
     def __init__(self):
         self.packageDb = _RpmPackageDb()
 
+class RHEL(Fedora):
+    pass
+
 class Debian(Distro):
-    """
-    Class representing one of the Debian or Debian-derived distributions
-    """
     def __init__(self):
         self.packageDb = _AptPackageDb()
 
 class Ubuntu(Debian):
-    """
-    Class representing one of the Debian or Debian-derived distributions
-    """
     def __init__(self):
         self.packageDb = _UbuntuAptPackageDb()
 
 class Suse(Distro):
-    """
-    Class representing one of the SuSE or SuSE-derived distributions
-    """
     def __init__(self):
         self.packageDb = _RpmPackageDb()
 
 class Gentoo(Distro):
-    """
-    Class representing one of the Gentoo or Gentoo-derived distributions
-    """
     def __init__(self):
         self.packageDb = _PortagePackageDb()
 
 class Conary(Distro):
-    """
-    Class representing a Conary-based distribution
-    """
     def __init__(self):
         self.packageDb = _ConaryPackageDb()
 
 class Solaris(Distro):
-    """
-    Class representing a Solaris distribution
-    """
     def __init__(self):
         self.packageDb = _SolarisPackageDb()
 
 class JHBuild(Distro):
-    """
-    Class representing a JHBuild environment
-    """
     def __init__(self):
         self.packageDb = JhBuildPackageDb()
 
-message = "Detecting distribution: "
-if os.environ.get("CERTIFIED_GNOMIE", "no") == "yes":
-    logger.log(message + "JHBuild environment")
-    distro = JHBuild()
-elif os.path.exists ("/etc/SuSE-release"):
-    logger.log(message + "SuSE (or derived distribution)")
-    distro = Suse()
-elif os.path.exists ("/etc/fedora-release"):
-    logger.log(message + "Fedora (or derived distribution)")
-    distro = RedHatOrFedora()
-elif os.path.exists ("/etc/redhat-release"):
-    logger.log(message + "Red Hat/Fedora/derived distribution")
-    distro = RedHatOrFedora()
-elif os.path.exists ("/usr/share/doc/ubuntu-minimal"):
-    logger.log(message + "Ubuntu (or derived distribution)")
-    distro = Ubuntu()
-elif os.path.exists ("/etc/debian_version"):
-    logger.log(message + "Debian (or derived distribution)")
-    distro = Debian()
-elif os.path.exists ("/etc/gentoo-release"):
-    logger.log(message + "Gentoo (or derived distribution)")
-    distro = Gentoo()
-elif os.path.exists ("/etc/slackware-version"):
-    logger.log(message + "Slackware")
-    raise DistributionNotSupportedError("Slackware")
-elif os.path.exists ("/var/lib/conarydb/conarydb"):
-    logger.log(message + "Conary-based distribution")
-    distro = Conary()
-elif os.path.exists ("/etc/release") and \
-        re.match (".*Solaris", open ("/etc/release").readline()):
-    logger.log(message + "Solaris distribution")
-    distro = Solaris()
-else:
-    logger.log(message + "Unknown")
-    raise DistributionNotSupportedError("Unknown")
+def detectDistro():
+    logger.log("Detecting distribution:", newline = False)
 
+    if os.environ.get("CERTIFIED_GNOMIE", "no") == "yes":
+        distro = JHBuild()
+    elif os.path.exists("/etc/SuSE-release"):
+        distro = Suse()
+    elif os.path.exists("/etc/fedora-release"):
+        distro = Fedora()
+    elif os.path.exists("/etc/redhat-release"):
+        distro = RHEL()
+    elif os.path.exists("/usr/share/doc/ubuntu-minimal"):
+        distro = Ubuntu()
+    elif os.path.exists("/etc/debian_version"):
+        distro = Debian()
+    elif os.path.exists("/etc/gentoo-release"):
+        distro = Gentoo()
+    elif os.path.exists("/etc/slackware-version"):
+        raise DistributionNotSupportedError("Slackware")
+    elif os.path.exists("/var/lib/conarydb/conarydb"):
+        distro = Conary()
+    elif os.path.exists ("/etc/release") and \
+            re.match(".*Solaris", open ("/etc/release").readline()):
+        distro = Solaris()
+    else:
+        raise DistributionNotSupportedError("Unknown")
+    logger.log(distro.__class__.__name__)
+    return distro
+
+distro = detectDistro()
 packageDb = distro.packageDb
+

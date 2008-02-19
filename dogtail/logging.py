@@ -109,9 +109,6 @@ class Logger:
             raise IOError, \
                     "Log path %s does not exist or is not a directory" % logDir
 
-        #self.createFile()
-
-
     def findUniqueName(self):
         # generate a logfile name and check if it already exists
         self.fileName = config.logDir + self.stamper.fileStamp(self.fileName) \
@@ -129,39 +126,31 @@ class Logger:
 
     def createFile(self):
         # Try to create the file and write the header info
-        try:
-            print "Creating logfile at %s ..." % self.fileName
-            self.file = codecs.open(self.fileName, mode = 'wb', encoding = \
-                    'utf-8')
-            self.file.write("##### " + os.path.basename(self.fileName) + '\n')
-            self.file.flush()
-            return True
-        except IOError:
-            print "Could not create and write to " + self.fileName
-            self.file = False
-            return False
+        print "Creating logfile at %s ..." % self.fileName
+        self.file = codecs.open(self.fileName, mode = 'wb', encoding = \
+                'utf-8')
+        self.file.write("##### " + os.path.basename(self.fileName) + '\n')
+        self.file.flush()
 
-    def log(self, message):
+    def log(self, message, newline = True):
         """
         Hook used for logging messages. Might eventually be a virtual
         function, but nice and simple for now.
         """
         message = message.decode('utf-8', 'replace')
 
-        # Also write to standard out.
-        if self.stdOut and config.logDebugToStdOut: print message
-
         # Try to open and write the result to the log file.
-        if isinstance(self.file, bool): 
-            if not config.logDebugToFile: return
-            elif not self.createFile(): return
-        try:
-            #self.file = open(self.fileName, 'a')
-            self.file.write(message + '\n')
+        if isinstance(self.file, bool) and config.logDebugToFile:
+            self.createFile()
+
+        if config.logDebugToFile:
+            if newline: self.file.write(message + '\n')
+            else: self.file.write(message + ' ')
             self.file.flush()
-            #self.file.close()
-        except IOError:
-            print "Could not write to file " + self.fileName
+
+        if self.stdOut and config.logDebugToStdOut: 
+            if newline: print message
+            else: print message,
 
 class ResultsLogger(Logger):
     """

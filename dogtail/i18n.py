@@ -7,7 +7,6 @@ Authors: David Malcolm <dmalcolm@redhat.com>
 
 __author__ = """David Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.com>"""
 
-import distro
 import config
 
 import os
@@ -212,6 +211,8 @@ def getMoFilesForPackage(packageName, language = '', getDependencies=True):
     dependencies. It is possible to restrict the results to those of a certain
     language, for example 'ja'.
     """
+    import distro
+
     result = []
     for filename in distro.packageDb.getFiles(packageName):
         if isMoFile(filename, language):
@@ -255,6 +256,7 @@ def loadTranslationsFromPackageMoFiles(packageName, getDependencies=True):
     # this special case, aside from the simple fact that there is one,
     # is that it makes automatic translations much slower.
 
+    import distro
     language = os.environ.get('LANGUAGE', os.environ['LANG'])[0:2]
     if isinstance(distro.distro, distro.Ubuntu):
         load('language-pack-gnome-%s' % language, language)

@@ -59,10 +59,10 @@ except FocusError:
     focus.dialog('Save as...')
 
 # click the Browse for other folders widget
-activate('Browse for other folders')
+click('Browse for other folders')
 
 # Click the Desktop widget
-activate('Desktop', roleName = 'table cell')
+click('Desktop', roleName = 'table cell')
 
 # We want to save to the file name 'UTF8demo.txt'.
 focus.text()

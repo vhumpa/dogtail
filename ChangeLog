@@ -1,5 +1,10 @@
 2008-02-19  Zack Cerza <zcerza@redhat.com>
 
+	* examples/gedit-test-utf8-procedural-api.py: Use click() instead of
+	activate().
+
+2008-02-19  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tc.py: Add TCBool and TCNode.
 
 2008-02-19  Zack Cerza <zcerza@redhat.com>

@@ -9,9 +9,11 @@ Data storage is handled by the SniffModel class.
 There is no SniffView class; we just use a GtkTreeView.
 Data display is handled by the SniffController class.
 """
-from dogtail.utils import checkForA11yInteractively
-checkForA11yInteractively()
 from dogtail.config import config
+if config.checkForA11y:
+    from dogtail.utils import checkForA11yInteractively
+    checkForA11yInteractively()
+
 config.logDebugToFile = False
 config.childrenLimit = 100000
 from dogtail import tree

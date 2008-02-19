@@ -89,6 +89,10 @@ class _Config(object):
     fatal. If True, exceptions will be raised. If False, warnings will be 
     passed to the debug logger.
 
+    checkForA11y (boolean):
+    Whether to check if accessibility is enabled. If not, just assume it is 
+    (default True).
+
     logDebugToFile (boolean):
     Whether to write debug output to a log file.
 
@@ -134,6 +138,7 @@ class _Config(object):
             'debugTranslation' : False,
             'blinkOnActions' : False,
             'fatalErrors' : False,
+            'checkForA11y' : True,
 
             # Logging
             'logDebugToFile' : True

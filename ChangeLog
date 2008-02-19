@@ -1,5 +1,15 @@
 2008-02-19  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/config.py: Add new parameter: checkForA11y, which defaults
+	to True. If set to False, we assume accessibility is enabled.
+
+	* dogtail/utils.py: Don't import gconf until necessary.
+
+	* dogtail/tree.py, sniff/sniff: Don't check for accessibility unless
+	config.config.checkForA11y is True.
+
+2008-02-19  Zack Cerza <zcerza@redhat.com>
+
 	* examples/gedit-test-utf8-procedural-api.py: Use click() instead of
 	activate().
 

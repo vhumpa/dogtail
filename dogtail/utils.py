@@ -11,6 +11,7 @@ David Malcolm <dmalcolm@redhat.com>
 """
 
 import os
+import sys
 import subprocess
 import re
 from config import config
@@ -148,16 +149,14 @@ class Blinker:
         return True
 
 
-import sys
-import gconf
-gconfClient = gconf.client_get_default()
 a11yGConfKey = '/desktop/gnome/interface/accessibility'
 
 def isA11yEnabled():
     """
     Checks if accessibility is enabled via gconf.
     """
-    gconfEnabled = gconfClient.get_bool(a11yGConfKey)
+    import gconf
+    gconfEnabled = gconf.client_get_default().get_bool(a11yGConfKey)
     if os.environ.get('GTK_MODULES','').find('gail:atk-bridge') == -1:
         envEnabled = False
     else: envEnabled = True
@@ -171,7 +170,8 @@ def enableA11y():
     """
     Enables accessibility via gconf.
     """
-    return gconfClient.set_bool(a11yGConfKey, True)
+    import gconf
+    return gconf.client_get_default().set_bool(a11yGConfKey, True)
 
 def checkForA11y():
     """

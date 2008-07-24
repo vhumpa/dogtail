@@ -1,3 +1,7 @@
+2008-07-24  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Update to reflect API change in rawinput.
+
 2008-02-19  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/config.py: Add new parameter: checkForA11y, which defaults

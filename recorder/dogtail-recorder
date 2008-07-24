@@ -665,19 +665,19 @@ class EventRecorder:
             elapsedTime = 0
 
         # Get the name of the key in question.
-        keyString = dogtail.rawinput.keyStrings[event.id]
+        keyName = dogtail.rawinput.keySymToKeyName(event.id)
         # If the key is printable, get its character.
         keyChar = dogtail.rawinput.keySymToUniChar(event.id)
-        #print "string '%s' char '%s'" % (keyString, keyChar)
+        #print "string '%s' char '%s'" % (keyName, keyChar)
 
         # Is the only key being pressed a modifier?
-        if keyString.startswith("Alt_") or \
-                keyString.startswith("Control_") or \
-                keyString.startswith("Meta_") or \
-                keyString.startswith("Shift") or \
-                keyString == 'Caps_Lock':
+        if keyName.startswith("Alt_") or \
+                keyName.startswith("Control_") or \
+                keyName.startswith("Meta_") or \
+                keyName.startswith("Shift") or \
+                keyName == 'Caps_Lock':
             isJustAMod = True
-            #print "Just a mod: %s" % keyString
+            #print "Just a mod: %s" % keyName
         else: isJustAMod = False
             
         
@@ -691,7 +691,7 @@ class EventRecorder:
         if isJustAMod:
             # If this is just a modifier event, note that the modifier's
             # state and then we're done.
-            mod(keyString)
+            mod(keyName)
             return
         
         # If this is a release event, we're done.
@@ -727,8 +727,8 @@ class EventRecorder:
         # If the key represents a printable character, use that.
         if keyChar != '': key = keyChar
         else:
-            # Otherwise, use the keyString, e.g. 'Return'.
-            key = keyString
+            # Otherwise, use the keyName, e.g. 'Return'.
+            key = keyName
             # We treat nonprintable characters like key combos.
             combo = True
 
@@ -756,7 +756,7 @@ class EventRecorder:
             self.typedTextBuffer = self.typedTextBuffer + key
         return
 
-        # If we're using the keyString or have modifiers, flush 
+        # If we're using the keyName or have modifiers, flush 
         # self.typedTextBuffer by recording a line and also record the key 
         # combo.
         if modString or flush:

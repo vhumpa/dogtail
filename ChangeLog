@@ -1,3 +1,7 @@
+2008-08-08  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/logging.py: Make ResultsLogger log to a file no matter what.
+
 2008-07-24  Zack Cerza <zcerza@redhat.com>
 
 	* recorder/dogtail-recorder: Update to reflect API change in rawinput.

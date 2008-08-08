@@ -132,18 +132,20 @@ class Logger:
         self.file.write("##### " + os.path.basename(self.fileName) + '\n')
         self.file.flush()
 
-    def log(self, message, newline = True):
+    def log(self, message, newline = True, force = False):
         """
         Hook used for logging messages. Might eventually be a virtual
         function, but nice and simple for now.
+
+        If force is True, log to a file irrespective of config.logDebugToFile.
         """
         message = message.decode('utf-8', 'replace')
 
         # Try to open and write the result to the log file.
-        if isinstance(self.file, bool) and config.logDebugToFile:
+        if isinstance(self.file, bool) and (force or config.logDebugToFile):
             self.createFile()
 
-        if config.logDebugToFile:
+        if force or config.logDebugToFile:
             if newline: self.file.write(message + '\n')
             else: self.file.write(message + ' ')
             self.file.flush()
@@ -178,7 +180,7 @@ class ResultsLogger(Logger):
             raise ValueError, entry
             print "Method argument requires a 1 {key: value} dict. Supplied argument not one {key: value}"
 
-        Logger.log(self, self.stamper.entryStamp() + "      " + entry)
+        Logger.log(self, self.stamper.entryStamp() + "      " + entry, force = True)
 
 debugLogger = Logger('debug', config.logDebugToFile)
 

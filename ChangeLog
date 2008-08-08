@@ -1,5 +1,10 @@
 2008-08-08  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/tc.py: Eliminate double slashes in TCImage.diff. Also remove
+	do-nothing TCImage.__init__().
+
+2008-08-08  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tc.py: Rewrite TCImage to use PIL instead of ImageMagick.
 	Update unit tests to reflect this rewrite.
 

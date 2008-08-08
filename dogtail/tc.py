@@ -81,10 +81,6 @@ class TCImage(TC):
     """
     Image Test Case Class.
     """
-
-    def __init__(self):
-        TC.__init__(self)
-
     def compare(self, label, baseline, undertest):
         for _file in (baseline, undertest):
             if type(_file) is not unicode and type(_file) is not str:
@@ -92,7 +88,8 @@ class TCImage(TC):
         self.label = label.strip()
         self.baseline = baseline.strip()
         self.undertest = undertest.strip()
-        self.diff = os.path.sep.join((config.scratchDir, 'diff.png'))
+        self.diff = os.path.normpath(
+                os.path.sep.join((config.scratchDir, 'diff.png')))
 
         self.baseImage = Image.open(self.baseline)
         self.testImage = Image.open(self.undertest)

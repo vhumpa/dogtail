@@ -13,7 +13,7 @@ import datetime
 import os.path
 from config import config
 from logging import ResultsLogger, TimeStamp, debugLogger
-from errors import DependencyNotFoundError
+from PIL import Image, ImageChops, ImageStat
 
 
 class TC(object):
@@ -81,114 +81,44 @@ class TCImage(TC):
     """
     Image Test Case Class.
     """
-    IMVersion = ''
 
     def __init__(self):
         TC.__init__(self)
-        self.supportedmetrics = ("MAE", "MSE", "PSE", "PSNR","RMSE", "none")
-        self.scratchDir = config.scratchDir
-        self.deldfile = 0
 
-        # Get the ImageMagick version by parsing its '-version' output.
-        IMVer = os.popen('compare -version').readline()
-        IMVer = re.match('Version: ImageMagick ([0-9\.]+) .*', IMVer)
-        if IMVer is not None:
-            IMVer = IMVer.groups()[0]
-            TCImage.IMVersion = IMVer
-        else:
-            raise DependencyNotFoundError, "ImageMagick"
-
-    # Use ImageMagick to compare 2 files
-    def compare(self, label, baseline, undertest, dfile='default', metric='none', threshold=0.0):
-        """
-        Calls ImageMagick's "compare" program. Default compares are based on
-size but metric based comparisons are also supported with a threshold
-determining pass/fail criteria.
-        """
+    def compare(self, label, baseline, undertest):
+        for _file in (baseline, undertest):
+            if type(_file) is not unicode and type(_file) is not str:
+                raise TypeError("Need filenames!")
         self.label = label.strip()
         self.baseline = baseline.strip()
         self.undertest = undertest.strip()
-        self.difference = 0.0
-        self.metric = metric.strip()
-        self.threshold = threshold
+        self.diff = os.path.sep.join((config.scratchDir, 'diff.png'))
 
-        # Create a default filename and flag it for deletion
-        if dfile == "default":
-            x = TimeStamp()
-            # Remove all whitespace from the label since IM chokes on it
-            splabel = label.split(" ")
-            label = "".join(splabel)
-            self.dfile = self.scratchDir + x.fileStamp(label)
-            if (self.dfile[-4:].lower() != ".png"): self.dfile += ".png"
-            self.deldfile = 1
-        else: # or use the supplied one with no deletion
-            self.dfile = dfile
-            self.deldfile = 0
+        self.baseImage = Image.open(self.baseline)
+        self.testImage = Image.open(self.undertest)
+        try:
+            if self.baseImage.size != self.testImage.size: 
+                self.result = {self.label: "Failed - images are different sizes"}
+                raise StopIteration
 
-        # Check to see if the metric type is supported
-        if self.metric in self.supportedmetrics:
-            # This is a bit convoluted and will be until IM completes
-            # implementation of command line chaining. This should be put into
-            # a try also munge together our IM call chain, if we're not doing
-            # numeric metrics
-            if self.metric == "none":
-                # Build the comparison string. Redirect STDERR to STDOUT;
-                # IM writes to STDERR and cmd reads STDOUT
-                cmd = ("compare " + self.baseline + " " + self.undertest + " " + self.dfile + " " + "2>&1")
-                # os.popen returns a list; if it is empty then we have passed
-                answer = os.popen(cmd).readlines()
-                if answer == []:
-                    self.result = {self.label: "Passed - Images are the same size"}
-                else:
-                    fanswer = answer[0].strip()
-                    self.result = {self.label: "Failed - " + fanswer}
-                TC.logger.log(self.result)
-                return self.result
-            else: # otherwise run the metric code
-                # Build the cmd
-                cmd = ("compare -metric " + self.metric + " " + self.baseline + " " + self.undertest + " " + self.dfile + " " + "2>&1")
-                answer = os.popen(cmd).readlines()
+            self.diffImage = ImageChops.difference(self.baseImage, 
+                    self.testImage)
+            self.diffImage.save(self.diff)
+            result = False
+            for stat in ('stddev', 'mean', 'sum2'):
+                for item in getattr(ImageStat.Stat(self.diffImage), stat):
+                    if item: 
+                        self.result = {self.label: "Failed - see %s" % 
+                                self.diff}
+                        raise StopIteration
+                    else: result = True
+        except StopIteration:
+            result = False
 
-                # We need to check if the metric comparison failed. Unfortunately we
-                # can only tell this by checking the length of the output of the
-                # command. More unfortunately, ImageMagic changed the length of the
-                # output at version 6.2.4, so we have to work around that.
-                metricFailed = True
-                IMVersion = TCImage.IMVersion
-                if IMVersion <= '6.2.3' and len(answer) == 1: metricFailed = False
-                if IMVersion >= '6.2.4' and len(answer) != 1: metricFailed = False
-                if metricFailed:
-                    fanswer = answer[0]
-                    self.result = {self.label: "Failed - " + fanswer}
-                else: # grab the metric from answer and convert it to a number
-                    fanswer = answer[0].strip()
-                    fanswer = fanswer.split(" ")
-                    fanswer = fanswer[0]
-                    fanswer = float(fanswer)
+        if result: self.result = {self.label: "Passed"}
 
-                    if fanswer == float("inf"): #same under PSNR returns inf dB:
-                        self.result = {self.label: "Passed - " + "compare results: " + str(fanswer) + " dB"}
-                    elif fanswer > self.threshold:
-                        excess = fanswer - self.threshold
-                        self.result = {self.label: "Failed - " + "compare result exceeds threshold by: " + str(excess) + " dB"}
-                    else:
-                        under = self.threshold - fanswer
-                        self.result = {self.label: "Passed - " + "compare results under threshold by: " + str(under) + " dB"}
-                TC.logger.log(self.result)
-                return self.result
-
-            # delete the composite image file if self.dfile is default
-            if self.deldfile == 1:
-                try:
-                    os.remove(self.dfile)
-                except IOError:
-                    debugLogger.log("Could not delete tempfile " + self.dfile)
-
-        else: # unsupported metric given
-            self.result = {self.label: "Failed - " + self.metric + " is not in the list of supported metrics"}
-            TC.logger.log(self.result)
-            return self.result
-
+        TC.logger.log(self.result)
+        return self.result
 
 
 class TCNumber(TC):
@@ -415,8 +345,7 @@ if __name__ == '__main__':
     # Print the entrystamp - should be YYYY-MM-DD_HH:MM:SS with local system time
     print entry
 
-    # Test to see that image compares work - this a simple compare with defaults
-    # Load our variabes
+    # Copmare different colors
     label = "unit test case 3.0"
     baseline = "../examples/data/20w.png"
     undertest = "../examples/data/20b.png"
@@ -428,10 +357,10 @@ if __name__ == '__main__':
     # Fire off the compare
     result = case3.compare(label, baseline, undertest)
 
-    # Print the result Should be label - Passed - Images are same size
+    # Print the result Should be label - Failed
     print result
 
-    # Default compare with different images (the sizes differ)
+    # Compare different sizes
     label = "unit test case 3.1"
     baseline = "../examples/data/20w.png"
     undertest = "../examples/data/10w.png"
@@ -440,56 +369,19 @@ if __name__ == '__main__':
     # Fire off the compare
     result = case3.compare(label, baseline, undertest)
 
-    # Print the result Should be label - Failied compare:Images differ in size
+    # Print the result Should be label - Failed
     print result
 
-    # Image compare pass with the metrics option
+    # Compare the same image
     label = "unit test case 3.2"
-    baseline = "../examples/data/20w.png"
-    undertest = "../examples/data/20b.png"
-    result = {}
-    metrics = ("MAE", "MSE", "PSE", "PSNR"," RMSE")
-
-    for i in range(len(metrics)):
-        result = case3.compare(label, baseline, undertest, metric=metrics[i])
-        print metrics[i]
-        print result
-
-    # Image compare fail metrics
-    label = "unit test case 3.3"
     baseline = "../examples/data/10w.png"
-    undertest = "../examples/data/10b.png"
+    undertest = "../examples/data/10w.png"
     result = {}
-    metrics = ("MAE", "MSE", "PSE", "PSNR"," RMSE")
 
-    for i in range(len(metrics)):
-        result = case3.compare(label, baseline, undertest, metric=metrics[i])
-        print metrics[i]
-        print result
+    # Fire off the compare
+    result = case3.compare(label, baseline, undertest)
 
-    # Image comapre threshold metrics - only PNSR should pass
-    label = "unit test case 3.4"
-    baseline = "../examples/data/10w.png"
-    undertest = "../examples/data/10b.png"
-    result = {}
-    metrics = ("MAE", "MSE", "PSE", "PSNR"," RMSE")
-    bound = 5
-
-    for i in range(len(metrics)):
-        result = case3.compare(label, baseline, undertest, metric=metrics[i], threshold=bound)
-        print metrics[i]
-        print result
-
-    # Bogus metric test
-    label = "unit test case 3.5"
-    baseline = "../examples/data/10w.png"
-    undertest = "../examples/data/10b.png"
-    result = {}
-    metrics = "Guess"
-
-    result = case3.compare(label, baseline, undertest, metric=metrics)
-
-    # Should be failed - metric unsupported
+    # Print the result Should be label - Passed
     print result
 
     # Number comparison tests

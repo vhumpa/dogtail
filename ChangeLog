@@ -1,5 +1,9 @@
 2008-08-08  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/tc.py: Make TC a new-style class. No particular reason.
+
+2008-08-08  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/logging.py: Make ResultsLogger log to a file no matter what.
 
 2008-07-24  Zack Cerza <zcerza@redhat.com>

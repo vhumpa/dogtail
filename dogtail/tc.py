@@ -16,7 +16,7 @@ from logging import ResultsLogger, TimeStamp, debugLogger
 from errors import DependencyNotFoundError
 
 
-class TC:
+class TC(object):
     """
     The Test Case Superclass
     """

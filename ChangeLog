@@ -1,5 +1,9 @@
 2008-08-11  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/rawinput.py: Use config.actionDelay for click().
+
+2008-08-11  Zack Cerza <zcerza@redhat.com>
+
 	* examples/gedit-test-utf8-procedural-api.py: Collapse the file
 	chooser's expander widget when we're done using it.
 

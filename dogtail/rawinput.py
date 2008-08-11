@@ -29,7 +29,7 @@ def click (x, y, button = 1):
     """
     logger.log("Mouse button %s click at (%s,%s)"%(button,x,y))
     registry.generateMouseEvent(x, y, 'b%sc' % button)
-    doDelay()
+    doDelay(config.actionDelay)
 
 def doubleClick (x, y, button = 1):
     """

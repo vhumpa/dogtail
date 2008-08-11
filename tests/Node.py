@@ -17,7 +17,6 @@ __author__="Dave Malcolm <dmalcolm@redhat.com>"
 import unittest
 import time
 import dogtail.tree
-import pyatspi
 from CORBA import COMM_FAILURE
 
 class GtkDemoTest(unittest.TestCase):
@@ -80,7 +79,7 @@ class TestNodeAttributes(GtkDemoTest):
     # 'role' (read-only atspi role enum):
     def testGetRole(self):
         "Node.role for a gtk-demo app should be SPI_ROLE_APPLICATION"
-        self.assertEquals(self.app.role, pyatspi.ROLE_APPLICATION)
+        self.assertEquals(self.app.role, dogtail.tree.pyatspi.ROLE_APPLICATION)
 
     def testSetRole(self):
         "Node.role should be read-only"

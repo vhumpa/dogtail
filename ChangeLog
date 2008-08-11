@@ -1,5 +1,9 @@
 2008-08-11  Zack Cerza <zcerza@redhat.com>
 
+	* tests/Node.py: Don't import pyatspi unnecessarily.
+
+2008-08-11  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/rawinput.py: Use config.actionDelay for click().
 
 2008-08-11  Zack Cerza <zcerza@redhat.com>

@@ -1,5 +1,11 @@
 2008-08-11  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/tree.py: Don't log giant messages to the debug log if we're
+	setting a Node's text to a very large value. Also, use
+	config.actionDelay for Node.click().
+
+2008-08-11  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tc.py: Put a timestamp on TCImage's diff.png.
 
 2008-08-08  Zack Cerza <zcerza@redhat.com>

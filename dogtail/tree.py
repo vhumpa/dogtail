@@ -168,7 +168,7 @@ class Action:
                 logger.log("Warning: " + str(nSE))
         if config.blinkOnActions: self.node.blink()
         result = self.__action.doAction (self.__index)
-        doDelay()
+        doDelay(config.actionDelay)
         return result
         
 
@@ -316,7 +316,12 @@ class Node:
     def _setText(self, text):
          try:
              if config.debugSearching:
-                 logger.log("Setting text of %s to '%s'"%(self.getLogString(), value)) 
+                 msg = "Setting text of %s to %s"
+                 # Let's not get too crazy if 'text' is really large...
+                 # FIXME: Sometimes the next line screws up Unicode strings.
+                 if len(text) > 140: txt = text[:134] + " [...]"
+                 else: txt = text
+                 logger.log(msg % (self.getLogString(), "'%s'" % txt)) 
              self.queryEditableText().setTextContents(text)
          except NotImplementedError: raise AttributeError, "can't set attribute"
     text = property(_getText, _setText, doc = \
@@ -391,7 +396,6 @@ class Node:
         if config.debugSearching:
             logger.log("raw click on %s %s at (%s,%s)"%(self.name, self.getLogString(), str(clickX), str(clickY)))
         rawinput.click(clickX, clickY, button)
-        doDelay()
 
     ##
     # RelationSet

@@ -88,8 +88,9 @@ class TCImage(TC):
         self.label = label.strip()
         self.baseline = baseline.strip()
         self.undertest = undertest.strip()
+        diffName = TimeStamp().fileStamp("diff") + ".png"
         self.diff = os.path.normpath(
-                os.path.sep.join((config.scratchDir, 'diff.png')))
+                os.path.sep.join((config.scratchDir, diffName)))
 
         self.baseImage = Image.open(self.baseline)
         self.testImage = Image.open(self.undertest)

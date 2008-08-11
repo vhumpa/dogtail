@@ -1,3 +1,7 @@
+2008-08-11  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tc.py: Put a timestamp on TCImage's diff.png.
+
 2008-08-08  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/tc.py: Eliminate double slashes in TCImage.diff. Also remove

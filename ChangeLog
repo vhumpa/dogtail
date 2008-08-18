@@ -1,5 +1,12 @@
 2008-08-18  Zack Cerza <zcerza@redhat.com>
 
+	* examples/gedit-test-utf8-procedural-api.py: Actually, handle the
+	file chooser's expander widget more gracefully by looking to see if it
+	has the 'checked' state before expanding it - apparently 'checked'
+	means it is expanded. Go figure.
+
+2008-08-18  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/procedural.py: Make Click.__call__() work without arguments
 	again.
 

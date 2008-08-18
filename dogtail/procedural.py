@@ -298,9 +298,10 @@ class Click (Action):
         If raw is False or if button evaluates to False, just pass the rest of 
         the arguments to Action.
         """
+        if name or roleName or description:
+            FocusWidget.__call__(self, name = name, roleName = roleName, description = description)
         if raw and button:
             # We're doing a raw mouse click
-            FocusWidget.__call__(self, name = name, roleName = roleName, description = description)
             Click.node.click(button)
         else:
             Action.__call__(self, name = name, roleName = roleName, description = description, delay = delay)

@@ -1,3 +1,9 @@
+2008-12-31  Zack Cerza <zcerza@redhat.com>
+
+	* examples/appstartup.py: Add a new example that launches a given
+	application, then checks to see that it started correctly by looking 
+	for a Node with the given roleName.
+
 2008-08-18  Zack Cerza <zcerza@redhat.com>
 
 	* examples/gedit-test-utf8-procedural-api.py: Actually, handle the

@@ -7,6 +7,7 @@ install:
 	python setup.py install
 
 clean:
+	rm -rf api_docs/
 	python setup.py clean
 	rm -f MANIFEST
 	rm -rf build dist
@@ -43,10 +44,16 @@ srpm: rpm_prep
 	mv rpms/SRPMS/* dist/
 	rm -rf rpms/
 
-apidocs:
-	rm -rf website/doc/*
-	#find website/doc -not -type d -not -regex '.*/\.svn/.*' -exec rm {} \;
-	happydoc -d website/doc/ -t "Documentation" dogtail && \
-	mv website/doc/dogtail/* website/doc/ && \
-	rm -rf website/doc/dogtail/
+apidocs: apidocs_html apidocs_pdf
 
+apidocs_html:
+	epydoc --html --config epydoc.conf
+
+apidocs_pdf:
+	epydoc --pdf --config epydoc.conf
+	mv api_docs/api.pdf api_docs/dogtail.pdf
+
+update_apidocs: apidocs
+	# Sadly, I'm still the only one who can update the API docs.
+	ssh zmc@fedorapeople.org rm -rf \~/public_html/dogtail/epydoc/*
+	scp api_docs/*.{html,css,png,pdf} zmc@fedorapeople.org:~/public_html/dogtail/epydoc/

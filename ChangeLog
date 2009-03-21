@@ -1,5 +1,10 @@
 2009-03-21  Zack Cerza <zcerza@redhat.com>
 
+	* Makefile: Add proper targets for generating/uploading API docs.
+	We're using Epydoc now.
+
+2009-03-21  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/utils.py: If we're running under pydoc or epydoc, don't bail
 	if accessibility is disabled.
 

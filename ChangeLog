@@ -1,3 +1,8 @@
+2009-03-21  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/utils.py: If we're running under pydoc or epydoc, don't bail
+	if accessibility is disabled.
+
 2008-12-31  Zack Cerza <zcerza@redhat.com>
 
 	* examples/appstartup.py: Add a new example that launches a given

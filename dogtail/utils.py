@@ -163,6 +163,11 @@ def isA11yEnabled():
     return (gconfEnabled or envEnabled)
 
 def bailBecauseA11yIsDisabled():
+    if sys.argv[0].endswith("pydoc"): return
+    try:
+        if file("/proc/%s/cmdline" % os.getpid()).read().find('epydoc') != -1:
+            return
+    except: pass
     logger.log("Dogtail requires that Assistive Technology support be enabled. Aborting...")
     sys.exit(1)
 

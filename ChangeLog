@@ -1,5 +1,9 @@
 2009-03-21  Zack Cerza <zcerza@redhat.com>
 
+	* epydoc.conf: Add the Epydoc config file.
+
+2009-03-21  Zack Cerza <zcerza@redhat.com>
+
 	* Makefile: Add proper targets for generating/uploading API docs.
 	We're using Epydoc now.
 

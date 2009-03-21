@@ -1,0 +1,5 @@
+api_docs/*
+build/*
+dist/*
+MANIFEST
+*.pyc

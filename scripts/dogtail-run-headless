@@ -2,191 +2,35 @@
 """
 dogtail-run-headless
 
-Runs a dogtail script 
-This script launches an X server using the virtual framebuffer, allowing
-dogtail scripts to be run on headless servers. 
-The server can currently use a minimal GNOME session, or just metacity.
+This script runs a session within an X server, allowing dogtail scripts to be
+run on systems with no graphic cards, among other things. Currently it can 
+only start GNOME sessions.
 
-Dogtail scripts are run in the current directory. After the script
-terminates, so does the X server.
-"""
-__author__ = "Zack Cerza <zcerza@redhat.com>"
-
-_usage = """
-Usage: dogtail-run-headless <options> <script>
-
-Options:
-
-    -h, --help      Display this message.
-    
-    -g, --gnome     Use a GNOME session.
-    
-    -n, --none      Use a minimal session, consisting of just metacity.
-    
-    -k, --kde       Use a KDE session (not implemented).
+Scripts are run in the current directory. After they are finished, dogtail can
+optionally log out of the session, which will also termninate the X server.
 """
 
-def usage():
-    print _usage
-
-import os
+from optparse import OptionParser
+from dogtail import sessions
 import sys
-import gconf
-gconfClient = gconf.client_get_default()
 
-TRUE='true'
-FALSE='false'
+def parse():
+    parser = OptionParser()
+    parser.add_option("-s", "--session", dest = "session", type = "choice",
+            choices = ["GNOME"], help = "which session to use")
+    parser.add_option("-n", "--no-terminate", action = "store_false", 
+            dest = "terminate", 
+            help = "don't terminate the session when the script ends")
+    parser.set_defaults(session = "GNOME", terminate = True)
+    options, args = parser.parse_args()
+    return options, args
 
-a11yGConfKey = '/desktop/gnome/interface/accessibility'
+def main():
+    options, args = parse()
+    elif options.session == "GNOME":
+        session = sessions.GNOMESession
+    pid = session.start()
+    session.wait()
+    sys.exit(session.scriptExitCode)
 
-global a11yIsEnabled
-global a11yWasEnabled
-a11yWasEnabled = True
-
-def makeSureGNOMEIsAccessible():
-    global a11yIsEnabled, a11yWasEnabled
-    a11yIsEnabled = gconfClient.get_bool(a11yGConfKey)
-    a11yWasEnabled = a11yIsEnabled
-
-    if not a11yIsEnabled:
-        print "Temporarily enabling accessibility support for GNOME"
-        gconfClient.set_bool(a11yGConfKey, True)
-        a11yIsEnabled = gconfClient.get_bool(a11yGConfKey)
-
-    return a11yIsEnabled
-
-global xinitrc
-xinitrc = None
-
-def startXServer():
-    def findFreeDisplay():
-        import re
-        tmp = os.listdir('/tmp')
-        pattern = re.compile('\.X([0-9]+)-lock')
-        numbers = []
-        for file in tmp:
-            match = re.match(pattern, file)
-            if match: numbers.append(int(match.groups()[0]))
-        if not numbers: return ':0'
-        numbers.sort()
-        return ':' + str(numbers[-1] + 1)
-    
-    server = os.popen('/usr/bin/which Xvfb 2>/dev/null')
-    if not server:
-        print "Cannot find Xvfb"
-        sys.exit(EXIT_DEPS)
-    server = server.readlines()[0].strip()
-
-    client = xinitrc.name
-    resolution = '1024x768x16'
-    cmd = 'xinit %s -- %s %s -screen 0 %s -ac -noreset -shmem' % \
-            (client, server, findFreeDisplay(), resolution)
-    print cmd
-    return os.system(cmd)
-    
-global exitCodeFile
-exitCodeFile = None
-
-def main(argv):
-    import getopt
-    EXIT_SYNTAX = 1
-    EXIT_NOT_IMPL = 2
-    EXIT_DEPS = 3
-
-    shortOpts = "hgkn"
-    longOpts = ['help', 'gnome', 'kde', 'none']
-    try:
-        opts, args = getopt.getopt(argv[1:], shortOpts, longOpts)
-    except getopt.GetoptError:
-        usage()
-        return EXIT_SYNTAX
-    if len(opts) == 0:
-        usage()
-        return EXIT_SYNTAX
-        
-    def stripOpt(opt):
-        # take the '-' out of e.g. '-h'
-        if len(opt) == 2: opt = opt[1]
-        # take the '--' out of e.g. '--help'
-        if len(opt) > 2: opt = opt[2:]
-        return opt
-    
-    for opt, arg in opts:
-        opt = stripOpt(opt)
-        if opt in (shortOpts[0], longOpts[0]):
-            usage()
-            cleanup()
-            return 0
-        elif len(args) == 0:
-            print "You must specify a script to execute in the headless session."
-            print
-            return EXIT_SYNTAX
-        elif len(args) > 1:
-            print "You may only specify one script to execute in the headless session."
-            print
-            print "Note: If you're trying to have dogtail-run-headless run a script using certain"
-            print "environment values, use the following format (note the quotation marks):"
-            print
-            print '   dogtail-run-headless "VAR=value /path/to/script.py"'
-            print
-            return EXIT_SYNTAX
-        else:
-            script = args[0]
-    
-        pid = str(os.getpid())
-        global exitCodeFile
-        exitCodeFile = "/tmp/dogtail-headless-exitcode." + pid
-
-        global xinitrc
-        xinitrc = file("/tmp/dogtail-headless-xinitrc." + pid, 'w')
-        xinitrc.write('#!/bin/sh\n')
-        
-        if opt in (shortOpts[1], longOpts[1]):
-            xinitrc.write('gnome-session &\n')
-            xinitrc.write('sleep 10\n')
-            xinitrc.write('cd %s && dogtail-detect-session && sh -c "%s"; echo -n $? > %s\n' % (os.getcwdu(), script, exitCodeFile))
-            xinitrc.close()
-
-            makeSureGNOMEIsAccessible()
-            startXServer()
-            exitCode = int(file(exitCodeFile, 'r').read())
-            return exitCode
-            
-        elif opt in (shortOpts[2], longOpts[2]):
-            # KDE session
-            print "Sorry, this is just a placeholder. KDE4 should support dogtail, and vice versa."
-            cleanup()
-            return EXIT_NOT_IMPL
-
-        elif opt in (shortOpts[3], longOpts[3]):
-            # No session
-            xinitrc.write('metacity &\n')
-            xinitrc.write('sleep 3\n')
-            xinitrc.write('cd %s && sh -c "%s"; echo -n $? > %s\n' % (os.getcwdu(), script, exitCodeFile))
-            xinitrc.close()
-            
-            makeSureGNOMEIsAccessible()
-            startXServer()
-            exitCode = int(file(exitCodeFile, 'r').read())
-            return exitCode
-
-def cleanup():
-    if not a11yWasEnabled: gconfClient.set_bool(a11yGConfKey, False)
-    if exitCodeFile:
-        os.remove(exitCodeFile)
-    if xinitrc:
-        name = xinitrc.name
-        xinitrc.close()
-        os.remove(name)
-
-if __name__ == "__main__":
-    import traceback
-    try: exitCode = main(sys.argv)
-    except Exception:
-        exitCode = 254
-        traceback.print_exc()
-    try: 
-        cleanup()
-    except Exception: traceback.print_exc()
-    sys.exit(exitCode)
-
+if __name__ == "__main__": main()

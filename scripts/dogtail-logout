@@ -1,0 +1,10 @@
+#!/usr/bin/python
+
+from dogtail.procedural import *
+
+focus.application('gnome-panel')
+click('System')
+click('Log Out .*')
+
+focus.application('gnome-session')
+click('Log Out')

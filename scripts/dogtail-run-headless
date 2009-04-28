@@ -27,8 +27,8 @@ def parse():
 
 def main():
     options, args = parse()
-    elif options.session == "GNOME":
-        session = sessions.GNOMESession
+    if options.session == "GNOME":
+        session = sessions.GNOMESession(script = " ".join(args), logout = options.terminate)
     pid = session.start()
     session.wait()
     sys.exit(session.scriptExitCode)

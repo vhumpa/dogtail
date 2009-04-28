@@ -113,7 +113,7 @@ class GNOMESession(Session):
         lines = [
             "gconftool-2 --type bool --set /desktop/gnome/interface/accessibility true",
             ". /etc/X11/xinit/xinitrc-common",
-            "sh -c \"sleep 10; cd %s && dogtail-detect-session && sh -c \\\"%s; echo -n $? > %s\\\"%s\"&\n" % (os.getcwdu(), self.script, self.exitCodeFile, logoutString),
+            "sh -c \"sleep 10; cd %s && dogtail-detect-session && sh -c \\\"%s; echo -n \\\\\\$? > %s\\\"%s\"&\n" % (os.getcwdu(), self.script, self.exitCodeFile, logoutString),
             "exec -l $SHELL -c \"$CK_XINIT_SESSION $SSH_AGENT %s\"" % \
             #"$CK_XINIT_SESSION $SSH_AGENT %s &" % \
                     self.gnome_session,

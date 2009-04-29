@@ -6,6 +6,11 @@ from time import sleep
 focus.application('gnome-panel')
 click('System')
 click('Log Out .*')
+
+# The following often doesn't work. I'm not sure why, but sometimes
+# gnome-session doesn't show up as accessible. The good news is that even if
+# we can't click the 'Log Out' button, newer versions of gnome-session log you
+# out automatically after 60 seconds if you don't cancel.
 sleep(1)
 focus.application('gnome-session')
 click('Log Out')

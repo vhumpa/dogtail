@@ -56,8 +56,8 @@ def main():
     if options.xserver: session.xserver.server = options.xserver
     pid = session.start()
     scriptExitCode = session.script.exitCode
-    if options.logout: session.attemptLogout()
-    if options.terminate: session.stop()
+    if options.logout == 'y': session.attemptLogout()
+    if options.terminate == 'y': session.stop()
     else: session.wait()
     sys.exit(scriptExitCode)
 

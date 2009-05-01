@@ -114,7 +114,16 @@ class Session(object):
 
     @property
     def environment(self):
-        if self._environment: return self._environment
+        def isSessionProcess(fileName):
+            try:
+                if os.path.realpath(path + 'exe') != self.sessionBinary: 
+                    return False
+            except OSError:
+                return False
+            pid = fileName.split('/')[2]
+            if pid == 'self' or pid == str(os.getpid()): return False
+            return True
+
         def getEnvDict(fileName):
             try: envString = open(fileName, 'r').read()
             except IOError: return {}
@@ -132,11 +141,14 @@ class Session(object):
                 return True
             return False
 
-        for envFile in glob.glob('/proc/*/environ'):
-            pid = envFile.split('/')[2]
-            if pid == 'self' or pid == str(os.getpid()): continue
+        for path in glob.glob('/proc/*/'):
+            if not isSessionProcess(path): continue
+            envFile = path + 'environ'
             envDict = getEnvDict(envFile)
-            if isSessionEnv(envDict): self._environment = envDict
+            if isSessionEnv(envDict): 
+                print path
+                print envDict
+                self._environment = envDict
         if not self._environment:
             raise RuntimeError("Can't find our environment!")
         return self._environment

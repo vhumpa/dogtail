@@ -15,31 +15,50 @@ from dogtail import sessions
 import sys
 import os.path
 
+
 def findXServers(path = "/usr/bin"):
     l = [os.path.join(path, f) for f in os.listdir(path) if f[0] == 'X']
     s = set(os.path.realpath(p) for p in l)
     return list(s)
 
 def parse():
+    yesno = ('y', 'n')
+    sessions = ("GNOME",)
     parser = OptionParser()
-    parser.add_option("-s", "--session", dest = "session", type = "choice",
-            choices = ["GNOME"], help = "which session to use")
-    parser.add_option("-x", "--x-server", dest = "xserver", type = "choice",
+
+    parser.add_option("-s", "--session", type = "choice", 
+            dest = "session", 
+            choices = sessions, 
+            help = "which session to use")
+    parser.add_option("-x", "--x-server", type = "choice", 
+            dest = "xserver", 
             choices = findXServers(), help = "which X server to use")
-    parser.add_option("-n", "--no-terminate", action = "store_false", 
-            dest = "terminate", 
-            help = "don't terminate the session when the script ends")
-    parser.set_defaults(session = "GNOME", terminate = True)
+    parser.add_option("-l", "--logout", type = "choice", 
+            dest = "logout", 
+            choices = yesno,
+            help = "attempt to log out of the session gracefully after" + 
+                "script completion")
+    parser.add_option("-t", "--terminate", type = "choice", 
+            dest = "terminate",
+            choices = yesno,
+            help = "after script completion, and after any attempt to log" +
+                "out, terminate the session")
+
+    parser.set_defaults(session = sessions[0], logout = 'y', terminate = 'y')
     options, args = parser.parse_args()
     return options, args
 
 def main():
     options, args = parse()
     if options.session == "GNOME":
-        session = sessions.GNOMESession(script = " ".join(args), logout = options.terminate)
-    if options.xserver: session.xserver.binary = options.xserver
+        session = sessions.Session(sessionBinary = '/usr/bin/gnome-session',
+                scriptCmdList = args)
+    if options.xserver: session.xserver.server = options.xserver
     pid = session.start()
-    session.wait()
-    sys.exit(session.scriptExitCode)
+    scriptExitCode = session.script.exitCode
+    if options.logout: session.attemptLogout()
+    if options.terminate: session.stop()
+    else: session.wait()
+    sys.exit(scriptExitCode)
 
 if __name__ == "__main__": main()

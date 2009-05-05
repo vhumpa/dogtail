@@ -4,13 +4,19 @@ from dogtail.procedural import *
 from time import sleep
 
 focus.application('gnome-panel')
-click('System')
-click('Log Out .*')
+# We're not using raw clicks here because sometimes we get bogus extents from 
+# gnome-panel
+click('System', raw = False)
+click('Log Out .*', raw = False)
 
-# The following often doesn't work. I'm not sure why, but sometimes
+# The following sometimes doesn't work. I'm not sure why, but sometimes
 # gnome-session doesn't show up as accessible. The good news is that even if
 # we can't click the 'Log Out' button, newer versions of gnome-session log you
-# out automatically after 60 seconds if you don't cancel.
+# out automatically after 60 seconds if you don't cancel. Also, the session
+# implementations in dogtail.sessions will by default terminate the X server if
+# this script fails to log out.
 sleep(1)
 focus.application('gnome-session')
-click('Log Out')
+click('Log Out', raw = False)
+# Give the session some time to end before we kill it.
+sleep(10)

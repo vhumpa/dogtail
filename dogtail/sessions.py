@@ -94,7 +94,6 @@ class Session(object):
 
     def __init__(self, sessionBinary, scriptCmdList = [], scriptDelay = 10, logout = True):
         self.sessionBinary = sessionBinary
-        print scriptCmdList
         self.script = Script(scriptCmdList)
         self.scriptDelay = scriptDelay
         self.logout = logout
@@ -146,8 +145,8 @@ class Session(object):
             envFile = path + 'environ'
             envDict = getEnvDict(envFile)
             if isSessionEnv(envDict): 
-                print path
-                print envDict
+                #print path
+                #print envDict
                 self._environment = envDict
         if not self._environment:
             raise RuntimeError("Can't find our environment!")

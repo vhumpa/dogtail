@@ -92,7 +92,7 @@ class Session(object):
 
     cookieName = "DOGTAIL_SESSION_COOKIE"
 
-    def __init__(self, sessionBinary, scriptCmdList, scriptDelay = 10, logout = True):
+    def __init__(self, sessionBinary, scriptCmdList = [], scriptDelay = 10, logout = True):
         self.sessionBinary = sessionBinary
         print scriptCmdList
         self.script = Script(scriptCmdList)

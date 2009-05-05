@@ -162,7 +162,7 @@ class Session(object):
         self.xserver.stop()
 
     def attemptLogout(self):
-        logoutScript = Script('/tmp/dt_git/scripts/dogtail-logout', 
+        logoutScript = Script('dogtail-logout', 
                 environ = self.environment)
         logoutScript.start()
         logoutScript.wait()

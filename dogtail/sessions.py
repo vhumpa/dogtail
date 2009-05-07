@@ -13,7 +13,7 @@ def scratchFile(label):
     dogtail-headless-<label>.<random junk>"""
     prefix = "dogtail-headless-"
     return tempfile.NamedTemporaryFile(prefix = "%s%s." % (prefix, label), 
-            dir = config.scratchDir, delete = False)
+            dir = config.scratchDir)
 
 class Subprocess(object):
     def __init__(self, cmdList, environ = None):
@@ -102,9 +102,9 @@ class Session(object):
         self._environment = None
 
     def start(self):
-        xinitrcFileObj = scratchFile('xinitrc')
-        self.xserver.xinitrc = xinitrcFileObj.name
-        self._buildXInitRC(xinitrcFileObj)
+        self.xinitrcFileObj = scratchFile('xinitrc')
+        self.xserver.xinitrc = self.xinitrcFileObj.name
+        self._buildXInitRC(self.xinitrcFileObj)
         xServerPid = self.xserver.start()
         time.sleep(self.scriptDelay)
         self.script.environ = self.environment

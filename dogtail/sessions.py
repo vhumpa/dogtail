@@ -2,6 +2,7 @@ import time
 import os
 import re
 import subprocess
+import signal
 import tempfile
 import random
 import glob
@@ -32,7 +33,9 @@ class Subprocess(object):
         return self.popen.wait()
 
     def stop(self):
-        self.popen.terminate()
+        # The following doesn't exist in python < 2.6, if you can believe it.
+        #self.popen.terminate()
+        os.kill(self.popen.pid, signal.SIGTERM)
 
     @property
     def exitCode(self):

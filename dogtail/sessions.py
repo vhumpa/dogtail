@@ -189,5 +189,4 @@ class Session(object):
 
         fileObj.write('\n'.join(lines).strip())
         fileObj.flush()
-        fileObj.close()
 

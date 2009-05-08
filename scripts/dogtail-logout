@@ -2,6 +2,8 @@
 
 from dogtail.procedural import *
 from time import sleep
+config.fatalErrors = True
+config.logDebugToFile = False
 
 focus.application('gnome-panel')
 # We're not using raw clicks here because sometimes we get bogus extents from 
@@ -16,7 +18,15 @@ click('Log Out .*', raw = False)
 # implementations in dogtail.sessions will by default terminate the X server if
 # this script fails to log out.
 sleep(1)
-focus.application('gnome-session')
-click('Log Out', raw = False)
+try:
+    focus.application('gnome-session')
+    click('Log Out', raw = False)
+except FocusError:
+    # In earlier versions of GNOME, the logout dialog belonged to gnome-panel.
+    focus.application('gnome-panel')
+    # Really? alert? That's a new one for me.
+    focus.widget(roleName = 'alert')
+    click('Log Out', raw = False)
+
 # Give the session some time to end before we kill it.
 sleep(10)

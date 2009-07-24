@@ -4,16 +4,17 @@
 # it is killed. It will most likely be deleted in the next release.
 __author__ = 'David Malcolm <dmalcolm@redhat.com>'
 
-import atspi
 import dogtail.tree
+import pyatspi
+import Accessibility
 
 # Test of event callbacks
 # Under construction
 
 def callback(event):
     source = event.source
-    if isinstance(source, atspi.Accessible):
-        sourceStr = " source:%s"%(str(dogtail.tree.Node(source)))
+    if isinstance(source, Accessibility.Accessible):
+        sourceStr = " source:%s"% str(source)
     else:
         sourceStr = ""
     print "Got event: %s%s"%(event.type, sourceStr)
@@ -42,8 +43,8 @@ eventNames = [
     "object:active-descendant-changed",
     "object:visible-data-changed",
     "object:text-selection-changed",
-    "object:text-caret-moved",
-    "object:text-changed",
+#    "object:text-caret-moved",
+#    "object:text-changed",
     "object:column-inserted",
     "object:row-inserted",
     "object:column-reordered",
@@ -74,9 +75,10 @@ eventNames = [
     "object:test"
     ]
 
-#for eventName in eventNames:
-#    listener = atspi.EventListener(callback, [eventName])
-listener = atspi.EventListener(callback, eventNames)
+listeners = []
+for eventName in eventNames:
+    #listener = atspi.EventListener(callback, [eventName])
+    listeners.append(pyatspi.Registry.registerEventListener(callback, eventName))
 
 #listener = atspi.EventListener(callback, [""])
-atspi.event_main()
+pyatspi.Registry.start(False, False)

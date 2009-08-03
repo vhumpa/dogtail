@@ -506,39 +506,28 @@ class EventRecorder:
         self.modsDown = {}
 
         import gtk.keysyms
+        self.listeners = {
+                "window:create": marshalOnWindowCreate,
+                "focus:": marshalOnFocus,
+                "object:state-changed:selected": marshalOnSelect,
+                "mouse:button": marshalOnMouseButton
+                }
 
     def __registerEvents(self):
-        # Focus events:
-        pyatspi.Registry.registerEventListener(marshalOnFocus, "focus:")
-
-        # State Changed events:
-        pyatspi.Registry.registerEventListener(marshalOnSelect, "object:state-changed:selected")
-
-        # Mouse button events:
-        pyatspi.Registry.registerEventListener(marshalOnMouseButton, "mouse:button")
+        print "registering events"
+        for eventName, callback in self.listeners.iteritems():
+            ret = pyatspi.Registry.registerEventListener(callback, eventName)
+            print eventName, str(ret)
 
         # Keystroke events:
-        pyatspi.Registry.registerKeystrokeListener(marshalOnKeyPress, [], self.modMasks, [pyatspi.KEY_PRESSED_EVENT, pyatspi.KEY_RELEASED_EVENT], True, True, False)
-
-        # Window creation:
-        #pyatspi.Registry.registerEventListener(marshalOnWindowCreate, "window:create")
-
+        #pyatspi.Registry.registerKeystrokeListener(marshalOnKeyPress, [], self.modMasks, [pyatspi.KEY_PRESSED_EVENT, pyatspi.KEY_RELEASED_EVENT], True, True, False)
         
     def __deregisterEvents(self):
-        # Focus events:
-        pyatspi.Registry.deregisterEventListener(marshalOnFocus, "focus:")
+        for eventName, callback in self.listeners.iteritems():
+            pyatspi.Registry.deregisterEventListener(callback, eventName)
 
-        # State Changed events:
-        pyatspi.Registry.deregisterEventListener(marshalOnSelect, "object:state-changed:selected")
-        
-        # Mouse button events:
-        pyatspi.Registry.deregisterEventListener(marshalOnMouseButton, "mouse:button")
-        
         # Keystroke events:
-        pyatspi.Registry.deregisterKeystrokeListener(marshalOnKeyPress, [], self.modMasks, [pyatspi.KEY_PRESSED_EVENT, pyatspi.KEY_RELEASED_EVENT])
-        
-        # Window creation:
-        #pyatspi.Registry.deregisterEventListener(marshalOnWindowCreate, "window:create")
+        #pyatspi.Registry.deregisterKeystrokeListener(marshalOnKeyPress, [], self.modMasks, [pyatspi.KEY_PRESSED_EVENT, pyatspi.KEY_RELEASED_EVENT])
         
 
     def startRecording(self, unused = None, scriptTextView = None):
@@ -563,7 +552,6 @@ class EventRecorder:
         self.lastSelectedNode = event.source
 
     def onMouseButton(self, event):
-        #logEvent(event)
         self.writer.recordTyping(self.typedTextBuffer, "pressed", self.lastFocusedNode)
         self.typedTextBuffer = ""
 
@@ -655,7 +643,6 @@ class EventRecorder:
         elif event.type == pyatspi.KEY_RELEASED:
             isRelease = True
 
-        #logEvent(event)
 
         # This elapsed time code isn't used right now.
         self.lastKeyPressTimeStamp = event.timestamp
@@ -776,7 +763,6 @@ class EventRecorder:
             self.typedTextBuffer = self.typedTextBuffer + key
 
     def onWindowCreate(self, event):
-        # logEvent(event)
         sourceNode = event.source
         print "Window creation: %s" % str(sourceNode)
 
@@ -790,22 +776,27 @@ class EventRecorder:
 # when an exception is raised.
 import traceback
 def marshalOnFocus(event):
+    logEvent(event)
     try: recorder.onFocus(event)
     except Exception: traceback.print_exc()
 
 def marshalOnSelect(event):
+    logEvent(event)
     try: recorder.onSelect(event)
     except Exception: traceback.print_exc()
 
 def marshalOnMouseButton(event):
+    logEvent(event)
     try: recorder.onMouseButton(event)
     except Exception: traceback.print_exc()
 
 def marshalOnKeyPress(event):
+    logEvent(event)
     try: recorder.onKeyPress(event)
     except Exception: traceback.print_exc()
 
 def marshalOnWindowCreate(event):
+    logEvent(event)
     try: recorder.onWindowCreate(event)
     except Exception: traceback.print_exc()
 

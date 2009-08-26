@@ -24,7 +24,8 @@ def findXServers(path = "/usr/bin"):
 def parse():
     yesno = ('y', 'n')
     sessions = ("GNOME",)
-    parser = optparse.OptionParser()
+    usage = "usage: %prog: [options] {script [args]}"
+    parser = optparse.OptionParser(usage=usage)
 
     parser.add_option("-s", "--session", type = "choice", 
             dest = "session", 
@@ -46,13 +47,13 @@ def parse():
 
     parser.set_defaults(session = sessions[0], logout = 'y', terminate = 'y')
     options, args = parser.parse_args()
+    if not args:
+        parser.print_usage()
+        sys.exit(1)
     return options, args
 
 def main():
     options, args = parse()
-    if not args:
-        sys.stderr.write("Need a script to run!")
-        sys.exit(1)
     if options.session == "GNOME":
         session = sessions.Session(sessionBinary = '/usr/bin/gnome-session',
                 scriptCmdList = args)

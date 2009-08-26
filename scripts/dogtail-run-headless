@@ -10,7 +10,7 @@ Scripts are run in the current directory. After they are finished, dogtail can
 optionally log out of the session, which will also termninate the X server.
 """
 
-from optparse import OptionParser
+import optparse
 from dogtail import sessions
 import sys
 import os.path
@@ -24,7 +24,7 @@ def findXServers(path = "/usr/bin"):
 def parse():
     yesno = ('y', 'n')
     sessions = ("GNOME",)
-    parser = OptionParser()
+    parser = optparse.OptionParser()
 
     parser.add_option("-s", "--session", type = "choice", 
             dest = "session", 
@@ -50,6 +50,9 @@ def parse():
 
 def main():
     options, args = parse()
+    if not args:
+        sys.stderr.write("Need a script to run!")
+        sys.exit(1)
     if options.session == "GNOME":
         session = sessions.Session(sessionBinary = '/usr/bin/gnome-session',
                 scriptCmdList = args)

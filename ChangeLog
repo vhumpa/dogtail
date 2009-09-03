@@ -1,3 +1,114 @@
+2009-08-26  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Tweak usage output. 
+
+2009-08-26  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Require a script argument to be run! 
+
+2009-08-03  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Refactor eventlistener (de)registration
+	code. Also move some logEvent calls. 
+
+2009-07-24  Zack Cerza <zcerza@redhat.com>
+
+	* examples/test-events.py: Update to pyatspi. Disable some events as
+	they just flood the terminal. 
+
+2009-05-08  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-logout: Work with RHEL5. 
+
+2009-05-05  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py: Use os.kill() instead of Popen.terminate(),
+	since the latter doesn't exist before python 2.6... 
+
+2009-05-05  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py: Oops, don't close() the xinitrc object! 
+
+2009-05-05  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py: Let scratch files be deleted upon closing. Keep
+	Session.xinitrcFileOBj around until its start() method is next called,
+	so it can be read in the meantime.
+
+2009-05-05  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-logout: Don't use raw clicks. Also add a little more
+	documentation. 
+
+2009-05-05  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py: Fix path to dogtail-logout
+
+2009-05-05  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py: Remove/comment some debug output. 
+
+2009-05-05  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py: Make scriptCmdList an optional argument to
+	Session.init()
+
+2009-05-01  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Fix option application. 
+
+2009-05-01  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py: Tweak the way we find the correct environment
+	for the script. 
+
+2009-05-01  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py, scripts/dogtail-run-headless: Refactor most of
+	dogtail.sessions. 
+
+2009-04-30  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py: Merge Session and GNOMESession; refactor
+	Session; add Script. 
+
+2009-04-29  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-logout: Add a note about the script still "working"
+	if gnome-session doesn't end up being accessible. 
+
+2009-04-29  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Give a choice of X servers. 
+
+2009-04-29  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-logout: Add a sleep(1), something's wrong... 
+
+2009-04-28  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Actually instantiate the session
+	object.
+
+2009-04-28  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py: Properly report exit code.
+
+2009-04-28  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Draft of a rewrite using
+	dogtail.sessions
+
+2009-04-28  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-logout: Add a new script, dogtail-logout. This is
+	for use with headless sessions. Currently doesn't work yet. 
+
+2009-04-28  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py: Add a sessions module. This will become the
+	basis for a rewritten dogtail-run-headless. 
+
 2009-03-21  Zack Cerza <zcerza@redhat.com>
 
 	* epydoc.conf: Add the Epydoc config file.

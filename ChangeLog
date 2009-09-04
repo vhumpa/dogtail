@@ -1,3 +1,7 @@
+2009-09-04  Zack Cerza <zcerza@redhat.com>
+
+	* NEWS: Update.
+
 2009-08-26  Zack Cerza <zcerza@redhat.com>
 
 	* scripts/dogtail-run-headless: Tweak usage output. 

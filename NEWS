@@ -1,11 +1,25 @@
 dogtail 0.7.0
 =============
 
-Features:
+Too many changes to list, but here are some of the major ones:
 
-Bugfixes:
+Dogtail has been ported to pyatspi. This means:
+    Faster performance
+    Errors will be more clear
+    No more crashing/dying - you will either get an exception, or it will work.
+    There is useful generated documentation
+Inline documentation has been greatly improved
+Headless execution support was completely rewritten.
+Sniff was completely rewritten. It is now:
+    Faster
+    More reliable
+    Self-updating via AT-SPI events
+    Slightly prettier
+    Able to tell you about certain states and relations
+Image Comparison (TCImage) was rewritten. No more ImageMagick!
+IconLogger was removed. Wah!
 
-note: tests/Node.py's TestNodeAttributes is failing due to GNOME bugs #498557 
+Note: tests/Node.py's TestNodeAttributes is failing due to GNOME bugs #498557 
       and #498563
 
 

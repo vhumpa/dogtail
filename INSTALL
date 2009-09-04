@@ -2,10 +2,6 @@ Installation on Red-Hat-like systems:
 	make rpm
 	rpm -Uvh ./dist/dogtail-*.noarch.rpm
 
-Installation on Debian-like systems:
-	make deb
-	dpkg -i ../python-dogtail_*_all.deb
-
 Installation on other systems:
 	./setup.py install --prefix=/usr
 	

@@ -1,5 +1,10 @@
 2009-09-04  Zack Cerza <zcerza@redhat.com>
 
+	* tests/Node.py: Look for at-spi instead of gail in testGetVersion
+	since Fedora no longer has a package called gail.
+
+2009-09-04  Zack Cerza <zcerza@redhat.com>
+
 	* INSTALL: Update.
 
 2009-09-04  Zack Cerza <zcerza@redhat.com>

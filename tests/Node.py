@@ -286,7 +286,7 @@ class TestNodeAttributes(GtkDemoTest):
     # 'version'
     def testGetVersion(self):
         import dogtail.distro
-        expectedVersion = dogtail.distro.packageDb.getVersion('gail')
+        expectedVersion = dogtail.distro.packageDb.getVersion('at-spi')
         self.assertEquals(self.app.version, str(expectedVersion))
 
     def testSetVersion(self):

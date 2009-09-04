@@ -11,9 +11,6 @@ from logging import debugLogger as logger
 class DistributionNotSupportedError(Exception):
     """
     This distribution is not supported.
-
-    Arguments:
-            distro: the distribution that is not supported.
     """
     PATCH_MESSAGE = "Please send patches to dogtail-devel-list@gnome.org"
 

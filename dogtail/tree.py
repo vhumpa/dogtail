@@ -1,10 +1,10 @@
 """Makes some sense of the AT-SPI API
 
 The tree API handles various things for you:
-- fixes most timing issues
-- can automatically generate (hopefully) highly-readable logs of what the
+    - fixes most timing issues
+    - can automatically generate (hopefully) highly-readable logs of what the
 script is doing
-- traps various UI malfunctions, raising exceptions for them (again,
+    - traps various UI malfunctions, raising exceptions for them (again,
 hopefully improving the logs)
 
 The most important class is Node. Each Node is an element of the desktop UI.
@@ -362,8 +362,7 @@ class Node:
         except NotImplementedError: return None
     extents = property(_getExtents, doc = \
         """
-        A tuple containing the location and size of the Accessible:
-            (x, y, w, h)
+        A tuple containing the location and size of the Accessible: (x, y, w, h)
         """)
 
     def grabFocus(self):
@@ -384,9 +383,9 @@ class Node:
     def click(self, button = 1):
         """
         Generates a raw mouse click event, using the specified button.
-            1 is left,
-            2 is middle,
-            3 is right.
+            - 1 is left,
+            - 2 is middle,
+            - 3 is right.
         """
         extents = self.extents
         position = (extents[0], extents[1])

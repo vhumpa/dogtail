@@ -40,7 +40,7 @@ class GtkDemoTest(unittest.TestCase):
         Click on the named demo within the gtk-demo app.
         """
         tree = self.app.child(roleName="tree table")
-        tree.child(demoName).doAction('activate')
+        tree.child(demoName).doubleClick()
 
 class TestNodeAttributes(GtkDemoTest):
     """

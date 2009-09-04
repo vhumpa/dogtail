@@ -387,14 +387,22 @@ class Node:
             - 2 is middle,
             - 3 is right.
         """
-        extents = self.extents
-        position = (extents[0], extents[1])
-        size = (extents[2], extents[3])
-        clickX = position[0] + 0.5 * size[0]
-        clickY = position[1] + 0.5 * size[1]
+        clickX = self.position[0] + self.size[0]/2
+        clickY = self.position[1] + self.size[1]/2
         if config.debugSearching:
             logger.log("raw click on %s %s at (%s,%s)"%(self.name, self.getLogString(), str(clickX), str(clickY)))
         rawinput.click(clickX, clickY, button)
+
+    def doubleClick(self, button = 1):
+        """
+        Generates a raw mouse double-click event, using the specified button.
+        """
+        clickX = self.position[0] + self.size[0]/2
+        clickY = self.position[1] + self.size[1]/2
+        if config.debugSearching:
+            logger.log("raw click on %s %s at (%s,%s)"%(self.name, self.getLogString(), str(clickX), str(clickY)))
+        rawinput.doubleClick(clickX, clickY, button)
+
 
     ##
     # RelationSet

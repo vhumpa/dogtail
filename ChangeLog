@@ -1,5 +1,13 @@
 2009-09-04  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/tree.py: Simplify Node.click(); add Node.doubleClick().
+
+	* tests/Node.py: Make GtkDemoTest.runDemo() use Node.doubleClick()
+	instead of the activate action, since gtk-demo doesn't appear to use
+	that action anymore. This will be backward-compatible anyway.
+
+2009-09-04  Zack Cerza <zcerza@redhat.com>
+
 	* tests/Node.py: Look for at-spi instead of gail in testGetVersion
 	since Fedora no longer has a package called gail.
 

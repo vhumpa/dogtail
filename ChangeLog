@@ -1,5 +1,14 @@
 2009-09-04  Zack Cerza <zcerza@redhat.com>
 
+	* README: Update. 
+
+2009-09-04  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py, dogtail/tree.py: Fix some formatting that epydoc
+	doesn't like.
+
+2009-09-04  Zack Cerza <zcerza@redhat.com>
+
 	* NEWS: Update.
 
 2009-08-26  Zack Cerza <zcerza@redhat.com>

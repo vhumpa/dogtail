@@ -16,7 +16,7 @@ __author__ = 'Zack Cerza <zcerza@redhat.com>'
 ##############################################################################
 
 import tree
-from predicate import GenericPredicate, IsADialogNamed, IsAnApplicationNamed
+import predicate
 from config import config
 import rawinput
 
@@ -25,10 +25,8 @@ class FocusError(Exception):
     pass
 
 import errors
-def focusFailed(type, name):
-    if type is None or type == '':
-        type = "widget"
-    errors.warn('The requested %s \'%s\' could not be focused.' % (type, name))
+def focusFailed(pred):
+    errors.warn('The requested widget could not be focused: %s' % pred.debugName)
 
 ENOARGS = "At least one argument is needed"
 
@@ -63,12 +61,12 @@ class FocusApplication (FocusBase):
         Search for an application that matches and refocus on the given name.
         """
         try:
-            predicate = IsAnApplicationNamed(name)
-            app = self.desktop.findChild(predicate, recursive = False, retry = False)
+            pred = predicate.IsAnApplicationNamed(name)
+            app = self.desktop.findChild(pred, recursive = False, retry = False)
         except tree.SearchError, desc:
             if config.fatalErrors: raise FocusError, name
             else:
-                focusFailed('Application', name)
+                focusFailed(pred)
                 return False
         if app: 
             FocusApplication.node = app
@@ -91,17 +89,17 @@ class FocusDialog (FocusBase):
         Search for a dialog that matches the given name and refocus on it.
         """
         result = None
-        predicate = IsADialogNamed(name)
+        pred = predicate.IsADialogNamed(name)
         try:
-            result = FocusApplication.node.findChild(predicate, requireResult=False, recursive = False)
+            result = FocusApplication.node.findChild(pred, requireResult=False, recursive = False)
         except AttributeError: pass
         if result:
             FocusDialog.node = result
             FocusWidget.node = None
         else: 
-            if config.fatalErrors: raise FocusError, predicate.debugName
+            if config.fatalErrors: raise FocusError, pred.debugName
             else:
-                focusFailed('Dialog', name)
+                focusFailed(pred)
                 return False
         return True
 
@@ -109,6 +107,35 @@ class FocusWidget (FocusBase):
     """
     Keeps track of which widget is currently focused.
     """
+    def findByPredicate(self, pred):
+        result = None
+        try:
+            result = FocusWidget.node.findChild(pred, requireResult = False, retry = False)
+        except AttributeError: pass
+        if result: FocusWidget.node = result
+        else:
+            try:
+                result = FocusDialog.node.findChild(pred, requireResult = False, retry = False)
+            except AttributeError: pass
+        if result: FocusWidget.node = result
+        else:
+            try:
+                result = FocusApplication.node.findChild(pred, requireResult = False, retry = False)
+                if result: FocusWidget.node = result
+            except AttributeError: 
+                if config.fatalErrors: raise FocusError, name
+                else:
+                    focusFailed(pred)
+                    return False
+
+        if result == None:
+            FocusWidget.node = result
+            if config.fatalErrors: raise FocusError, pred.debugName
+            else:
+                focusFailed(pred)
+                return False
+        return True
+
     def __call__ (self, name = '', roleName = '', description = ''):
         """
         If name, roleName or description are specified, search for a widget that matches and refocus on it.
@@ -117,34 +144,9 @@ class FocusWidget (FocusBase):
             raise TypeError, ENOARGS
 
         # search for a widget.
-        result = None
-        predicate = GenericPredicate(name = name, roleName = roleName, description = description)
-        try:
-            result = FocusWidget.node.findChild(predicate, requireResult = False, retry = False)
-        except AttributeError: pass
-        if result: FocusWidget.node = result
-        else:
-            try:
-                result = FocusDialog.node.findChild(predicate, requireResult = False, retry = False)
-            except AttributeError: pass
-        if result: FocusWidget.node = result
-        else:
-            try:
-                result = FocusApplication.node.findChild(predicate, requireResult = False, retry = False)
-                if result: FocusWidget.node = result
-            except AttributeError: 
-                if config.fatalErrors: raise FocusError, name
-                else:
-                    focusFailed(roleName, name)
-                    return False
-
-        if result == None:
-            FocusWidget.node = result
-            if config.fatalErrors: raise FocusError, predicate.debugName
-            else:
-                focusFailed(roleName, name)
-                return False
-        return True
+        pred = predicate.GenericPredicate(name = name, 
+                roleName = roleName, description = description)
+        return self.findByPredicate(pred)
 
 class Focus (FocusBase):
     """
@@ -167,13 +169,13 @@ class Focus (FocusBase):
 
     def button (self, name):
         """
-        A shortcut to self.widget(name, roleName = 'push button')
+        A shortcut to self.widget.findByPredicate(predicate.IsAButtonNamed(name))
         """
-        return self.widget(name = name, roleName = 'push button')
+        return self.widget.findByPredicate(predicate.IsAButtonNamed(name))
 
     def frame (self, name):
         """
-        A shortcut to self.widget(name, roleName = 'frame')
+        An alias to window()
         """
         return self.widget(name = name, roleName = 'frame')
 
@@ -185,15 +187,15 @@ class Focus (FocusBase):
 
     def menu (self, name):
         """
-        A shortcut to self.widget(name, roleName = 'menu')
+        A shortcut to self.widget.findByPredicate(predicate.IsAMenuNamed(name))
         """
-        return self.widget(name = name, roleName = 'menu')
+        return self.widget.findByPredicate(predicate.IsAMenuNamed(name))
 
     def menuItem (self, name):
         """
-        A shortcut to self.widget(name, roleName = 'menu item')
+        A shortcut to self.widget.findByPredicate(predicate.IsAMenuItemNamed(name))
         """
-        return self.widget(name = name, roleName = 'menu item')
+        return self.widget.findByPredicate(predicate.IsAMenuItemNamed(name))
 
     def table (self, name = ''):
         """
@@ -209,15 +211,15 @@ class Focus (FocusBase):
 
     def text (self, name = ''):
         """
-        A shortcut to self.widget(name, roleName = 'text')
+        A shortcut to self.widget.findByPredicate(IsATextEntryNamed(name))
         """
-        return self.widget(name = name, roleName = 'text')
+        return self.widget.findByPredicate(predicate.IsATextEntryNamed(name))
 
     def window (self, name):
         """
-        A shortcut to self.widget(name, roleName = 'window')
+        A shortcut to self.widget.findByPredicate(IsAWindowNamed(name))
         """
-        return self.widget(name = name, roleName = 'window')
+        return self.widget.findByPredicate(predicate.IsAWindowNamed(name))
 
 class Action (FocusWidget):
     """

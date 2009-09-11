@@ -1,5 +1,10 @@
 2009-09-11  Zack Cerza <zcerza@redhat.com>
 
+	* dogtail/procedural.py: Use specific Predicate subclasses where
+	available.
+
+2009-09-11  Zack Cerza <zcerza@redhat.com>
+
 	* recorder/dogtail-recorder: Keyboard recording had been disabled by
 	accident. Reenable it.
 

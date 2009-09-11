@@ -520,14 +520,14 @@ class EventRecorder:
             print eventName, str(ret)
 
         # Keystroke events:
-        #pyatspi.Registry.registerKeystrokeListener(marshalOnKeyPress, [], self.modMasks, [pyatspi.KEY_PRESSED_EVENT, pyatspi.KEY_RELEASED_EVENT], True, True, False)
+        pyatspi.Registry.registerKeystrokeListener(marshalOnKeyPress, [], self.modMasks, [pyatspi.KEY_PRESSED_EVENT, pyatspi.KEY_RELEASED_EVENT], True, True, False)
         
     def __deregisterEvents(self):
         for eventName, callback in self.listeners.iteritems():
             pyatspi.Registry.deregisterEventListener(callback, eventName)
 
         # Keystroke events:
-        #pyatspi.Registry.deregisterKeystrokeListener(marshalOnKeyPress, [], self.modMasks, [pyatspi.KEY_PRESSED_EVENT, pyatspi.KEY_RELEASED_EVENT])
+        pyatspi.Registry.deregisterKeystrokeListener(marshalOnKeyPress, [], self.modMasks, [pyatspi.KEY_PRESSED_EVENT, pyatspi.KEY_RELEASED_EVENT])
         
 
     def startRecording(self, unused = None, scriptTextView = None):

@@ -1,3 +1,8 @@
+2009-09-11  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Keyboard recording had been disabled by
+	accident. Reenable it.
+
 2009-09-04  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/tree.py: Simplify Node.click(); add Node.doubleClick().

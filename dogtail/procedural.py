@@ -80,6 +80,30 @@ class FocusDesktop (FocusBase):
     """
     pass
 
+class FocusWindow (FocusBase):
+    """
+    Keeps track of which window is currently focused.
+    """
+    def __call__ (self, name):
+        """
+        Search for a dialog that matches the given name and refocus on it.
+        """
+        result = None
+        pred = predicate.IsAWindowNamed(name)
+        try:
+            result = FocusApplication.node.findChild(pred, requireResult=False, recursive = False)
+        except AttributeError: pass
+        if result:
+            FocusWindow.node = result
+            FocusDialog.node = None
+            FocusWidget.node = None
+        else: 
+            if config.fatalErrors: raise FocusError, pred.debugName
+            else:
+                focusFailed(pred)
+                return False
+        return True
+
 class FocusDialog (FocusBase):
     """
     Keeps track of which dialog is currently focused.
@@ -120,6 +144,11 @@ class FocusWidget (FocusBase):
         if result: FocusWidget.node = result
         else:
             try:
+                result = FocusWindow.node.findChild(pred, requireResult = False, retry = False)
+            except AttributeError: pass
+        if result: FocusWidget.node = result
+        else:
+            try:
                 result = FocusApplication.node.findChild(pred, requireResult = False, retry = False)
                 if result: FocusWidget.node = result
             except AttributeError: 
@@ -156,7 +185,7 @@ class Focus (FocusBase):
     def __getattr__ (self, name):
         raise AttributeError, name
     def __setattr__(self, name, value):
-        if name in ('application', 'dialog', 'widget'):
+        if name in ('application', 'dialog', 'widget', 'window'):
             self.__dict__[name] = value
         else:
             raise AttributeError, name
@@ -165,6 +194,8 @@ class Focus (FocusBase):
     application = FocusApplication()
     app = application # shortcut :)
     dialog = FocusDialog()
+    window = FocusWindow()
+    frame = window
     widget = FocusWidget()
 
     def button (self, name):
@@ -172,12 +203,6 @@ class Focus (FocusBase):
         A shortcut to self.widget.findByPredicate(predicate.IsAButtonNamed(name))
         """
         return self.widget.findByPredicate(predicate.IsAButtonNamed(name))
-
-    def frame (self, name):
-        """
-        An alias to window()
-        """
-        return self.widget(name = name, roleName = 'frame')
 
     def icon (self, name):
         """
@@ -214,12 +239,6 @@ class Focus (FocusBase):
         A shortcut to self.widget.findByPredicate(IsATextEntryNamed(name))
         """
         return self.widget.findByPredicate(predicate.IsATextEntryNamed(name))
-
-    def window (self, name):
-        """
-        A shortcut to self.widget.findByPredicate(IsAWindowNamed(name))
-        """
-        return self.widget.findByPredicate(predicate.IsAWindowNamed(name))
 
 class Action (FocusWidget):
     """

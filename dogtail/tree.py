@@ -554,22 +554,16 @@ class Node:
         """
         logger.log("Typing text into %s: '%s'"%(self.getLogString(), string))
 
-        # Non-working implementation
-        # Unfortunately, the call to AccessibleText_setCaretOffset fails for Evolution's gtkhtml composer for some reason
-        if False:
-            logger.log("caret offset: %s" % self.caretOffset)
-            self.__editableText.insertText (self.caretOffset, text)
-            self.caretOffset+=len(string) # FIXME: is this correct?
-            logger.log("new caret offset: %s" % self.caretOffset)
-
         if self.focusable:
             if not self.focused:
                 try: self.grabFocus()
                 except Exception: logger.log("Node is focusable but I can't grabFocus!")
             rawinput.typeText(string)
         else:
-            logger.log("Node is not focusable; falling back to setting text")
-            node.text += string
+            logger.log("Node is not focusable; falling back to inserting text")
+            et = self.queryEditableText()
+            et.insertText(self.caretOffset, string, len(string))
+            self.caretOffset += len(string)
             doDelay()
 
     def keyCombo(self, comboString):

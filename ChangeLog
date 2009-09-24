@@ -1,3 +1,11 @@
+2009-09-23  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Fix a bug in Node.typetext(). Actually, change its
+	behavior significantly: if we can't grab keyboard focus, fall back to
+	inserting text via the editabletext interface at the current caret
+	location. old behavior was to replace contents entirely, which doesn't
+	scale at all.
+
 2009-09-11  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/procedural.py: Use specific Predicate subclasses where

@@ -1,5 +1,10 @@
 2009-09-29  Zack Cerza <zcerza@redhat.com>
 
+	* sniff/sniff: Remove an unused set object. Trying to stay compatible
+	with older pythons...
+
+2009-09-29  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tree.py: Add Node.contains(), which can be used to determine
 	if a given point onscreen lies inside a Node's extents. Also add
 	Node.getAccessibleAtPoint(), which tries to find the Node at a given

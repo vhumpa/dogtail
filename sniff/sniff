@@ -338,7 +338,6 @@ class SniffModel(gtk.TreeStore):
     nodeColumn = 0
     nameColumn = 1
     pixbufColumn = 2
-    deadRows = set()
     eventQueue = []
     cache = {}
 
@@ -378,7 +377,6 @@ class SniffModel(gtk.TreeStore):
         self.refresh()
 
     def refresh(self):
-        self.deadRows.clear()
         self.cache.clear()
         self.clear()
         self.appendAndPopulate(None, self.rootNode)

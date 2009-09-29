@@ -1,3 +1,14 @@
+2009-09-29  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Add Node.contains(), which can be used to determine
+	if a given point onscreen lies inside a Node's extents. Also add
+	Node.getAccessibleAtPoint(), which tries to find the Node at a given
+	point on screen.
+
+	* recorder/dogtail-recorder: Use the new Node methods to reimplement
+	most of the click detection; the old method was too expensive and
+	fragile. Also turn on pyatspi's caching.
+
 2009-09-24  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/procedural.py: Add FocusWindow class, and corresponding

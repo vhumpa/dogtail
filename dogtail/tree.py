@@ -365,6 +365,22 @@ class Node:
         A tuple containing the location and size of the Accessible: (x, y, w, h)
         """)
 
+    def contains(self, x, y):
+        try: return self.queryComponent().contains(x, y, pyatspi.DESKTOP_COORDS)
+        except NotImplementedError: return False
+
+    def getChildAtPoint(self, x, y):
+        node = self
+        while True:
+            try:
+                child = node.queryComponent().getAccessibleAtPoint(x, y,
+                        pyatspi.DESKTOP_COORDS)
+                if child and child.contains(x, y): node = child
+                else: break
+            except NotImplementedError: break
+        if node and node.contains(x, y): return node
+        else: return None
+
     def grabFocus(self):
         "Attempts to set the keyboard focus to this Accessible."
         return self.queryComponent().grabFocus()

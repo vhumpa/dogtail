@@ -9,6 +9,7 @@ checkForA11yInteractively()
 
 import dogtail.tree
 pyatspi = dogtail.tree.pyatspi
+pyatspi.accessible.setCacheLevel(pyatspi.constants.CACHE_PROPERTIES)
 Accessibility = dogtail.tree.Accessibility
 from dogtail.predicate import GenericPredicate
 import gtk.gdk
@@ -565,56 +566,18 @@ class EventRecorder:
         # the real source ourselves.
 
         def detectByCoordinates(nodes, x, y):
-            # From a list of nodes, find the smallest one that (x, y) is in
-            def isCandidate(node, x, y):
-                # If (x, y) is inside the node, return True
-                if node and node.position:
-                    #print "x,y: %s, %s" % (x, y)
-                    #print "position: %s, size: %s" % (node.position, node.size)
-                    if node.position[0] <= x <= (node.position[0] + node.size[0]) and \
-                            node.position[1] <= y <= (node.position[1] + node.size[1]):
-                        return True
-            def getAllDescendants(node):
-                result = []
-                for child in node.children:
-                    result.append(child)
-                    result.extend(getAllDescendants(child))
-                return result
-            def smallestNode(nodes):
-                # Return the node with the smallest area
-                areas = {}
-                for node in nodes:
-                    area = node.size[0] * node.size[1]
-                    if areas.get(area, None):
-                        print "Two nodes are the same size?!"
-                        print str(areas[area]) + "|" + str(node)
-                    areas[area] = node
-                if areas:
-                    return areas[min(areas.keys())]
-
-            detectedNode = None
             for node in nodes:
-                if isCandidate(node, x, y):
-                    detectedNode = node
-                    # table children don't send focus signals, so we have to
-                    # find the child itself.
-                    if node.roleName == 'table':
-                        detectedNode = None
-                        # getAllDescendants() is very expensive :(
-                        possibleNodes = getAllDescendants(node)
-                        probableNodes = [n for n in possibleNodes if \
-                                isCandidate(n, x, y)]
-                        detectedNode = smallestNode(probableNodes)
-            return detectedNode
+                if not node: continue
+                candidate = node.getChildAtPoint(x, y)
+                if candidate:
+                    return candidate
 
         x = event.detail1
         y = event.detail2
-        if self.lastSelectedNode != self.lastFocusedNode:
-            possibleNodes = (self.lastSelectedNode, self.lastFocusedNode)
-        else:
-            # If self.lastSelectedNode isn't meaningful, don't waste time on 
-            # it with detectByCoordinates().
-            possibleNodes = [self.lastFocusedNode]
+        # Below is a hack using a dict to avoid using a set, as older pythons
+        # don't have sets.
+        possibleNodes = {self.lastSelectedNode : None, 
+                self.lastFocusedNode : None}.keys()
         detectedNode = detectByCoordinates(possibleNodes, x, y)
         if detectedNode and ((detectedNode.name == appName and \
                 detectedNode.roleName == 'frame') or \

@@ -1,3 +1,7 @@
+2009-09-30  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Disable debug logging... again.
+
 2009-09-29  Zack Cerza <zcerza@redhat.com>
 
 	* sniff/sniff: Remove an unused set object. Trying to stay compatible

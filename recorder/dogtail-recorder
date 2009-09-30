@@ -739,27 +739,27 @@ class EventRecorder:
 # when an exception is raised.
 import traceback
 def marshalOnFocus(event):
-    logEvent(event)
+    #logEvent(event)
     try: recorder.onFocus(event)
     except Exception: traceback.print_exc()
 
 def marshalOnSelect(event):
-    logEvent(event)
+    #logEvent(event)
     try: recorder.onSelect(event)
     except Exception: traceback.print_exc()
 
 def marshalOnMouseButton(event):
-    logEvent(event)
+    #logEvent(event)
     try: recorder.onMouseButton(event)
     except Exception: traceback.print_exc()
 
 def marshalOnKeyPress(event):
-    logEvent(event)
+    #logEvent(event)
     try: recorder.onKeyPress(event)
     except Exception: traceback.print_exc()
 
 def marshalOnWindowCreate(event):
-    logEvent(event)
+    #logEvent(event)
     try: recorder.onWindowCreate(event)
     except Exception: traceback.print_exc()
 

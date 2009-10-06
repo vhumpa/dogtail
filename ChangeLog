@@ -1,3 +1,7 @@
+2009-10-06  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Catch LookupErrors (e.g. quitting an app)
+
 2009-09-30  Zack Cerza <zcerza@redhat.com>
 
 	* recorder/dogtail-recorder: Disable debug logging... again.

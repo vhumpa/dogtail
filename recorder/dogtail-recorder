@@ -578,7 +578,11 @@ class EventRecorder:
         # don't have sets.
         possibleNodes = {self.lastSelectedNode : None, 
                 self.lastFocusedNode : None}.keys()
-        detectedNode = detectByCoordinates(possibleNodes, x, y)
+        try:
+            detectedNode = detectByCoordinates(possibleNodes, x, y)
+        except LookupError:
+            return
+
         if detectedNode and ((detectedNode.name == appName and \
                 detectedNode.roleName == 'frame') or \
                 detectedNode.findAncestor(\

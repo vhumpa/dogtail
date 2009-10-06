@@ -12,5 +12,4 @@ __version__ = "0.6.90"
 __copyright__ = "Copyright © 2005 Red Hat, Inc."
 __license__ = "GPL"
 
-import pyatspi
 __all__ = ("config", "predicate", "procedural", "tc", "tree", "utils", "errors")

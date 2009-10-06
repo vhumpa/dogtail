@@ -1,5 +1,6 @@
 import time
 import os
+import errno
 import re
 import subprocess
 import signal
@@ -16,8 +17,19 @@ def scratchFile(label):
     return tempfile.NamedTemporaryFile(prefix = "%s%s." % (prefix, label), 
             dir = config.scratchDir)
 
+def testBinary(path):
+    if (path.startswith(os.path.sep) or
+            path.startswith(os.path.join('.','')) or 
+            path.startswith(os.path.join('..',''))):
+        if not os.path.exists(path):
+            raise IOError, (errno.ENOENT, "No such file", path)
+        if not os.access(path, os.X_OK):
+            raise IOError, (errno.ENOEXEC, "Permission denied", path)
+    return True
+
 class Subprocess(object):
     def __init__(self, cmdList, environ = None):
+        testBinary(cmdList[0])
         self.cmdList = cmdList
         self.environ = environ
         self._exitCode = None
@@ -48,6 +60,7 @@ class XServer(Subprocess):
             xinitrc = "/etc/X11/xinit/Xclients", 
             resolution = "1024x768x16"):
         """resolution is only used with Xvfb."""
+        testBinary(server)
         self.server = server
         self._exitCode = None
         self.xinit = "/usr/bin/xinit"
@@ -96,6 +109,7 @@ class Session(object):
     cookieName = "DOGTAIL_SESSION_COOKIE"
 
     def __init__(self, sessionBinary, scriptCmdList = [], scriptDelay = 10, logout = True):
+        testBinary(sessionBinary)
         self.sessionBinary = sessionBinary
         self.script = Script(scriptCmdList)
         self.scriptDelay = scriptDelay

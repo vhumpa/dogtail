@@ -18,8 +18,7 @@ def examples_data():
     dataList = os.listdir(os.curdir + '/examples/data/')
     result = []
     for data in dataList:
-        if data != '.svn':
-            result = result + ['examples/data/' + data]
+		result = result + ['examples/data/' + data]
     return result
 
 def sniff_icons():
@@ -45,19 +44,18 @@ def scripts():
     list = os.listdir(os.curdir + '/scripts/')
     result = ['sniff/sniff', 'recorder/dogtail-recorder']
     for file in list:
-        if file != '.svn':
-            result = result + ['scripts/' + file]
+		result = result + ['scripts/' + file]
     return result
 
 setup (
         name = 'dogtail',
-        version = '0.6.90',
+        version = '0.7.0',
         description = """GUI test tool and automation framework that uses Accessibility (a11y) technologies to communicate with desktop applications.""",
         author = """Zack Cerza <zcerza@redhat.com>,
 Ed Rousseau <rousseau@redhat.com>,
 David Malcolm <dmalcolm@redhat.com>""",
         author_email = 'dogtail-list@gnome.org',
-        url = 'http://people.redhat.com/zcerza/dogtail/',
+        url = 'http://dogtail.fedorahosted.org/',
         packages = ['dogtail'],
         scripts = scripts(),
         data_files = [

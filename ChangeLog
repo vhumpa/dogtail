@@ -1,5 +1,10 @@
 2009-10-08  Zack Cerza <zcerza@redhat.com>
 
+	* setup.py, dogtail/__init__.py: Bump version to 0.7.0. Remove
+	references to .svn directory. Reflect new site.
+
+2009-10-08  Zack Cerza <zcerza@redhat.com>
+
 	* NEWS, README: Add notes about API docs.
 
 2009-10-08  Zack Cerza <zcerza@redhat.com>

@@ -1,5 +1,9 @@
 2009-10-08  Zack Cerza <zcerza@redhat.com>
 
+	* NEWS: Update.
+
+2009-10-08  Zack Cerza <zcerza@redhat.com>
+
 	* tests/Node.py: Remove tests for Node.version. This actually comes
 	straight from pyatspi, and is just plain not useful. It is also
 	inconsistent. For example, on RHEL5 it gives you the gail version,

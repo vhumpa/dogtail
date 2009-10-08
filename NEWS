@@ -8,7 +8,8 @@ This release has too many changes to list. Here are some of the major ones:
     - Errors will be more clear.
     - No more segfaulting or myserious crashes.
 
-* There is now useful generated API documentation.
+* There is now useful generated API documentation:
+    http://fedorapeople.org/~zmc/dogtail/epydoc/
 
 * Inline documentation has been greatly improved.
 

@@ -11,7 +11,7 @@
 
 2009-10-06  Zack Cerza <zcerza@redhat.com>
 
-	* dogtail/sessions.py: Make sure that at binaries (at least those with
+	* dogtail/sessions.py: Make sure that binaries (at least those with
 	absolute or relative paths specified) exist and are executable long 
 	before we try to execute them.
 

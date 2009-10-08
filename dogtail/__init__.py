@@ -8,7 +8,7 @@ Authors: Zack Cerza <zcerza@redhat.com>, Ed Rousseau <rousseau@redhat.com>, Davi
 __author__ = """Zack Cerza <zcerza@redhat.com>,
 Ed Rousseau <rousseau@redhat.com>,
 David Malcolm <dmalcolm@redhat.com>"""
-__version__ = "0.7.0"
+__version__ = "0.7.1"
 __copyright__ = "Copyright © 2005 Red Hat, Inc."
 __license__ = "GPL"
 

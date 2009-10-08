@@ -283,16 +283,6 @@ class TestNodeAttributes(GtkDemoTest):
         "Node.toolkit should be read-only"
         self.assertRaises(AttributeError, self.app.__setattr__,  "toolkit", "GAIL")
 
-    # 'version'
-    def testGetVersion(self):
-        import dogtail.distro
-        expectedVersion = dogtail.distro.packageDb.getVersion('at-spi')
-        self.assertEquals(self.app.version, str(expectedVersion))
-
-    def testSetVersion(self):
-        "Node.version should be read-only"
-        self.assertRaises(AttributeError, self.app.__setattr__,  "version", 42)
-
     # 'ID'
     def testGetID(self):
         "Node.id should be numeric"

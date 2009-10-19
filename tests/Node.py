@@ -17,6 +17,7 @@ __author__="Dave Malcolm <dmalcolm@redhat.com>"
 import unittest
 import time
 import dogtail.tree
+import pyatspi
 from CORBA import COMM_FAILURE
 
 class GtkDemoTest(unittest.TestCase):
@@ -99,8 +100,7 @@ class TestNodeAttributes(GtkDemoTest):
         # the app appears to not have a parent:
         self.assertEquals(self.app.parent, None)
 
-        # ensure that a child of the app has the app as a parent (would be good to have proper node equality/identity...)
-        self.assertEquals(self.app.children[0].parent.name, "gtk-demo")
+        self.assertEquals(self.app.children[0].parent, self.app)
 
     def testSetParent(self):
         "Node.parent should be read-only"
@@ -158,22 +158,59 @@ class TestNodeAttributes(GtkDemoTest):
         # FIXME: should we assert that things are logged and delays are added?
         # FIXME: should have a test case involving the complex GtkTextView widget
 
-    # FIXME: 'passwordText' (write-only string):
-    # is there one of these inside gtk-demo?
-    
-    # FIXME: 'caretOffset' (read/write int):
+    def testCaretOffset(self):
+        "Make sure the caret offset works as expected"
+        self.runDemo('Dialog and Message Boxes')
+        wnd = self.app.window('Dialogs')
+        entry1 = wnd.child(label = 'Entry 1')
+        entry2 = wnd.child(label = 'Entry 2')
 
-    # 'combovalue' (write-only string):
-    def testGetComboValue(self):
-        # FIXME: should have the code raise a WriteOnly exception and check for it here
-        pass
+        # Try reading the entries:
+        self.assertEquals(entry1.text,'')
+        self.assertEquals(entry2.text,'')
 
+        # Set them...
+        s1 = "I just need a sentence"
+        s2 = "And maybe a second one to be sure"
+        entry1.text = s1
+        entry2.text = s2
+
+        # Make sure the caret offset is zero
+        self.assertEquals(entry1.caretOffset, 0)
+        self.assertEquals(entry2.caretOffset, 0)
+
+        # Set the caret offset to something ridiculous
+        entry1.caretOffset = len(s1 * 3)
+        entry2.caretOffset = len(s2 * 3)
+
+        # Make sure the caret offset only goes as far as the end of the string
+        self.assertEquals(entry1.caretOffset, len(s1))
+        self.assertEquals(entry2.caretOffset, len(s2))
+
+        def splitByOffsets(node, string):
+            # Verify the equality of node.text and string, word by word.
+            # I realize this doesn't really test dogtail itself, but that could
+            #   change in the future and I don't want to throw the code away.
+            textIface = node.queryText()
+            endOffset = -1 # We only set this now so the loop looks nicer
+            startOffset = 0
+            while startOffset != len(string):
+                (text, startOffset, endOffset) = textIface.getTextAtOffset(
+                        startOffset, pyatspi.TEXT_BOUNDARY_WORD_START)
+                self.assertEquals(startOffset,
+                        string.find(text, startOffset, endOffset))
+                startOffset = endOffset
+
+        splitByOffsets(entry1, s1)
+        splitByOffsets(entry2, s2)
+
+    # 'combovalue' (read/write string):
     def testSetComboValue(self):
-        # FIXME: to be written
-        #self.runDemo('Combo boxes')
-        #wnd = self.app.window('Combo boxes')
-        #combo1 = wnd.child(label="Some stock icons")
-        pass
+        self.runDemo('Combo boxes')
+        wnd = self.app.window('Combo boxes')
+        combo1 = wnd.child('Some stock icons').child(roleName = 'combo box')
+        combo1.combovalue = 'Clear'
+        self.assertEquals(combo1.combovalue, 'Clear')
 
     # 'stateSet' (read-only StateSet instance):
     def testGetStateSet(self):
@@ -186,7 +223,7 @@ class TestNodeAttributes(GtkDemoTest):
 
     # 'relations' (read-only list of atspi.Relation instances):
     def testGetRelations(self):
-        # FIXME
+        # FIXME once relations are used for something other than labels
         pass
 
     def testSetRelations(self):
@@ -238,11 +275,10 @@ class TestNodeAttributes(GtkDemoTest):
     def testGetActions(self):
         "Node.actions should be an empty list for the app node"
         self.assertEquals(len(self.app.actions), 0) 
-        # FIXME test some common widgets
    
     def testSetActions(self):
         "Node.actions should be read-only"
-        self.assertRaises(AttributeError, self.app.__setattr__,  "actions", [])
+        self.assertRaises(AttributeError, self.app.__setattr__,  "actions", {})
 
     # 'extents' (readonly tuple):
     def testGetExtents(self):

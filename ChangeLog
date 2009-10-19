@@ -1,3 +1,8 @@
+2009-10-19  Zack Cerza <zcerza@redhat.com>
+
+	* tests/Node.py: Add tests for Node.caretOffset and Node.combovalue;
+	minor tweaks to other tests.
+
 2009-10-08  Zack Cerza <zcerza@redhat.com>
 
 	* setup.py, dogtail/__init__.py: Post-release version bump.

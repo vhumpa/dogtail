@@ -1,5 +1,10 @@
 2009-10-19  Zack Cerza <zcerza@redhat.com>
 
+	* tests/procedural.py: Add some unit tests for the procedural
+	interface.
+
+2009-10-19  Zack Cerza <zcerza@redhat.com>
+
 	* tests/Node.py: Add tests for Node.caretOffset and Node.combovalue;
 	minor tweaks to other tests.
 

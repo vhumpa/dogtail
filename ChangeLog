@@ -1,3 +1,9 @@
+2009-10-20  Zack Cerza <zcerza@redhat.com>
+
+	* tests/procedural.py: Add more tests, make miscellaneous tweaks.
+
+	* dogtail/procedural.py: Fix a bug found by unit tests.
+
 2009-10-19  Zack Cerza <zcerza@redhat.com>
 
 	* tests/procedural.py: Add some unit tests for the procedural

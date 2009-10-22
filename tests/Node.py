@@ -367,6 +367,14 @@ class TestSearching(GtkDemoTest):
         # in gtk-demo on 10/22/2009.
         self.assertEquals(len(tableCells), 41)
 
+    def testFindChildren2(self):
+        pred = dogtail.predicate.GenericPredicate(roleName = 'page tab list')
+        pageTabLists = self.app.findChildren(pred)
+        pred = dogtail.predicate.GenericPredicate(roleName = 'page tab')
+        # The second page tab list is the one with the 'Info' and 'Source' tabs
+        pageTabs = pageTabLists[1].findChildren(pred)
+        self.assertEquals(len(pageTabs), 2)
+
 class TestActions(GtkDemoTest):
     # FIXME: should test the various actions
     pass

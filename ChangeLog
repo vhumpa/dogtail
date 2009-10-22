@@ -1,3 +1,9 @@
+2009-10-22  Zack Cerza <zcerza@redhat.com>
+
+	* tests/Node.py: Add unit test for Node.findAllChildren(), since I'm
+	going to rewrite it using the more-optimized
+	pyatspi.utils.findAllDescendants().
+
 2009-10-20  Zack Cerza <zcerza@redhat.com>
 
 	* tests/procedural.py: Add more tests, make miscellaneous tweaks.

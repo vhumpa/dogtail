@@ -17,6 +17,7 @@ __author__="Dave Malcolm <dmalcolm@redhat.com>"
 import unittest
 import time
 import dogtail.tree
+import dogtail.predicate
 import pyatspi
 from CORBA import COMM_FAILURE
 
@@ -357,9 +358,14 @@ class TestSelection(GtkDemoTest):
         #self.assert_(not source.isSelected)
 
 
-class TestPredicates(GtkDemoTest):
+class TestSearching(GtkDemoTest):
     # FIXME: should test the various predicates and the search methods of Node
-    pass
+    def testFindChildren(self):
+        pred = dogtail.predicate.GenericPredicate(roleName = 'table cell')
+        tableCells = self.app.findChildren(pred)
+        # 41 is a magic number. I hand-counted how many table cells there were
+        # in gtk-demo on 10/22/2009.
+        self.assertEquals(len(tableCells), 41)
 
 class TestActions(GtkDemoTest):
     # FIXME: should test the various actions

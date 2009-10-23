@@ -357,6 +357,33 @@ class TestSelection(GtkDemoTest):
         #self.assert_(info.isSelected)
         #self.assert_(not source.isSelected)
 
+class TestValue(GtkDemoTest):
+    def testGetValue(self):
+        "The scrollbar starts out at position zero."
+        sb = self.app.child(roleName = 'scroll bar')
+        self.assertEquals(sb.value, 0)
+
+    def testSetValue(self):
+        "Ensure that we can set the value of the scrollbar."
+        sb = self.app.child(roleName = 'scroll bar')
+        sb.value = 100
+        self.assertEquals(sb.value, 100)
+
+    def testMinValue(self):
+        "Ensure that the minimum value for the scrollbar is correct."
+        sb = self.app.child(roleName = 'scroll bar')
+        self.assertEquals(sb.minValue, 0)
+
+    def testMaxValue(self):
+        "Ensure that the maximum value for the scrollbar is plausible."
+        sb = self.app.child(roleName = 'scroll bar')
+        self.assert_(sb.maxValue > 250)
+
+    def testMinValueIncrement(self):
+        "Ensure that the minimum value increment of the scrollbar is an int."
+        sb = self.app.child(roleName = 'scroll bar')
+        self.assertEquals(int(sb.minValueIncrement), sb.minValueIncrement)
+
 
 class TestSearching(GtkDemoTest):
     # FIXME: should test the various predicates and the search methods of Node

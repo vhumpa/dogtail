@@ -1,3 +1,11 @@
+2009-10-23  Zack Cerza <zcerza@redhat.com>
+
+	* tests/Node.py: Add several unit tests for AccessibleValue-related
+	properties, since they were all broken a long time ago without anyone
+	noticing.
+
+	* dogtail/tree.py: Fix all the AccessibleValue-related properties.
+
 2009-10-22  Zack Cerza <zcerza@redhat.com>
 
 	* tests/Node.py: Add another unit test for Node.findAllChildren().

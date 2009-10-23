@@ -539,29 +539,29 @@ class Node:
     # Value
     ##
 
-    def _getValue(self):
-        try: return self.queryValue().getCurrentValue()
+    @property
+    def value(self):
+        try: return self.queryValue().currentValue
         except NotImplementedError: pass
 
-    def _setValue(self, value):
-        self.setCurrentValue(value)
+    @value.setter
+    def value(self, value):
+        self.queryValue().currentValue = value
 
-    value = property(_getValue, _setValue)
-
-    def _getMinValue(self):
-        try: return self.queryValue().getMinimumValue()
+    @property
+    def minValue(self):
+        try: return self.queryValue().minimumValue
         except NotImplementedError: pass
-    minValue = property(_getMinValue)
 
-    def _getMinValueIncrement(self):
-        try: return self.queryValue().getMinimumIncrement
+    @property
+    def minValueIncrement(self):
+        try: return self.queryValue().minimumIncrement
         except NotImplementedError: pass
-    minValueIncrement = property(_getMinValueIncrement)
 
-    def _getMaxValue(self):
-        try: return self.queryValue().getMaximumValue()
+    @property
+    def maxValue(self):
+        try: return self.queryValue().maximumValue
         except NotImplementedError: pass
-    maxValue = property(_getMaxValue)
 
     def typeText(self, string):
         """

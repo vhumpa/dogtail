@@ -1,6 +1,15 @@
 2009-10-23  Zack Cerza <zcerza@redhat.com>
 
-	* tests/Node.py: Add another unit test for Node.findAllChildren(). Add
+	* dogtail/tree.py: Rewrite Node.findChildren() using
+	pyatspi.utils.findAllDescendants(). It's around 10% faster now and
+	allows you to use any kind of predicate you wish.
+
+	* tests/Node.py: Make one of the Node.findChildren() tests use
+	non-recursive mode.
+
+2009-10-23  Zack Cerza <zcerza@redhat.com>
+
+	* tests/Node.py: Add another unit test for Node.findChildren(). Add
 	docs for the rest.
 
 2009-10-23  Zack Cerza <zcerza@redhat.com>
@@ -13,11 +22,11 @@
 
 2009-10-22  Zack Cerza <zcerza@redhat.com>
 
-	* tests/Node.py: Add another unit test for Node.findAllChildren().
+	* tests/Node.py: Add another unit test for Node.findChildren().
 
 2009-10-22  Zack Cerza <zcerza@redhat.com>
 
-	* tests/Node.py: Add unit test for Node.findAllChildren(), since I'm
+	* tests/Node.py: Add unit test for Node.findChildren(), since I'm
 	going to rewrite it using the more-optimized
 	pyatspi.utils.findAllDescendants().
 

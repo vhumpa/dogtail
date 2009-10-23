@@ -409,7 +409,7 @@ class TestSearching(GtkDemoTest):
         pageTabs = pageTabLists[1].findChildren(pred)
         self.assertEquals(len(pageTabs), 2)
 
-    def testFindChildren3(self):
+    def testFindChildrenNonRecursive(self):
         """
         Ensure that there are the correct number of table cells in the Tree
         Store demo.
@@ -427,7 +427,7 @@ class TestSearching(GtkDemoTest):
         table = wnd.child(roleName = 'tree table')
         pred = dogtail.predicate.GenericPredicate(roleName = 'table cell')
         dogtail.config.config.childrenLimit = 10000
-        cells = table.findChildren(pred)
+        cells = table.findChildren(pred, recursive = False)
         # 318 is a magic number. I did verify this.
         self.assertEquals(len(cells), 318)
 

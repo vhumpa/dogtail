@@ -767,32 +767,21 @@ class Node:
         if requireResult:
             raise SearchError(describeSearch(self, pred, recursive, debugName))
 
-
     # The canonical "search for multiple" method:
     def findChildren(self, pred, recursive = True):
         """
         Find all children/descendents satisfying the predicate.
         """
-        # Note: This function does not use 
-        # pyatspi.utils.findAllDescendants() because that function
-        # cannot be run non-recursively. 
-        assert isinstance(pred, predicate.Predicate)
-
-        selfList = []
-
-        try: children = self.children
-        except Exception: return []
-
-        for child in children:
-            if child.satisfies(pred): selfList.append(child)
-            if recursive:
-                childList = child.findChildren(pred, recursive)
-                if childList:
-                    for child in childList:
-                        selfList.append(child)
-            # ...on to next child
-
-        if selfList: return selfList
+        if isinstance(pred, predicate.Predicate): pred = pred.satisfiedByNode
+        if not recursive:
+            cIter = iter(self)
+            result = []
+            while True:
+                try: child = cIter.next()
+                except StopIteration: break
+                if child is not None and pred(child): result.append(child)
+            return result
+        else: return pyatspi.utils.findAllDescendants(self, pred)
 
     # The canonical "search above this node" method:
     def findAncestor (self, pred):

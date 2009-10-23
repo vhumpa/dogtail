@@ -18,6 +18,8 @@ import unittest
 import time
 import dogtail.tree
 import dogtail.predicate
+import dogtail.config
+dogtail.config.config.logDebugToFile = False
 import pyatspi
 from CORBA import COMM_FAILURE
 
@@ -388,6 +390,10 @@ class TestValue(GtkDemoTest):
 class TestSearching(GtkDemoTest):
     # FIXME: should test the various predicates and the search methods of Node
     def testFindChildren(self):
+        """
+        Ensure that there are the correct number of table cells in the list
+        of demos.
+        """
         pred = dogtail.predicate.GenericPredicate(roleName = 'table cell')
         tableCells = self.app.findChildren(pred)
         # 41 is a magic number. I hand-counted how many table cells there were
@@ -395,12 +401,36 @@ class TestSearching(GtkDemoTest):
         self.assertEquals(len(tableCells), 41)
 
     def testFindChildren2(self):
+        "Ensure that there are two tabs in the second page tab list."
         pred = dogtail.predicate.GenericPredicate(roleName = 'page tab list')
         pageTabLists = self.app.findChildren(pred)
         pred = dogtail.predicate.GenericPredicate(roleName = 'page tab')
         # The second page tab list is the one with the 'Info' and 'Source' tabs
         pageTabs = pageTabLists[1].findChildren(pred)
         self.assertEquals(len(pageTabs), 2)
+
+    def testFindChildren3(self):
+        """
+        Ensure that there are the correct number of table cells in the Tree
+        Store demo.
+        """
+        # The next several lines exist to expand the 'Tree View' item and
+        # scroll down, so that runDemo() will work.
+        # FIXME: make runDemo() handle this for us.
+        treeViewCell = self.app.child('Tree View', roleName = 'table cell')
+        treeViewCell.typeText('+')
+        dogtail.tree.doDelay()
+        sb = self.app.child(roleName = 'scroll bar')
+        sb.value = sb.maxValue
+        self.runDemo('Tree Store')
+        wnd = self.app.window('Card planning sheet')
+        table = wnd.child(roleName = 'tree table')
+        pred = dogtail.predicate.GenericPredicate(roleName = 'table cell')
+        dogtail.config.config.childrenLimit = 10000
+        cells = table.findChildren(pred)
+        # 318 is a magic number. I did verify this.
+        self.assertEquals(len(cells), 318)
+
 
 class TestActions(GtkDemoTest):
     # FIXME: should test the various actions

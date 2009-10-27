@@ -1,5 +1,9 @@
 2009-10-27  Zack Cerza <zcerza@redhat.com>
 
+	* tests/Node.py: Add tests for getting labeler/labelee.
+
+2009-10-27  Zack Cerza <zcerza@redhat.com>
+
 	* dogtail/tree.py: Refactor all Node properties, to clean up namespace
 	pollution.
 

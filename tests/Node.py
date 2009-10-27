@@ -233,19 +233,27 @@ class TestNodeAttributes(GtkDemoTest):
         "Node.relations should be read-only"
         self.assertRaises(AttributeError, self.app.__setattr__,  "relations", [])
 
-    # 'labellee' (read-only list of Node instances):
-    def testGetLabellee(self):
-        # FIXME
-        pass
+    # 'labelee' (read-only list of Node instances):
+    def testGetLabelee(self):
+        "Entry1/2's labelee should be a text widget"
+        self.runDemo('Dialog and Message Boxes')
+        wnd = self.app.window('Dialogs')
+        label = wnd.child(roleName = 'label')
+        self.assertEquals(label.labelee.roleName, 'text')
 
-    def testSetLabellee(self):
-        "Node.labellee should be read-only"
+
+    def testSetLabelee(self):
+        "Node.labelee should be read-only"
         self.assertRaises(AttributeError, self.app.__setattr__,  "labellee", None)
 
-    # 'labeller' (read-only list of Node instances):
-    def testGetLabeller(self):
-        # FIXME
-        pass
+    # 'labeler' (read-only list of Node instances):
+    def testGetLabeler(self):
+        "The text areas in the 'Dialogs' window should have labelers."
+        self.runDemo('Dialog and Message Boxes')
+        wnd = self.app.window('Dialogs')
+        text = wnd.child(roleName = 'text')
+        self.assertEquals(text.labeler.name, 'Entry 2')
+
 
     def testSetLabeller(self):
         "Node.labeller should be read-only"

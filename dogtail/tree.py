@@ -142,14 +142,14 @@ class Action:
         self.__action = action
         self.__index = index
 
-    def _getName(self): return self.__action.getName(self.__index)
-    name = property(_getName)
+    @property
+    def name(self): return self.__action.getName(self.__index)
 
-    def _getDescription(self): return self.__action.getDescription(self.__index)
-    description = property(_getDescription)
+    @property
+    def description(self): return self.__action.getDescription(self.__index)
 
-    def _getKeyBinding(self): return self.__action.getKeyBinding(self.__index)
-    keyBinding = property(_getKeyBinding)
+    @property
+    def keyBinding(self): return self.__action.getKeyBinding(self.__index)
 
     def __str__ (self):
         return "[action | %s | %s ]" % \
@@ -170,7 +170,7 @@ class Action:
         result = self.__action.doAction (self.__index)
         doDelay(config.actionDelay)
         return result
-        
+
 
 class Node:
     """
@@ -184,21 +184,25 @@ class Node:
         try: len(self.user_data)
         except (AttributeError, TypeError): self.user_data = {}
 
-    def _getDebugName(self):
-        self.__setupUserData()
-        return self.user_data.get('debugName', None)
+    @apply
+    def debugName():
+        doc = "debug name assigned during search operations"
+        def fget(self):
+            self.__setupUserData()
+            return self.user_data.get('debugName', None)
 
-    def _setDebugName(self, debugName):
-        self.__setupUserData()
-        self.user_data['debugName'] = debugName
+        def fset(self, debugName):
+            self.__setupUserData()
+            self.user_data['debugName'] = debugName
 
-    debugName = property(_getDebugName, _setDebugName, doc = \
-            "debug name assigned during search operations")
+        return property(**locals())
 
     ##
     # Accessible
     ##
-    def _getDead(self):
+    @property
+    def dead(self):
+        """Is the node dead (defunct) ?"""
         try:
             if self.roleName == 'invalid': return True
             n = self.role
@@ -206,9 +210,10 @@ class Node:
             if len(self) > 0: n = self[0]
         except (LookupError, COMM_FAILURE, OBJECT_NOT_EXIST): return True
         return False
-    dead = property(_getDead, doc = "Is the node dead (defunct) ?")
 
-    def _getChildren(self):
+    @property
+    def children(self):
+        """a list of this Accessible's children"""
         if self.parent and self.parent.roleName == 'hyper link':
             print self.parent.role
             return []
@@ -217,7 +222,9 @@ class Node:
         if childCount > config.childrenLimit:
             global haveWarnedAboutChildrenLimit
             if not haveWarnedAboutChildrenLimit:
-                logger.log("Only returning %s children. You may change config.childrenLimit if you wish. This message will only be printed once." % str(config.childrenLimit))
+                logger.log("Only returning %s children. You may change "
+                    "config.childrenLimit if you wish. This message will only"
+                    " be printed once." % str(config.childrenLimit))
                 haveWarnedAboutChildrenLimit = True
                 childCount = config.childrenLimit
         for i in range(childCount):
@@ -248,9 +255,9 @@ class Node:
         except NotImplementedError: pass
 
         return children
-    children = property(_getChildren, doc = \
-        "a list of this Accessible's children")
+
     roleName = property(Accessibility.Accessible.getRoleName)
+
     role = property(Accessibility.Accessible.getRole)
 
     indexInParent = property(Accessibility.Accessible.getIndexInParent)
@@ -269,7 +276,15 @@ class Node:
             return actions[name].do()
         raise ActionNotSupported(name, self)
 
-    def _getActions(self):
+    @property
+    def actions(self):
+        """
+        A dictionary of supported action names as keys, with Action objects as 
+        values. Common action names include:
+        
+        'click' 'press' 'release' 'activate' 'jump' 'check' 'dock' 'undock'
+        'open' 'menu'
+        """
         actions = {}
         try:
             action = self.queryAction()
@@ -278,92 +293,99 @@ class Node:
                 actions[action.getName(i)] = a
         finally:
             return actions
-    actions = property(_getActions, doc = \
-    """
-    A dictionary of supported action names as keys, with Action objects as 
-    values. Common action names include:
-    
-    'click' 'press' 'release' 'activate' 'jump' 'check' 'dock' 'undock'
-    'open' 'menu'
-    """)
 
+    @apply
+    def combovalue():
+        doc = "The value (as a string) currently selected in the combo box."
 
-    def _getComboValue(self): return self.name
-    def _setComboValue(self, value):
-        logger.log("Setting combobox %s to '%s'"%(self.getLogString(), value))
-        self.childNamed(childName=value).doAction('click')
-        doDelay()
-    combovalue = property(_getComboValue, _setComboValue, doc = \
-        """The value (as a string) currently selected in the combo box.""")
+        def fget(self): return self.name
+
+        def fset(self, value):
+            logger.log("Setting combobox %s to '%s'"%(self.getLogString(),
+                value))
+            self.childNamed(childName=value).doAction('click')
+            doDelay()
+
+        return property(**locals())
 
     ##
     # Hypertext and Hyperlink
     ##
 
-    def _getURI(self):
+    @property
+    def URI(self):
         try: return self.user_data['linkAnchor'].URI
         except (KeyError, AttributeError): raise NotImplementedError
-    URI = property(_getURI)
 
 
     ##
     # Text and EditableText
     ##
 
-    def _getText(self):
-        try: return self.queryText().getText(0,-1)
-        except NotImplementedError: return None
-    def _setText(self, text):
-         try:
-             if config.debugSearching:
-                 msg = "Setting text of %s to %s"
-                 # Let's not get too crazy if 'text' is really large...
-                 # FIXME: Sometimes the next line screws up Unicode strings.
-                 if len(text) > 140: txt = text[:134] + " [...]"
-                 else: txt = text
-                 logger.log(msg % (self.getLogString(), "'%s'" % txt)) 
-             self.queryEditableText().setTextContents(text)
-         except NotImplementedError: raise AttributeError, "can't set attribute"
-    text = property(_getText, _setText, doc = \
-        """For instances with an AccessibleText interface, the text as a 
-        string. This is read-only, unless the instance also has an 
-        AccessibleEditableText interface. In this case, you can write values 
-        to the attribute. This will get logged in the debug log, and a delay 
-        will be added.
-    
-        If this instance corresponds to a password entry, use the passwordText 
-        property instead.""")
+    @apply
+    def text():
+        doc = """For instances with an AccessibleText interface, the text as a 
+    string. This is read-only, unless the instance also has an 
+    AccessibleEditableText interface. In this case, you can write values 
+    to the attribute. This will get logged in the debug log, and a delay 
+    will be added.
 
-    def _getCaretOffset(self): return self.queryText().caretOffset
-    def _setCaretOffset(self, offset):
-        return self.queryText().setCaretOffset(offset)
-    caretOffset = property(_getCaretOffset, _setCaretOffset, doc = \
-         """For instances with an AccessibleText interface, the caret offset 
-         as an integer.""")
+    If this instance corresponds to a password entry, use the passwordText 
+    property instead."""
 
+        def fget(self):
+            try: return self.queryText().getText(0,-1)
+            except NotImplementedError: return None
+        def fset(self, text):
+             try:
+                 if config.debugSearching:
+                     msg = "Setting text of %s to %s"
+                     # Let's not get too crazy if 'text' is really large...
+                     # FIXME: Sometimes the next line screws up Unicode strings.
+                     if len(text) > 140: txt = text[:134] + " [...]"
+                     else: txt = text
+                     logger.log(msg % (self.getLogString(), "'%s'" % txt))
+                 self.queryEditableText().setTextContents(text)
+             except NotImplementedError:
+                 raise AttributeError, "can't set attribute"
+
+        return property(**locals())
+
+    @apply
+    def caretOffset():
+
+        def fget(self):
+            """For instances with an AccessibleText interface, the caret 
+            offset as an integer."""
+            return self.queryText().caretOffset
+
+        def fset(self, offset):
+            return self.queryText().setCaretOffset(offset)
+
+        return property(**locals())
 
     ##
     # Component
     ##
 
-    def _getPosition(self):
+    @property
+    def position(self):
+        """A tuple containing the position of the Accessible: (x, y)"""
         return self.queryComponent().getPosition(pyatspi.DESKTOP_COORDS)
-    position = property(_getPosition, doc = \
-        """A tuple containing the position of the Accessible: (x, y)""")
 
-    def _getSize(self): return self.queryComponent().getSize()
-    size = property(_getSize, doc = \
-        """A tuple containing the size of the Accessible: (w, h)""")
+    @property
+    def size(self):
+        """A tuple containing the size of the Accessible: (w, h)"""
+        return self.queryComponent().getSize()
 
-    def _getExtents(self):
+    @property
+    def extents(self):
+        """A tuple containing the location and size of the Accessible: 
+        (x, y, w, h)"""
         try:
             ex = self.queryComponent().getExtents(pyatspi.DESKTOP_COORDS)
             return (ex.x, ex.y, ex.width, ex.height)
         except NotImplementedError: return None
-    extents = property(_getExtents, doc = \
-        """
-        A tuple containing the location and size of the Accessible: (x, y, w, h)
-        """)
 
     def contains(self, x, y):
         try: return self.queryComponent().contains(x, y, pyatspi.DESKTOP_COORDS)
@@ -390,7 +412,7 @@ class Node:
         Blink, baby!
         """
         if not self.extents: return False
-        else: 
+        else:
             (x, y, w, h) = self.extents
             from utils import Blinker
             blinkData = Blinker(x, y, w, h, count)
@@ -423,87 +445,84 @@ class Node:
     ##
     # RelationSet
     ##
-    def _labeler(self):
+    @property
+    def labeler(self):
+        """'labeller' (read-only list of Node instances):
+        The node(s) that is/are a label for this node. Generated from
+        'relations'.
+        """
         relationSet = self.getRelationSet()
         for relation in relationSet:
             if relation.getRelationType() == pyatspi.RELATION_LABELLED_BY:
-                    if relation.getNTargets() == 1: 
+                    if relation.getNTargets() == 1:
                         return relation.getTarget(0)
                     targets = []
                     for i in range(relation.getNTargets()):
                         targets.append(relation.getTarget(i))
                     return targets
-    labeler = property(_labeler, doc = \
-        """
-        'labeller' (read-only list of Node instances):
-        The node(s) that is/are a label for this node. Generated from
-        'relations'.
-        """)
-    labeller = property(_labeler, doc = "See labeler")
+    labeller = labeler
 
-    def _labelee(self):
+    @property
+    def labelee(self):
+        """'labellee' (read-only list of Node instances):
+        The node(s) that this node is a label for. Generated from 'relations'.
+        """
         relationSet = self.getRelationSet()
         for relation in relationSet:
             if relation.getRelationType() == pyatspi.RELATION_LABEL_FOR:
-                    if relation.getNTargets() == 1: 
+                    if relation.getNTargets() == 1:
                         return relation.getTarget(0)
                     targets = []
                     for i in range(relation.getNTargets()):
                         targets.append(relation.getTarget(i))
                     return targets
-    labelee = property(_labelee, doc = \
-        """
-        'labellee' (read-only list of Node instances):
-        The node(s) that this node is a label for. Generated from 'relations'.
-        """)
-    labellee = property(_labelee, doc = "See labelee")
+    labellee = labelee
 
     ##
     # StateSet
     ##
-    def _isSensitive(self): return self.getState().contains(pyatspi.STATE_SENSITIVE)
-    sensitive = property(_isSensitive, doc = \
-        "Is the Accessible sensitive (i.e. not greyed out)?")
+    @property
+    def sensitive(self):
+        """Is the Accessible sensitive (i.e. not greyed out)?"""
+        return self.getState().contains(pyatspi.STATE_SENSITIVE)
 
-    def _isShowing(self): return self.getState().contains(pyatspi.STATE_SHOWING)
-    showing = property(_isShowing)
+    @property
+    def showing(self):
+        return self.getState().contains(pyatspi.STATE_SHOWING)
 
-    def _isFocusable(self): return self.getState().contains(pyatspi.STATE_FOCUSABLE)
-    focusable = property(_isFocusable, doc = \
-        "Is the Accessible capable of having keyboard focus?")
+    @property
+    def focusable(self):
+        """Is the Accessible capable of having keyboard focus?"""
+        return self.getState().contains(pyatspi.STATE_FOCUSABLE)
 
-    def _isFocused(self): return self.getState().contains(pyatspi.STATE_FOCUSED)
-    focused = property(_isFocused, doc = \
-        "Does the Accessible have keyboard focus?")
+    @property
+    def focused(self):
+        """Does the Accessible have keyboard focus?"""
+        return self.getState().contains(pyatspi.STATE_FOCUSED)
 
-    def _isChecked(self): return self.getState().contains(pyatspi.STATE_CHECKED)
-    checked = property(_isChecked, doc = \
-        "Is the Accessible a checked checkbox?")
+    @property
+    def isChecked(self):
+        """Is the Accessible a checked checkbox?"""
+        return self.getState().contains(pyatspi.STATE_CHECKED)
 
     ##
     # Selection
     ##
 
     def selectAll(self):
-        """
-        Selects all children.
-        """
+        """Selects all children."""
         result = self.querySelection().selectAll()
         doDelay()
         return result
 
     def deselectAll(self):
-        """
-        Deselects all selected children.
-        """
+        """Deselects all selected children."""
         result = self.querySelection().clearSelection()
         doDelay()
         return result
 
     def select(self):
-        """
-        Selects the Accessible.
-        """
+        """Selects the Accessible."""
         try: parent = self.parent
         except AttributeError: raise NotImplementedError
         result = parent.querySelection().selectChild(self.indexInParent)
@@ -511,29 +530,28 @@ class Node:
         return result
 
     def deselect(self):
-        """
-        Deselects the Accessible.
-        """
+        """Deselects the Accessible."""
         try: parent = self.parent
         except AttributeError: raise NotImplementedError
         result = parent.querySelection().deselectChild(self.indexInParent)
         doDelay()
         return result
-    
-    def _getSelected(self):
+
+    @property
+    def isSelected(self):
+        """Is the Accessible selected?"""
         try: parent = self.parent
         except AttributeError: raise NotImplementedError
         return parent.querySelection().isChildSelected(self.indexInParent)
-    isSelected = property(_getSelected, doc = "Is the Accessible selected?")
-    
-    def _getSelectedChildren(self):
+
+    @property
+    def selectedChildren(self):
+        """Returns a list of children that are selected."""
         #TODO: hideChildren for Hyperlinks?
         selection = self.querySelection()
         selectedChildren = []
         for i in xrange(selection.nSelectedChildren):
             selectedChildren.append(selection.getSelectedChild(i))
-    selectedChildren = property(_getSelectedChildren, doc = \
-        "Returns a list of children that are selected.")
 
     ##
     # Value
@@ -553,19 +571,19 @@ class Node:
 
     @property
     def minValue(self):
-        "The minimum value of self.value"
+        """The minimum value of self.value"""
         try: return self.queryValue().minimumValue
         except NotImplementedError: pass
 
     @property
     def minValueIncrement(self):
-        "The minimum value increment of self.value"
+        """The minimum value increment of self.value"""
         try: return self.queryValue().minimumIncrement
         except NotImplementedError: pass
 
     @property
     def maxValue(self):
-        "The maximum value of self.value"
+        """The maximum value of self.value"""
         try: return self.queryValue().maximumValue
         except NotImplementedError: pass
 
@@ -724,7 +742,7 @@ class Node:
             while True:
                 try: child = cIter.next()
                 except StopIteration: break
-                if child is not None: 
+                if child is not None:
                     if pred(child): return child
         else: return pyatspi.utils.findDescendant(self, pred)
 
@@ -929,13 +947,13 @@ class LinkAnchor:
         self.linkIndex = linkIndex
         self.anchorIndex = anchorIndex
 
-    def _getLink(self):
+    @property
+    def link(self):
         return self.hypertext.getLink(self.linkIndex)
-    link = property(_getLink)
 
-    def _getURI(self):
+    @property
+    def URI(self):
         return self.link.getURI(self.anchorIndex)
-    URI = property(_getURI)
 
 
 class Root (Node):

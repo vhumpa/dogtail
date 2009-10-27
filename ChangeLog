@@ -1,3 +1,9 @@
+2009-10-27  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Rewrite the Node.value property in a way that's
+	compatible with python 2.4 while still avoiding namespace pollution.
+	Add docstrings for the AccessibleValue-related properties.
+
 2009-10-23  Zack Cerza <zcerza@redhat.com>
 
 	* dogtail/tree.py: Rewrite Node.findChildren() using

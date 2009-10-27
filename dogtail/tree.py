@@ -539,27 +539,33 @@ class Node:
     # Value
     ##
 
-    @property
-    def value(self):
-        try: return self.queryValue().currentValue
-        except NotImplementedError: pass
+    @apply
+    def value():
+        doc = "The value contained by the AccessibleValue interface."
+        def fget(self):
+            try: return self.queryValue().currentValue
+            except NotImplementedError: pass
 
-    @value.setter
-    def value(self, value):
-        self.queryValue().currentValue = value
+        def fset(self, value):
+            self.queryValue().currentValue = value
+
+        return property(**locals())
 
     @property
     def minValue(self):
+        "The minimum value of self.value"
         try: return self.queryValue().minimumValue
         except NotImplementedError: pass
 
     @property
     def minValueIncrement(self):
+        "The minimum value increment of self.value"
         try: return self.queryValue().minimumIncrement
         except NotImplementedError: pass
 
     @property
     def maxValue(self):
+        "The maximum value of self.value"
         try: return self.queryValue().maximumValue
         except NotImplementedError: pass
 

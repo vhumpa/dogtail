@@ -1,3 +1,8 @@
+2009-12-07  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Add a little more error checking to avoid some cases
+	where sniff, if left running for long periods of time, would crash.
+
 2009-10-27  Zack Cerza <zcerza@redhat.com>
 
 	* tests/Node.py: Add tests for getting labeler/labelee.

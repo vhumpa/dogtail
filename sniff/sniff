@@ -410,7 +410,8 @@ class SniffModel(gtk.TreeStore):
 
     def getPath(self, node):
         if not node: raise ValueError
-        indexInParent = node.indexInParent
+        try: indexInParent = node.indexInParent
+        except LookupError: return None
         row = self.cache.get(node, None)
         path = []
         needParent = True
@@ -426,7 +427,7 @@ class SniffModel(gtk.TreeStore):
             indexInParent = list(tree.root.children).index(node)
             needParent = False
         elif not node.parent: return None
-        elif len(node.parent) >= indexInParent - 1 and \
+        elif (0 <= indexInParent <= (len(node.parent) - 1)) and \
                 node.parent[indexInParent] != node:
             return None
             siblings = node.parent.children
@@ -507,8 +508,9 @@ class SniffModel(gtk.TreeStore):
 
     def __removeNodeCB(self, iter, parent, path):
         childRow = self.iter_children(iter)
-        while childRow:
+        while childRow is not None:
             node = self.getNode(childRow)
+            if node is None: break
             if node and self.getNode(childRow) not in parent:
                 self.remove(childRow)
             else: childRow = self.iter_next(childRow)

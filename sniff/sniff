@@ -9,19 +9,38 @@ Data storage is handled by the SniffModel class.
 There is no SniffView class; we just use a GtkTreeView.
 Data display is handled by the SniffController class.
 """
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('Gdk', '3.0')
+gi.require_version('GObject', '2.0')
+import sys
 from dogtail.config import config
-if config.checkForA11y:
-    from dogtail.utils import checkForA11yInteractively
-    checkForA11yInteractively()
+print "------------------------checkpoint 1"
+#if config.checkForA11y:
+#    from dogtail.utils import checkForA11yInteractively
+#    checkForA11yInteractively()
 
 config.logDebugToFile = False
 config.childrenLimit = 100000
-from dogtail import tree
-pyatspi = tree.pyatspi
+
+print "------------------------checkpoint 1a"
+#from dogtail.tree import *
+print "------------------------checkpoint 1ab"
+import pyatspi
+import Accessibility
 import CORBA
-from dogtail import utils
-import gobject
-import gtk
+print "------------------------checkpoint 1b"
+#from dogtail import utils
+print "------------------------checkpoint 2"
+from gi.repository import Gtk
+print "------------------------checkpoint 2aa"
+from gi.repository import Gdk
+from gi.repository import Gio
+print "------------------------checkpoint 2aaa"
+from gi.repository import GdkPixbuf
+print "------------------------checkpoint 2ab"
+from gi.repository import GObject
+print "------------------------checkpoint 2b"
 
 class SniffApp(object):
     appName = 'Sniff'
@@ -30,22 +49,24 @@ class SniffApp(object):
 
     def __init__(self):
 
-        import gnome
-        self.program = gnome.program_init(self.appName, '0.1')
-        import gtk.glade
-
+        print "------------------------checkpoint 3"
+        #import gnome
+        #self.program = gnome.program_init(self.appName, '0.1')
+        #import Gtk.glade
+        self.builder = Gtk.Builder()
+        print "------------------------checkpoint 4"
         import os
-        if os.path.exists('sniff.glade'):
-            self.x = gtk.glade.XML('sniff.glade')
+        if os.path.exists('sniff.ui'):
+            self.builder.add_from_file('sniff.ui')
         else:
             import sys
             exec_root = sys.argv[0].split("/bin/")[0]
             if exec_root[0] is not '/':
                 exec_root = "/usr"
-            self.x = gtk.glade.XML(exec_root + \
+            self.x = Gtk.glade.XML(exec_root + \
                     '/share/dogtail/glade/sniff.glade')
 
-        self.app = self.x.get_widget(self.appName)
+        self.app = self.builder.get_object(self.appName)
 
         try:
             self.app.set_icon_from_file('../icons/dogtail-head.svg')
@@ -57,33 +78,33 @@ class SniffApp(object):
         self.setUpWidgets()
         self.connectSignals()
         self.app.show_all()
-        gtk.main()
+        Gtk.main()
 
     def setUpWidgets(self):
-        self.quit1 = self.x.get_widget('quit1')
-        self.expand_all1 = self.x.get_widget('expand_all1')
-        self.collapse_all1 = self.x.get_widget('collapse_all1')
-        self.about1 = self.x.get_widget('about1')
-        self.refreshMenuItem = self.x.get_widget('refresh1')
-        self.setRootMenuItem = self.x.get_widget('setRootMenuItem')
-        self.unsetRootMenuItem = self.x.get_widget('unsetRootMenuItem')
+        self.quit1 = self.builder.get_object('quit1')
+        self.expand_all1 = self.builder.get_object('expand_all1')
+        self.collapse_all1 = self.builder.get_object('collapse_all1')
+        self.about1 = self.builder.get_object('about1')
+        self.refreshMenuItem = self.builder.get_object('refresh1')
+        self.setRootMenuItem = self.builder.get_object('setRootMenuItem')
+        self.unsetRootMenuItem = self.builder.get_object('unsetRootMenuItem')
         self.about = None
 
-        self.tree = SniffController(self.x)
+        self.tree = SniffController(self.builder)
 
     def connectSignals(self):
         self.app.connect('delete_event', self.quit, self)
         self.quit1.connect('activate', self.quit, self)
-        self.expand_all1.connect('activate', self.tree.expandAll, True)
-        self.collapse_all1.connect('activate', self.tree.expandAll, False)
+        #self.expand_all1.connect('activate', self.tree.expandAll, True)
+        #self.collapse_all1.connect('activate', self.tree.expandAll, False)
         self.about1.connect('activate', self.showAbout, self)
-        self.refreshMenuItem.connect('activate', self.tree.refresh)
-        self.setRootMenuItem.connect('activate', self.tree.changeRoot, True)
-        self.unsetRootMenuItem.connect('activate', self.tree.changeRoot, False)
+        #self.refreshMenuItem.connect('activate', self.tree.refresh)
+        #self.setRootMenuItem.connect('activate', self.tree.changeRoot, True)
+        #self.unsetRootMenuItem.connect('activate', self.tree.changeRoot, False)
 
     def showAbout(self, *args):
         if not self.about:
-            self.about = gtk.AboutDialog()
+            self.about = Gtk.AboutDialog()
             self.about.set_name(self.appName)
             self.about.set_authors(self.appAuthors)
             self.about.set_comments('Explore your desktop with Dogtail')
@@ -92,37 +113,37 @@ class SniffApp(object):
         self.about.show_all()
 
     def hideAbout(self, window, response):
-        if response == gtk.RESPONSE_CANCEL: window.hide()
+        if response == Gtk.ResponseType.CANCEL: window.hide()
 
     def quit(self, *args):
-        gtk.main_quit()
+        Gtk.main_quit()
 
 
 class SniffController(object):
     invalidBufferCallbackID = None
 
-    def __init__(self, gladeXML):
-        self.x = gladeXML
-        self.nameTextLabel = self.x.get_widget('nameTextLabel')
+    def __init__(self, builder):
+        self.builder = builder
+        self.nameTextLabel = self.builder.get_object('nameTextLabel')
         self.nameTextLabel.set_text('')
-        self.roleNameTextLabel = self.x.get_widget('roleNameTextLabel')
+        self.roleNameTextLabel = self.builder.get_object('roleNameTextLabel')
         self.roleNameTextLabel.set_text('')
-        self.descTextLabel = self.x.get_widget('descTextLabel')
+        self.descTextLabel = self.builder.get_object('descTextLabel')
         self.descTextLabel.set_text('')
-        self.actionsTextLabel = self.x.get_widget('actionsTextLabel')
+        self.actionsTextLabel = self.builder.get_object('actionsTextLabel')
         self.actionsTextLabel.set_text('')
-        self.textTextView = self.x.get_widget('textTextView')
+        self.textTextView = self.builder.get_object('textTextView')
         self.textTextViewBufferCallbackID = self.invalidBufferCallbackID
         self.textTextView.set_sensitive(False)
         self.textTextView.get_buffer().set_text('')
-        self.labelerButton = self.x.get_widget('labelerButton')
+        self.labelerButton = self.builder.get_object('labelerButton')
         self.labelerButton.set_sensitive(False)
-        self.labeleeButton = self.x.get_widget('labeleeButton')
+        self.labeleeButton = self.builder.get_object('labeleeButton')
         self.labeleeButton.set_sensitive(False)
-        self.stateView = self.x.get_widget('stateTreeView')
+        self.stateView = self.builder.get_object('stateTreeView')
         self.stateModel = StateModel()
         self.setUpStateView()
-        self.treeView = self.x.get_widget('treeTreeView')
+        self.treeView = self.builder.get_object('treeTreeView')
         self.treeSelection = self.treeView.get_selection()
         self.treeModel = SniffModel()
         self.setUpTreeView()
@@ -130,10 +151,10 @@ class SniffController(object):
 
     def setUpStateView(self):
         self.stateView.set_model(self.stateModel)
-        cellRenderer = gtk.CellRendererText()
-        col = gtk.TreeViewColumn('Present States', cellRenderer, \
+        cellRenderer = Gtk.CellRendererText()
+        col = Gtk.TreeViewColumn('Present States', cellRenderer, \
                 text=self.stateModel.stateColumn)
-        col.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
+        #col.set_sizing(Gtk.TreeViewColumnSizing.AUTOSIZE)
         self.stateView.insert_column(col, -1)
 
     def setUpTreeView(self):
@@ -141,12 +162,12 @@ class SniffController(object):
 
         self.treeView.set_model(self.treeModel)
 
-        col = gtk.TreeViewColumn()
-        cellRenderer = gtk.CellRendererPixbuf()
+        col = Gtk.TreeViewColumn()
+        cellRenderer = Gtk.CellRendererPixbuf()
         col.pack_start(cellRenderer, expand = False)
         col.add_attribute(cellRenderer, 'pixbuf', self.treeModel.pixbufColumn)
 
-        cellRenderer = gtk.CellRendererText()
+        cellRenderer = Gtk.CellRendererText()
         col.pack_end(cellRenderer, expand = False)
         col.add_attribute(cellRenderer, 'text', self.treeModel.nameColumn)
 
@@ -155,11 +176,11 @@ class SniffController(object):
         self.treeView.insert_column(col, -1)
 
         for column in self.treeView.get_columns():
-            column.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
+            column.set_sizing(Gtk.TreeViewColumnSizing.AUTOSIZE)
             column.set_resizable(True)
         self.treeView.show()
         path = 0
-        self.treeView.expand_row(path, False)
+        #self.treeView.expand_row(path, False)
         self.rowExpanded(self.treeView, self.treeModel.get_iter(path), path)
 
     def changeRoot(self, menuItem, toSelected = True, *args):
@@ -239,7 +260,7 @@ class SniffController(object):
         method(arg)
 
     def keyPress(self, widget, event, *userParams):
-        if event.keyval == gtk.keysyms.Return:
+        if event.keyval == Gdk.KEY_Return:
             path = self.treeSelection.get_selected_rows()[1][0]
             if self.treeView.row_expanded(path):
                 self.treeView.collapse_row(path)
@@ -256,11 +277,11 @@ class SniffController(object):
         if node == None: return
 
         if event.button == 3:
-            menu = gtk.Menu()
+            menu = Gtk.Menu()
             menuItem = None
             if node.actions:
                 for action in node.actions.keys():
-                    menuItem = gtk.MenuItem(action.capitalize())
+                    menuItem = Gtk.MenuItem(action.capitalize())
                     menuItem.connect('activate', self.menuItemActivate, \
                             node.doAction, action)
                     menuItem.show()
@@ -287,7 +308,7 @@ class SniffController(object):
         if node.actions: str = ' '.join(node.actions.keys())
         self.actionsTextLabel.set_text(str)
 
-        # Have we connected this signal yet? 
+        # Have we connected this signal yet?
         # If so, disconnect it before proceeding.
         if self.textTextViewBufferCallbackID != self.invalidBufferCallbackID:
             self.textTextView.get_buffer().disconnect( \
@@ -309,7 +330,7 @@ class SniffController(object):
             self.textTextView.get_buffer().set_text('')
             self.textTextView.set_sensitive(False)
 
-        if node.labeler and not node.labeler.dead: 
+        if node.labeler and not node.labeler.dead:
             self.labelerButton.set_sensitive(True)
             self.labelerButton.show()
         #elif node.labeler and node.labeler.dead:
@@ -317,7 +338,7 @@ class SniffController(object):
         else:
             self.labelerButton.set_sensitive(False)
             self.labelerButton.hide()
-        if node.labelee and not node.labelee.dead: 
+        if node.labelee and not node.labelee.dead:
             self.labeleeButton.set_sensitive(True)
             self.labeleeButton.show()
         #elif node.labelee and node.labelee.dead:
@@ -334,36 +355,41 @@ class SniffController(object):
                         textBuffer.get_end_iter())
 
 
-class SniffModel(gtk.TreeStore):
+class SniffModel(Gtk.TreeStore):
     nodeColumn = 0
     nameColumn = 1
     pixbufColumn = 2
     eventQueue = []
     cache = {}
 
-    def __init__(self, root = tree.root):
-        gtk.TreeStore.__init__(self, gobject.TYPE_PYOBJECT, \
-                gobject.TYPE_STRING, gtk.gdk.Pixbuf)
+    def __init__(self):
+        Gtk.TreeStore.__init__(self, GObject.TYPE_PYOBJECT, \
+                GObject.TYPE_STRING, GdkPixbuf.Pixbuf)
+        print "------------------------checkpoint 5"
+        #from dogtail.tree import root
+        root = pyatspi.Registry.getDesktop(0)
+        print "------------------------checkpoint 5b"
         self.rootNode = self.initialRootNode = root
         self.appendAndPopulate(None, self.rootNode)
 
     def __contains__(self, item):
-        if isinstance(item, tree.Node):
+        from dogtail.tree import Node
+        if isinstance(item, Node):
             if item in self.cache:
                 row = self.cache[item]
                 # If row is None, we need to call getPath() to be sure
-                if not row: 
+                if not row:
                     path = self.getPath(item)
                     return path is not None
                 elif row in self: return True
             return False
-        elif isinstance(item, gtk.TreeIter): 
+        elif isinstance(item, Gtk.TreeIter):
             return self.iter_is_valid(item)
         elif isinstance(item, list) or isinstance(item, tuple):
             try: iter = self.get_iter(item)
             except ValueError: return False
             return iter in self
-        elif isinstance(item, gtk.TreeRowReference):
+        elif isinstance(item, Gtk.TreeRowReference):
             return item.valid() and item.get_path() in self
         else:
             raise TypeError
@@ -384,18 +410,24 @@ class SniffModel(gtk.TreeStore):
     def append(self, parentIter, node):
         if node: self.cache[node] = None
         pb = self.getPixbufForNode(node)
-        return gtk.TreeStore.append(self, parentIter, (node, node.name, pb))
+        return Gtk.TreeStore.append(self, parentIter, (node, node.name, pb))
 
     def remove(self, iter):
         node = self.getNode(iter)
         try: del self.cache[node]
-        finally: return gtk.TreeStore.remove(self, iter)
+        finally: return Gtk.TreeStore.remove(self, iter)
 
     def populateChildren(self, iter):
-        if not iter in self: return False
+        #sys.exit()
+        print "------------------------checkpoint 6a"
+
+        if not iter in self:
+            print "------------------------checkpoint 6b"
+            return False #SEGFAULT... WHY HERE???
+        print "------------------------checkpoint 6b"
         result = True
         node = self.getNode(iter)
-        for child in node.children: 
+        for child in node.children:
             if child in self: continue
             result = result and self.append(iter, child)
         return result
@@ -412,6 +444,7 @@ class SniffModel(gtk.TreeStore):
         if not node: raise ValueError
         try: indexInParent = node.indexInParent
         except LookupError: return None
+        root = pyatspi.Registry.getDesktop(0)
         row = self.cache.get(node, None)
         path = []
         needParent = True
@@ -424,7 +457,7 @@ class SniffModel(gtk.TreeStore):
         elif node.role == pyatspi.ROLE_APPLICATION or node.roleName == \
                 'application':
             path = [0]
-            indexInParent = list(tree.root.children).index(node)
+            indexInParent = list(root.children).index(node)
             needParent = False
         elif not node.parent: return None
         elif (0 <= indexInParent <= (len(node.parent) - 1)) and \
@@ -432,7 +465,7 @@ class SniffModel(gtk.TreeStore):
             return None
             siblings = node.parent.children
             sibIndex = siblings.index(node)
-            try: 
+            try:
                 if siblings[sibIndex] != node: return None
                 else: indexInParent = sibIndex
             except ValueError: return None
@@ -453,7 +486,7 @@ class SniffModel(gtk.TreeStore):
             #print "I smell a bug in %s..." % node.getApplication()
             return None
 
-        self.cache[node] = gtk.TreeRowReference(self, path)
+        self.cache[node] = Gtk.TreeRowReference(self, path)
         return path
 
     def processEvents(self):
@@ -470,7 +503,7 @@ class SniffModel(gtk.TreeStore):
         app = event.host_application
         if app and app.name == 'sniff': return
         self.eventQueue.append(event)
-        gobject.idle_add(self.processEvents)
+        GObject.idle_add(self.processEvents)
 
     def processChangedNode(self, event):
         node = event.source
@@ -497,7 +530,7 @@ class SniffModel(gtk.TreeStore):
                         else:
                             # If it has no children now, give it a sec
                             # to come up with some.
-                            gobject.timeout_add(1000, \
+                            GObject.timeout_add(1000, \
                                     self.__addNodeCB, iter, child)
             elif event.type.minor == 'remove':
                 self.__removeNodeCB(iter, node, path)
@@ -520,37 +553,38 @@ class SniffModel(gtk.TreeStore):
         return False
 
     def getPixbufForNode(self, node):
-        theme = gtk.icon_theme_get_default()
+        theme = Gtk.IconTheme().get_default()
+        #theme = Gtk.IconTheme.get_default()
         try:
             if node.role == pyatspi.ROLE_APPLICATION:
                 # FIXME: Use the pixbuf from libwcnk (if available):
                 # wnckApp = Application(node).getWnckApplication()
                 # if wnckApp
-                try: 
+                try:
                     return theme.load_icon(node.name, 24, \
-                            gtk.ICON_LOOKUP_USE_BUILTIN)
-                except gobject.GError:
-                    try: 
+                            Gtk.IconLookupFlags.USE_BUILTIN)
+                except GObject.GError:
+                    try:
                         return theme.load_icon(node.name.lower(), 24, \
-                            gtk.ICON_LOOKUP_USE_BUILTIN)
-                    except gobject.GError: 
+                            Gtk.IconLookupFlags.USE_BUILTIN)
+                    except GObject.GError:
                         return None
             elif node.parent:
                 return iconForRole[node.role]
             else:
                 return theme.load_icon("gnome-fs-desktop", 24, \
-                        gtk.ICON_LOOKUP_USE_BUILTIN)
+                        Gtk.IconLookupFlags.USE_BUILTIN)
         except Exception:
             return theme.load_icon("gtk-dialog-error", 24, \
-                    gtk.ICON_LOOKUP_USE_BUILTIN)
+                    Gtk.IconLookupFlags.USE_BUILTIN)
 
-class StateModel(gtk.ListStore):
+class StateModel(Gtk.ListStore):
     stateColumn = 0
     statesSupported = ['checked', 'focusable', 'focused', 'sensitive', \
             'showing']
 
     def __init__(self):
-        gtk.ListStore.__init__(self, gobject.TYPE_STRING)
+        Gtk.ListStore.__init__(self, GObject.TYPE_STRING)
 
     def setNode(self, node):
         self.clear()
@@ -561,10 +595,10 @@ class StateModel(gtk.ListStore):
 
 def loadIcon(iconName):
     try:
-        pixbuf = gtk.gdk.pixbuf_new_from_file('icons/' + iconName)
-    except gobject.GError:
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file('icons/' + iconName)
+    except GObject.GError:
         iconName = '/usr/share/dogtail/icons/' + iconName
-        pixbuf = gtk.gdk.pixbuf_new_from_file(iconName)
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file(iconName)
     return pixbuf
 
 button_xpm = loadIcon("button.xpm")
@@ -594,7 +628,7 @@ window_xpm = loadIcon("window.xpm")
 
 iconForRole = { \
     pyatspi.ROLE_INVALID : None, \
-    # pyatspi doesn't have the following... not even sure if it exists 
+    # pyatspi doesn't have the following... not even sure if it exists
     # anywhere.
     #atspi.SPI_ROLE_ACCEL_LABEL : label_xpm, \
     pyatspi.ROLE_ALERT : None, \
@@ -679,5 +713,5 @@ iconForRole = { \
 def main():
     sniff = SniffApp()
 
-if __name__ == '__main__': 
+if __name__ == '__main__':
     main()

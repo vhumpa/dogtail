@@ -49,18 +49,18 @@ def screenshot(file = 'screenshot.png', timeStamp = True):
         newFile = baseName + '.' + fileExt
         path = config.scratchDir + newFile
 
-    import gtk.gdk
-    import gobject
-    rootWindow = gtk.gdk.get_default_root_window()
+    from gi.repository import Gdk
+    from gi.repository import GObject
+    rootWindow = Gdk.get_default_root_window()
     geometry = rootWindow.get_geometry()
-    pixbuf = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, False, 8, geometry[2], \
+    pixbuf = GdkPixbuf.Pixbuf(GdkPixbuf.Colorspace.RGB, False, 8, geometry[2], \
             geometry[3])
-    gtk.gdk.Pixbuf.get_from_drawable(pixbuf, rootWindow, \
+    GdkPixbuf.Pixbuf.get_from_drawable(pixbuf, rootWindow, \
             rootWindow.get_colormap(), 0, 0, 0, 0, geometry[2], geometry[3])
-    # gtk.gdk.Pixbuf.save() needs 'jpeg' and not 'jpg'
+    # GdkPixbuf.Pixbuf.save() needs 'jpeg' and not 'jpg'
     if fileExt == 'jpg': fileExt = 'jpeg'
     try: pixbuf.save(path, fileExt)
-    except gobject.GError:
+    except GObject.GError:
         raise ValueError, "Failed to save screenshot in %s format" % fileExt
     assert os.path.exists(path)
     logger.log("Screenshot taken: " + path)
@@ -118,32 +118,33 @@ class Blinker:
     INTERVAL_MS = 200
 
     def __init__(self, x, y, w, h, count = 2):
-        import gobject
-        import gtk.gdk
+        from gi.repository import GObject
+        from gi.repository import Gdk
+        from gi.repository import Gtk
         self.count = count
         self.x = x
         self.y = y
         self.w = w
         self.h = h
-        self.timeout_handler_id = gobject.timeout_add (Blinker.INTERVAL_MS, self.blinkDrawRectangle)
-        gtk.main()
+        self.timeout_handler_id = GObject.timeout_add (Blinker.INTERVAL_MS, self.blinkDrawRectangle)
+        Gtk.main()
 
     def blinkDrawRectangle (self):
-        import gtk.gdk
-        display = gtk.gdk.display_get_default()
+        from gi.repository import Gdk
+        display = Gdk.Display.get_default()
         screen = display.get_default_screen()
         rootWindow = screen.get_root_window()
         gc = rootWindow.new_gc()
 
-        gc.set_subwindow (gtk.gdk.INCLUDE_INFERIORS)
-        gc.set_function (gtk.gdk.INVERT)
-        gc.set_line_attributes (3, gtk.gdk.LINE_SOLID, gtk.gdk.CAP_BUTT, gtk.gdk.JOIN_MITER)
+        gc.set_subwindow (Gdk.INCLUDE_INFERIORS)
+        gc.set_function (Gdk.INVERT)
+        gc.set_line_attributes (3, Gdk.LINE_SOLID, Gdk.CAP_BUTT, Gdk.JOIN_MITER)
         rootWindow.draw_rectangle (gc, False, self.x, self.y, self.w, self.h);
 
         self.count-=1
 
         if self.count <= 0:
-            gtk.main_quit()
+            Gtk.main_quit()
             return False
 
         return True
@@ -153,10 +154,10 @@ a11yGConfKey = '/desktop/gnome/interface/accessibility'
 
 def isA11yEnabled():
     """
-    Checks if accessibility is enabled via gconf.
+    Checks if accessibility is enabled via GConf.
     """
-    import gconf
-    gconfEnabled = gconf.client_get_default().get_bool(a11yGConfKey)
+    from gi.repository import GConf
+    gconfEnabled = GConf.Client.get_default().get_bool(a11yGConfKey)
     if os.environ.get('GTK_MODULES','').find('gail:atk-bridge') == -1:
         envEnabled = False
     else: envEnabled = True
@@ -173,10 +174,10 @@ def bailBecauseA11yIsDisabled():
 
 def enableA11y():
     """
-    Enables accessibility via gconf.
+    Enables accessibility via GConf.
     """
-    import gconf
-    return gconf.client_get_default().set_bool(a11yGConfKey, True)
+    from gi.repository import GConf
+    return GConf.Client.get_default().set_bool(a11yGConfKey, True)
 
 def checkForA11y():
     """
@@ -190,26 +191,26 @@ def checkForA11yInteractively():
     user if it should be enabled if it is not already, then halts execution.
     """
     if isA11yEnabled(): return
-    import gtk
-    dialog = gtk.Dialog('Enable Assistive Technology Support?',
+    from gi.repository import Gtk
+    dialog = Gtk.Dialog('Enable Assistive Technology Support?',
                      None,
-                     gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                     (gtk.STOCK_QUIT, gtk.RESPONSE_CLOSE, 
-                         "_Enable", gtk.RESPONSE_ACCEPT))
+                     Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                     (Gtk.STOCK_QUIT, Gtk.ResponseType.CLOSE,
+                         "_Enable", Gtk.ResponseType.ACCEPT))
     question = """Dogtail requires that Assistive Technology Support be enabled for it to function. Would you like to enable Assistive Technology support now?
 
 Note that you will have to log out for the change to fully take effect.
     """.strip()
-    dialog.set_default_response(gtk.RESPONSE_ACCEPT)
-    questionLabel = gtk.Label(question)
+    dialog.set_default_response(Gtk.ResponseType.ACCEPT)
+    questionLabel = Gtk.Label(label=question)
     questionLabel.set_line_wrap(True)
-    dialog.vbox.pack_start(questionLabel)
+    dialog.vbox.pack_start(questionLabel, True, True, 0)
     dialog.show_all()
     result = dialog.run()
-    if result == gtk.RESPONSE_ACCEPT:
+    if result == Gtk.ResponseType.ACCEPT:
         logger.log("Enabling accessibility...")
         enableA11y()
-    elif result == gtk.RESPONSE_CLOSE:
+    elif result == Gtk.ResponseType.CLOSE:
        bailBecauseA11yIsDisabled()
     dialog.destroy()
 

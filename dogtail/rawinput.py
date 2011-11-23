@@ -11,9 +11,16 @@ __author__ = """
 David Malcolm <dmalcolm@redhat.com>,
 Zack Cerza <zcerza@redhat.com>
 """
+import gi
 
-import gtk.keysyms
-import gtk.gdk
+gi.require_version('Gtk', '3.0')
+gi.require_version('Gdk', '3.0')
+
+import sys
+from gi.repository import Gtk
+from gi.repository import Gdk
+#import Gtk.gdk
+#import Gdk.keysyms #SEGFAULT HERE, module is elsewhere...
 from config import config
 from utils import doDelay
 from logging import debugLogger as logger
@@ -95,23 +102,23 @@ def typeText(string):
         pressKey(char)
 
 keyNameAliases = {
-    'enter' : 'Return',
-    'esc' : 'Escape',
-    'alt' : 'Alt_L',
-    'control' : 'Control_L',
-    'ctrl' : 'Control_L',
-    'shift' : 'Shift_L',
-    'del' : 'Delete',
-    'ins' : 'Insert',
-    'pageup' : 'Page_Up',
-    'pagedown' : 'Page_Down',
-    ' ' : 'space',
-    '\t' : 'Tab',
-    '\n' : 'Return'
+    'enter' : 'KEY_Return',
+    'esc' : 'KEY_Escape',
+    'alt' : 'KEY_Alt_L',
+    'control' : 'KEY_Control_L',
+    'ctrl' : 'KEY_Control_L',
+    'shift' : 'KEY_Shift_L',
+    'del' : 'KEY_Delete',
+    'ins' : 'KEY_Insert',
+    'pageup' : 'KEY_Page_Up',
+    'pagedown' : 'KEY_Page_Down',
+    ' ' : 'KEY_space',
+    '\t' : 'KEY_Tab',
+    '\n' : 'KEY_Return'
 }
 
 def keySymToUniChar(keySym):
-    i = gtk.gdk.keyval_to_unicode(keySym)
+    i = Gdk.keyval_to_unicode(keySym)
     if i: UniChar = unichr(i)
     else: UniChar = ''
     return UniChar
@@ -120,17 +127,17 @@ def uniCharToKeySym(uniChar):
     # OK, if it's not actually unicode we can fix that, right?
     if not isinstance(uniChar, unicode): uniChar = unicode(uniChar)
     i = ord(uniChar)
-    keySym = gtk.gdk.unicode_to_keyval(i)
+    keySym = Gdk.unicode_to_keyval(i)
     return keySym
 
 def keySymToKeyName(keySym):
-    return gtk.gdk.keyval_name(keySym)
+    return Gdk.keyval_name(keySym)
 
 def keyNameToKeySym(keyName):
     try:
         keyName = keyNameAliases.get(keyName.lower(), keyName)
-        keySym = gtk.gdk.keyval_from_name(keyName)
-        if not keySym: keySym = getattr(gtk.keysyms, keyName)
+        keySym = Gdk.keyval_from_name(keyName)
+        if not keySym: keySym = getattr(Gdk, keyName)
     except AttributeError:
         try: keySym = uniCharToKeySym(keyName)
         except TypeError: raise KeyError, keyName
@@ -142,13 +149,16 @@ def keyNameToKeyCode(keyName):
 
     Note that the keycode returned by this function is often incorrect when
     the requested keystring is obtained by holding down the Shift key.
-    
+
     Generally you should use uniCharToKeySym() and should only need this
     function for nonprintable keys anyway.
     """
-    keymap = gtk.gdk.keymap_get_default()
+    print keyName
+    keymap = Gdk.Keymap()
+    print 'chk'
     entries = keymap.get_entries_for_keyval( \
-            gtk.gdk.keyval_from_name(keyName))
+                Gdk.keyval_from_name(keyName))
+    print 'chk2'
     try: return entries[0][0]
     except TypeError: pass
 
@@ -156,7 +166,7 @@ def pressKey(keyName):
     """
     Presses (and releases) the key specified by keyName.
     keyName is the English name of the key as seen on the keyboard. Ex: 'enter'
-    Names are looked up in gtk.keysyms. If they are not found there, they are
+    Names are looked up in Gdk.KEY_ If they are not found there, they are
     looked up by uniCharToKeySym().
     """
     keySym = keyNameToKeySym(keyName)
@@ -178,23 +188,30 @@ def keyCombo(comboString):
                 if S:
                     S = keyNameAliases.get(S.lower(), S)
                     strings.append(S)
+    print 'check 1'
     for s in strings:
-        if not hasattr(gtk.keysyms, s):
-            raise ValueError, "Cannot find key %s" % s
-
+        if not hasattr(Gdk, s):
+            #there is KEY_ added in GTK3 which we need to add for keynames
+            # not defined in the keyNameAliases
+            if not hasattr(Gdk, 'KEY_' + s):
+                raise ValueError, "Cannot find key %s" % s
+    print 'check 2'
     modifiers = strings[:-1]
     finalKey = strings[-1]
-
+    print 'check 3'
     for modifier in modifiers:
+
         code = keyNameToKeyCode(modifier)
         registry.generateKeyboardEvent(code, None, KEY_PRESS)
-
-    code = keyNameToKeyCode(finalKey)
+    print 'check 4'
+    print finalKey
+    code = keyNameToKeyCode(finalKey) # <-- segfault
+    print 'check 4b'
     registry.generateKeyboardEvent(code, None, KEY_PRESSRELEASE)
-
+    print 'check 5'
     for modifier in modifiers:
         code = keyNameToKeyCode(modifier)
         registry.generateKeyboardEvent(code, None, KEY_RELEASE)
-
+    print 'check 6'
     doDelay()
 

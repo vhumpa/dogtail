@@ -16,31 +16,23 @@ gi.require_version('GObject', '2.0')
 import sys
 from dogtail.config import config
 print "------------------------checkpoint 1"
-#if config.checkForA11y:
-#    from dogtail.utils import checkForA11yInteractively
-#    checkForA11yInteractively()
+if config.checkForA11y:
+    from dogtail.utils import checkForA11yInteractively
+    checkForA11yInteractively()
 
 config.logDebugToFile = False
 config.childrenLimit = 100000
 
-print "------------------------checkpoint 1a"
 #from dogtail.tree import *
-print "------------------------checkpoint 1ab"
 import pyatspi
 import Accessibility
 import CORBA
-print "------------------------checkpoint 1b"
 #from dogtail import utils
-print "------------------------checkpoint 2"
 from gi.repository import Gtk
-print "------------------------checkpoint 2aa"
 from gi.repository import Gdk
 from gi.repository import Gio
-print "------------------------checkpoint 2aaa"
 from gi.repository import GdkPixbuf
-print "------------------------checkpoint 2ab"
 from gi.repository import GObject
-print "------------------------checkpoint 2b"
 
 class SniffApp(object):
     appName = 'Sniff'
@@ -49,12 +41,10 @@ class SniffApp(object):
 
     def __init__(self):
 
-        print "------------------------checkpoint 3"
         #import gnome
         #self.program = gnome.program_init(self.appName, '0.1')
         #import Gtk.glade
         self.builder = Gtk.Builder()
-        print "------------------------checkpoint 4"
         import os
         if os.path.exists('sniff.ui'):
             self.builder.add_from_file('sniff.ui')
@@ -63,8 +53,8 @@ class SniffApp(object):
             exec_root = sys.argv[0].split("/bin/")[0]
             if exec_root[0] is not '/':
                 exec_root = "/usr"
-            self.x = Gtk.glade.XML(exec_root + \
-                    '/share/dogtail/glade/sniff.glade')
+            self.builder.add_from_file(exec_root + \
+                    '/share/dogtail/glade/sniff.ui')
 
         self.app = self.builder.get_object(self.appName)
 
@@ -95,12 +85,12 @@ class SniffApp(object):
     def connectSignals(self):
         self.app.connect('delete_event', self.quit, self)
         self.quit1.connect('activate', self.quit, self)
-        #self.expand_all1.connect('activate', self.tree.expandAll, True)
-        #self.collapse_all1.connect('activate', self.tree.expandAll, False)
+        self.expand_all1.connect('activate', self.tree.expandAll, True)
+        self.collapse_all1.connect('activate', self.tree.expandAll, False)
         self.about1.connect('activate', self.showAbout, self)
-        #self.refreshMenuItem.connect('activate', self.tree.refresh)
-        #self.setRootMenuItem.connect('activate', self.tree.changeRoot, True)
-        #self.unsetRootMenuItem.connect('activate', self.tree.changeRoot, False)
+        self.refreshMenuItem.connect('activate', self.tree.refresh)
+        self.setRootMenuItem.connect('activate', self.tree.changeRoot, True)
+        self.unsetRootMenuItem.connect('activate', self.tree.changeRoot, False)
 
     def showAbout(self, *args):
         if not self.about:
@@ -116,7 +106,8 @@ class SniffApp(object):
         if response == Gtk.ResponseType.CANCEL: window.hide()
 
     def quit(self, *args):
-        Gtk.main_quit()
+        sys.exit()
+        #Gtk.main_quit()
 
 
 class SniffController(object):
@@ -154,7 +145,7 @@ class SniffController(object):
         cellRenderer = Gtk.CellRendererText()
         col = Gtk.TreeViewColumn('Present States', cellRenderer, \
                 text=self.stateModel.stateColumn)
-        #col.set_sizing(Gtk.TreeViewColumnSizing.AUTOSIZE)
+        col.set_sizing(Gtk.TreeViewColumnSizing.AUTOSIZE)
         self.stateView.insert_column(col, -1)
 
     def setUpTreeView(self):
@@ -180,6 +171,9 @@ class SniffController(object):
             column.set_resizable(True)
         self.treeView.show()
         path = 0
+        #t = True, True
+        self.treeView.expand_all()
+        #self.expandAll(t)
         #self.treeView.expand_row(path, False)
         self.rowExpanded(self.treeView, self.treeModel.get_iter(path), path)
 
@@ -193,6 +187,7 @@ class SniffController(object):
     def refresh(self, menuItem = None, refreshModel = True, *args):
         if refreshModel: self.treeModel.refresh()
         rootPath = self.treeModel.get_path(self.treeModel.get_iter_root())
+        self.treeView.expand_all()
         self.treeView.expand_row(rootPath, False)
 
     def connectSignals(self):
@@ -209,10 +204,10 @@ class SniffController(object):
                 'object:children-changed')
         pyatspi.Registry.registerEventListener(self.treeModel.nodeChanged, \
                 'object:property-change:accessible-name')
-        #pyatspi.Registry.registerEventListener(self.treeModel.nodeChanged, \
-        #        'object:property-change:accessible-state')
-        #pyatspi.Registry.registerEventListener(self.treeModel.nodeChanged, \
-        #        'object:state-changed')
+        pyatspi.Registry.registerEventListener(self.treeModel.nodeChanged, \
+                'object:property-change:accessible-state')
+        pyatspi.Registry.registerEventListener(self.treeModel.nodeChanged, \
+                'object:state-changed')
 
     def selectionChanged(self, treeSelection):
         node = self.getSelectedNode()
@@ -282,13 +277,15 @@ class SniffController(object):
             if node.actions:
                 for action in node.actions.keys():
                     menuItem = Gtk.MenuItem(action.capitalize())
-                    menuItem.connect('activate', self.menuItemActivate, \
-                            node.doAction, action)
+                    #menuItem.connect('activate', self.menuItemActivate, \
+                    #        node.doAction, action)
+                    print action.capitalize()
                     menuItem.show()
                     menu.append(menuItem)
             if not menuItem: return
-            menu.show()
-            menu.popup(None, None, None, event.button, event.time)
+            #menu.show()
+            Gtk.Menu.popup(menu, parent_menu_shell=None, parent_menu_item=None, func=None, \
+                       button=event.button, activate_time=event.time, data=None )
 
     def showRelationTarget(self, button, relation, *args):
         target = getattr(self.getSelectedNode(), relation)
@@ -365,10 +362,7 @@ class SniffModel(Gtk.TreeStore):
     def __init__(self):
         Gtk.TreeStore.__init__(self, GObject.TYPE_PYOBJECT, \
                 GObject.TYPE_STRING, GdkPixbuf.Pixbuf)
-        print "------------------------checkpoint 5"
-        #from dogtail.tree import root
         root = pyatspi.Registry.getDesktop(0)
-        print "------------------------checkpoint 5b"
         self.rootNode = self.initialRootNode = root
         self.appendAndPopulate(None, self.rootNode)
 
@@ -418,13 +412,8 @@ class SniffModel(Gtk.TreeStore):
         finally: return Gtk.TreeStore.remove(self, iter)
 
     def populateChildren(self, iter):
-        #sys.exit()
-        print "------------------------checkpoint 6a"
-
         if not iter in self:
-            print "------------------------checkpoint 6b"
-            return False #SEGFAULT... WHY HERE???
-        print "------------------------checkpoint 6b"
+            return False
         result = True
         node = self.getNode(iter)
         for child in node.children:
@@ -486,7 +475,7 @@ class SniffModel(Gtk.TreeStore):
             #print "I smell a bug in %s..." % node.getApplication()
             return None
 
-        self.cache[node] = Gtk.TreeRowReference(self, path)
+        #self.cache[node] = Gtk.TreeRowReference(self, path)
         return path
 
     def processEvents(self):

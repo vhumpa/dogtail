@@ -102,19 +102,19 @@ def typeText(string):
         pressKey(char)
 
 keyNameAliases = {
-    'enter' : 'KEY_Return',
-    'esc' : 'KEY_Escape',
-    'alt' : 'KEY_Alt_L',
-    'control' : 'KEY_Control_L',
-    'ctrl' : 'KEY_Control_L',
-    'shift' : 'KEY_Shift_L',
-    'del' : 'KEY_Delete',
-    'ins' : 'KEY_Insert',
-    'pageup' : 'KEY_Page_Up',
-    'pagedown' : 'KEY_Page_Down',
-    ' ' : 'KEY_space',
-    '\t' : 'KEY_Tab',
-    '\n' : 'KEY_Return'
+    'enter' : 'Return',
+    'esc' : 'Escape',
+    'alt' : 'Alt_L',
+    'control' : 'Control_L',
+    'ctrl' : 'Control_L',
+    'shift' : 'Shift_L',
+    'del' : 'Delete',
+    'ins' : 'Insert',
+    'pageup' : 'Page_Up',
+    'pagedown' : 'Page_Down',
+    ' ' : 'space',
+    '\t' : 'Tab',
+    '\n' : 'Return'
 }
 
 def keySymToUniChar(keySym):
@@ -154,12 +154,12 @@ def keyNameToKeyCode(keyName):
     function for nonprintable keys anyway.
     """
     print keyName
-    keymap = Gdk.Keymap()
+    keymap = Gdk.Keymap.get_for_display(Gdk.Display.get_default())
     print 'chk'
     entries = keymap.get_entries_for_keyval( \
                 Gdk.keyval_from_name(keyName))
     print 'chk2'
-    try: return entries[0][0]
+    try: return entries[1][0].keycode
     except TypeError: pass
 
 def pressKey(keyName):
@@ -202,6 +202,7 @@ def keyCombo(comboString):
     for modifier in modifiers:
 
         code = keyNameToKeyCode(modifier)
+        print code
         registry.generateKeyboardEvent(code, None, KEY_PRESS)
     print 'check 4'
     print finalKey

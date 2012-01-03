@@ -260,20 +260,15 @@ class Node:
     # Action
     ##
 
-    def doAction(self, name):
+    ## Needed to be renamed from doAction due to conflicts
+    ## with 'Accessibility.Accessible.doAction' in gtk3 branch
+    def doActionNamed(self, name):
         """
         Perform the action with the specified name. For a list of actions
         supported by this instance, check the 'actions' property.
         """
         actions = self.actions
-        print actions
         if actions.has_key(name):
-            # -- GTK3 doAction hotfixes
-            # doAction does not work for some reason, possibly pyatspi
-            # changes
-            if name == 'click':
-                return self.click()
-            # --
             return actions[name].do()
         raise ActionNotSupported(name, self)
 

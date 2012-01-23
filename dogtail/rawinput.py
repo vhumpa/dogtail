@@ -153,12 +153,9 @@ def keyNameToKeyCode(keyName):
     Generally you should use uniCharToKeySym() and should only need this
     function for nonprintable keys anyway.
     """
-    print keyName
     keymap = Gdk.Keymap.get_for_display(Gdk.Display.get_default())
-    print 'chk'
     entries = keymap.get_entries_for_keyval( \
                 Gdk.keyval_from_name(keyName))
-    print 'chk2'
     try: return entries[1][0].keycode
     except TypeError: pass
 
@@ -188,31 +185,22 @@ def keyCombo(comboString):
                 if S:
                     S = keyNameAliases.get(S.lower(), S)
                     strings.append(S)
-    print 'check 1'
     for s in strings:
         if not hasattr(Gdk, s):
             #there is KEY_ added in GTK3 which we need to add for keynames
             # not defined in the keyNameAliases
             if not hasattr(Gdk, 'KEY_' + s):
                 raise ValueError, "Cannot find key %s" % s
-    print 'check 2'
     modifiers = strings[:-1]
     finalKey = strings[-1]
-    print 'check 3'
     for modifier in modifiers:
 
         code = keyNameToKeyCode(modifier)
-        print code
         registry.generateKeyboardEvent(code, None, KEY_PRESS)
-    print 'check 4'
-    print finalKey
     code = keyNameToKeyCode(finalKey) # <-- segfault
-    print 'check 4b'
     registry.generateKeyboardEvent(code, None, KEY_PRESSRELEASE)
-    print 'check 5'
     for modifier in modifiers:
         code = keyNameToKeyCode(modifier)
         registry.generateKeyboardEvent(code, None, KEY_RELEASE)
-    print 'check 6'
     doDelay()
 

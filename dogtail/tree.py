@@ -295,7 +295,7 @@ class Node:
     def _getComboValue(self): return self.name
     def _setComboValue(self, value):
         logger.log("Setting combobox %s to '%s'"%(self.getLogString(), value))
-        self.childNamed(childName=value).doAction('click')
+        self.childNamed(childName=value).doActionNamed('click')
         doDelay()
     combovalue = property(_getComboValue, _setComboValue, doc = \
         """The value (as a string) currently selected in the combo box.""")

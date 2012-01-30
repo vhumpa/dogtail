@@ -3,7 +3,7 @@
 dogtail-run-headless
 
 This script runs a session within an X server, allowing dogtail scripts to be
-run on systems with no graphic cards, among other things. Currently it can 
+run on systems with no graphic cards, among other things. Currently it can
 only start GNOME sessions.
 
 Scripts are run in the current directory. After they are finished, dogtail can
@@ -27,19 +27,19 @@ def parse():
     usage = "usage: %prog: [options] {script [args]}"
     parser = optparse.OptionParser(usage=usage)
 
-    parser.add_option("-s", "--session", type = "choice", 
-            dest = "session", 
-            choices = sessions, 
+    parser.add_option("-s", "--session", type = "choice",
+            dest = "session",
+            choices = sessions,
             help = "which session to use")
-    parser.add_option("-x", "--x-server", type = "choice", 
-            dest = "xserver", 
+    parser.add_option("-x", "--x-server", type = "choice",
+            dest = "xserver",
             choices = findXServers(), help = "which X server to use")
-    parser.add_option("-l", "--logout", type = "choice", 
-            dest = "logout", 
+    parser.add_option("-l", "--logout", type = "choice",
+            dest = "logout",
             choices = yesno,
-            help = "attempt to log out of the session gracefully after" + 
+            help = "attempt to log out of the session gracefully after" +
                 "script completion")
-    parser.add_option("-t", "--terminate", type = "choice", 
+    parser.add_option("-t", "--terminate", type = "choice",
             dest = "terminate",
             choices = yesno,
             help = "after script completion, and after any attempt to log" +
@@ -65,7 +65,7 @@ def main():
     #we shall always terminate as long as we're
     #getting fallback mode
     session.stop()
-    else: session.wait()
+    #else: session.wait()
     sys.exit(scriptExitCode)
 
 if __name__ == "__main__": main()

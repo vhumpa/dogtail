@@ -15,7 +15,7 @@ gi.require_version('Gdk', '3.0')
 gi.require_version('GObject', '2.0')
 import sys
 from dogtail.config import config
-print "------------------------checkpoint 1"
+
 if config.checkForA11y:
     from dogtail.utils import checkForA11yInteractively
     checkForA11yInteractively()

@@ -49,7 +49,7 @@ def scripts():
 
 setup (
         name = 'dogtail',
-        version = '0.7.1',
+        version = '0.8.0a2',
         description = """GUI test tool and automation framework that uses Accessibility (a11y) technologies to communicate with desktop applications.""",
         author = """Zack Cerza <zcerza@redhat.com>,
 Ed Rousseau <rousseau@redhat.com>,
@@ -63,7 +63,7 @@ David Malcolm <dmalcolm@redhat.com>""",
                                         examples() ),
                                 ('share/doc/dogtail/examples/data',
                                         examples_data() ),
-                                ('share/dogtail/glade', ['sniff/sniff.glade',
+                                ('share/dogtail/glade', ['sniff/sniff.ui',
                                         'recorder/recorder.glade']),
                                 ('share/dogtail/icons', sniff_icons() ),
                                 ('share/applications', ['sniff/sniff.desktop',

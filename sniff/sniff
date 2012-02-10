@@ -272,20 +272,17 @@ class SniffController(object):
         if node == None: return
 
         if event.button == 3:
-            menu = Gtk.Menu()
+            self.menu = Gtk.Menu()
             menuItem = None
             if node.actions:
                 for action in node.actions.keys():
                     menuItem = Gtk.MenuItem(action.capitalize())
-                    #menuItem.connect('activate', self.menuItemActivate, \
-                    #        node.doAction, action)
-                    print action.capitalize()
+                    menuItem.connect('activate', self.menuItemActivate, node.doActionNamed, action)
                     menuItem.show()
-                    menu.append(menuItem)
+                    self.menu.append(menuItem)
             if not menuItem: return
-            #menu.show()
-            Gtk.Menu.popup(menu, parent_menu_shell=None, parent_menu_item=None, func=None, \
-                       button=event.button, activate_time=event.time, data=None )
+            self.menu.show_all()
+            self.menu.popup(None, None, None, None, event.button, event.time)
 
     def showRelationTarget(self, button, relation, *args):
         target = getattr(self.getSelectedNode(), relation)

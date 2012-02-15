@@ -14,6 +14,8 @@ import os
 import sys
 import subprocess
 import re
+import cairo
+from gi.repository import Gtk
 from config import config
 from time import sleep
 from logging import debugLogger as logger
@@ -114,41 +116,46 @@ def doDelay(delay=None):
         logger.log("sleeping for %f" % delay)
     sleep(delay)
 
-class Blinker:
-    INTERVAL_MS = 200
+class Highlight (Gtk.Window):
 
-    def __init__(self, x, y, w, h, count = 2):
+    def __init__(self, x, y, w, h):
+        super(Highlight, self).__init__()
+        self.set_decorated(False)
+        self.set_has_resize_grip(False)
+        self.set_default_size(w, h)
+        self.screen = self.get_screen()
+        self.visual = self.screen.get_rgba_visual()
+        if self.visual is not None and self.screen.is_composited():
+            self.set_visual(self.visual)
+        self.set_app_paintable(True)
+        self.connect("draw", self.area_draw)
+        self.show_all()
+        self.move(x,y)
+
+    def area_draw(self, widget, cr):
+        cr.set_source_rgba(.0, .0, .0, 0.0)
+        cr.set_operator(cairo.OPERATOR_SOURCE)
+        cr.paint()
+        cr.set_operator(cairo.OPERATOR_OVER)
+        cr.set_source_rgb(0.9, 0.1, 0.1)
+        cr.set_line_width(6)
+        cr.rectangle(0, 0, self.get_size()[0], self.get_size()[1])
+        cr.stroke()
+
+class Blinker:
+    INTERVAL_MS = 1000
+    def __init__(self, x, y, w, h):
         from gi.repository import GObject
         from gi.repository import Gdk
-        from gi.repository import Gtk
-        self.count = count
-        self.x = x
-        self.y = y
-        self.w = w
-        self.h = h
-        self.timeout_handler_id = GObject.timeout_add (Blinker.INTERVAL_MS, self.blinkDrawRectangle)
-        Gtk.main()
+        self.highlight_window = Highlight(x, y, w, h)
+        if self.highlight_window.screen.is_composited() is not False:
+            self.timeout_handler_id = GObject.timeout_add (Blinker.INTERVAL_MS, self.destroyHighlight)
+        else:
+            self.highlight_window.destroy()
 
-    def blinkDrawRectangle (self):
-        from gi.repository import Gdk
-        display = Gdk.Display.get_default()
-        screen = display.get_default_screen()
-        rootWindow = screen.get_root_window()
-        gc = rootWindow.new_gc()
-
-        gc.set_subwindow (Gdk.INCLUDE_INFERIORS)
-        gc.set_function (Gdk.INVERT)
-        gc.set_line_attributes (3, Gdk.LINE_SOLID, Gdk.CAP_BUTT, Gdk.JOIN_MITER)
-        rootWindow.draw_rectangle (gc, False, self.x, self.y, self.w, self.h);
-
-        self.count-=1
-
-        if self.count <= 0:
-            Gtk.main_quit()
-            return False
-
-        return True
-
+    def destroyHighlight(self):
+        self.highlight_window.destroy()
+        return False
 
 a11yGConfKey = '/desktop/gnome/interface/accessibility'
 

@@ -64,7 +64,6 @@ class SniffApp(object):
             self.app.set_icon_from_file( \
                     '/usr/share/icons/hicolor/scalable/apps/dogtail-head.svg')
 
-
         self.setUpWidgets()
         self.connectSignals()
         self.app.show_all()
@@ -132,6 +131,7 @@ class SniffController(object):
         self.labeleeButton = self.builder.get_object('labeleeButton')
         self.labeleeButton.set_sensitive(False)
         self.stateView = self.builder.get_object('stateTreeView')
+        self.highlight1 = self.builder.get_object('highlight1')
         self.stateModel = StateModel()
         self.setUpStateView()
         self.treeView = self.builder.get_object('treeTreeView')
@@ -200,6 +200,7 @@ class SniffController(object):
         self.treeView.connect('row-expanded', self.rowExpanded, self.treeModel)
         self.treeView.connect('row-collapsed', self.rowCollapsed)
         self.treeSelection.connect('changed', self.selectionChanged)
+        #self.highlight1.connect('activate', self.toggleHighlight)
         pyatspi.Registry.registerEventListener(self.treeModel.nodeChanged, \
                 'object:children-changed')
         pyatspi.Registry.registerEventListener(self.treeModel.nodeChanged, \
@@ -213,7 +214,9 @@ class SniffController(object):
         node = self.getSelectedNode()
         if node:
             self.setUpBottomPane(node)
-            node.blink()
+            print self.highlight1.get_active()
+            if self.highlight1.get_active() is True:
+                node.blink()
 
     def getSelectedNode(self):
         (store, iter) = self.treeView.get_selection().get_selected()
@@ -347,7 +350,6 @@ class SniffController(object):
         if node == None: return
         node.text = textBuffer.get_text(textBuffer.get_start_iter(), \
                         textBuffer.get_end_iter())
-
 
 class SniffModel(Gtk.TreeStore):
     nodeColumn = 0

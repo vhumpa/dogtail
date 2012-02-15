@@ -389,16 +389,16 @@ class Node:
         "Attempts to set the keyboard focus to this Accessible."
         return self.queryComponent().grabFocus()
 
-    def blink(self, count=2):
-        """
-        Blink, baby!
-        """
-        if not self.extents: return False
-        else:
-            (x, y, w, h) = self.extents
-            from utils import Blinker
-            blinkData = Blinker(x, y, w, h, count)
-            return True
+    #def blink(self, count=2):
+        #"""
+        #Blink, baby!
+        #"""
+        #if not self.extents: return False
+        #else:
+            #(x, y, w, h) = self.extents
+            #from utils import Blinker
+            #blinkData = Blinker(x, y, w, h, count)
+            #return True
 
     def click(self, button = 1):
         """
@@ -914,7 +914,7 @@ class Node:
             result.extend(child.getUserVisibleStrings())
         return result
 
-    def blink(self, count = 2):
+    def blink(self):
         """
         Blink, baby!
         """
@@ -922,7 +922,7 @@ class Node:
             return False
         else:
             (x, y, w, h) = self.extents
-            blinkData = Blinker(x, y, w, h, count)
+            blinkData = Blinker(x, y, w, h)
             return True
 
 

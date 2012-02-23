@@ -12,7 +12,6 @@ Data display is handled by the SniffController class.
 import gi
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
-gi.require_version('GObject', '2.0')
 import sys
 from dogtail.config import config
 
@@ -23,11 +22,8 @@ if config.checkForA11y:
 config.logDebugToFile = False
 config.childrenLimit = 100000
 
-#from dogtail.tree import *
 import pyatspi
 import Accessibility
-import CORBA
-#from dogtail import utils
 from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import Gio
@@ -40,10 +36,6 @@ class SniffApp(object):
             'David Malcolm <dmalcolm@redhat.com']
 
     def __init__(self):
-
-        #import gnome
-        #self.program = gnome.program_init(self.appName, '0.1')
-        #import Gtk.glade
         self.builder = Gtk.Builder()
         import os
         if os.path.exists('sniff.ui'):
@@ -55,15 +47,12 @@ class SniffApp(object):
                 exec_root = "/usr"
             self.builder.add_from_file(exec_root + \
                     '/share/dogtail/glade/sniff.ui')
-
         self.app = self.builder.get_object(self.appName)
-
         try:
             self.app.set_icon_from_file('../icons/dogtail-head.svg')
         except Exception:
             self.app.set_icon_from_file( \
                     '/usr/share/icons/hicolor/scalable/apps/dogtail-head.svg')
-
         self.setUpWidgets()
         self.connectSignals()
         self.app.show_all()
@@ -105,8 +94,7 @@ class SniffApp(object):
         if response == Gtk.ResponseType.CANCEL: window.hide()
 
     def quit(self, *args):
-        sys.exit()
-        #Gtk.main_quit()
+        Gtk.main_quit()
 
 
 class SniffController(object):
@@ -171,10 +159,7 @@ class SniffController(object):
             column.set_resizable(True)
         self.treeView.show()
         path = 0
-        #t = True, True
         self.treeView.expand_all()
-        #self.expandAll(t)
-        #self.treeView.expand_row(path, False)
         self.rowExpanded(self.treeView, self.treeModel.get_iter(path), path)
 
     def changeRoot(self, menuItem, toSelected = True, *args):
@@ -186,7 +171,7 @@ class SniffController(object):
 
     def refresh(self, menuItem = None, refreshModel = True, *args):
         if refreshModel: self.treeModel.refresh()
-        rootPath = self.treeModel.get_path(self.treeModel.get_iter_root())
+        rootPath = self.treeModel.get_path(self.treeModel.get_iter_first())
         self.treeView.expand_all()
         self.treeView.expand_row(rootPath, False)
 
@@ -214,7 +199,6 @@ class SniffController(object):
         node = self.getSelectedNode()
         if node:
             self.setUpBottomPane(node)
-            print self.highlight1.get_active()
             if self.highlight1.get_active() is True:
                 node.blink()
 
@@ -542,7 +526,6 @@ class SniffModel(Gtk.TreeStore):
 
     def getPixbufForNode(self, node):
         theme = Gtk.IconTheme().get_default()
-        #theme = Gtk.IconTheme.get_default()
         try:
             if node.role == pyatspi.ROLE_APPLICATION:
                 # FIXME: Use the pixbuf from libwcnk (if available):

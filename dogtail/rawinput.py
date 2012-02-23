@@ -19,8 +19,6 @@ gi.require_version('Gdk', '3.0')
 import sys
 from gi.repository import Gtk
 from gi.repository import Gdk
-#import Gtk.gdk
-#import Gdk.keysyms #SEGFAULT HERE, module is elsewhere...
 from config import config
 from utils import doDelay
 from logging import debugLogger as logger
@@ -187,8 +185,6 @@ def keyCombo(comboString):
                     strings.append(S)
     for s in strings:
         if not hasattr(Gdk, s):
-            #there is KEY_ added in GTK3 which we need to add for keynames
-            # not defined in the keyNameAliases
             if not hasattr(Gdk, 'KEY_' + s):
                 raise ValueError, "Cannot find key %s" % s
     modifiers = strings[:-1]
@@ -197,7 +193,7 @@ def keyCombo(comboString):
 
         code = keyNameToKeyCode(modifier)
         registry.generateKeyboardEvent(code, None, KEY_PRESS)
-    code = keyNameToKeyCode(finalKey) # <-- segfault
+    code = keyNameToKeyCode(finalKey)
     registry.generateKeyboardEvent(code, None, KEY_PRESSRELEASE)
     for modifier in modifiers:
         code = keyNameToKeyCode(modifier)

@@ -39,16 +39,16 @@ class FocusBase:
     def __getattr__ (self, name):
         # Fold all the Node's AT-SPI properties into the Focus object.
         try: return getattr(self.node, name)
-        except AttributeError: 
+        except AttributeError:
             raise AttributeError, name
 
     def __setattr__ (self, name, value):
         # Fold all the Node's AT-SPI properties into the Focus object.
         if name == 'node':
-            self.__dict__[name] = value
+            self.__class__.__dict__[name] = value
         else:
             try: setattr(self.node, name, value)
-            except AttributeError: 
+            except AttributeError:
                 raise AttributeError, name
 
 class FocusApplication (FocusBase):
@@ -68,7 +68,7 @@ class FocusApplication (FocusBase):
             else:
                 focusFailed(pred)
                 return False
-        if app: 
+        if app:
             FocusApplication.node = app
             FocusDialog.node = None
             FocusWidget.node = None
@@ -97,7 +97,7 @@ class FocusWindow (FocusBase):
             FocusWindow.node = result
             FocusDialog.node = None
             FocusWidget.node = None
-        else: 
+        else:
             if config.fatalErrors: raise FocusError, pred.debugName
             else:
                 focusFailed(pred)
@@ -120,7 +120,7 @@ class FocusDialog (FocusBase):
         if result:
             FocusDialog.node = result
             FocusWidget.node = None
-        else: 
+        else:
             if config.fatalErrors: raise FocusError, pred.debugName
             else:
                 focusFailed(pred)
@@ -151,7 +151,7 @@ class FocusWidget (FocusBase):
             try:
                 result = FocusApplication.node.findChild(pred, requireResult = False, retry = False)
                 if result: FocusWidget.node = result
-            except AttributeError: 
+            except AttributeError:
                 if config.fatalErrors: raise FocusError, name
                 else:
                     focusFailed(pred)
@@ -173,7 +173,7 @@ class FocusWidget (FocusBase):
             raise TypeError, ENOARGS
 
         # search for a widget.
-        pred = predicate.GenericPredicate(name = name, 
+        pred = predicate.GenericPredicate(name = name,
                 roleName = roleName, description = description)
         return self.findByPredicate(pred)
 
@@ -316,7 +316,7 @@ class Click (Action):
     def __call__ (self, name = '', roleName = '', description = '', raw = True, button = primary, delay = config.actionDelay):
         """
         By default, execute a raw mouse event.
-        If raw is False or if button evaluates to False, just pass the rest of 
+        If raw is False or if button evaluates to False, just pass the rest of
         the arguments to Action.
         """
         if name or roleName or description:
@@ -350,7 +350,7 @@ class Select (Action):
             FocusWidget.__call__(self, name = name, roleName = roleName, description = description)
         func = getattr(self.node, self.action)
         func()
-        
+
 def type(text):
     if focus.widget.node:
         focus.widget.node.typeText(text)

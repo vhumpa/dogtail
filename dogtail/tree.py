@@ -282,9 +282,9 @@ class Node:
     @property
     def actions(self):
         """
-        A dictionary of supported action names as keys, with Action objects as 
+        A dictionary of supported action names as keys, with Action objects as
         values. Common action names include:
-        
+
         'click' 'press' 'release' 'activate' 'jump' 'check' 'dock' 'undock'
         'open' 'menu'
         """
@@ -327,13 +327,13 @@ class Node:
 
     @apply
     def text():
-        doc = """For instances with an AccessibleText interface, the text as a 
-    string. This is read-only, unless the instance also has an 
-    AccessibleEditableText interface. In this case, you can write values 
-    to the attribute. This will get logged in the debug log, and a delay 
+        doc = """For instances with an AccessibleText interface, the text as a
+    string. This is read-only, unless the instance also has an
+    AccessibleEditableText interface. In this case, you can write values
+    to the attribute. This will get logged in the debug log, and a delay
     will be added.
 
-    If this instance corresponds to a password entry, use the passwordText 
+    If this instance corresponds to a password entry, use the passwordText
     property instead."""
 
         def fget(self):
@@ -358,7 +358,7 @@ class Node:
     def caretOffset():
 
         def fget(self):
-            """For instances with an AccessibleText interface, the caret 
+            """For instances with an AccessibleText interface, the caret
             offset as an integer."""
             return self.queryText().caretOffset
 
@@ -383,7 +383,7 @@ class Node:
 
     @property
     def extents(self):
-        """A tuple containing the location and size of the Accessible: 
+        """A tuple containing the location and size of the Accessible:
         (x, y, w, h)"""
         try:
             ex = self.queryComponent().getExtents(pyatspi.DESKTOP_COORDS)
@@ -504,7 +504,7 @@ class Node:
         return self.getState().contains(pyatspi.STATE_FOCUSED)
 
     @property
-    def isChecked(self):
+    def checked(self):
         """Is the Accessible a checked checkbox?"""
         return self.getState().contains(pyatspi.STATE_CHECKED)
 

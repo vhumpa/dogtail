@@ -157,18 +157,19 @@ class Blinker:
         self.highlight_window.destroy()
         return False
 
-a11yGConfKey = '/desktop/gnome/interface/accessibility'
+a11yDConfKey = 'org.gnome.desktop.interface'
 
 def isA11yEnabled():
     """
-    Checks if accessibility is enabled via GConf.
+    Checks if accessibility is enabled via DConf.
     """
-    from gi.repository import GConf
-    gconfEnabled = GConf.Client.get_default().get_bool(a11yGConfKey)
+    from gi.repository.Gio import Settings
+    InterfaceSettings = Settings(a11yDConfKey)
+    dconfEnabled = InterfaceSettings.get_boolean('toolkit-accessibility')
     if os.environ.get('GTK_MODULES','').find('gail:atk-bridge') == -1:
         envEnabled = False
     else: envEnabled = True
-    return (gconfEnabled or envEnabled)
+    return (dconfEnabled or envEnabled)
 
 def bailBecauseA11yIsDisabled():
     if sys.argv[0].endswith("pydoc"): return
@@ -183,8 +184,9 @@ def enableA11y():
     """
     Enables accessibility via GConf.
     """
-    from gi.repository import GConf
-    return GConf.Client.get_default().set_bool(a11yGConfKey, True)
+    from gi.repository.Gio import Settings
+    InterfaceSettings = Settings(a11yDConfKey)
+    dconfEnabled = InterfaceSettings.set_boolean('toolkit-accessibility', True)
 
 def checkForA11y():
     """

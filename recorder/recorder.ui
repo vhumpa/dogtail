@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<!--*- mode: xml -*-->
+<interface>
+  <object class="GtkWindow" id="window">
+    <property name="default_height">200</property>
+    <property context="yes" name="title" translatable="yes">Script Recorder</property>
+    <property name="visible">True</property>
+    <child>
+      <object class="GtkVBox" id="vbox1">
+        <property name="visible">True</property>
+        <child>
+          <object class="GtkHButtonBox" id="hbuttonbox1">
+            <property name="layout_style">start</property>
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkButton" id="recordButton">
+                <property name="is_focus">True</property>
+                <property name="label">gtk-media-record</property>
+                <property name="use_stock">True</property>
+                <property name="visible">True</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="playButton">
+                <property name="label">gtk-media-play</property>
+                <property name="use_stock">True</property>
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="clearButton">
+                <property name="label">gtk-clear</property>
+                <property name="use_stock">True</property>
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="saveButton">
+                <property name="is_focus">True</property>
+                <property name="label">gtk-save</property>
+                <property name="use_stock">True</property>
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="position">3</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkVBox" id="vbox2">
+            <property name="spacing">1</property>
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkLabel" id="scriptViewLabel">
+                <property context="yes" name="label" translatable="yes"> Script:</property>
+                <property name="visible">True</property>
+                <property name="xalign">0.0</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow" id="scrolledwindow1">
+                <property name="hscrollbar_policy">automatic</property>
+                <property name="visible">True</property>
+                <property name="vscrollbar_policy">automatic</property>
+                <child>
+                  <object class="GtkTextView" id="scriptTextView">
+                    <property name="editable">False</property>
+                    <property name="is_focus">True</property>
+                    <property name="visible">True</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

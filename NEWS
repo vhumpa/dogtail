@@ -1,3 +1,34 @@
+dogtail 0.8.0 Beta
+==================
+Simply put, ported to be compatible with the new GNOME 3 and to work well in major
+GNOME 3 (GTK3) distributions.
+
+We'd like to make the 0.8.x version onward the GNOME3 compatible branch usable
+for Fedora, RHEL7 and others, while keeping 0.7.x releases for fixes in older GNOME2
+systems.
+
+--- What was done ---
+
+Most notably, Sniff's UI needed to ported completely to GTK3, yet there are
+also several places in dogtail 'itself' that needed to be rewritten to go ahead
+with the new technologies. Those were all the modules where the old pygtk was
+used for various reasons (rawinput, utils, tree...). Incompatibilites were also
+present due to the new version of pyatspi (notably with the doAction method).
+
+Since the present 0.7.0 version is largely dysfunctional in Fedora 15+, we'd
+like to include the 0.8.0 into Fedora repos as even the beta provides
+much better functionality than the 0.7.0 stable.
+
+We think the 0.8.0 Beta is largely stable and useable. The dogtail-recorder was
+dropped for now, but might return in RC or 0.8.1
+
+To be done
+- headless so far brings in the fallback mode with GNOME3
+- examples need to be checked througly
+- recorder (might be 0.8.1)
+- with At-spi QT bridge project being far ahead by now, make dogtail out-of-box
+  available for QT application automation.
+
 dogtail 0.7.0
 =============
 

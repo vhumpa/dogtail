@@ -197,7 +197,7 @@ class Session(object):
             logoutString = ""
         lines = [
             "export %s=%s" % (self.cookieName, self.cookie),
-            "gconftool-2 --type bool --set /desktop/gnome/interface/accessibility true",
+            "gsettings set org.gnome.desktop.interface toolkit-accessibility true",
             ". /etc/X11/xinit/xinitrc-common",
             "export %s" % self.cookieName,
             "exec -l $SHELL -c \"$CK_XINIT_SESSION $SSH_AGENT %s\"" % \

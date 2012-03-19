@@ -18,7 +18,7 @@ Dependencies
 
 Python bindings for your distribution, e.g. python-apt or rpm-python
 
-PyGTK and GNOME-Python
+PyGObject and GNOME-Python
 
 Applications to test, e.g. from the GNOME desktop:
     http://gnome.org/
@@ -33,7 +33,7 @@ Currently only GNOME and GTK+ applications are supported. KDE 4 should have
 the accessibility support that will enable you to use dogtail with it.
 
 First, enable accessibility support in your GNOME session with:
-  gconftool-2 --type bool --set /desktop/gnome/interface/accessibility true
+  gsettings set org.gnome.desktop.interface toolkit-accessibility true
 This only affects newly-started applications, so you may want to log out and 
 log back in again.
 
@@ -41,7 +41,6 @@ Then, look at some of the example scripts. Run them, tweak them, write your own.
 
 I suggest starting with gedit-test-utf8-procedural-api.py, as it's updated the
 most often.
-
 
 Bugs
 ====

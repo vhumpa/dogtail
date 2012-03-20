@@ -60,18 +60,24 @@ def release (x, y, button = 1):
     registry.generateMouseEvent(x,y, 'b%sr' % button)
     doDelay()
 
-def absoluteMotion (x, y):
+def absoluteMotion (x, y, mouseDelay=None):
     """
     Synthesize mouse absolute motion to (x,y)
     """
     logger.log("Mouse absolute motion to (%s,%s)"%(x,y))
     registry.generateMouseEvent(x,y, 'abs')
-    doDelay()
+    if mouseDelay:
+        doDelay(mouseDelay)
+    else:
+        doDelay()
 
-def relativeMotion (x, y):
+def relativeMotion (x, y, mouseDelay=None):
     logger.log("Mouse relative motion of (%s,%s)"%(x,y))
     registry.generateMouseEvent(x,y, 'rel')
-    doDelay()
+    if mouseDelay:
+        doDelay(mouseDelay)
+    else:
+        doDelay()
 
 def drag(fromXY, toXY, button = 1):
     """

@@ -42,18 +42,19 @@ def icons(ext_tuple):
 def scripts():
     import os
     list = os.listdir(os.curdir + '/scripts/')
-    result = ['sniff/sniff', 'recorder/dogtail-recorder']
+    result = ['sniff/sniff']
     for file in list:
 		result = result + ['scripts/' + file]
     return result
 
 setup (
         name = 'dogtail',
-        version = '0.8.0beta1',
+        version = '0.8.0beta2',
         description = """GUI test tool and automation framework that uses Accessibility (a11y) technologies to communicate with desktop applications.""",
         author = """Zack Cerza <zcerza@redhat.com>,
 Ed Rousseau <rousseau@redhat.com>,
-David Malcolm <dmalcolm@redhat.com>""",
+David Malcolm <dmalcolm@redhat.com>
+Vitezslav Humpa <vhumpa@redhat.com>""",
         author_email = 'dogtail-list@gnome.org',
         url = 'http://dogtail.fedorahosted.org/',
         packages = ['dogtail'],
@@ -63,11 +64,9 @@ David Malcolm <dmalcolm@redhat.com>""",
                                         examples() ),
                                 ('share/doc/dogtail/examples/data',
                                         examples_data() ),
-                                ('share/dogtail/glade', ['sniff/sniff.ui',
-                                        'recorder/recorder.glade']),
+                                ('share/dogtail/glade', ['sniff/sniff.ui']),
                                 ('share/dogtail/icons', sniff_icons() ),
-                                ('share/applications', ['sniff/sniff.desktop',
-                                        'recorder/dogtail-recorder.desktop']),
+                                ('share/applications', ['sniff/sniff.desktop']),
                                 ('share/icons/hicolor/48x48/apps', icons('png')),
                                 ('share/icons/hicolor/scalable/apps', icons('svg'))
                                 ],

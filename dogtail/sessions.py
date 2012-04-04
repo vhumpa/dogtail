@@ -1,5 +1,6 @@
 import time
 import os
+import pwd
 import errno
 import re
 import subprocess
@@ -26,6 +27,9 @@ def testBinary(path):
         if not os.access(path, os.X_OK):
             raise IOError, (errno.ENOEXEC, "Permission denied", path)
     return True
+
+def get_username():
+    return pwd.getpwuid( os.getuid() )[ 0 ]
 
 class Subprocess(object):
     def __init__(self, cmdList, environ = None):
@@ -167,6 +171,8 @@ class Session(object):
                 self._environment = envDict
         if not self._environment:
             raise RuntimeError("Can't find our environment!")
+        #self._environment['XDG_RUNTIME_DIR'] = '/run/user/' + get_username()
+        print self._environment
         return self._environment
 
     def wait(self):
@@ -200,10 +206,10 @@ class Session(object):
             "gsettings set org.gnome.desktop.interface toolkit-accessibility true",
             ". /etc/X11/xinit/xinitrc-common",
             "export %s" % self.cookieName,
-            "exec -l $SHELL -c \"$CK_XINIT_SESSION $SSH_AGENT %s\"" % \
-                    self.sessionBinary,
+            "exec -l $SHELL -c \"$CK_XINIT_SESSION $SSH_AGENT %s %s\"" % \
+                    (self.sessionBinary, '--session=gnome-dogtail-headless' \
+                     if  self.sessionBinary == '/usr/bin/gnome-session' else ''),
             ""]
 
         fileObj.write('\n'.join(lines).strip())
         fileObj.flush()
-

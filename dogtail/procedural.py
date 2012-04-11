@@ -257,7 +257,7 @@ class Action (FocusWidget):
         """
         if name or roleName or description:
             FocusWidget.__call__(self, name = name, roleName = roleName, description = description)
-        self.node.doAction(self.action)
+        self.node.doActionNamed(self.action)
 
     def __getattr__ (self, attr):
         return getattr(FocusWidget.node, attr)

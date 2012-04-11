@@ -306,7 +306,7 @@ class Node:
         def fset(self, value):
             logger.log("Setting combobox %s to '%s'"%(self.getLogString(),
                 value))
-            self.childNamed(childName=value).doAction('click')
+            self.childNamed(childName=value).doActionNamed('click')
             doDelay()
 
         return property(**locals())

@@ -206,9 +206,8 @@ class Session(object):
             "gsettings set org.gnome.desktop.interface toolkit-accessibility true",
             ". /etc/X11/xinit/xinitrc-common",
             "export %s" % self.cookieName,
-            "exec -l $SHELL -c \"$CK_XINIT_SESSION $SSH_AGENT %s %s\"" % \
-                    (self.sessionBinary, '--session=gnome-dogtail-headless' \
-                     if  self.sessionBinary == '/usr/bin/gnome-session' else ''),
+            "exec -l $SHELL -c \"$CK_XINIT_SESSION $SSH_AGENT %s\"" % \
+                    (self.sessionBinary),
             ""]
 
         fileObj.write('\n'.join(lines).strip())

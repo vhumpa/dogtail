@@ -828,7 +828,7 @@ class Node:
 
 
     # Various wrapper/helper search methods:
-    def child (self, name = '', roleName = '', description= '', label = '', recursive=True, debugName=None):
+    def child (self, name = '', roleName = '', description= '', label = '', recursive=True, retry=True, debugName=None):
         """
         Finds a child satisying the given criteria.
 
@@ -836,7 +836,24 @@ class Node:
         if no such child is found, and will eventually raise an exception. It
         also logs the search.
         """
-        return self.findChild (predicate.GenericPredicate(name = name, roleName = roleName, description= description, label = label), recursive = recursive, debugName=debugName)
+        return self.findChild (predicate.GenericPredicate(name = name, roleName = roleName, description= description, label = label), recursive = recursive, retry = retry, debugName=debugName)
+
+    def isChild(self, name = '', roleName = '', description= '', label = '', recursive=True, retry=False, debugName=None):
+        """
+        Determines whether a child satisying the given criteria exists.
+
+        This is implemented using findChild, but will not automatically retry
+        if no such child is found. To make the function retry multiple times set retry to True.
+        Returns a boolean value depending on whether the child was eventually found. Similar to
+        'child', yet it catches SearchError exception to provide for False results, will raise
+        any other exceptions. It also logs the search.
+        """
+        found = True
+        try:
+            self.findChild (predicate.GenericPredicate(name = name, roleName = roleName, description= description, label = label), recursive = recursive, retry = retry, debugName=debugName)
+        except SearchError:
+            found = False
+        return found
 
     def menu(self, menuName, recursive=True):
         """

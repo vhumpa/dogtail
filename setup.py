@@ -53,7 +53,7 @@ def session_file():
 
 setup (
         name = 'dogtail',
-        version = '0.8.0beta3',
+        version = '0.8.0beta5',
         description = """GUI test tool and automation framework that uses Accessibility (a11y) technologies to communicate with desktop applications.""",
         author = """Zack Cerza <zcerza@redhat.com>,
 Ed Rousseau <rousseau@redhat.com>,
@@ -72,8 +72,7 @@ Vitezslav Humpa <vhumpa@redhat.com>""",
                                 ('share/dogtail/icons', sniff_icons() ),
                                 ('share/applications', ['sniff/sniff.desktop']),
                                 ('share/icons/hicolor/48x48/apps', icons('png')),
-                                ('share/icons/hicolor/scalable/apps', icons('svg')),
-                                ('share/gnome-session/sessions', session_file())
+                                ('share/icons/hicolor/scalable/apps', icons('svg'))
                                 ],
         cmdclass = {
                 'bdist_rpm': bdist_rpm

@@ -199,8 +199,8 @@ def keyCombo(comboString):
     registry.generateKeyboardEvent(code, None, KEY_PRESSRELEASE)
 
     for modifier in modifiers:
-        code = keyNameToKeyCode(modifier)
-        registry.generateKeyboardEvent(code, None, KEY_RELEASE)
+        code = keyNameToKeySym(finalKey)
+        registry.generateKeyboardEvent(code, None, KEY_SYM)
 
-    doDelay()
+    doTypingDelay()
 

@@ -19,8 +19,13 @@ import os.path
 def findXServers(path = "/usr/bin"):
     l = [os.path.join(path, f) for f in os.listdir(path) if f[0] == 'X']
     s = set(os.path.realpath(p) for p in l)
+    
+    # VV hack for removing Xorg if /dev/fb0 is missing (on some ppc machines)
+    if os.stat("/dev/fb0").st_gid == 0 and os.uname()[-1] == 'ppc64':
+        s.discard('/usr/bin/X')
+        s.discard('/usr/bin/Xorg') 
+    
     return list(s)
-
 def parse():
     yesno = ('y', 'n')
     sessions = ("GNOME",)
@@ -54,10 +59,15 @@ def parse():
 
 def main():
     options, args = parse()
+    if options.xserver:
+        server = options.xserver
+    else:
+        print "Autodetection mode"
+        servers = findXServers()
+        server = servers[0]
+        if '/usr/bin/Xorg' in servers: server = '/usr/bin/Xorg'
     if options.session == "GNOME":
-        session = sessions.Session(sessionBinary = '/usr/bin/gnome-session',
-                scriptCmdList = args)
-    if options.xserver: session.xserver.server = options.xserver
+        session = sessions.Session(sessionBinary = '/usr/bin/gnome-session', server=server, scriptCmdList = args)
     pid = session.start()
     scriptExitCode = session.script.exitCode
     if options.logout == 'y': session.attemptLogout()

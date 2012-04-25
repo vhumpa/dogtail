@@ -108,13 +108,13 @@ class Session(object):
 
     cookieName = "DOGTAIL_SESSION_COOKIE"
 
-    def __init__(self, sessionBinary, scriptCmdList = [], scriptDelay = 10, logout = True):
+    def __init__(self, sessionBinary, server, scriptCmdList = [], scriptDelay = 10, logout = True):
         testBinary(sessionBinary)
         self.sessionBinary = sessionBinary
         self.script = Script(scriptCmdList)
         self.scriptDelay = scriptDelay
         self.logout = logout
-        self.xserver = XServer()
+        self.xserver = XServer(server)
         self._cookie = None
         self._environment = None
 
@@ -206,4 +206,3 @@ class Session(object):
 
         fileObj.write('\n'.join(lines).strip())
         fileObj.flush()
-

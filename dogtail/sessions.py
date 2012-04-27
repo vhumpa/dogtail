@@ -40,8 +40,7 @@ class Subprocess(object):
 
     def start(self):
         if self.environ == None: environ = os.environ
-        self.popen = subprocess.Popen(self.cmdList,
-                env = self.environ)#, stdout = subprocess.PIPE, 
+        self.popen = subprocess.Popen(self.cmdList, env = self.environ)#, stdout = subprocess.PIPE, 
                 #stderr = subprocess.STDOUT, close_fds = True)
         return self.popen.pid
 
@@ -136,7 +135,9 @@ class Session(object):
     def environment(self):
         def isSessionProcess(fileName):
             try:
-                if os.path.realpath(path + 'exe') != self.sessionBinary: 
+                if os.path.realpath(path + 'exe') != ('/usr/bin/plasma-desktop' \
+                            if self.sessionBinary.split('/')[-1] == 'startkde'
+                            else self.sessionBinary): 
                     return False
             except OSError:
                 return False
@@ -171,8 +172,6 @@ class Session(object):
                 self._environment = envDict
         if not self._environment:
             raise RuntimeError("Can't find our environment!")
-        #self._environment['XDG_RUNTIME_DIR'] = '/run/user/' + get_username()
-        print self._environment
         return self._environment
 
     def wait(self):

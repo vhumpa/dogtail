@@ -23,7 +23,7 @@ def findXServers(path = "/usr/bin"):
 
 def parse():
     yesno = ('y', 'n')
-    sessions = ("GNOME",)
+    sessions = ("GNOME", "KDE")
     usage = "usage: %prog: [options] {script [args]}"
     parser = optparse.OptionParser(usage=usage)
 
@@ -58,7 +58,10 @@ def main():
         del os.environ['XDG_RUNTIME_DIR']
     if options.session == "GNOME":
         session = sessions.Session(sessionBinary = '/usr/bin/gnome-session',
-                scriptCmdList = args)
+                scriptCmdList = args, scriptDelay = 10)
+    if options.session == "KDE":
+        session = sessions.Session(sessionBinary = '/usr/bin/startkde',
+                scriptCmdList = args, scriptDelay = 25)
     if options.xserver: session.xserver.server = options.xserver
     pid = session.start()
     scriptExitCode = session.script.exitCode

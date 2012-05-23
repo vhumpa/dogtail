@@ -190,17 +190,17 @@ def keyCombo(comboString):
 
     modifiers = strings[:-1]
     finalKey = strings[-1]
-
+    
     for modifier in modifiers:
         code = keyNameToKeyCode(modifier)
         registry.generateKeyboardEvent(code, None, KEY_PRESS)
 
-    code = keyNameToKeyCode(finalKey)
-    registry.generateKeyboardEvent(code, None, KEY_PRESSRELEASE)
-
+    code = keyNameToKeySym(finalKey)
+    registry.generateKeyboardEvent(code, None, KEY_SYM)
+    
     for modifier in modifiers:
-        code = keyNameToKeySym(finalKey)
-        registry.generateKeyboardEvent(code, None, KEY_SYM)
+        code = keyNameToKeyCode(modifier)
+        registry.generateKeyboardEvent(code, None, KEY_RELEASE)
 
     doTypingDelay()
 

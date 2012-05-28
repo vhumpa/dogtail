@@ -16,6 +16,7 @@ import subprocess
 import re
 import cairo
 from gi.repository import Gtk
+from gi.repository import GObject
 from config import config
 from time import sleep
 from logging import debugLogger as logger
@@ -144,17 +145,19 @@ class Highlight (Gtk.Window):
 
 class Blinker:
     INTERVAL_MS = 1000
+    main_loop = GObject.MainLoop()
     def __init__(self, x, y, w, h):
-        from gi.repository import GObject
         from gi.repository import Gdk
         self.highlight_window = Highlight(x, y, w, h)
         if self.highlight_window.screen.is_composited() is not False:
             self.timeout_handler_id = GObject.timeout_add (Blinker.INTERVAL_MS, self.destroyHighlight)
+            self.main_loop.run()
         else:
             self.highlight_window.destroy()
 
     def destroyHighlight(self):
         self.highlight_window.destroy()
+        self.main_loop.quit()
         return False
 
 a11yDConfKey = 'org.gnome.desktop.interface'

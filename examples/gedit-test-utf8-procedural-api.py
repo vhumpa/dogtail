@@ -9,14 +9,15 @@ from dogtail.config import config
 import dogtail.tc
 from dogtail.procedural import *
 from dogtail.utils import screenshot
+from dogtail.predicate import GenericPredicate
 
 # These next two lines get us translations for free. To see the script run
 # translated, run it like this:
 #  LANG=ja_JP.UTF-8 ./gedit-test-utf8-procedural-api.py
 # You might also want to set config.debugTranslation and
 # config.debugSearching to True, just for fun.
-import dogtail.i18n
-dogtail.i18n.loadTranslationsFromPackageMoFiles('gedit')
+#import dogtail.i18n
+#dogtail.i18n.loadTranslationsFromPackageMoFiles('gedit')
 
 from os import environ, path, remove
 
@@ -45,30 +46,53 @@ utfdemo = open(path[0] + '/data/UTF-8-demo.txt')
 focus.widget.text = utfdemo.read()
 
 # Take a screenshot of the window
-screenshot()
+#screenshot()
 
 # Click gedit's Save button.
 click.button('Save')
 
 # Focus gedit's Save As... dialog
 try:
-    # This string changed somewhere around gedit 2.13.2.
-    # This is the new string
-    focus.dialog(u'Save As\u2026')
+    focus.widget.findByPredicate(GenericPredicate(roleName='file chooser'))
 except FocusError:
-    # Fall back to the old string.
-    focus.dialog('Save as...')
-
-# click the Browse for other folders widget
-focus.widget('Browse for other folders')
-if not focus.widget.checked: click()
+    try:
+        # This string changed somewhere around gedit 2.13.2.
+        # This is the new string
+        focus.dialog(u'Save As\u2026')
+    except FocusError:
+        # Fall back to the old string.
+        focus.dialog('Save as...')
 
 # Click the Desktop widget
 click('Desktop', roleName = 'table cell')
 
+# Focus on dialog again
+try:
+    focus.widget.findByPredicate(GenericPredicate(roleName='file chooser'))
+except FocusError:
+    try:
+        # This string changed somewhere around gedit 2.13.2.
+        # This is the new string
+        focus.dialog(u'Save As\u2026')
+    except FocusError:
+        # Fall back to the old string.
+        focus.dialog('Save as...')
 # We want to save to the file name 'UTF8demo.txt'.
 focus.text()
 focus.widget.text = 'UTF8demo.txt'
+
+
+# And focus on dialog again
+try:
+    focus.widget.findByPredicate(GenericPredicate(roleName='file chooser'))
+except FocusError:
+    try:
+        # This string changed somewhere around gedit 2.13.2.
+        # This is the new string
+        focus.dialog(u'Save As\u2026')
+    except FocusError:
+        # Fall back to the old string.
+        focus.dialog('Save as...')
 
 # Click the Save button.
 click('Save')

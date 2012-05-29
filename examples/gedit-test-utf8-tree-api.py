@@ -5,6 +5,7 @@ __author__ = 'Zack Cerza <zcerza@redhat.com'
 
 from dogtail import tree
 from dogtail.utils import run
+from dogtail.predicate import GenericPredicate
 from time import sleep
 from os import environ, path, remove
 environ['LANG']='en_US.UTF-8'
@@ -20,7 +21,11 @@ run("gedit")
 gedit = tree.root.application('gedit')
 
 # Get a handle to gedit's text object.
-textbuffer = gedit.child(roleName = 'text')
+# Last text object is the gedit's text field
+textbuffer = gedit.findChildren(GenericPredicate(roleName='text'))[-1]
+
+# This will work only if 'File Browser panel' plugin is disabled
+#textbuffer = gedit.child(roleName = 'text')
 
 # Load the UTF-8 demo file.
 from sys import path
@@ -40,9 +45,12 @@ savebutton.click()
 
 # Get a handle to gedit's Save As... dialog.
 try:
-    saveas = gedit.dialog(u'Save As\u2026')
+    saveas = gedit.child(roleName='file chooser')
 except tree.SearchError:
-    saveas = gedit.dialog('Save as...')
+    try:
+        saveas = gedit.dialog(u'Save As\u2026')
+    except tree.SearchError:
+        saveas = gedit.dialog('Save as...')
 
 # We want to save to the file name 'UTF8demo.txt'.
 saveas.child(roleName = 'text').text = 'UTF8demo.txt'
@@ -53,8 +61,7 @@ saveas.child(roleName = 'text').text = 'UTF8demo.txt'
 # "Desktop" entires in the Save As dialog - you have to query for the
 # roleName too - see the on-line help for the Dogtail "tree" class for
 # details
-desktop = saveas.child('Desktop', roleName='table cell')
-desktop.doAction('activate')
+saveas.child('Desktop', roleName='table cell').click()
 
 #  Click the Save button.
 saveas.button('Save').click()

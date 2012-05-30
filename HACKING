@@ -7,23 +7,5 @@
 We use 4 spaces for indentation.
 
 == Python versions ==
-We're trying to support both Python 2.3 and Python 2.4
-In particular, this means:
-
-
-=== No decorators ===
-If you need to create a static method, use:
-{{{
-	def foo():
-		print "bar"
-	foo = staticmethod(foo)
-}}}
-rather than:
-{{{
-	@staticmethod
-	def foo():
-		print "bar"
-}}}
-
-since the latter way is not supported in Python 2.3
-
+Currently the 0.8.x versions of dogtail target Python 2.7
+We might not be 3.x compatible yet.

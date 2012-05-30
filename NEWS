@@ -1,33 +1,58 @@
-dogtail 0.8.0 Beta
-==================
+dogtail 0.8.0
+=============
+Finally a big release updating dogtail after more than 2 years ! Dogtail
+is developed and maintained now again.
+
 Simply put, ported to be compatible with the new GNOME 3 and to work well in major
 GNOME 3 (GTK3) distributions.
 
-We'd like to make the 0.8.x version onward the GNOME3 compatible branch usable
+We'd like to make the 0.8.x version onward the GNOME 3 compatible branch usable
 for Fedora, RHEL7 and others, while keeping 0.7.x releases for fixes in older GNOME2
 systems.
 
 --- What was done ---
 
-Most notably, Sniff's UI needed to ported completely to GTK3, yet there are
+Notably, Sniff's UI needed to ported completely to GTK3, yet there are
 also several places in dogtail 'itself' that needed to be rewritten to go ahead
 with the new technologies. Those were all the modules where the old pygtk was
 used for various reasons (rawinput, utils, tree...). Incompatibilites were also
 present due to the new version of pyatspi (notably with the doAction method).
 
-Since the present 0.7.0 version is largely dysfunctional in Fedora 15+, we'd
-like to include the 0.8.0 into Fedora repos as even the beta provides
-much better functionality than the 0.7.0 stable.
+Release highlights:
 
-We think the 0.8.0 Beta is largely stable and useable. The dogtail-recorder was
-dropped for now, but might return in RC or 0.8.1
+* A great number of fixes everywhere related to GTK/GNOME/At-Spi updates
 
-To be done
-- headless so far brings in the fallback mode with GNOME3
-- examples need to be checked througly
-- recorder (might be 0.8.1)
-- with At-spi QT bridge project being far ahead by now, make dogtail out-of-box
-  available for QT application automation.
+* The dogtail-recorder was dropped for now, but might return in RC or 0.8.1
+
+* Thanks to the qt-at-spi project, dogtail now works out-of-the-box for QT!
+
+* Headless supports KDE sessions
+
+* Headless working with full 3D-Accelerated GNOME session (no fallback anymore)
+
+* Highlight used in sniff completely re-written and made toggleable (of by default)
+
+* Makefile updated, 'make run' builds packages in homedir/rpmbuld now
+
+* Several examples fixed for updated gedit
+
+* Added tree.isChild() convenience method
+
+* Renamed doAction to doActionNamed due to conflict with doAction inside
+  pyatspi namespace
+
+* Delay made configurable in absoluteMotion and relativeMotion functions
+
+* Changed at-spi activation to use DConf instead of GConf
+
+* A bit of code clean-up and modernization (using @property now etc.)
+
+* More error checking added
+
+* A couple of unit tests for Node added
+
+* Node.findChildren() updated to be faster
+
 
 dogtail 0.7.0
 =============

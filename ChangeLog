@@ -1,3 +1,53 @@
+2012-05-30 Vita Humpa <vhumpa@redhat.com>
+
+    dogtail 0.8.0
+    =============
+    Finally a big release updating dogtail after more than 2 years ! Dogtail
+    is developed and maintained now again.
+
+    Simply put, ported to be compatible with the new GNOME 3 and to work well in major
+    GNOME 3 (GTK3) distributions.
+
+    We'd like to make the 0.8.x version onward the GNOME 3 compatible branch usable
+    for Fedora, RHEL7 and others, while keeping 0.7.x releases for fixes in older GNOME2
+    systems.
+
+    --- What was done ---
+
+    Notably, Sniff's UI needed to ported completely to GTK3, yet there are
+    also several places in dogtail 'itself' that needed to be rewritten to go ahead
+    with the new technologies. Those were all the modules where the old pygtk was
+    used for various reasons (rawinput, utils, tree...). Incompatibilites were also
+    present due to the new version of pyatspi (notably with the doAction method).
+
+    Release highlights:
+
+    * A great number of fixes everywhere related to GTK/GNOME/At-Spi updates
+
+    * The dogtail-recorder was dropped for now, but might return in RC or 0.8.1
+
+    * Thanks to the qt-at-spi project, dogtail now works out-of-the-box for QT!
+
+    * Headless supports KDE sessions
+
+    * Headless working with full 3D-Accelerated GNOME session (no fallback anymore)
+
+    * Highlight used in sniff completely re-written and made toggleable (of by default)
+
+    * Makefile updated, 'make run' builds packages in homedir/rpmbuld now
+
+    * Several examples fixed for updated gedit
+
+    * Added tree.isChild() convenience method
+
+    * Renamed doAction to doActionNamed due to conflict with doAction inside pyatspi namespace
+
+    * Delay made configurable in absoluteMotion and relativeMotion functions
+
+    * Changed at-spi activation to use DConf instead of GConf
+
+    * A bit of code clean-up and modernization (using @property now etc.)
+
 2009-12-07  Zack Cerza <zcerza@redhat.com>
 
 	* sniff/sniff: Add a little more error checking to avoid some cases

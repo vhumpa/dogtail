@@ -4,6 +4,7 @@ include Makefile
 include HACKING
 include INSTALL
 include NEWS
+include dogtail.spec
 recursive-include docs *
 recursive-include scripts *
 include sniff/sniff.glade sniff/sniff.desktop sniff/icons/*.xpm

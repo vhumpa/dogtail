@@ -1,4 +1,3 @@
-%define beta rc1
 
 Summary: GUI test tool and automation framework
 Name: dogtail
@@ -6,7 +5,7 @@ Version: 0.8.0
 Release: 1
 License: GPLv2
 URL: http://dogtail.fedorahosted.org/
-Source0: dist/%{name}-%{version}%{beta}.tar.gz
+Source0: dist/%{name}-%{version}.tar.gz
 
 #BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch: noarch
@@ -30,7 +29,7 @@ GUI test tool and automation framework that uses assistive technologies to
 communicate with desktop applications.
 
 %prep
-%setup -q -n %{name}-%{version}%{beta}
+%setup -q -n %{name}-%{version}
 
 %build
 python ./setup.py build
@@ -39,7 +38,6 @@ python ./setup.py build
 rm -rf $RPM_BUILD_ROOT
 python ./setup.py install -O2 --root=$RPM_BUILD_ROOT --record=%{name}.files
 rm -rf $RPM_BUILD_ROOT/%{_docdir}/dogtail
-rm -f $RPM_BUILD_ROOT/%{python_sitelib}/%{name}-%{version}-py%{python_version}.egg-info
 find examples -type f -exec chmod 0644 \{\} \;
 desktop-file-install $RPM_BUILD_ROOT/%{_datadir}/applications/sniff.desktop \
   --vendor=fedora \

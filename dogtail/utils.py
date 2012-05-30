@@ -54,15 +54,21 @@ def screenshot(file = 'screenshot.png', timeStamp = True):
 
     from gi.repository import Gdk
     from gi.repository import GObject
+    from gi.repository import GdkPixbuf
     rootWindow = Gdk.get_default_root_window()
     geometry = rootWindow.get_geometry()
-    pixbuf = GdkPixbuf.Pixbuf(GdkPixbuf.Colorspace.RGB, False, 8, geometry[2], \
-            geometry[3])
-    GdkPixbuf.Pixbuf.get_from_drawable(pixbuf, rootWindow, \
-            rootWindow.get_colormap(), 0, 0, 0, 0, geometry[2], geometry[3])
+    pixbuf = GdkPixbuf.Pixbuf(colorspace=GdkPixbuf.Colorspace.RGB,
+                              has_alpha=False,
+                              bits_per_sample=8,
+                              width=geometry[2],
+                              height=geometry[3])
+
+    pixbuf = Gdk.pixbuf_get_from_window(rootWindow, 0, 0, \
+                                        geometry[2], geometry[3])
     # GdkPixbuf.Pixbuf.save() needs 'jpeg' and not 'jpg'
     if fileExt == 'jpg': fileExt = 'jpeg'
-    try: pixbuf.save(path, fileExt)
+    try:
+        pixbuf.savev(path, fileExt, [], [])
     except GObject.GError:
         raise ValueError, "Failed to save screenshot in %s format" % fileExt
     assert os.path.exists(path)

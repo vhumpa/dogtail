@@ -9,6 +9,6 @@ Comment[en_GB]=Browse your Assistive Technology-enabled desktop
 Exec=sniff
 Terminal=false
 Type=Application
-Icon=dogtail-head.svg
+Icon=dogtail-head
 StartupNotify=true
 Categories=Application;Development;

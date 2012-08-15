@@ -22,7 +22,7 @@ class _Config(object):
 
     scriptName(str) [Read-Only]:
     The name of the script being run.
-    
+
     encoding(str)
     The encoding for text, used by dogtail.tc.TCString .
 
@@ -33,13 +33,13 @@ class _Config(object):
     The delay after a character is typed on the keyboard.
 
     runInterval(float):
-    The interval at which dogtail.utils.run() and dogtail.procedural.run() 
+    The interval at which dogtail.utils.run() and dogtail.procedural.run()
     check to see if the application has started up.
 
     runTimeout(int):
     The timeout after which dogtail.utils.run() and dogtail.procedural.run()
     give up on looking for the newly-started application.
-    
+
     searchBackoffDuration (float):
     Time in seconds for which to delay when a search fails.
 
@@ -86,11 +86,11 @@ class _Config(object):
 
     fatalErrors (boolean):
     Whether errors encountered in dogtail.procedural should be considered
-    fatal. If True, exceptions will be raised. If False, warnings will be 
+    fatal. If True, exceptions will be raised. If False, warnings will be
     passed to the debug logger.
 
     checkForA11y (boolean):
-    Whether to check if accessibility is enabled. If not, just assume it is 
+    Whether to check if accessibility is enabled. If not, just assume it is
     (default True).
 
     logDebugToFile (boolean):
@@ -154,7 +154,7 @@ class _Config(object):
         _Config.__createDir(_Config.defaults['dataDir'])
 
     def __setattr__(self, name, value):
-        if not config.defaults.has_key(name):
+        if name not in config.defaults:
             raise AttributeError, name + " is not a valid option."
 
         elif _Config.defaults[name] != value or \
@@ -176,7 +176,7 @@ class _Config(object):
 
     def __createDir(cls, dirName, perms = 0777):
         """
-        Creates a directory (if it doesn't currently exist), creating any 
+        Creates a directory (if it doesn't currently exist), creating any
         parent directories it needs.
 
         If perms is None, create with python's default permissions.
@@ -184,7 +184,7 @@ class _Config(object):
         dirName = os.path.abspath(dirName)
         #print "Checking for %s ..." % dirName,
         if not os.path.isdir(dirName):
-            if perms: 
+            if perms:
                 umask = os.umask(0)
                 os.makedirs(dirName, perms)
                 os.umask(umask)

@@ -54,7 +54,7 @@ def parse():
 
 def main():
     options, args = parse()
-    if os.environ.has_key('XDG_RUNTIME_DIR'):
+    if 'XDG_RUNTIME_DIR' in os.environ:
         del os.environ['XDG_RUNTIME_DIR']
     if options.session == "GNOME":
         session = sessions.Session(sessionBinary = '/usr/bin/gnome-session',

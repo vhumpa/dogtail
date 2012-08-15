@@ -275,7 +275,7 @@ class Node:
         supported by this instance, check the 'actions' property.
         """
         actions = self.actions
-        if actions.has_key(name):
+        if name in actions:
             return actions[name].do()
         raise ActionNotSupported(name, self)
 

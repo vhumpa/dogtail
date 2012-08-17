@@ -51,8 +51,10 @@ class SniffApp(object):
         try:
             self.app.set_icon_from_file('../icons/dogtail-head.svg')
         except Exception:
-            self.app.set_icon_from_file( \
-                    '/usr/share/icons/hicolor/scalable/apps/dogtail-head.svg')
+            import os
+            path = os.path.abspath (os.path.join(__file__, os.path.pardir, os.path.pardir))
+            self.app.set_icon_from_file( os.path.join( path, \
+                    'share/icons/hicolor/scalable/apps/dogtail-head.svg'))
         self.setUpWidgets()
         self.connectSignals()
         self.app.show_all()
@@ -568,7 +570,9 @@ def loadIcon(iconName):
     try:
         pixbuf = GdkPixbuf.Pixbuf.new_from_file('icons/' + iconName)
     except GObject.GError:
-        iconName = '/usr/share/dogtail/icons/' + iconName
+        import os
+        path = os.path.abspath (os.path.join(__file__, os.path.pardir, os.path.pardir))
+        iconName = os.path.join(path, 'share/dogtail/icons/', iconName)
         pixbuf = GdkPixbuf.Pixbuf.new_from_file(iconName)
     return pixbuf
 

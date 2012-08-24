@@ -18,6 +18,7 @@ __author__ = 'Zack Cerza <zcerza@redhat.com>'
 import tree
 import predicate
 from config import config
+from utils import Lock
 import rawinput
 
 #FocusError = "FocusError: %s not found"
@@ -368,6 +369,14 @@ def run(application, arguments = '', appName = ''):
     pid = utilsRun(application + ' ' + arguments, appName = appName)
     focus.application(application)
     return pid
+
+# tell sniff not to use auto-refresh while script using this module is running
+sniff_lock = Lock(lockname='sniff_refresh.lock',randomize=False)
+try:
+    sniff_lock.lock()
+except OSError:
+    pass # lock was already present from other script instance or leftover from killed instance
+# lock should unlock automatically on script exit.
 
 focus = Focus()
 click = Click()

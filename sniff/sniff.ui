@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <requires lib="gtk+" version="2.16"/>
+  <!-- interface-requires gtk+ 3.0 -->
   <object class="GtkWindow" id="Sniff">
     <property name="width_request">325</property>
     <property name="height_request">475</property>
@@ -17,9 +17,9 @@
             <property name="can_focus">False</property>
             <child>
               <object class="GtkMenuItem" id="menuitem1">
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">Sniff</property>
                 <child type="submenu">
                   <object class="GtkMenu" id="menu1">
@@ -28,9 +28,9 @@
                     <child>
                       <object class="GtkImageMenuItem" id="quit1">
                         <property name="label">gtk-quit</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <property name="always_show_image">True</property>
@@ -42,9 +42,9 @@
             </child>
             <child>
               <object class="GtkMenuItem" id="menuitem2">
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">Actions</property>
                 <child type="submenu">
                   <object class="GtkMenu" id="menu2">
@@ -53,9 +53,9 @@
                     <child>
                       <object class="GtkImageMenuItem" id="expand_all1">
                         <property name="label" translatable="yes">Expand All</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="image">image1</property>
                         <property name="use_stock">False</property>
                         <property name="always_show_image">True</property>
@@ -64,9 +64,9 @@
                     <child>
                       <object class="GtkImageMenuItem" id="collapse_all1">
                         <property name="label" translatable="yes">Collapse All</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="image">image2</property>
                         <property name="use_stock">False</property>
                         <property name="always_show_image">True</property>
@@ -74,17 +74,17 @@
                     </child>
                     <child>
                       <object class="GtkSeparatorMenuItem" id="separatormenuitem1">
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                       </object>
                     </child>
                     <child>
                       <object class="GtkImageMenuItem" id="refresh1">
                         <property name="label">Refresh</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="image">image7</property>
                         <property name="use_stock">False</property>
                         <property name="always_show_image">True</property>
@@ -93,9 +93,9 @@
                     <child>
                       <object class="GtkImageMenuItem" id="setRootMenuItem">
                         <property name="label" translatable="yes">Set As Root</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="image">image5</property>
                         <property name="use_stock">False</property>
                         <property name="always_show_image">True</property>
@@ -104,9 +104,9 @@
                     <child>
                       <object class="GtkImageMenuItem" id="unsetRootMenuItem">
                         <property name="label" translatable="yes">Unset As Root Item</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="image">image6</property>
                         <property name="use_stock">False</property>
                         <property name="always_show_image">True</property>
@@ -114,17 +114,26 @@
                     </child>
                     <child>
                       <object class="GtkSeparatorMenuItem" id="separatormenuitem2">
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                       </object>
                     </child>
                     <child>
                       <object class="GtkCheckMenuItem" id="highlight1">
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="label" translatable="yes">Highlight Items</property>
+                        <property name="use_underline">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckMenuItem" id="autorefresh">
+                        <property name="use_action_appearance">False</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Auto Refresh</property>
                         <property name="use_underline">True</property>
                       </object>
                     </child>
@@ -134,9 +143,9 @@
             </child>
             <child>
               <object class="GtkMenuItem" id="menuitem3">
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">Help</property>
                 <child type="submenu">
                   <object class="GtkMenu" id="menu3">
@@ -145,9 +154,9 @@
                     <child>
                       <object class="GtkImageMenuItem" id="about1">
                         <property name="label">gtk-about</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <property name="always_show_image">True</property>
@@ -377,6 +386,7 @@
                     <child>
                       <object class="GtkButton" id="labelerButton">
                         <property name="label" translatable="yes">Labeler</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="can_default">True</property>
@@ -393,6 +403,7 @@
                     <child>
                       <object class="GtkButton" id="labeleeButton">
                         <property name="label" translatable="yes">Labelee</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="can_default">True</property>

@@ -149,7 +149,7 @@ class Highlight (Gtk.Window):
         cr.rectangle(0, 0, self.get_size()[0], self.get_size()[1])
         cr.stroke()
 
-class Blinker:
+class Blinker(object):
     INTERVAL_MS = 1000
     main_loop = GObject.MainLoop()
     def __init__(self, x, y, w, h):
@@ -165,6 +165,67 @@ class Blinker:
         self.highlight_window.destroy()
         self.main_loop.quit()
         return False
+        
+class Lock(object):
+    """
+    A mutex implementation that uses atomicity of the mkdir operation in UNIX-like
+    systems. This can be used by scripts to provide for mutual exlusion, either in single
+    scripts using threads etc. or i.e. to handle sitations of possible collisions among
+    multiple running scripts. You can choose to make randomized single-script wise locks
+    or a more general locks if you do not choose to randomize the lockdir name
+    """
+    def __init__(self, location='/tmp', lockname='dogtail_lockdir_', randomize=True):
+        """
+        You can change the default lockdir location or name. Setting randomize to
+        False will result in no random string being appened to the lockdir name.
+        """
+        self.lockdir = os.path.join(os.path.normpath(location), lockname)
+        if randomize:
+            self.lockdir = "%s%s" % (self.lockdir,self.__getPostfix())
+
+    def lock(self):
+        """
+        Creates a lockdir based on the settings on Lock() instance creation.
+        Raises OSError exception of the lock is already present. Should be
+        atomic on POSIX compliant systems. 
+        """
+        locked_msg = 'Dogtail lock: Already locked with the same lock'
+        if not os.path.exists(self.lockdir):
+            try:
+                os.mkdir(self.lockdir)
+                return self.lockdir
+            except OSError, e:
+                if e.errno == errno.EEXIST and os.path.isdir(self.lockdir):
+                    raise OSError(locked_msg)
+        else:
+            raise OSError(locked_msg)
+
+    def unlock(self):
+        """
+        Removes a lock. Will raise OSError exception if the lock was not present.
+        Should be atomic on POSIX compliant systems.
+        """
+        import os #have to import here for situations when executed from __del__
+        if os.path.exists(self.lockdir):
+            try:
+                os.rmdir(self.lockdir)
+            except OSError, e:
+                if e.erron == errno.EEXIST:
+                    raise OSError('Dogtail unlock: lockdir removed elsewhere!')
+        else:
+            raise OSError('Dogtail unlock: not locked')
+
+    def __del__(self):
+        """
+        Makes sure lock is removed when the process ends. Although not when killed indeed.
+        """
+        self.unlock()
+
+    def __getPostfix(self):
+        import random
+        import string
+        return ''.join(random.choice(string.letters + string.digits) for x in range(5))
+        
 
 a11yDConfKey = 'org.gnome.desktop.interface'
 

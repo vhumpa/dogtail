@@ -83,8 +83,6 @@ try:
 except ImportError:
     raise ImportError, "Error importing the AT-SPI bindings"
 
-from CORBA import COMM_FAILURE, OBJECT_NOT_EXIST
-
 # We optionally import the bindings for libWnck.
 try:
     from gi.repository import Wnck
@@ -209,7 +207,7 @@ class Node:
             n = self.role
             n = self.name
             if len(self) > 0: n = self[0]
-        except (LookupError, COMM_FAILURE, OBJECT_NOT_EXIST): return True
+        except: return True
         return False
 
     @property

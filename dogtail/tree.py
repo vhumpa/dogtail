@@ -442,7 +442,19 @@ class Node:
         if config.debugSearching:
             logger.log("raw click on %s %s at (%s,%s)"%(self.name, self.getLogString(), str(clickX), str(clickY)))
         rawinput.doubleClick(clickX, clickY, button)
-
+    
+    def point(self, mouseDelay=None):
+        """
+        Move mouse cursor to the center of the widget.
+        """
+        pointX = self.position[0] + self.size[0]/2
+        pointY = self.position[1] + self.size[1]/2
+        logger.log("Pointing on %s %s at (%s,%s)"%(self.name, self.getLogString(), str(pointX), str(pointY)))
+        rawinput.registry.generateMouseEvent(pointX,pointY,'abs')
+        if mouseDelay:
+            doDelay(mouseDelay)
+        else:
+            doDelay()
 
     ##
     # RelationSet

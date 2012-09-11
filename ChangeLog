@@ -1,3 +1,26 @@
+2012-09-07 Vita Humpa <vhumpa@redhat.com>
+
+    dogtail 0.8.1
+    =============
+	A first update to the new GNOME3 / KDE4 compatible release containing several fixes:
+
+	* Sniff's autorefresh made togglable, to help avoid collisions with potential
+	  running dogtail scripts. Sniff checks at startup whether some script is running
+	  and sets up the autorefresh off if it is.
+
+	* Added a locking mechanism into utils that can be used to solve situations when
+	  multiple dogtail processes/thread are running (applied in tree/procedural and sniff
+	  already)
+	 
+	* Removed the deprecated dependency on CORBA
+
+	* Icons no longer use absolute pathing in sniff (thx roignac)
+
+	* Deprecated  .has_key() operator replaced with 'in'.
+
+	* Removed .svg inside sniff's .desktop file
+
+
 2012-05-30 Vita Humpa <vhumpa@redhat.com>
 
     dogtail 0.8.0

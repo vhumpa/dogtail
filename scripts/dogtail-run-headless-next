@@ -1,0 +1,139 @@
+#!/usr/bin/python
+"""
+dogtail-run-headless-next
+
+Unlike the original headless script this will make use of an Display Manager
+(currently gdm) to handle starting the X server and user session. It's motivated
+by  changes related to systemd - that disallows running a gnome session from an
+environment spawned by 'su'. The original headless will not work in these cases
+anymore on systemd systems
+
+Instead this script uses the AutoLogin feature of the DM, so that when it starts DM's
+service the session will login for particular user at once. It then uses the
+environment properties from the new session and runs the target script inthere.
+
+Will work with distros where 'service gdm/kdm start/stop' takes an effect, but
+you can also specify an alternative like 'init 5/init 3' to use with systems that
+i.e. make use of initscripts. 
+
+Even if you are still able to use dogtail-run-headless in your usecase, you might
+consider switching to this scrpt - as making use of DM is likely to be more reliable
+and less buggy compared to headless itself taking care of everything.
+
+Please take a look at --help for usage info.
+
+Limitations
+--
+Currently limited only to gnome-session, GDM and systemd (will extend soon).
+
+"""
+
+import argparse
+import sys
+import os
+import glob
+import subprocess
+import time
+import ConfigParser
+import shutil
+from dogtail.sessions import Script
+
+def getSessionEnvironment(sessionBinary):
+
+    def isSessionProcess(fileName):
+        try:
+            if os.path.realpath(fileName + 'exe') != ('/usr/bin/plasma-desktop' \
+                        if sessionBinary.split('/')[-1] == 'startkde'
+                        else sessionBinary): 
+                return False
+        except OSError:
+            return False
+        pid = fileName.split('/')[2]
+        if pid == 'self' or pid == str(os.getpid()): return False
+        return True
+
+    def getEnvDict(fileName):
+        try: envString = open(fileName, 'r').read()
+        except IOError: return {}
+        envItems = envString.split('\x00')
+        envDict = {}
+        for item in envItems:
+            if not '=' in item: continue
+            k, v = item.split('=', 1)
+            envDict[k] = v
+        return envDict
+
+    envDict = False
+    for path in glob.glob('/proc/*/'):
+        if not isSessionProcess(path): continue
+        envFile = path + 'environ'
+        envDict = getEnvDict(envFile)
+    if not envDict:
+        raise RuntimeError("Can't find our environment!")
+    return envDict
+
+class DisplayManagerSession(object):
+
+    gdm_config = '/etc/gdm/custom.conf'
+    scriptDelay = 20
+    user = 'test'
+
+    def __init__(self, user = None):
+        if user is not None:
+            self.user = user
+        self.tmp_file = '/tmp/%s' % os.path.basename(self.gdm_config)
+
+    def setup(self, restore=False):
+        shutil.copy(self.gdm_config, self.tmp_file)
+        config = ConfigParser.SafeConfigParser()
+        config.optionxform = str
+        config.read(self.tmp_file)
+        if not restore:
+            config.set('daemon', 'AutomaticLoginEnable', 'true')
+            config.set('daemon', 'AutomaticLogin', self.user)
+        else:
+            config.remove_option('daemon', 'AutomaticLoginEnable')
+            config.remove_option('daemon', 'AutomaticLogin')
+        output = open(self.tmp_file, 'w')
+        config.write(output)
+        output.flush()
+        subprocess.Popen('sudo mv -f %s %s' % (self.tmp_file , self.gdm_config), shell=True).wait()
+
+    def start(self):
+        subprocess.Popen('sudo service gdm start', shell=True)
+        time.sleep(self.scriptDelay)
+
+    def stop(self):
+        subprocess.Popen('sudo service gdm stop', shell=True)
+
+def parse():
+    import argparse
+    parser = argparse.ArgumentParser(prog='$ dogtail-run-headless-next')
+    parser.add_argument('script', help="""Command to execute the script""")
+    parser.add_argument('--dont-start', action='store_true', help="""Use already running session (doesn't have to be under Display Manager)""")
+    parser.add_argument('--dont-kill', action='store_true', help="""Do not kill session when script exits.""")
+    return parser.parse_args()
+
+def main():
+    args = parse()
+    scriptCmdList = args.script.split()
+
+    dm = DisplayManagerSession()
+
+    if args.dont_start is not True:
+        dm.setup()
+        dm.start()
+
+    os.environ = getSessionEnvironment('/usr/bin/gnome-session')
+
+    script = Script(scriptCmdList)
+    scriptPid = script.start()
+    exitCode = script.wait()
+
+    if args.dont_kill is not True:
+        dm.stop()
+        dm.setup(restore=True)
+
+    sys.exit(exitCode)
+
+if __name__ == "__main__": main()

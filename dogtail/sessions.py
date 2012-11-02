@@ -39,7 +39,7 @@ class Subprocess(object):
         self._exitCode = None
 
     def start(self):
-        if self.environ == None: environ = os.environ
+        if self.environ == None: self.environ = os.environ
         self.popen = subprocess.Popen(self.cmdList, env = self.environ)#, stdout = subprocess.PIPE, 
                 #stderr = subprocess.STDOUT, close_fds = True)
         return self.popen.pid
@@ -111,7 +111,7 @@ class Session(object):
 
     cookieName = "DOGTAIL_SESSION_COOKIE"
 
-    def __init__(self, sessionBinary, scriptCmdList = [], scriptDelay = 10, logout = True):
+    def __init__(self, sessionBinary, scriptCmdList = [], scriptDelay = 20, logout = True):
         testBinary(sessionBinary)
         self.sessionBinary = sessionBinary
         self.script = Script(scriptCmdList)

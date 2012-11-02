@@ -3,8 +3,7 @@
 dogtail-run-headless
 
 This script runs a session within an X server, allowing dogtail scripts to be
-run on systems with no graphic cards, among other things. Currently it can
-only start GNOME sessions.
+run on systems with no graphic cards, among other things.
 
 Scripts are run in the current directory. After they are finished, dogtail can
 optionally log out of the session, which will also termninate the X server.

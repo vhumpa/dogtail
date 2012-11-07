@@ -1,9 +1,9 @@
 #!/usr/bin/python
-"""
+descr = """
 dogtail-run-headless-next
 
 Unlike the original headless script this will make use of an Display Manager
-(currently gdm) to handle starting the X server and user session. It's motivated
+(DM - currently gdm) to handle starting the X server and user session. It's motivated
 by  changes related to systemd - that disallows running a gnome session from an
 environment spawned by 'su'. The original headless will not work in these cases
 anymore on systemd systems
@@ -38,6 +38,8 @@ import ConfigParser
 import shutil
 from dogtail.sessions import Script
 
+preserve_envs = ['PYTHONPATH', 'TEST']
+
 def getSessionEnvironment(sessionBinary):
 
     def isSessionProcess(fileName):
@@ -63,6 +65,14 @@ def getSessionEnvironment(sessionBinary):
             envDict[k] = v
         return envDict
 
+    def copyVars(envDict):
+        '''Copy a couple of old variables we want to preserve'''
+        for env in preserve_envs:
+            if os.environ.has_key(env):
+                envDict[env] = os.environ[env]
+        return envDict
+
+
     envDict = False
     for path in glob.glob('/proc/*/'):
         if not isSessionProcess(path): continue
@@ -70,7 +80,7 @@ def getSessionEnvironment(sessionBinary):
         envDict = getEnvDict(envFile)
     if not envDict:
         raise RuntimeError("Can't find our environment!")
-    return envDict
+    return copyVars(envDict)
 
 class DisplayManagerSession(object):
 
@@ -103,15 +113,20 @@ class DisplayManagerSession(object):
         subprocess.Popen('sudo service gdm start', shell=True)
         time.sleep(self.scriptDelay)
 
+    def setA11y(self, enable):
+        subprocess.Popen('/usr/bin/gsettings set org.gnome.desktop.interface toolkit-accessibility %s' \
+                         % ('true' if enable else 'false'), shell=True, env=os.environ)
+
     def stop(self):
         subprocess.Popen('sudo service gdm stop', shell=True)
 
 def parse():
     import argparse
-    parser = argparse.ArgumentParser(prog='$ dogtail-run-headless-next')
+    parser = argparse.ArgumentParser(prog='$ dogtail-run-headless-next', description=descr)
     parser.add_argument('script', help="""Command to execute the script""")
     parser.add_argument('--dont-start', action='store_true', help="""Use already running session (doesn't have to be under Display Manager)""")
     parser.add_argument('--dont-kill', action='store_true', help="""Do not kill session when script exits.""")
+    parser.add_argument('--disable-a11y', action='store_true', help="""Disable accessibility technologies on script(not session) exit.""")
     return parser.parse_args()
 
 def main():
@@ -125,14 +140,18 @@ def main():
         dm.start()
 
     os.environ = getSessionEnvironment('/usr/bin/gnome-session')
+    dm.setA11y(True)
 
     script = Script(scriptCmdList)
     scriptPid = script.start()
     exitCode = script.wait()
 
-    if args.dont_kill is not True:
+    if args.dont_kill is False:
         dm.stop()
         dm.setup(restore=True)
+
+    if args.disable_a11y is True:
+        dm.setA11y(False)
 
     sys.exit(exitCode)
 

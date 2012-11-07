@@ -250,13 +250,13 @@ def bailBecauseA11yIsDisabled():
     logger.log("Dogtail requires that Assistive Technology support be enabled. Aborting...")
     sys.exit(1)
 
-def enableA11y():
+def enableA11y(enable=True):
     """
-    Enables accessibility via GConf.
+    Enables accessibility via DConf.
     """
     from gi.repository.Gio import Settings
     InterfaceSettings = Settings(a11yDConfKey)
-    dconfEnabled = InterfaceSettings.set_boolean('toolkit-accessibility', True)
+    dconfEnabled = InterfaceSettings.set_boolean('toolkit-accessibility', enable)
 
 def checkForA11y():
     """

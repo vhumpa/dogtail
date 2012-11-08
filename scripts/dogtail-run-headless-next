@@ -110,7 +110,7 @@ class DisplayManagerSession(object):
         subprocess.Popen('sudo mv -f %s %s' % (self.tmp_file , self.gdm_config), shell=True).wait()
 
     def start(self):
-        subprocess.Popen('sudo service gdm start', shell=True)
+        subprocess.Popen('sudo service gdm start'.split())
         time.sleep(self.scriptDelay)
 
     def setA11y(self, enable):
@@ -118,7 +118,8 @@ class DisplayManagerSession(object):
                          % ('true' if enable else 'false'), shell=True, env=os.environ)
 
     def stop(self):
-        subprocess.Popen('sudo service gdm stop', shell=True)
+        subprocess.Popen('sudo service gdm stop'.split()).wait()
+        time.sleep(10)
 
 def parse():
     import argparse

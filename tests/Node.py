@@ -55,7 +55,7 @@ class TestNodeAttributes(GtkDemoTest):
         self.assertRaises(AttributeError, getattr, self.app, "thisIsNotAnAttribute")
 
     #FIXME: should setattr for a non-existant attr be allowed?
-    
+
     # 'name' (read-only string):
     def testGetName(self):
         """
@@ -68,7 +68,7 @@ class TestNodeAttributes(GtkDemoTest):
     def testSetName(self):
         "Node.name should be read-only"
         self.assertRaises(AttributeError, self.app.__setattr__,  "name", "hello world")
-    
+
     # 'roleName' (read-only string):
     def testGetRoleName(self):
         """
@@ -149,7 +149,7 @@ class TestNodeAttributes(GtkDemoTest):
         # Ensure that they got set:
         self.assertEquals(entry1.text, "hello")
         self.assertEquals(entry2.text, "world")
-        
+
         # and try again, searching for them again, to ensure it actually affected the UI:
         self.assertEquals(dlg.child(label='Entry 1').text, "hello")
         self.assertEquals(dlg.child(label='Entry 2').text, "world")
@@ -286,8 +286,8 @@ class TestNodeAttributes(GtkDemoTest):
     # 'actions' (read-only list of Action instances):
     def testGetActions(self):
         "Node.actions should be an empty list for the app node"
-        self.assertEquals(len(self.app.actions), 0) 
-   
+        self.assertEquals(len(self.app.actions), 0)
+
     def testSetActions(self):
         "Node.actions should be read-only"
         self.assertRaises(AttributeError, self.app.__setattr__,  "actions", {})
@@ -525,7 +525,9 @@ def trap_stdout(function, args=None):
     try:
         out = StringIO()
         sys.stdout = out
-        if args:
+        if args is dict:
+            function(**args)
+        elif args is str:
             function(args)
         else:
             function()

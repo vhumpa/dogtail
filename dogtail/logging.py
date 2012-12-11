@@ -107,7 +107,7 @@ class Logger:
         else:
             # If path doesn't exist, raise an exception
             raise IOError, \
-                    "Log path %s does not exist or is not a directory" % logDir
+                    "Log path %s does not exist or is not a directory" % config.logDir
 
     def findUniqueName(self):
         # generate a logfile name and check if it already exists
@@ -150,7 +150,7 @@ class Logger:
             else: self.file.write(message + ' ')
             self.file.flush()
 
-        if self.stdOut and config.logDebugToStdOut: 
+        if self.stdOut and config.logDebugToStdOut:
             if newline: print message
             else: print message,
 

@@ -95,22 +95,22 @@ class TestPredicate(unittest.TestCase):
         dn1 = self.DummyNode('dummy name 1', 'dummy role 1', 'dummy desc 1')
         genericPredicateByName = dogtail.predicate.GenericPredicate(name=dn1.name)
         self.assertTrue(genericPredicateByName.satisfiedByNode(dn1))
-        self.assertEquals(genericPredicateByName.makeScriptMethodCall(False), u'child(name="dummy name 1", recursive=False)')
+        self.assertEquals(genericPredicateByName.makeScriptMethodCall(False), u'child( name="dummy name 1", recursive=False)')
         self.assertEquals(genericPredicateByName.makeScriptVariableName(), u'dummyName1Node')
 
     def test_predicates_generic_by_label(self):
         dn1 = self.DummyNode('dummy name 1', 'dummy role 1', 'dummy desc 1')
         genericPredicateByRole = dogtail.predicate.GenericPredicate(roleName=dn1.roleName)
         self.assertTrue(genericPredicateByRole.satisfiedByNode(dn1))
-        self.assertEquals(genericPredicateByRole.makeScriptMethodCall(False), u'child(roleName="dummy role 1", recursive=False)')
+        self.assertEquals(genericPredicateByRole.makeScriptMethodCall(False), u"child( roleName='dummy role 1', recursive=False)")
         self.assertEquals(genericPredicateByRole.makeScriptVariableName(), u'dummyRole1Node')
 
     def test_predicates_generic_by_description(self):
         dn1 = self.DummyNode('dummy name 1', 'dummy role 1', 'dummy desc 1')
         genericPredicateByDescription = dogtail.predicate.GenericPredicate(description=dn1.description)
         self.assertTrue(genericPredicateByDescription.satisfiedByNode(dn1))
-        self.assertEquals(genericPredicateByDescription.makeScriptMethodCall(False), u'child(description="dummy desc 1", recursive=False)')
-        self.assertEquals(genericPredicateByDescription.makeScriptVariableName(), u'dummyName1Node')
+        self.assertEquals(genericPredicateByDescription.makeScriptMethodCall(False), u"child( description='dummy desc 1', recursive=False)")
+        self.assertEquals(genericPredicateByDescription.makeScriptVariableName(), u'dummyDesc1Node')
 
     def test_predicates_named(self):
         dn1 = self.DummyNode('dummy name 1', 'dummy role 1', 'dummy desc 1')

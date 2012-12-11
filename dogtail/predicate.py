@@ -167,15 +167,16 @@ class GenericPredicate(Predicate):
 
     def makeScriptMethodCall(self, isRecursive):
         if self.label:
-            args = "label=%s"%label
+            args = "label='%s'"%label
         else:
             args = ""
             if self.name:
+                print self.name
                 args += " name=%s"%self.name
             if self.roleName:
-                args += " roleName=%s"%self.roleName
+                args += " roleName='%s'"%self.roleName
             if self.description:
-                args += " description=%s"%self.description
+                args += " description='%s'"%self.description
         return "child(%s%s)"%(args, makeScriptRecursiveArgument(isRecursive, True))
 
     def makeScriptVariableName(self):
@@ -418,7 +419,7 @@ class PredicateTests(unittest.TestCase):
 
         dummyButton = DummyNode('dummy', 'push button')
         self.assertTrue(IsAButtonNamed(dummyButton.name).satisfiedByNode(dummyButton))
-        
+
         dummyTab = DummyNode('dummy', 'page tab')
         self.assertTrue(IsATabNamed(dummyTab.name).satisfiedByNode(dummyTab))
 

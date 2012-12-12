@@ -525,9 +525,9 @@ def trap_stdout(function, args=None):
     try:
         out = StringIO()
         sys.stdout = out
-        if args is dict:
+        if type(args) is dict:
             function(**args)
-        elif args is str:
+        elif type(args) is str or NoneType:
             function(args)
         else:
             function()

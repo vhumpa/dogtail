@@ -14,19 +14,21 @@ import Node
 
 class TestScreenshot(Node.GtkDemoTest):
 
-    def make_expected_and_compare(self, actual_path):
+    def make_expected_and_compare(self, actual_path, jpg_tolerance=None):
         extension = actual_path.split('.')[-1]
         expected_path = actual_path.replace(extension, "expected." + extension)
 
         import os
         os.system("gnome-screenshot -f %s" % expected_path)
 
-        command = ["compare", "-metric", "AE", "-fuzz", "5%", actual_path, expected_path, "output"]
+        command = ["compare", "-metric", "MAE", actual_path, expected_path, "output"]
         import subprocess
         p = subprocess.Popen(command, stderr=subprocess.PIPE)
         output, error = p.communicate()
 
-        self.assertEquals(error, "0\n")
+        import re
+        m = re.search(r"\((.*)\)", error)
+        self.assertTrue(0.1 >= float(m.group(1)))
 
     def test_screenshot_incorrect_timestamp(self):
         self.assertRaises(TypeError, dogtail.utils.screenshot, "timeStamp", None)
@@ -45,7 +47,7 @@ class TestScreenshot(Node.GtkDemoTest):
 
     def test_screenshot_jpeg(self):
         actual_path = dogtail.utils.screenshot("basename.jpg")
-        self.make_expected_and_compare(actual_path)
+        self.make_expected_and_compare(actual_path, jpg_tolerance=True)
 
     def test_screenshot_unknown_format(self):
         self.assertRaises(ValueError, dogtail.utils.screenshot, "basename.dat")

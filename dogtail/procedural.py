@@ -72,6 +72,7 @@ class FocusApplication (FocusBase):
         if app:
             FocusApplication.node = app
             FocusDialog.node = None
+            FocusWindow.node = None
             FocusWidget.node = None
         return True
 

@@ -1,13 +1,14 @@
+%define beta beta5
 
 Summary: GUI test tool and automation framework
 Name: dogtail
-Version: 0.8.0
-Release: 1
+Version: 0.8.2
+Release: 0.5.%{beta}%{?dist}
 License: GPLv2
 URL: http://dogtail.fedorahosted.org/
-Source0: dist/%{name}-%{version}.tar.gz
+Source0: %{name}-%{version}.tar.gz
+#Source0: http://fedorahosted.org/released/dogtail/%{name}-%{version}.tar.gz
 
-#BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch: noarch
 
 BuildRequires: python2-devel
@@ -19,10 +20,10 @@ Requires: pyatspi
 Requires: pygobject3
 Requires: pycairo
 Requires: pygtk2
-Requires: pyorbit
 Requires: rpm-python
 Requires: xorg-x11-xinit
 Requires: python-imaging
+Requires: sudo
 
 %description
 GUI test tool and automation framework that uses assistive technologies to 
@@ -38,6 +39,7 @@ python ./setup.py build
 rm -rf $RPM_BUILD_ROOT
 python ./setup.py install -O2 --root=$RPM_BUILD_ROOT --record=%{name}.files
 rm -rf $RPM_BUILD_ROOT/%{_docdir}/dogtail
+rm -f $RPM_BUILD_ROOT/%{python_sitelib}/%{name}-%{version}-py%{python_version}.egg-info
 find examples -type f -exec chmod 0644 \{\} \;
 desktop-file-install $RPM_BUILD_ROOT/%{_datadir}/applications/sniff.desktop \
   --vendor=fedora \
@@ -60,24 +62,42 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %{_bindir}/*
 %{python_sitelib}/dogtail/
-%{python_sitelib}/*.egg-info
 %{_datadir}/applications/*
 %{_datadir}/dogtail/
 %{_datadir}/icons/hicolor/*
 %doc COPYING
 %doc README
 %doc NEWS
-%doc dogtail.spec
 %doc examples/
 
 %changelog
-* Thu Apr 12 2012 Vitezslav Humpa <vhumpa@redhat.com> - 0.8.0-0.5.beta5
+
+* Wed Nov 2 2012 Vitezslav Humpa <vhumpa@redhat.com> - 0.8.2-0.1.beta1
+- Internal EL7 release/beta build 
+- Wrote a dogtail-run-headless-next - script that uses a DisplayManager
+ (gdm/kdm) to handle the X server / session management. Should replace
+  headless in the future if systemd spreads.
+ 
+-Also fixed a wrong condition in the sessions module
+
+* Wed Oct 18 2012 Vitezslav Humpa <vhumpa@redhat.com> - 0.8.1-2
+- Respin
+
+* Wed Oct 16 2012 Vitezslav Humpa <vhumpa@redhat.com> - 0.8.1-1
+- New upstream release
+
+* Wed Jul 18 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.8.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
+* Mon Jun 04 2012 Jaroslav Reznik <jreznik@redhat.com> - 0.8.0-2
+- respin
+
+* Thu May 31 2012 Jaroslav Reznik <jreznik@redhat.com> - 0.8.0-1
+- Update to 0.8.0 Final
+- New upstream release
+
+* Mon Apr 16 2012 Jaroslav Reznik <jreznik@redhat.com> - 0.8.0-0.5.beta5
 - Update to 0.8.0 beta 5
-- Several fixes for dogtail-run-headless, will now bring a proper GNOME
-  session, HW accelerated where available
-- Added tree.isChild convenience method
-- Added a 'retry' parameter to tree.child allowing to turn off the default
-  and bypassing the long search where not needed
 
 * Mon Apr 02 2012 Jaroslav Reznik <jreznik@redhat.com> - 0.8.0-0.2.beta2
 - Update to 0.8.0 beta 2

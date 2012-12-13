@@ -104,9 +104,6 @@ class TestNodeAttributes(GtkDemoTest):
         # the app has a parent if gnome-shell is used, so parent.parent is a safe choice
         if filter(lambda x: x.name == 'gnome-shell', self.app.applications()):
             self.assertEquals(self.app.parent.parent, None)
-        else:
-            self.assertEquals(self.app.parent, None)
-
         self.assertEquals(self.app.children[0].parent, self.app)
 
     def testSetParent(self):
@@ -525,9 +522,10 @@ def trap_stdout(function, args=None):
     try:
         out = StringIO()
         sys.stdout = out
+        import types
         if type(args) is dict:
             function(**args)
-        elif type(args) is str or NoneType:
+        elif args:
             function(args)
         else:
             function()
@@ -549,48 +547,6 @@ class TestDump(GtkDemoTest):
    [action | activate |  ]
   [scroll bar | ]
    [action | activate |  ]""")
-
-class TestErrors(unittest.TestCase):
-
-    def test_warn(self):
-       output = trap_stdout(dogtail.errors.warn, ('WARNING'))
-       self.assertEquals('WARNING' in output, True)
-
-class TestLogging(unittest.TestCase):
-
-    def setUp(self):
-        self.old_log_dir = dogtail.config.config.logDir
-
-    def tearDown(self):
-        dogtail.config.config.logDir = self.old_log_dir
-
-    def test_entryStamp_is_not_empty(self):
-        ts = dogtail.logging.TimeStamp()
-        self.assertEquals(len(ts.entryStamp()) > 0, True)
-
-    def test_correct_error_if_log_dir_does_not_exist(self):
-        import shutil
-        shutil.rmtree(dogtail.config.config.logDir)
-        self.assertRaises(IOError, dogtail.logging.Logger, "log", file = True)
-
-    def test_unique_name(self):
-        logger1 = dogtail.logging.Logger("log", file = True)
-        logger1.createFile()
-        logger2 = dogtail.logging.Logger("log", file = True)
-        logger2.createFile()
-        logger3 = dogtail.logging.Logger("log", file = True)
-        self.assertNotEquals(logger1.fileName, logger2.fileName)
-        self.assertNotEquals(logger2.fileName, logger3.fileName)
-
-    def test_results_logger_correct_dict(self):
-        logger = dogtail.logging.ResultsLogger("log")
-        output = trap_stdout(logger.log, {'a': '1'})
-        self.assertEquals('a:      1' in output, True)
-
-    def test_results_logger_incorrect_dict(self):
-        logger = dogtail.logging.ResultsLogger("log")
-        self.assertRaises(ValueError, logger.log, "not a dict")
-
 
 if __name__ == '__main__':
     unittest.main()

@@ -14,7 +14,7 @@ environment properties from the new session and runs the target script inthere.
 
 Will work with distros where 'service gdm/kdm start/stop' takes an effect, but
 you can also specify an alternative like 'init 5/init 3' to use with systems that
-i.e. make use of initscripts. 
+i.e. make use of initscripts.
 
 Even if you are still able to use dogtail-run-headless in your usecase, you might
 consider switching to this scrpt - as making use of DM is likely to be more reliable
@@ -51,7 +51,7 @@ def getSessionEnvironment(sessionBinary):
         try:
             if os.path.realpath(fileName + 'exe') != ('/usr/bin/plasma-desktop' \
                         if sessionBinary.split('/')[-1] == 'startkde'
-                        else sessionBinary): 
+                        else sessionBinary):
                 return False
         except OSError:
             return False
@@ -92,20 +92,6 @@ def execCodeWithEnv(code, env=None):
         text_file.write(code)
     subprocess.Popen('python /tmp/execcode.dogtail'.split(), env=(os.environ if env is None else env)).wait()
 
-def waitForProcess(process, invert=False):
-    doc='''Waits until a process appears'''
-
-    def isProcessRunning(process):
-        doc='''Gives true if process can be greped out of full ps dump '''
-        s = subprocess.Popen(["ps", "axw"],stdout=subprocess.PIPE)
-        for x in s.stdout:
-            if re.search(process, x):
-                return True
-        return False
-
-    while isProcessRunning(process) is invert:
-        time.sleep(1)
-
 class DisplayManagerSession(object):
 
     gdm_config = '/etc/gdm/custom.conf'
@@ -114,6 +100,19 @@ class DisplayManagerSession(object):
     kdm_options = {'section':'X-:0-Core', 'enable':'AutoLoginEnable', 'user':'AutoLoginUser'}
     scriptDelay = 20
     user = 'test'
+
+    def isProcessRunning(self, process):
+        doc='''Gives true if process can be greped out of full ps dump '''
+        s = subprocess.Popen(["ps", "axw"],stdout=subprocess.PIPE)
+        for x in s.stdout:
+            if re.search(process, x):
+                return True
+        return False
+
+    def waitForProcess(self, process, invert=False):
+        doc='''Waits until a process appears'''
+        while self.isProcessRunning(process) is invert:
+            time.sleep(1)
 
     def __init__(self, dm = 'gdm', user = None):
         if user is not None:
@@ -151,10 +150,11 @@ class DisplayManagerSession(object):
             subprocess.Popen('echo "export QT_ACCESSIBILITY=1" > ~/.kde/env/qt-at-spi.sh', shell=True).wait()
             subprocess.Popen('echo "[Desktop]\nSession=kde-plasma" > ~/.dmrc', shell=True).wait()
 
-    def start(self, wait_for_binary):
+    def start(self, session_binary):
         subprocess.Popen(('sudo service %s start' % (self.dm)).split())
-        waitForProcess(wait_for_binary)
-        # some extra time for an environment (shell/kwin) to load all resources etc. 
+        self.session_binary = session_binary
+        self.waitForProcess(session_binary)
+        # some extra time for an environment (shell/kwin) to load all resources etc.
         if self.dm == 'kdm':
             time.sleep(10) # KDE keeps loading screen on untill all is loaded
         else:
@@ -169,8 +169,14 @@ class DisplayManagerSession(object):
 
     def stop(self):
         subprocess.Popen(('sudo service %s stop' % (self.dm)).split()).wait()
-        waitForProcess('/usr/bin/%s' % self.dm, invert=True)
+        self.waitForProcess('/usr/bin/%s' % self.dm, invert=True)
         time.sleep(3) # extra safe time
+        # did i.e. gnome-shell get stuck running?
+        if self.isProcessRunning(self.session_binary):
+            print('dogtail-run-headless-next: WARNING: %s still running, proceeding with kill -9' % self.session_binary)
+            subprocess.Popen(('sudo pkill --signal 9 %s' % (self.session_binary)).split()).wait()
+            time.sleep(1)
+
 
 def parse():
     import argparse
@@ -204,7 +210,7 @@ def main():
         dm.start(session_binary.split('/')[-1])
 
     os.environ = getSessionEnvironment(session_binary)
-    
+
     if dm_name == 'gdm':
         dm.setA11y(True)
 

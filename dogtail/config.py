@@ -7,6 +7,11 @@ import os
 import sys
 import locale
 
+
+def _userTmpDir(baseName):
+    # i.e. /tmp/dogtail-foo
+    return '-'.join(('/'.join(('/tmp', baseName)), os.getlogin()))
+
 class _Config(object):
     """
     Contains configuration parameters for the dogtail run.
@@ -99,19 +104,19 @@ class _Config(object):
     logDebugToStdOut (boolean):
     Whether to print log output to console or not (default True).
     """
-    def _getScriptName(self):
+    @property
+    def scriptName(self):
         return os.path.basename(sys.argv[0]).replace('.py','')
-    scriptName = property(_getScriptName)
 
-    def _getEncoding(self):
+    @property
+    def encoding(self):
         return locale.getpreferredencoding().lower()
-    encoding = property(_getEncoding)
 
     defaults = {
             # Storage
-            'scratchDir' : '/tmp/dogtail/',
-            'dataDir' : '/tmp/dogtail/data/',
-            'logDir' : '/tmp/dogtail/logs/',
+            'scratchDir' : '/'.join((_userTmpDir('dogtail'), '')),
+            'dataDir' : '/'.join((_userTmpDir('dogtail'), 'data', '')),
+            'logDir' : '/'.join((_userTmpDir('dogtail'), 'logs', '')),
             'scriptName' : scriptName.fget(None),
             'encoding' : encoding.fget(None),
             'configFile' : None,

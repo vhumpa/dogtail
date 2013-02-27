@@ -21,6 +21,15 @@ def examples_data():
 		result = result + ['examples/data/' + data]
     return result
 
+def tests():
+    import os
+    exList = os.listdir(os.curdir + '/tests/')
+    result = []
+    for ex in exList:
+        if ex.split('.')[-1] == 'py':
+            result = result + ['tests/' + ex]
+    return result
+
 def sniff_icons():
     import os
     list = os.listdir(os.curdir + '/sniff/icons/')
@@ -68,6 +77,8 @@ Vitezslav Humpa <vhumpa@redhat.com>""",
                                         examples() ),
                                 ('share/doc/dogtail/examples/data',
                                         examples_data() ),
+                                ('share/doc/dogtail/tests',
+                                        tests() ),
                                 ('share/dogtail/glade', ['sniff/sniff.ui']),
                                 ('share/dogtail/icons', sniff_icons() ),
                                 ('share/applications', ['sniff/sniff.desktop']),

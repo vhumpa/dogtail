@@ -24,46 +24,61 @@ from utils import doDelay
 from logging import debugLogger as logger
 from pyatspi import Registry as registry
 from pyatspi import (KEY_SYM, KEY_PRESS, KEY_PRESSRELEASE, KEY_RELEASE)
+from exceptions import ValueError
 
 def doTypingDelay():
     doDelay(config.typingDelay)
 
-def click (x, y, button = 1):
+def checkCoordinates(x, y):
+    if x < 0 or y < 0:
+        raise ValueError("Attempting to generate a mouse event at negative coordinates: (%s,%s)" % (x,y))
+
+def click (x, y, button = 1, check = True):
     """
     Synthesize a mouse button click at (x,y)
     """
+    if check:
+        checkCoordinates(x, y)
     logger.log("Mouse button %s click at (%s,%s)"%(button,x,y))
     registry.generateMouseEvent(x, y, 'b%sc' % button)
     doDelay(config.actionDelay)
 
-def doubleClick (x, y, button = 1):
+def doubleClick (x, y, button = 1, check = True):
     """
     Synthesize a mouse button double-click at (x,y)
     """
+    if check:
+        checkCoordinates(x, y)
     logger.log("Mouse button %s doubleclick at (%s,%s)"%(button,x,y))
     registry.generateMouseEvent(x,y, 'b%sd' % button)
     doDelay()
 
-def press (x, y, button = 1):
+def press (x, y, button = 1, check = True):
     """
     Synthesize a mouse button press at (x,y)
     """
+    if check:
+        checkCoordinates(x, y)
     logger.log("Mouse button %s press at (%s,%s)"%(button,x,y))
     registry.generateMouseEvent(x,y, 'b%sp' % button)
     doDelay()
 
-def release (x, y, button = 1):
+def release (x, y, button = 1, check = True):
     """
     Synthesize a mouse button release at (x,y)
     """
+    if check:
+        checkCoordinates(x, y)
     logger.log("Mouse button %s release at (%s,%s)"%(button,x,y))
     registry.generateMouseEvent(x,y, 'b%sr' % button)
     doDelay()
 
-def absoluteMotion (x, y, mouseDelay=None):
+def absoluteMotion (x, y, mouseDelay=None, check = True):
     """
     Synthesize mouse absolute motion to (x,y)
     """
+    if check:
+        checkCoordinates(x, y)
     logger.log("Mouse absolute motion to (%s,%s)"%(x,y))
     registry.generateMouseEvent(x,y, 'abs')
     if mouseDelay:
@@ -79,21 +94,21 @@ def relativeMotion (x, y, mouseDelay=None):
     else:
         doDelay()
 
-def drag(fromXY, toXY, button = 1):
+def drag(fromXY, toXY, button = 1, check = True):
     """
     Synthesize a mouse press, drag, and release on the screen.
     """
     logger.log("Mouse button %s drag from %s to %s"%(button, fromXY, toXY))
 
     (x,y) = fromXY
-    press (x, y, button)
+    press (x, y, button, check)
     #doDelay()
 
     (x,y) = toXY
-    absoluteMotion(x,y)
+    absoluteMotion(x,y,check=check)
     doDelay()
 
-    release (x, y, button)
+    release (x, y, button, check)
     doDelay()
 
 def typeText(string):

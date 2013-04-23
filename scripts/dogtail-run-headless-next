@@ -209,7 +209,13 @@ def main():
         dm.setup()
         dm.start(session_binary.split('/')[-1])
 
-    os.environ = getSessionEnvironment(session_binary)
+    try:
+        os.environ = getSessionEnvironment(session_binary)
+    except :
+        print('dogtail-run-headless-next: Could not get the environment from %s process' % session_binary)
+        dm.stop()
+        dm.setup(restore=True)
+        sys.exit(1)
 
     if dm_name == 'gdm':
         dm.setA11y(True)

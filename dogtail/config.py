@@ -10,7 +10,7 @@ import locale
 
 def _userTmpDir(baseName):
     # i.e. /tmp/dogtail-foo
-    return '-'.join(('/'.join(('/tmp', baseName)), os.getlogin()))
+    return '-'.join(('/'.join(('/tmp', baseName)), os.environ['USER']))
 
 class _Config(object):
     """

@@ -1179,13 +1179,14 @@ del children
 import os
 #sniff also imports from tree and we don't want to run this code from sniff itself
 if not os.path.exists('/tmp/sniff_running.lock'):
-    # tell sniff not to use auto-refresh while script using this module is running
-    sniff_lock = Lock(lockname='sniff_refresh.lock',randomize=False)
-    try:
-        sniff_lock.lock()
-    except OSError:
-        pass # lock was already present from other script instance or leftover from killed instance
-    # lock should unlock automatically on script exit.
+    if not os.path.exists('/tmp/sniff_refresh.lock'): # may have already been locked by dogtail.procedural
+        # tell sniff not to use auto-refresh while script using this module is running
+        sniff_lock = Lock(lockname='sniff_refresh.lock',randomize=False)
+        try:
+            sniff_lock.lock()
+        except OSError:
+            pass # lock was already present from other script instance or leftover from killed instance
+        # lock should unlock automatically on script exit.
 
 # Convenient place to set some debug variables:
 #config.debugSearching = True

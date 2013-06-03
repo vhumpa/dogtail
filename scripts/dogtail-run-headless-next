@@ -22,10 +22,6 @@ and less buggy compared to headless itself taking care of everything.
 
 Please take a look at --help for usage info.
 
-Limitations
---
-Currently limited only to gnome-session, GDM and systemd (will extend soon).
-
 """
 
 drop_overview = '''from dogtail.utils import absoluteMotion, keyPress

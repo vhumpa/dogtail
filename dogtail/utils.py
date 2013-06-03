@@ -15,6 +15,7 @@ import sys
 import subprocess
 import re
 import cairo
+import predicate
 from gi.repository import Gtk
 from gi.repository import GObject
 from config import config
@@ -293,3 +294,67 @@ Note that you will have to log out for the change to fully take effect.
        bailBecauseA11yIsDisabled()
     dialog.destroy()
 
+class GnomeShell(object):
+    """
+    Utility class to help working with certain atributes of gnome-shell.
+    Currently that means handling the Application menu available for apps
+    on the top gnome-shell panel. Searching for the menu and its items is
+    somewhat tricky due to fuzzy a11y tree of gnome-shell, mainly since the
+    actual menu is not present as child to the menu-spawning button. Also,
+    the menus get constructed/destroyed on the fly with application focus
+    changes. Thus current application name as displayed plus a reference 
+    known menu item (with 'Quit' as default) are required by these methods.
+    """
+
+    def __init__(self, classic_mode=False):
+        from tree import root
+        self.shell = root.application('gnome-shell')
+
+    def getApplicationMenuList(self, search_by_item='Quit'):
+        """
+        Returns list of all menu item nodes. Searches for the menu by a reference item.
+        Provide a different item name, if the 'Quit' is not present - but beware picking one
+        present elsewhere, like 'Lock' or 'Power Off' present under the user menu.
+        """
+        matches = self.shell.findChildren(predicate.GenericPredicate(name=search_by_item, roleName='label'))
+        for match in matches:
+            ancestor = match.parent.parent.parent
+            if ancestor.roleName == 'panel':
+                return ancestor.findChildren(predicate.GenericPredicate(roleName='label'))
+        from tree import SearchError
+        raise SearchError("Could not find the Application menu based on '%s' item. Please provide an existing reference item" \
+                           % search_by_item)
+
+    def getApplicationMenuButton(self, app_name):
+        """
+        Returns the application menu 'button' node as present on the gnome-shell top panel.
+        """
+        try:
+            return self.shell[0][0][3].child(app_name, roleName='label')
+        except:
+            from tree import SearchError
+            raise SearchError("Application menu button of %s could not be found within gnome-shell!" % app_name)
+
+    def getApplicationMenuItem(self, item, search_by_item='Quit'):
+        """
+        Returns a particilar menu item node. Uses a different 'Quit' or custom item name for reference, but also
+        attempts to use the given item if the general reference fails.
+        """
+        try:
+            menu_items = self.getApplicationMenuList(search_by_item)
+        except:
+            menu_items = self.getApplicationMenuList(item)
+        for node in menu_items:
+            if node.name == item:
+                return node
+        raise Exception('Could not find the item, did application focus change?')
+
+    def clickApplicationMenuItem(self, app_name, item, search_by_item='Quit'):
+        """
+        Executes the given menu item through opening the menu first followed
+        by a click at the particular item. The menu search reference 'Quit'
+        may be customized. Also attempts to use the given item for reference
+        if search fails with the default/custom one.
+        """
+        self.getApplicationMenuButton(app_name).click()
+        self.getApplicationMenuItem(item,search_by_item).click()

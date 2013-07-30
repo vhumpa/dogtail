@@ -248,7 +248,9 @@ def bailBecauseA11yIsDisabled():
         if file("/proc/%s/cmdline" % os.getpid()).read().find('epydoc') != -1:
             return
     except: pass
-    logger.log("Dogtail requires that Assistive Technology support be enabled. Aborting...")
+    logger.log("Dogtail requires that Assistive Technology support be enabled." \
+        "\nYou can enable accessibility with sniff or by running:\n" \
+        "'gsettings set org.gnome.desktop.interface toolkit-accessibility true'\nAborting...")
     sys.exit(1)
 
 def enableA11y(enable=True):

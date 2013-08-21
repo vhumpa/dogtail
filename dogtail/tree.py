@@ -519,6 +519,11 @@ class Node:
         """Is the Accessible a checked checkbox?"""
         return self.getState().contains(pyatspi.STATE_CHECKED)
 
+    @property
+    def isChecked(self):
+        """Is the Accessible a checked checkbox? Compatibility property, same as Node.checked."""
+        return self.checked
+
     ##
     # Selection
     ##
@@ -553,10 +558,15 @@ class Node:
 
     @property
     def isSelected(self):
-        """Is the Accessible selected?"""
+        """Is the Accessible selected? Compatibility property, same as Node.selected."""
         try: parent = self.parent
         except AttributeError: raise NotImplementedError
         return parent.querySelection().isChildSelected(self.indexInParent)
+
+    @property
+    def selected(self):
+        """Is the Accessible selected?"""
+        return self.isSelected
 
     @property
     def selectedChildren(self):

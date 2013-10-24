@@ -45,7 +45,7 @@ def makeCamel(string):
     return result
 
 
-class Predicate:
+class Predicate(object):
 
     """Abstract base class representing a predicate function on nodes.
 

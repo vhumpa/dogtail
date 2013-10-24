@@ -4,7 +4,7 @@ Author: Dave Malcolm <dmalcolm@redhat.com>"""
 __author__ = 'Dave Malcolm <dmalcolm@redhat.com>'
 
 
-class Version:
+class Version(object):
 
     """
     Class representing a version of a software package.

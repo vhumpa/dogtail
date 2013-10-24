@@ -37,7 +37,7 @@ def focusFailed(pred):
 ENOARGS = "At least one argument is needed"
 
 
-class FocusBase:
+class FocusBase(object):
 
     """
     The base for every class in the module. Does nothing special, really.

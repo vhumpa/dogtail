@@ -18,7 +18,7 @@ import codecs
 # Timestamp class for file logs
 
 
-class TimeStamp:
+class TimeStamp(object):
 
     """
     Generates timestamps tempfiles and log entries
@@ -86,7 +86,7 @@ class TimeStamp:
         return self.now
 
 
-class Logger:
+class Logger(object):
 
     """
     Writes entries to standard out.

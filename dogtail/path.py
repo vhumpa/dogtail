@@ -5,7 +5,7 @@ Author: David Malcolm <dmalcolm@redhat.com>
 __author__ = """David Malcolm <dmalcolm@redhat.com>"""
 
 
-class SearchPath:
+class SearchPath(object):
 
     """
     Class used by the recording framework (and for more verbose script

@@ -39,7 +39,7 @@ whatever translation databases it wants.
 translationDbs = []
 
 
-class TranslationDb:
+class TranslationDb(object):
 
     """
     Abstract base class representing a database of translations
@@ -122,7 +122,7 @@ def translate(srcString):
     return results.keys()
 
 
-class TranslatableString:
+class TranslatableString(object):
 
     """
     Class representing a string that we want to match strings against, handling

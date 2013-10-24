@@ -34,7 +34,7 @@ global packageDb
 global distro
 
 
-class PackageDb:
+class PackageDb(object):
 
     """
     Class to abstract the details of whatever software package database is in
@@ -261,7 +261,7 @@ class JhBuildPackageDb(PackageDb):  # pragma: no cover
         return result.keys()
 
 
-class Distro:
+class Distro(object):
 
     """
     Class representing a distribution.

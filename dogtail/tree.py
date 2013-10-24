@@ -128,7 +128,7 @@ class ActionNotSupported(Exception):
         return self.message % (self.actionName, self.node.getLogString())
 
 
-class Action:
+class Action(object):
 
     """
     Class representing an action that can be performed on a specific node
@@ -184,7 +184,7 @@ class Action:
         return result
 
 
-class Node:
+class Node(object):
 
     """
     A node in the tree of UI elements. This class is mixed in with
@@ -1056,7 +1056,7 @@ class Node:
             return True
 
 
-class LinkAnchor:
+class LinkAnchor(object):
 
     """
     Class storing info about an anchor within an Accessibility.Hyperlink, which

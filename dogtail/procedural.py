@@ -54,7 +54,7 @@ class FocusBase(object):
     def __setattr__(self, name, value):
         # Fold all the Node's AT-SPI properties into the Focus object.
         if name == 'node':
-            self.__class__.__dict__[name] = value
+            setattr(self.__class__, name, value)
         else:
             try:
                 setattr(self.node, name, value)

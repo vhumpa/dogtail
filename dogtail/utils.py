@@ -13,18 +13,24 @@ David Malcolm <dmalcolm@redhat.com>
 import os
 import sys
 import subprocess
-import re
 import cairo
 import predicate
+import errno
+
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('Gdk', '3.0')
+
 from gi.repository import Gtk
 from gi.repository import GObject
 from config import config
 from time import sleep
 from logging import debugLogger as logger
 from logging import TimeStamp
-from errors import DependencyNotFoundError
+from __builtin__ import file
 
-def screenshot(file = 'screenshot.png', timeStamp = True):
+
+def screenshot(file='screenshot.png', timeStamp=True):
     """
     This function wraps the ImageMagick import command to take a screenshot.
 
@@ -35,7 +41,7 @@ def screenshot(file = 'screenshot.png', timeStamp = True):
     The timeStamp argument may be set to False to name the file foo.png.
     """
     if not isinstance(timeStamp, bool):
-        raise TypeError, "timeStampt must be True or False"
+        raise TypeError("timeStampt must be True or False")
     # config is supposed to create this for us. If it's not there, bail.
     assert os.path.isdir(config.scratchDir)
 
@@ -64,17 +70,19 @@ def screenshot(file = 'screenshot.png', timeStamp = True):
                               width=geometry[2],
                               height=geometry[3])
 
-    pixbuf = Gdk.pixbuf_get_from_window(rootWindow, 0, 0, \
+    pixbuf = Gdk.pixbuf_get_from_window(rootWindow, 0, 0,
                                         geometry[2], geometry[3])
     # GdkPixbuf.Pixbuf.save() needs 'jpeg' and not 'jpg'
-    if fileExt == 'jpg': fileExt = 'jpeg'
+    if fileExt == 'jpg':
+        fileExt = 'jpeg'
     try:
         pixbuf.savev(path, fileExt, [], [])
     except GObject.GError:
-        raise ValueError, "Failed to save screenshot in %s format" % fileExt
+        raise ValueError("Failed to save screenshot in %s format" % fileExt)
     assert os.path.exists(path)
     logger.log("Screenshot taken: " + path)
     return path
+
 
 def run(string, timeout=config.runTimeout, interval=config.runInterval, desktop=None, dumb=False, appName=''):
     """
@@ -82,17 +90,18 @@ def run(string, timeout=config.runTimeout, interval=config.runInterval, desktop=
     If dumb is omitted or is False, polls at interval seconds until the application is finished starting, or until timeout is reached.
     If dumb is True, returns when timeout is reached.
     """
-    if not desktop: from tree import root as desktop
+    if not desktop:
+        from tree import root as desktop
     args = string.split()
-    name = args[0]
     os.environ['GTK_MODULES'] = 'gail:atk-bridge'
-    pid = subprocess.Popen(args, env = os.environ).pid
+    pid = subprocess.Popen(args, env=os.environ).pid
 
     if not appName:
-        appName=args[0]
+        appName = args[0]
 
     if dumb:
-        # We're starting a non-AT-SPI-aware application. Disable startup detection.
+        # We're starting a non-AT-SPI-aware application. Disable startup
+        # detection.
         doDelay(timeout)
     else:
         # Startup detection code
@@ -109,9 +118,11 @@ def run(string, timeout=config.runTimeout, interval=config.runInterval, desktop=
                                 focus.application.node = child
                                 doDelay(interval)
                                 return pid
-            except AttributeError: pass
+            except AttributeError:
+                pass
             doDelay(interval)
     return pid
+
 
 def doDelay(delay=None):
     """
@@ -123,6 +134,7 @@ def doDelay(delay=None):
     if config.debugSleep:
         logger.log("sleeping for %f" % delay)
     sleep(delay)
+
 
 class Highlight (Gtk.Window):
 
@@ -138,7 +150,7 @@ class Highlight (Gtk.Window):
         self.set_app_paintable(True)
         self.connect("draw", self.area_draw)
         self.show_all()
-        self.move(x,y)
+        self.move(x, y)
 
     def area_draw(self, widget, cr):
         cr.set_source_rgba(.0, .0, .0, 0.0)
@@ -150,14 +162,16 @@ class Highlight (Gtk.Window):
         cr.rectangle(0, 0, self.get_size()[0], self.get_size()[1])
         cr.stroke()
 
+
 class Blinker(object):
     INTERVAL_MS = 1000
     main_loop = GObject.MainLoop()
+
     def __init__(self, x, y, w, h):
-        from gi.repository import Gdk
         self.highlight_window = Highlight(x, y, w, h)
         if self.highlight_window.screen.is_composited() is not False:
-            self.timeout_handler_id = GObject.timeout_add (Blinker.INTERVAL_MS, self.destroyHighlight)
+            self.timeout_handler_id = GObject.timeout_add(
+                Blinker.INTERVAL_MS, self.destroyHighlight)
             self.main_loop.run()
         else:
             self.highlight_window.destroy()
@@ -166,8 +180,10 @@ class Blinker(object):
         self.highlight_window.destroy()
         self.main_loop.quit()
         return False
-        
+
+
 class Lock(object):
+
     """
     A mutex implementation that uses atomicity of the mkdir operation in UNIX-like
     systems. This can be used by scripts to provide for mutual exlusion, either in single
@@ -175,6 +191,7 @@ class Lock(object):
     multiple running scripts. You can choose to make randomized single-script wise locks
     or a more general locks if you do not choose to randomize the lockdir name
     """
+
     def __init__(self, location='/tmp', lockname='dogtail_lockdir_', randomize=True):
         """
         You can change the default lockdir location or name. Setting randomize to
@@ -182,20 +199,20 @@ class Lock(object):
         """
         self.lockdir = os.path.join(os.path.normpath(location), lockname)
         if randomize:
-            self.lockdir = "%s%s" % (self.lockdir,self.__getPostfix())
+            self.lockdir = "%s%s" % (self.lockdir, self.__getPostfix())
 
     def lock(self):
         """
         Creates a lockdir based on the settings on Lock() instance creation.
         Raises OSError exception of the lock is already present. Should be
-        atomic on POSIX compliant systems. 
+        atomic on POSIX compliant systems.
         """
         locked_msg = 'Dogtail lock: Already locked with the same lock'
         if not os.path.exists(self.lockdir):
             try:
                 os.mkdir(self.lockdir)
                 return self.lockdir
-            except OSError, e:
+            except OSError as e:
                 if e.errno == errno.EEXIST and os.path.isdir(self.lockdir):
                     raise OSError(locked_msg)
         else:
@@ -206,11 +223,11 @@ class Lock(object):
         Removes a lock. Will raise OSError exception if the lock was not present.
         Should be atomic on POSIX compliant systems.
         """
-        import os #have to import here for situations when executed from __del__
+        import os  # have to import here for situations when executed from __del__
         if os.path.exists(self.lockdir):
             try:
                 os.rmdir(self.lockdir)
-            except OSError, e:
+            except OSError as e:
                 if e.erron == errno.EEXIST:
                     raise OSError('Dogtail unlock: lockdir removed elsewhere!')
         else:
@@ -226,9 +243,10 @@ class Lock(object):
         import random
         import string
         return ''.join(random.choice(string.letters + string.digits) for x in range(5))
-        
+
 
 a11yDConfKey = 'org.gnome.desktop.interface'
+
 
 def isA11yEnabled():
     """
@@ -237,21 +255,26 @@ def isA11yEnabled():
     from gi.repository.Gio import Settings
     InterfaceSettings = Settings(a11yDConfKey)
     dconfEnabled = InterfaceSettings.get_boolean('toolkit-accessibility')
-    if os.environ.get('GTK_MODULES','').find('gail:atk-bridge') == -1:
+    if os.environ.get('GTK_MODULES', '').find('gail:atk-bridge') == -1:
         envEnabled = False
-    else: envEnabled = True
+    else:
+        envEnabled = True
     return (dconfEnabled or envEnabled)
 
+
 def bailBecauseA11yIsDisabled():
-    if sys.argv[0].endswith("pydoc"): return
+    if sys.argv[0].endswith("pydoc"):
+        return
     try:
         if file("/proc/%s/cmdline" % os.getpid()).read().find('epydoc') != -1:
             return
-    except: pass
-    logger.log("Dogtail requires that Assistive Technology support be enabled." \
-        "\nYou can enable accessibility with sniff or by running:\n" \
-        "'gsettings set org.gnome.desktop.interface toolkit-accessibility true'\nAborting...")
+    except:
+        pass
+    logger.log("Dogtail requires that Assistive Technology support be enabled."
+               "\nYou can enable accessibility with sniff or by running:\n"
+               "'gsettings set org.gnome.desktop.interface toolkit-accessibility true'\nAborting...")
     sys.exit(1)
+
 
 def enableA11y(enable=True):
     """
@@ -259,25 +282,29 @@ def enableA11y(enable=True):
     """
     from gi.repository.Gio import Settings
     InterfaceSettings = Settings(a11yDConfKey)
-    dconfEnabled = InterfaceSettings.set_boolean('toolkit-accessibility', enable)
+    InterfaceSettings.set_boolean('toolkit-accessibility', enable)
+
 
 def checkForA11y():
     """
     Checks if accessibility is enabled, and halts execution if it is not.
     """
-    if not isA11yEnabled(): bailBecauseA11yIsDisabled()
+    if not isA11yEnabled():
+        bailBecauseA11yIsDisabled()
+
 
 def checkForA11yInteractively():
     """
     Checks if accessibility is enabled, and presents a dialog prompting the
     user if it should be enabled if it is not already, then halts execution.
     """
-    if isA11yEnabled(): return
+    if isA11yEnabled():
+        return
     from gi.repository import Gtk
     dialog = Gtk.Dialog('Enable Assistive Technology Support?',
-                     None,
-                     Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
-                     (Gtk.STOCK_QUIT, Gtk.ResponseType.CLOSE,
+                        None,
+                        Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                        (Gtk.STOCK_QUIT, Gtk.ResponseType.CLOSE,
                          "_Enable", Gtk.ResponseType.ACCEPT))
     question = """Dogtail requires that Assistive Technology Support be enabled for it to function. Would you like to enable Assistive Technology support now?
 
@@ -293,10 +320,12 @@ Note that you will have to log out for the change to fully take effect.
         logger.log("Enabling accessibility...")
         enableA11y()
     elif result == Gtk.ResponseType.CLOSE:
-       bailBecauseA11yIsDisabled()
+        bailBecauseA11yIsDisabled()
     dialog.destroy()
 
+
 class GnomeShell(object):
+
     """
     Utility class to help working with certain atributes of gnome-shell.
     Currently that means handling the Application menu available for apps
@@ -304,7 +333,7 @@ class GnomeShell(object):
     somewhat tricky due to fuzzy a11y tree of gnome-shell, mainly since the
     actual menu is not present as child to the menu-spawning button. Also,
     the menus get constructed/destroyed on the fly with application focus
-    changes. Thus current application name as displayed plus a reference 
+    changes. Thus current application name as displayed plus a reference
     known menu item (with 'Quit' as default) are required by these methods.
     """
 
@@ -318,14 +347,15 @@ class GnomeShell(object):
         Provide a different item name, if the 'Quit' is not present - but beware picking one
         present elsewhere, like 'Lock' or 'Power Off' present under the user menu.
         """
-        matches = self.shell.findChildren(predicate.GenericPredicate(name=search_by_item, roleName='label'))
+        matches = self.shell.findChildren(
+            predicate.GenericPredicate(name=search_by_item, roleName='label'))
         for match in matches:
             ancestor = match.parent.parent.parent
             if ancestor.roleName == 'panel':
                 return ancestor.findChildren(predicate.GenericPredicate(roleName='label'))
         from tree import SearchError
-        raise SearchError("Could not find the Application menu based on '%s' item. Please provide an existing reference item" \
-                           % search_by_item)
+        raise SearchError("Could not find the Application menu based on '%s' item. Please provide an existing reference item"
+                          % search_by_item)
 
     def getApplicationMenuButton(self, app_name):
         """
@@ -335,7 +365,8 @@ class GnomeShell(object):
             return self.shell[0][0][3].child(app_name, roleName='label')
         except:
             from tree import SearchError
-            raise SearchError("Application menu button of %s could not be found within gnome-shell!" % app_name)
+            raise SearchError(
+                "Application menu button of %s could not be found within gnome-shell!" % app_name)
 
     def getApplicationMenuItem(self, item, search_by_item='Quit'):
         """
@@ -349,7 +380,8 @@ class GnomeShell(object):
         for node in menu_items:
             if node.name == item:
                 return node
-        raise Exception('Could not find the item, did application focus change?')
+        raise Exception(
+            'Could not find the item, did application focus change?')
 
     def clickApplicationMenuItem(self, app_name, item, search_by_item='Quit'):
         """
@@ -359,4 +391,4 @@ class GnomeShell(object):
         if search fails with the default/custom one.
         """
         self.getApplicationMenuButton(app_name).click()
-        self.getApplicationMenuItem(item,search_by_item).click()
+        self.getApplicationMenuItem(item, search_by_item).click()

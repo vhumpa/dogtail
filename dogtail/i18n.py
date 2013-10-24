@@ -14,16 +14,19 @@ import re
 import gettext
 
 from logging import debugLogger as logger
+from __builtin__ import unicode
+
 
 def safeDecode(string):
     if not isinstance(string, unicode):
         try:
             string = string.decode('utf-8')
         except UnicodeDecodeError:
-            #logger.log(traceback.format_exc())
+            # logger.log(traceback.format_exc())
             #logger.log("The following string is invalid and caused the above error: '%s'" % string)
             string = string.decode('utf-8', 'replace')
     return string
+
 
 def safeEncode(string):
     pass
@@ -35,10 +38,13 @@ whatever translation databases it wants.
 """
 translationDbs = []
 
+
 class TranslationDb:
+
     """
     Abstract base class representing a database of translations
     """
+
     def getTranslationsOf(self, srcName):
         """
         Pure virtual method to look up the translation of a string.
@@ -52,11 +58,14 @@ class TranslationDb:
         """
         raise NotImplementedError
 
+
 class GettextTranslationDb(TranslationDb):
+
     """
     Implementation of TranslationDb which leverages gettext, using a single
     translation mo-file.
     """
+
     def __init__(self, moFile):
         self.__moFile = moFile
         self.__gnutranslations = gettext.GNUTranslations(open(moFile))
@@ -67,8 +76,8 @@ class GettextTranslationDb(TranslationDb):
         # Use a dict to get uniqueness:
         results = {}
         result = self.__gnutranslations.ugettext(srcName)
-        if result!=srcName:
-            results[result]=None
+        if result != srcName:
+            results[result] = None
 
         # Hack alert:
         #
@@ -84,13 +93,14 @@ class GettextTranslationDb(TranslationDb):
         # Ugly, but it works.
 
         for index in range(len(srcName)):
-            candidate = srcName[:index]+"_"+srcName[index:]
+            candidate = srcName[:index] + "_" + srcName[index:]
             result = self.__gnutranslations.ugettext(candidate)
-            if result!=candidate:
+            if result != candidate:
                 # Strip out the underscore, and add to the result:
-                results[result.replace('_','')]=True
+                results[result.replace('_', '')] = True
 
         return results.keys()
+
 
 def translate(srcString):
     """
@@ -103,15 +113,17 @@ def translate(srcString):
     for translationDb in translationDbs:
         for result in translationDb.getTranslationsOf(srcString):
             result = safeDecode(result)
-            results[result]=True
+            results[result] = True
 
     # No translations found:
-    if len(results)==0:
+    if len(results) == 0:
         if config.config.debugTranslation:
-            logger.log('Translation not found for "%s"'%srcString)
+            logger.log('Translation not found for "%s"' % srcString)
     return results.keys()
 
+
 class TranslatableString:
+
     """
     Class representing a string that we want to match strings against, handling
     translation for us, by looking it up once at construction time.
@@ -134,7 +146,7 @@ class TranslatableString:
         Compare the test string against either the translation of the original
         string (or simply the original string, if no translation was found).
         """
-        #print "comparing %s against %s"%(string, self)
+        # print "comparing %s against %s"%(string, self)
         def stringsMatch(inS, outS):
             """
             Compares a regular expression to a string
@@ -161,14 +173,15 @@ class TranslatableString:
         # the 'ts' variable keeps track of whether we're working with
         # translated strings. it's only used for debugging purposes.
         #ts = 0
-        #print string, str(self)
+        # print string, str(self)
         for translatedString in self.translatedStrings:
             #ts = ts + 1
             matched = stringsMatch(translatedString, string)
             if not matched:
                 matched = translatedString == string
-            if matched: return matched
-        #ts=0
+            if matched:
+                return matched
+        # ts=0
         return stringsMatch(self.untranslatedString, string)
 
     def __str__(self):
@@ -176,19 +189,19 @@ class TranslatableString:
         Provide a meaningful debug version of the string (and the translation in
         use)
         """
-        if len(self.translatedStrings)>0:
+        if len(self.translatedStrings) > 0:
             # build an output string, with commas in the correct places
             translations = ""
             for tString in self.translatedStrings:
                 translations += u'"%s", ' % safeDecode(tString)
-            result = u'"%s" (%s)' % (safeDecode(self.untranslatedString), translations)
+            result = u'"%s" (%s)' % (
+                safeDecode(self.untranslatedString), translations)
             return safeDecode(result)
         else:
             return '"%s"' % (self.untranslatedString)
 
 
-
-def isMoFile(filename, language = ''):
+def isMoFile(filename, language=''):
     """
     Does the given filename look like a gettext mo file?
 
@@ -196,22 +209,24 @@ def isMoFile(filename, language = ''):
     for example 'ja'?
     """
     if re.match('(.*)\\.mo$', filename):
-        if not language: return True
-        elif re.match('/usr/share/locale(.*)/%s(.*)/LC_MESSAGES/(.*)\\.mo$' % \
-                        language, filename):
+        if not language:
+            return True
+        elif re.match('/usr/share/locale(.*)/%s(.*)/LC_MESSAGES/(.*)\\.mo$' %
+                      language, filename):
             return True
         else:
             return False
     else:
         return False
 
+
 def loadAllTranslationsForLanguage(language):
     import distro
-    result = []
     for moFile in distro.packageDb.getMoFiles(language):
         translationDbs.append(GettextTranslationDb(moFile))
 
-def getMoFilesForPackage(packageName, language = '', getDependencies=True):
+
+def getMoFilesForPackage(packageName, language='', getDependencies=True):
     """
     Look up the named package and find all gettext mo files within it and its
     dependencies. It is possible to restrict the results to those of a certain
@@ -233,6 +248,7 @@ def getMoFilesForPackage(packageName, language = '', getDependencies=True):
 
     return result
 
+
 def loadTranslationsFromPackageMoFiles(packageName, getDependencies=True):
     """
     Helper function which appends all of the gettext translation mo-files used by
@@ -240,7 +256,8 @@ def loadTranslationsFromPackageMoFiles(packageName, getDependencies=True):
     """
     # Keep a list of mo-files that are already in use to avoid duplicates.
     moFiles = {}
-    def load(packageName, language = '', getDependencies = True):
+
+    def load(packageName, language='', getDependencies=True):
         for moFile in getMoFilesForPackage(packageName, language, getDependencies):
             # Searching the popt mo-files for translations makes gettext bail out,
             # so we ignore them here. This is
@@ -249,11 +266,12 @@ def loadTranslationsFromPackageMoFiles(packageName, getDependencies=True):
                 try:
                     translationDbs.append(GettextTranslationDb(moFile))
                     moFiles[moFile] = None
-                except (AttributeError, IndexError), inst:
+                except (AttributeError, IndexError):
                     if config.config.debugTranslation:
                         #import traceback
-                        #logger.log(traceback.format_exc())
-                        logger.log("Warning: Failed to load mo-file for translation: " + moFile)
+                        # logger.log(traceback.format_exc())
+                        logger.log(
+                            "Warning: Failed to load mo-file for translation: " + moFile)
 
     # Hack alert:
     #

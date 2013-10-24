@@ -32,10 +32,11 @@ from gi.repository import GObject
 
 builder = Gtk.Builder()
 
+
 class SniffApp(object):
     appName = 'Sniff'
-    appAuthors = ['Zack Cerza <zcerza@redhat.com>', \
-            'David Malcolm <dmalcolm@redhat.com']
+    appAuthors = ['Zack Cerza <zcerza@redhat.com>',
+                  'David Malcolm <dmalcolm@redhat.com']
 
     def __init__(self):
         self.builder = builder
@@ -47,16 +48,17 @@ class SniffApp(object):
             exec_root = sys.argv[0].split("/bin/")[0]
             if exec_root[0] is not '/':
                 exec_root = "/usr"
-            self.builder.add_from_file(exec_root + \
-                    '/share/dogtail/glade/sniff.ui')
+            self.builder.add_from_file(exec_root +
+                                       '/share/dogtail/glade/sniff.ui')
         self.app = self.builder.get_object(self.appName)
         try:
             self.app.set_icon_from_file('../icons/dogtail-head.svg')
         except Exception:
             import os
-            path = os.path.abspath (os.path.join(__file__, os.path.pardir, os.path.pardir))
-            self.app.set_icon_from_file( os.path.join( path, \
-                    'share/icons/hicolor/scalable/apps/dogtail-head.svg'))
+            path = os.path.abspath(
+                os.path.join(__file__, os.path.pardir, os.path.pardir))
+            self.app.set_icon_from_file(os.path.join(path,
+                                                     'share/icons/hicolor/scalable/apps/dogtail-head.svg'))
         self.setUpWidgets()
         self.connectSignals()
         self.app.show_all()
@@ -82,7 +84,8 @@ class SniffApp(object):
         self.collapse_all1.connect('activate', self.tree.expandAll, False)
         self.about1.connect('activate', self.showAbout, self)
         self.refreshMenuItem.connect('activate', self.tree.refresh)
-        self.autoRefreshMenuItem.connect('toggled', self.tree.toggleAutoRefresh)
+        self.autoRefreshMenuItem.connect(
+            'toggled', self.tree.toggleAutoRefresh)
         self.setRootMenuItem.connect('activate', self.tree.changeRoot, True)
         self.unsetRootMenuItem.connect('activate', self.tree.changeRoot, False)
 
@@ -104,7 +107,8 @@ class SniffApp(object):
         self.about.show_all()
 
     def hideAbout(self, window, response):
-        if response == Gtk.ResponseType.CANCEL: window.hide()
+        if response == Gtk.ResponseType.CANCEL:
+            window.hide()
 
     def quit(self, *args):
         Gtk.main_quit()
@@ -146,8 +150,8 @@ class SniffController(object):
     def setUpStateView(self):
         self.stateView.set_model(self.stateModel)
         cellRenderer = Gtk.CellRendererText()
-        col = Gtk.TreeViewColumn('Present States', cellRenderer, \
-                text=self.stateModel.stateColumn)
+        col = Gtk.TreeViewColumn('Present States', cellRenderer,
+                                 text=self.stateModel.stateColumn)
         col.set_sizing(Gtk.TreeViewColumnSizing.AUTOSIZE)
         self.stateView.insert_column(col, -1)
 
@@ -158,11 +162,11 @@ class SniffController(object):
 
         col = Gtk.TreeViewColumn()
         cellRenderer = Gtk.CellRendererPixbuf()
-        col.pack_start(cellRenderer, expand = False)
+        col.pack_start(cellRenderer, expand=False)
         col.add_attribute(cellRenderer, 'pixbuf', self.treeModel.pixbufColumn)
 
         cellRenderer = Gtk.CellRendererText()
-        col.pack_end(cellRenderer, expand = False)
+        col.pack_end(cellRenderer, expand=False)
         col.add_attribute(cellRenderer, 'text', self.treeModel.nameColumn)
 
         col.set_title('Name')
@@ -177,45 +181,54 @@ class SniffController(object):
         self.treeView.expand_all()
         #self.rowExpanded(self.treeView, self.treeModel.get_iter(path), path)
 
-    def changeRoot(self, menuItem, toSelected = True, *args):
-        if toSelected: node = self.getSelectedNode()
-        if toSelected and node: self.treeModel.changeRoot(node)
-        elif not toSelected: self.treeModel.reset()
-        else: return
-        self.refresh(refreshModel = False)
+    def changeRoot(self, menuItem, toSelected=True, *args):
+        if toSelected:
+            node = self.getSelectedNode()
+        if toSelected and node:
+            self.treeModel.changeRoot(node)
+        elif not toSelected:
+            self.treeModel.reset()
+        else:
+            return
+        self.refresh(refreshModel=False)
 
-    def refresh(self, menuItem = None, refreshModel = True, *args):
-        if refreshModel: self.treeModel.refresh()
+    def refresh(self, menuItem=None, refreshModel=True, *args):
+        if refreshModel:
+            self.treeModel.refresh()
         rootPath = self.treeModel.get_path(self.treeModel.get_iter_first())
         self.treeView.expand_all()
         self.treeView.expand_row(rootPath, False)
 
     def toggleAutoRefresh(self, *args):
         if self.autorefresh.get_active() is True:
-            pyatspi.Registry.registerEventListener(self.treeModel.nodeChanged, \
-                'object:children-changed')
-            pyatspi.Registry.registerEventListener(self.treeModel.nodeChanged, \
-                'object:property-change:accessible-name')
-            pyatspi.Registry.registerEventListener(self.treeModel.nodeChanged, \
-                'object:property-change:accessible-state')
-            pyatspi.Registry.registerEventListener(self.treeModel.nodeChanged, \
-                'object:state-changed')
+            pyatspi.Registry.registerEventListener(self.treeModel.nodeChanged,
+                                                   'object:children-changed')
+            pyatspi.Registry.registerEventListener(self.treeModel.nodeChanged,
+                                                   'object:property-change:accessible-name')
+            pyatspi.Registry.registerEventListener(self.treeModel.nodeChanged,
+                                                   'object:property-change:accessible-state')
+            pyatspi.Registry.registerEventListener(self.treeModel.nodeChanged,
+                                                   'object:state-changed')
             self.refresh()
         else:
-            pyatspi.Registry.deregisterEventListener(self.treeModel.nodeChanged, \
+            pyatspi.Registry.deregisterEventListener(
+                self.treeModel.nodeChanged,
                 'object:children-changed')
-            pyatspi.Registry.deregisterEventListener(self.treeModel.nodeChanged, \
+            pyatspi.Registry.deregisterEventListener(
+                self.treeModel.nodeChanged,
                 'object:property-change:accessible-name')
-            pyatspi.Registry.deregisterEventListener(self.treeModel.nodeChanged, \
+            pyatspi.Registry.deregisterEventListener(
+                self.treeModel.nodeChanged,
                 'object:property-change:accessible-state')
-            pyatspi.Registry.deregisterEventListener(self.treeModel.nodeChanged, \
+            pyatspi.Registry.deregisterEventListener(
+                self.treeModel.nodeChanged,
                 'object:state-changed')
 
     def connectSignals(self):
-        self.labelerButton.connect('clicked', self.showRelationTarget, \
-                'labeler')
-        self.labeleeButton.connect('clicked', self.showRelationTarget, \
-                'labelee')
+        self.labelerButton.connect('clicked', self.showRelationTarget,
+                                   'labeler')
+        self.labeleeButton.connect('clicked', self.showRelationTarget,
+                                   'labelee')
         self.treeView.connect('button-press-event', self.buttonPress)
         self.treeView.connect('key-press-event', self.keyPress)
         self.treeView.connect('row-expanded', self.rowExpanded, self.treeModel)
@@ -232,13 +245,17 @@ class SniffController(object):
 
     def getSelectedNode(self):
         (store, iter) = self.treeView.get_selection().get_selected()
-        if not iter: node = None
-        else: node = self.treeModel.getNode(iter)
+        if not iter:
+            node = None
+        else:
+            node = self.treeModel.getNode(iter)
         return node
 
     def expandAll(self, widget, *args):
-        if args[0] == True: self.treeView.expand_all()
-        elif args[0] == False: self.treeView.collapse_all()
+        if args[0] == True:
+            self.treeView.expand_all()
+        elif args[0] == False:
+            self.treeView.collapse_all()
 
     def rowExpanded(self, treeview, iter, path, *userParams):
         row = self.treeModel[path]
@@ -247,7 +264,8 @@ class SniffController(object):
             try:
                 childRow = childRows.next()
                 self.treeModel.populateChildren(childRow.iter)
-            except StopIteration: break
+            except StopIteration:
+                break
 
     def rowCollapsed(self, treeview, iter, path, *userParams):
         row = self.treeModel[path]
@@ -260,11 +278,14 @@ class SniffController(object):
                     while True:
                         grandChildRow = grandChildRows.next()
                         self.treeModel.remove(grandChildRow.iter)
-                except StopIteration: pass
-        except StopIteration: pass
+                except StopIteration:
+                    pass
+        except StopIteration:
+            pass
 
     def menuItemActivate(self, menuItem, *userParams):
-        if len(userParams) < 2: return
+        if len(userParams) < 2:
+            return
         method = userParams[0]
         arg = userParams[1]
         method(arg)
@@ -279,12 +300,15 @@ class SniffController(object):
         return False
 
     def buttonPress(self, widget, event, *userParams):
-        try: path, treeViewCol, relX, relY = \
-                        self.treeView.get_path_at_pos(int(event.x), \
-                        int(event.y))
-        except TypeError: return
+        try:
+            path, treeViewCol, relX, relY = \
+                self.treeView.get_path_at_pos(int(event.x),
+                                              int(event.y))
+        except TypeError:
+            return
         node = self.treeModel.getNode(self.treeModel.get_iter(path))
-        if node == None: return
+        if node == None:
+            return
 
         if event.button == 3:
             self.menu = Gtk.Menu()
@@ -292,36 +316,42 @@ class SniffController(object):
             if node.actions:
                 for action in node.actions.keys():
                     menuItem = Gtk.MenuItem(action.capitalize())
-                    menuItem.connect('activate', self.menuItemActivate, node.doActionNamed, action)
+                    menuItem.connect(
+                        'activate', self.menuItemActivate, node.doActionNamed, action)
                     menuItem.show()
                     self.menu.append(menuItem)
-            if not menuItem: return
+            if not menuItem:
+                return
             self.menu.show_all()
             self.menu.popup(None, None, None, None, event.button, event.time)
 
     def showRelationTarget(self, button, relation, *args):
         target = getattr(self.getSelectedNode(), relation)
-        if not target: return
-        try: target.blink()
+        if not target:
+            return
+        try:
+            target.blink()
         except:
             import traceback
             traceback.print_exc()
 
     def setUpBottomPane(self, node):
         """Generic code for setting up the table under the TreeView"""
-        if node == None: return
+        if node == None:
+            return
         self.nameTextLabel.set_text(node.name)
         self.roleNameTextLabel.set_text(node.roleName)
         self.descTextLabel.set_text(node.description)
         str = ''
-        if node.actions: str = ' '.join(node.actions.keys())
+        if node.actions:
+            str = ' '.join(node.actions.keys())
         self.actionsTextLabel.set_text(str)
 
         # Have we connected this signal yet?
         # If so, disconnect it before proceeding.
         if self.textTextViewBufferCallbackID != self.invalidBufferCallbackID:
-            self.textTextView.get_buffer().disconnect( \
-                    self.textTextViewBufferCallbackID)
+            self.textTextView.get_buffer().disconnect(
+                self.textTextViewBufferCallbackID)
             self.textTextViewBufferCallbackID = self.invalidBufferCallbackID
 
         if node.text is not None:
@@ -332,7 +362,7 @@ class SniffController(object):
                 # Remember the handler ID of this connection.
                 self.textTextView.set_sensitive(True)
                 self.textTextViewBufferCallbackID = \
-                        buffer.connect('changed', self.changeText, node)
+                    buffer.connect('changed', self.changeText, node)
             except NotImplementedError:
                 self.textTextView.set_sensitive(False)
         else:
@@ -342,7 +372,7 @@ class SniffController(object):
         if node.labeler and not node.labeler.dead:
             self.labelerButton.set_sensitive(True)
             self.labelerButton.show()
-        #elif node.labeler and node.labeler.dead:
+        # elif node.labeler and node.labeler.dead:
         #    print "labeler is dead", node.labeler
         else:
             self.labelerButton.set_sensitive(False)
@@ -350,7 +380,7 @@ class SniffController(object):
         if node.labelee and not node.labelee.dead:
             self.labeleeButton.set_sensitive(True)
             self.labeleeButton.show()
-        #elif node.labelee and node.labelee.dead:
+        # elif node.labelee and node.labelee.dead:
         #    print "labelee is dead", node.labelee
         else:
             self.labeleeButton.set_sensitive(False)
@@ -359,9 +389,11 @@ class SniffController(object):
         self.stateModel.setNode(node)
 
     def changeText(self, textBuffer, node):
-        if node == None: return
-        node.text = textBuffer.get_text(textBuffer.get_start_iter(), \
-                        textBuffer.get_end_iter())
+        if node == None:
+            return
+        node.text = textBuffer.get_text(textBuffer.get_start_iter(),
+                                        textBuffer.get_end_iter())
+
 
 class SniffModel(Gtk.TreeStore):
     nodeColumn = 0
@@ -373,8 +405,8 @@ class SniffModel(Gtk.TreeStore):
     def __init__(self):
         self.builder = builder
         #self.autorefresh = self.builder.get_object('autorefresh')
-        Gtk.TreeStore.__init__(self, GObject.TYPE_PYOBJECT, \
-                GObject.TYPE_STRING, GdkPixbuf.Pixbuf)
+        Gtk.TreeStore.__init__(self, GObject.TYPE_PYOBJECT,
+                               GObject.TYPE_STRING, GdkPixbuf.Pixbuf)
         root = pyatspi.Registry.getDesktop(0)
         self.rootNode = self.initialRootNode = root
         self.appendAndPopulate(None, self.rootNode)
@@ -388,13 +420,16 @@ class SniffModel(Gtk.TreeStore):
                 if not row:
                     path = self.getPath(item)
                     return path is not None
-                elif row in self: return True
+                elif row in self:
+                    return True
             return False
         elif isinstance(item, Gtk.TreeIter):
             return self.iter_is_valid(item)
         elif isinstance(item, list) or isinstance(item, tuple):
-            try: iter = self.get_iter(item)
-            except ValueError: return False
+            try:
+                iter = self.get_iter(item)
+            except ValueError:
+                return False
             return iter in self
         elif isinstance(item, Gtk.TreeRowReference):
             return item.valid() and item.get_path() in self
@@ -415,14 +450,17 @@ class SniffModel(Gtk.TreeStore):
         self.appendAndPopulate(None, self.rootNode)
 
     def append(self, parentIter, node):
-        if node: self.cache[node] = None
+        if node:
+            self.cache[node] = None
         pb = self.getPixbufForNode(node)
         return Gtk.TreeStore.append(self, parentIter, (node, node.name, pb))
 
     def remove(self, iter):
         node = self.getNode(iter)
-        try: del self.cache[node]
-        finally: return Gtk.TreeStore.remove(self, iter)
+        try:
+            del self.cache[node]
+        finally:
+            return Gtk.TreeStore.remove(self, iter)
 
     def populateChildren(self, iter):
         if not iter in self:
@@ -430,7 +468,8 @@ class SniffModel(Gtk.TreeStore):
         result = True
         node = self.getNode(iter)
         for child in node.children:
-            if child in self: continue
+            if child in self:
+                continue
             result = result and self.append(iter, child)
         return result
 
@@ -439,20 +478,26 @@ class SniffModel(Gtk.TreeStore):
         return self.populateChildren(childIter)
 
     def getNode(self, iter):
-        if not iter in self: return None
+        if not iter in self:
+            return None
         return self.get_value(iter, self.nodeColumn)
 
     def getPath(self, node):
-        if not node: raise ValueError
-        try: indexInParent = node.indexInParent
-        except LookupError: return None
+        if not node:
+            raise ValueError
+        try:
+            indexInParent = node.indexInParent
+        except LookupError:
+            return None
         root = pyatspi.Registry.getDesktop(0)
         row = self.cache.get(node, None)
         path = []
         needParent = True
         if row:
-            if row in self: path = row.get_path()
-            else: del self.cache[node]
+            if row in self:
+                path = row.get_path()
+            else:
+                del self.cache[node]
         elif node == self.rootNode:
             indexInParent = 0
             needParent = False
@@ -461,38 +506,45 @@ class SniffModel(Gtk.TreeStore):
             path = [0]
             indexInParent = list(root.children).index(node)
             needParent = False
-        elif not node.parent: return None
+        elif not node.parent:
+            return None
         elif (0 <= indexInParent <= (len(node.parent) - 1)) and \
                 node.parent[indexInParent] != node:
             return None
             siblings = node.parent.children
             sibIndex = siblings.index(node)
             try:
-                if siblings[sibIndex] != node: return None
-                else: indexInParent = sibIndex
-            except ValueError: return None
+                if siblings[sibIndex] != node:
+                    return None
+                else:
+                    indexInParent = sibIndex
+            except ValueError:
+                return None
         if type(path) == list:
             if needParent:
                 parentPath = self.getPath(node.parent)
-                if parentPath is None: return None
-                else: path = list(parentPath)
+                if parentPath is None:
+                    return None
+                else:
+                    path = list(parentPath)
             path.append(indexInParent)
 
         path = tuple(path)
         try:
             nodeByPath = self.getNode(self.get_iter(path))
             if node != nodeByPath:
-                #print "%s is not %s!" % (node, nodeByPath)
+                # print "%s is not %s!" % (node, nodeByPath)
                 return None
         except ValueError:
-            #print "I smell a bug in %s..." % node.getApplication()
+            # print "I smell a bug in %s..." % node.getApplication()
             return None
 
         #self.cache[node] = Gtk.TreeRowReference(self, path)
         return path
 
     def processEvents(self):
-        if not len(self.eventQueue): return
+        if not len(self.eventQueue):
+            return
         queueCopy = self.eventQueue[:]
         for event in queueCopy:
             self.processChangedNode(event)
@@ -500,17 +552,20 @@ class SniffModel(Gtk.TreeStore):
         return False
 
     def nodeChanged(self, event):
-        #if self.autorefresh.get_active() is False: return
+        # if self.autorefresh.get_active() is False: return
         node = event.source
-        if not node or not node in self: return
+        if not node or not node in self:
+            return
         app = event.host_application
-        if app and app.name == 'sniff': return
+        if app and app.name == 'sniff':
+            return
         self.eventQueue.append(event)
         GObject.idle_add(self.processEvents)
 
     def processChangedNode(self, event):
         node = event.source
-        if not node or not node in self: return
+        if not node or not node in self:
+            return
         path = self.getPath(node)
         try:
             iter = self.get_iter(path)
@@ -533,8 +588,8 @@ class SniffModel(Gtk.TreeStore):
                         else:
                             # If it has no children now, give it a sec
                             # to come up with some.
-                            GObject.timeout_add(1000, \
-                                    self.__addNodeCB, iter, child)
+                            GObject.timeout_add(1000,
+                                                self.__addNodeCB, iter, child)
             elif event.type.minor == 'remove':
                 self.__removeNodeCB(iter, node, path)
 
@@ -546,10 +601,12 @@ class SniffModel(Gtk.TreeStore):
         childRow = self.iter_children(iter)
         while childRow is not None:
             node = self.getNode(childRow)
-            if node is None: break
+            if node is None:
+                break
             if node and self.getNode(childRow) not in parent:
                 self.remove(childRow)
-            else: childRow = self.iter_next(childRow)
+            else:
+                childRow = self.iter_next(childRow)
 
     def __populateCB(self, iter):
         self.populateChildren(iter)
@@ -563,27 +620,28 @@ class SniffModel(Gtk.TreeStore):
                 # wnckApp = Application(node).getWnckApplication()
                 # if wnckApp
                 try:
-                    return theme.load_icon(node.name, 24, \
-                            Gtk.IconLookupFlags.USE_BUILTIN)
+                    return theme.load_icon(node.name, 24,
+                                           Gtk.IconLookupFlags.USE_BUILTIN)
                 except GObject.GError:
                     try:
-                        return theme.load_icon(node.name.lower(), 24, \
-                            Gtk.IconLookupFlags.USE_BUILTIN)
+                        return theme.load_icon(node.name.lower(), 24,
+                                               Gtk.IconLookupFlags.USE_BUILTIN)
                     except GObject.GError:
                         return None
             elif node.parent:
                 return iconForRole[node.role]
             else:
-                return theme.load_icon("user-desktop", 24, \
-                        Gtk.IconLookupFlags.USE_BUILTIN)
+                return theme.load_icon("user-desktop", 24,
+                                       Gtk.IconLookupFlags.USE_BUILTIN)
         except Exception:
-            return theme.load_icon("dialog-error", 24, \
-                    Gtk.IconLookupFlags.USE_BUILTIN)
+            return theme.load_icon("dialog-error", 24,
+                                   Gtk.IconLookupFlags.USE_BUILTIN)
+
 
 class StateModel(Gtk.ListStore):
     stateColumn = 0
-    statesSupported = ['checked', 'focusable', 'focused', 'sensitive', \
-            'showing']
+    statesSupported = ['checked', 'focusable', 'focused', 'sensitive',
+                       'showing']
 
     def __init__(self):
         Gtk.ListStore.__init__(self, GObject.TYPE_STRING)
@@ -600,7 +658,8 @@ def loadIcon(iconName):
         pixbuf = GdkPixbuf.Pixbuf.new_from_file('icons/' + iconName)
     except GObject.GError:
         import os
-        path = os.path.abspath (os.path.join(__file__, os.path.pardir, os.path.pardir))
+        path = os.path.abspath(
+            os.path.join(__file__, os.path.pardir, os.path.pardir))
         iconName = os.path.join(path, 'share/dogtail/icons/', iconName)
         pixbuf = GdkPixbuf.Pixbuf.new_from_file(iconName)
     return pixbuf
@@ -630,98 +689,99 @@ vscrollbar_xpm = loadIcon("vscrollbar.xpm")
 vseparator_xpm = loadIcon("vseparator.xpm")
 window_xpm = loadIcon("window.xpm")
 
-iconForRole = { \
-    pyatspi.ROLE_INVALID : None, \
+iconForRole = {
+    pyatspi.ROLE_INVALID: None,
     # pyatspi doesn't have the following... not even sure if it exists
     # anywhere.
-    #atspi.SPI_ROLE_ACCEL_LABEL : label_xpm, \
-    pyatspi.ROLE_ALERT : None, \
-    pyatspi.ROLE_ANIMATION : None, \
-    pyatspi.ROLE_ARROW : None, \
-    pyatspi.ROLE_CALENDAR : None, \
-    pyatspi.ROLE_CANVAS : None, \
-    pyatspi.ROLE_CHECK_BOX : checkbutton_xpm, \
-    pyatspi.ROLE_CHECK_MENU_ITEM : checkmenuitem_xpm, \
-    pyatspi.ROLE_COLOR_CHOOSER : colorselection_xpm, \
-    pyatspi.ROLE_COLUMN_HEADER : None, \
-    pyatspi.ROLE_COMBO_BOX : combo_xpm, \
-    pyatspi.ROLE_DATE_EDITOR : None, \
-    pyatspi.ROLE_DESKTOP_ICON : None, \
-    pyatspi.ROLE_DESKTOP_FRAME : None, \
-    pyatspi.ROLE_DIAL : None, \
-    pyatspi.ROLE_DIALOG : dialog_xpm, \
-    pyatspi.ROLE_DIRECTORY_PANE : None, \
-    pyatspi.ROLE_DRAWING_AREA : None, \
-    pyatspi.ROLE_FILE_CHOOSER : None, \
-    pyatspi.ROLE_FILLER : None, \
-    pyatspi.ROLE_FONT_CHOOSER : None, \
-    pyatspi.ROLE_FRAME : window_xpm, \
-    pyatspi.ROLE_GLASS_PANE : None, \
-    pyatspi.ROLE_HTML_CONTAINER : None, \
-    pyatspi.ROLE_ICON : image_xpm, \
-    pyatspi.ROLE_IMAGE : image_xpm, \
-    pyatspi.ROLE_INTERNAL_FRAME : None, \
-    pyatspi.ROLE_LABEL : label_xpm, \
-    pyatspi.ROLE_LAYERED_PANE : viewport_xpm, \
-    pyatspi.ROLE_LIST : None, \
-    pyatspi.ROLE_LIST_ITEM : None, \
-    pyatspi.ROLE_MENU : menuitem_xpm, \
-    pyatspi.ROLE_MENU_BAR : menubar_xpm, \
-    pyatspi.ROLE_MENU_ITEM : menuitem_xpm, \
-    pyatspi.ROLE_OPTION_PANE : None, \
-    pyatspi.ROLE_PAGE_TAB : notebook_xpm, \
-    pyatspi.ROLE_PAGE_TAB_LIST : notebook_xpm, \
-    pyatspi.ROLE_PANEL : viewport_xpm, \
-    pyatspi.ROLE_PASSWORD_TEXT : None, \
-    pyatspi.ROLE_POPUP_MENU : None, \
-    pyatspi.ROLE_PROGRESS_BAR : None, \
-    pyatspi.ROLE_PUSH_BUTTON : button_xpm, \
-    pyatspi.ROLE_RADIO_BUTTON : None, \
-    pyatspi.ROLE_RADIO_MENU_ITEM : None, \
-    pyatspi.ROLE_ROOT_PANE : viewport_xpm, \
-    pyatspi.ROLE_ROW_HEADER : None, \
-    pyatspi.ROLE_SCROLL_BAR : vscrollbar_xpm, \
-    pyatspi.ROLE_SCROLL_PANE : scrolledwindow_xpm, \
-    pyatspi.ROLE_SEPARATOR : vseparator_xpm, \
-    pyatspi.ROLE_SLIDER : None, \
-    pyatspi.ROLE_SPIN_BUTTON : spinbutton_xpm, \
-    pyatspi.ROLE_SPLIT_PANE : None, \
-    pyatspi.ROLE_STATUS_BAR : statusbar_xpm, \
-    pyatspi.ROLE_TABLE : table_xpm, \
-    pyatspi.ROLE_TABLE_CELL : treeitem_xpm, \
-    pyatspi.ROLE_TABLE_COLUMN_HEADER : None, \
-    pyatspi.ROLE_TABLE_ROW_HEADER : None, \
-    pyatspi.ROLE_TEAROFF_MENU_ITEM : None, \
-    pyatspi.ROLE_TERMINAL : None, \
-    pyatspi.ROLE_TEXT : text_xpm, \
-    pyatspi.ROLE_TOGGLE_BUTTON : None, \
-    pyatspi.ROLE_TOOL_BAR : toolbar_xpm, \
-    pyatspi.ROLE_TOOL_TIP : None, \
-    pyatspi.ROLE_TREE : tree_xpm, \
-    pyatspi.ROLE_TREE_TABLE : tree_xpm, \
-    pyatspi.ROLE_UNKNOWN : unknown_xpm, \
-    pyatspi.ROLE_VIEWPORT : viewport_xpm, \
-    pyatspi.ROLE_WINDOW : window_xpm, \
-    pyatspi.ROLE_EXTENDED : None, \
-    pyatspi.ROLE_HEADER : None, \
-    pyatspi.ROLE_FOOTER : None, \
-    pyatspi.ROLE_PARAGRAPH : None, \
-    pyatspi.ROLE_RULER : None, \
-    pyatspi.ROLE_APPLICATION : None, \
-    pyatspi.ROLE_AUTOCOMPLETE : None, \
-    pyatspi.ROLE_EDITBAR : None, \
-    pyatspi.ROLE_EMBEDDED : None, \
-    pyatspi.ROLE_LAST_DEFINED: None }
+    # atspi.SPI_ROLE_ACCEL_LABEL : label_xpm,
+    pyatspi.ROLE_ALERT: None,
+    pyatspi.ROLE_ANIMATION: None,
+    pyatspi.ROLE_ARROW: None,
+    pyatspi.ROLE_CALENDAR: None,
+    pyatspi.ROLE_CANVAS: None,
+    pyatspi.ROLE_CHECK_BOX: checkbutton_xpm,
+    pyatspi.ROLE_CHECK_MENU_ITEM: checkmenuitem_xpm,
+    pyatspi.ROLE_COLOR_CHOOSER: colorselection_xpm,
+    pyatspi.ROLE_COLUMN_HEADER: None,
+    pyatspi.ROLE_COMBO_BOX: combo_xpm,
+    pyatspi.ROLE_DATE_EDITOR: None,
+    pyatspi.ROLE_DESKTOP_ICON: None,
+    pyatspi.ROLE_DESKTOP_FRAME: None,
+    pyatspi.ROLE_DIAL: None,
+    pyatspi.ROLE_DIALOG: dialog_xpm,
+    pyatspi.ROLE_DIRECTORY_PANE: None,
+    pyatspi.ROLE_DRAWING_AREA: None,
+    pyatspi.ROLE_FILE_CHOOSER: None,
+    pyatspi.ROLE_FILLER: None,
+    pyatspi.ROLE_FONT_CHOOSER: None,
+    pyatspi.ROLE_FRAME: window_xpm,
+    pyatspi.ROLE_GLASS_PANE: None,
+    pyatspi.ROLE_HTML_CONTAINER: None,
+    pyatspi.ROLE_ICON: image_xpm,
+    pyatspi.ROLE_IMAGE: image_xpm,
+    pyatspi.ROLE_INTERNAL_FRAME: None,
+    pyatspi.ROLE_LABEL: label_xpm,
+    pyatspi.ROLE_LAYERED_PANE: viewport_xpm,
+    pyatspi.ROLE_LIST: None,
+    pyatspi.ROLE_LIST_ITEM: None,
+    pyatspi.ROLE_MENU: menuitem_xpm,
+    pyatspi.ROLE_MENU_BAR: menubar_xpm,
+    pyatspi.ROLE_MENU_ITEM: menuitem_xpm,
+    pyatspi.ROLE_OPTION_PANE: None,
+    pyatspi.ROLE_PAGE_TAB: notebook_xpm,
+    pyatspi.ROLE_PAGE_TAB_LIST: notebook_xpm,
+    pyatspi.ROLE_PANEL: viewport_xpm,
+    pyatspi.ROLE_PASSWORD_TEXT: None,
+    pyatspi.ROLE_POPUP_MENU: None,
+    pyatspi.ROLE_PROGRESS_BAR: None,
+    pyatspi.ROLE_PUSH_BUTTON: button_xpm,
+    pyatspi.ROLE_RADIO_BUTTON: None,
+    pyatspi.ROLE_RADIO_MENU_ITEM: None,
+    pyatspi.ROLE_ROOT_PANE: viewport_xpm,
+    pyatspi.ROLE_ROW_HEADER: None,
+    pyatspi.ROLE_SCROLL_BAR: vscrollbar_xpm,
+    pyatspi.ROLE_SCROLL_PANE: scrolledwindow_xpm,
+    pyatspi.ROLE_SEPARATOR: vseparator_xpm,
+    pyatspi.ROLE_SLIDER: None,
+    pyatspi.ROLE_SPIN_BUTTON: spinbutton_xpm,
+    pyatspi.ROLE_SPLIT_PANE: None,
+    pyatspi.ROLE_STATUS_BAR: statusbar_xpm,
+    pyatspi.ROLE_TABLE: table_xpm,
+    pyatspi.ROLE_TABLE_CELL: treeitem_xpm,
+    pyatspi.ROLE_TABLE_COLUMN_HEADER: None,
+    pyatspi.ROLE_TABLE_ROW_HEADER: None,
+    pyatspi.ROLE_TEAROFF_MENU_ITEM: None,
+    pyatspi.ROLE_TERMINAL: None,
+    pyatspi.ROLE_TEXT: text_xpm,
+    pyatspi.ROLE_TOGGLE_BUTTON: None,
+    pyatspi.ROLE_TOOL_BAR: toolbar_xpm,
+    pyatspi.ROLE_TOOL_TIP: None,
+    pyatspi.ROLE_TREE: tree_xpm,
+    pyatspi.ROLE_TREE_TABLE: tree_xpm,
+    pyatspi.ROLE_UNKNOWN: unknown_xpm,
+    pyatspi.ROLE_VIEWPORT: viewport_xpm,
+    pyatspi.ROLE_WINDOW: window_xpm,
+    pyatspi.ROLE_EXTENDED: None,
+    pyatspi.ROLE_HEADER: None,
+    pyatspi.ROLE_FOOTER: None,
+    pyatspi.ROLE_PARAGRAPH: None,
+    pyatspi.ROLE_RULER: None,
+    pyatspi.ROLE_APPLICATION: None,
+    pyatspi.ROLE_AUTOCOMPLETE: None,
+    pyatspi.ROLE_EDITBAR: None,
+    pyatspi.ROLE_EMBEDDED: None,
+    pyatspi.ROLE_LAST_DEFINED: None}
 
 
 def main():
     from dogtail.utils import Lock
-    #We need this to prohibit sniff making(and removing on exit) sniff_refresh lock when importing Node
-    sniff_running = Lock(lockname='sniff_running.lock',randomize=False)
+    # We need this to prohibit sniff making(and removing on exit)
+    # sniff_refresh lock when importing Node
+    sniff_running = Lock(lockname='sniff_running.lock', randomize=False)
     try:
         sniff_running.lock()
     except OSError:
-        pass 
+        pass
     sniff = SniffApp()
 
 if __name__ == '__main__':

@@ -3,15 +3,15 @@
 Author: Dave Malcolm <dmalcolm@redhat.com>"""
 __author__ = 'Dave Malcolm <dmalcolm@redhat.com>'
 
-import re
-import unittest
 
 class Version:
+
     """
     Class representing a version of a software package.
     Stored internally as a list of subversions, from major to minor.
     Overloaded comparison operators ought to work sanely.
     """
+
     def __init__(self, versionList):
         self.versionList = versionList
 
@@ -28,60 +28,29 @@ class Version:
     def __getNum(self):
         tmpList = list(self.versionList)
 
-        while len(tmpList)<5:
+        while len(tmpList) < 5:
             tmpList += [0]
 
         num = 0
         for i in range(len(tmpList)):
-            num *=1000
+            num *= 1000
             num += tmpList[i]
         return num
 
     def __lt__(self, other):
-        return self.__getNum()<other.__getNum()
+        return self.__getNum() < other.__getNum()
+
     def __le__(self, other):
-        return self.__getNum()<=other.__getNum()
+        return self.__getNum() <= other.__getNum()
+
     def __eq__(self, other):
-        return self.__getNum()==other.__getNum()
+        return self.__getNum() == other.__getNum()
+
     def __ne__(self, other):
-        return self.__getNum()!=other.__getNum()
+        return self.__getNum() != other.__getNum()
+
     def __gt__(self, other):
-        return self.__getNum()>other.__getNum()
+        return self.__getNum() > other.__getNum()
+
     def __ge__(self, other):
-        return self.__getNum()>=other.__getNum()
-
-class VersionTests(unittest.TestCase):
-    def testLt(self):
-        assert Version.fromString("2.0.1") < Version.fromString("2.1.0")
-        assert not Version.fromString("1.4.0") < Version.fromString("1.4.0")
-
-    def testLe(self):
-        assert Version.fromString("2.0.1") <= Version.fromString("2.1.0")
-        assert Version.fromString("1.4.0") <= Version.fromString("1.4.0")
-
-    def testEq(self):
-        assert not Version.fromString("2.0.1") == Version.fromString("2.1.0")
-        assert Version.fromString("1.4.0") == Version.fromString("1.4.0")
-
-    def testNe(self):
-        assert Version.fromString("2.0.1") != Version.fromString("2.1.0")
-        assert not Version.fromString("1.4.0") != Version.fromString("1.4.0")
-
-    def testGt(self):
-        assert Version.fromString("2.1.0") > Version.fromString("2.0.1")
-        assert not Version.fromString("1.4.0") > Version.fromString("1.4.0")
-
-    def testGe(self):
-        assert Version.fromString("2.1.0") >= Version.fromString("2.0.1")
-        assert Version.fromString("1.4.0") >= Version.fromString("1.4.0")
-
-    def testStr(self):
-        assert "2.0.4"==str(Version.fromString("2.0.4"))
-
-    def testParsing(self):
-        assert Version.fromString("0") == Version([0])
-        assert Version.fromString("0.1") == Version([0, 1])
-        assert Version.fromString("1.4.0") == Version([1, 4, 0])
-
-if __name__ == "__main__":
-    unittest.main()
+        return self.__getNum() >= other.__getNum()

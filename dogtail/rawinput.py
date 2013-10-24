@@ -16,8 +16,6 @@ import gi
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
 
-import sys
-from gi.repository import Gtk
 from gi.repository import Gdk
 from config import config
 from utils import doDelay
@@ -25,91 +23,103 @@ from logging import debugLogger as logger
 from pyatspi import Registry as registry
 from pyatspi import (KEY_SYM, KEY_PRESS, KEY_PRESSRELEASE, KEY_RELEASE)
 from exceptions import ValueError
+from __builtin__ import unicode, unichr
+
 
 def doTypingDelay():
     doDelay(config.typingDelay)
 
+
 def checkCoordinates(x, y):
     if x < 0 or y < 0:
-        raise ValueError("Attempting to generate a mouse event at negative coordinates: (%s,%s)" % (x,y))
+        raise ValueError(
+            "Attempting to generate a mouse event at negative coordinates: (%s,%s)" % (x, y))
 
-def click (x, y, button = 1, check = True):
+
+def click(x, y, button=1, check=True):
     """
     Synthesize a mouse button click at (x,y)
     """
     if check:
         checkCoordinates(x, y)
-    logger.log("Mouse button %s click at (%s,%s)"%(button,x,y))
+    logger.log("Mouse button %s click at (%s,%s)" % (button, x, y))
     registry.generateMouseEvent(x, y, 'b%sc' % button)
     doDelay(config.actionDelay)
 
-def doubleClick (x, y, button = 1, check = True):
+
+def doubleClick(x, y, button=1, check=True):
     """
     Synthesize a mouse button double-click at (x,y)
     """
     if check:
         checkCoordinates(x, y)
-    logger.log("Mouse button %s doubleclick at (%s,%s)"%(button,x,y))
-    registry.generateMouseEvent(x,y, 'b%sd' % button)
+    logger.log("Mouse button %s doubleclick at (%s,%s)" % (button, x, y))
+    registry.generateMouseEvent(x, y, 'b%sd' % button)
     doDelay()
 
-def press (x, y, button = 1, check = True):
+
+def press(x, y, button=1, check=True):
     """
     Synthesize a mouse button press at (x,y)
     """
     if check:
         checkCoordinates(x, y)
-    logger.log("Mouse button %s press at (%s,%s)"%(button,x,y))
-    registry.generateMouseEvent(x,y, 'b%sp' % button)
+    logger.log("Mouse button %s press at (%s,%s)" % (button, x, y))
+    registry.generateMouseEvent(x, y, 'b%sp' % button)
     doDelay()
 
-def release (x, y, button = 1, check = True):
+
+def release(x, y, button=1, check=True):
     """
     Synthesize a mouse button release at (x,y)
     """
     if check:
         checkCoordinates(x, y)
-    logger.log("Mouse button %s release at (%s,%s)"%(button,x,y))
-    registry.generateMouseEvent(x,y, 'b%sr' % button)
+    logger.log("Mouse button %s release at (%s,%s)" % (button, x, y))
+    registry.generateMouseEvent(x, y, 'b%sr' % button)
     doDelay()
 
-def absoluteMotion (x, y, mouseDelay=None, check = True):
+
+def absoluteMotion(x, y, mouseDelay=None, check=True):
     """
     Synthesize mouse absolute motion to (x,y)
     """
     if check:
         checkCoordinates(x, y)
-    logger.log("Mouse absolute motion to (%s,%s)"%(x,y))
-    registry.generateMouseEvent(x,y, 'abs')
+    logger.log("Mouse absolute motion to (%s,%s)" % (x, y))
+    registry.generateMouseEvent(x, y, 'abs')
     if mouseDelay:
         doDelay(mouseDelay)
     else:
         doDelay()
 
-def relativeMotion (x, y, mouseDelay=None):
-    logger.log("Mouse relative motion of (%s,%s)"%(x,y))
-    registry.generateMouseEvent(x,y, 'rel')
+
+def relativeMotion(x, y, mouseDelay=None):
+    logger.log("Mouse relative motion of (%s,%s)" % (x, y))
+    registry.generateMouseEvent(x, y, 'rel')
     if mouseDelay:
         doDelay(mouseDelay)
     else:
         doDelay()
 
-def drag(fromXY, toXY, button = 1, check = True):
+
+def drag(fromXY, toXY, button=1, check=True):
     """
     Synthesize a mouse press, drag, and release on the screen.
     """
-    logger.log("Mouse button %s drag from %s to %s"%(button, fromXY, toXY))
+    logger.log("Mouse button %s drag from %s to %s" % (button, fromXY, toXY))
 
-    (x,y) = fromXY
-    press (x, y, button, check)
-    #doDelay()
+    (x, y) = fromXY
+    press(x, y, button, check)
+    # doDelay()
 
-    (x,y) = toXY
-    absoluteMotion(x,y,check=check)
+    (x, y) = toXY
+    absoluteMotion(x, y, check=check)
     doDelay()
 
-    release (x, y, button, check)
+    release(x, y, button, check)
     doDelay()
+
 
 def typeText(string):
     """
@@ -121,46 +131,57 @@ def typeText(string):
         pressKey(char)
 
 keyNameAliases = {
-    'enter' : 'Return',
-    'esc' : 'Escape',
-    'alt' : 'Alt_L',
-    'control' : 'Control_L',
-    'ctrl' : 'Control_L',
-    'shift' : 'Shift_L',
-    'del' : 'Delete',
-    'ins' : 'Insert',
-    'pageup' : 'Page_Up',
-    'pagedown' : 'Page_Down',
-    ' ' : 'space',
-    '\t' : 'Tab',
-    '\n' : 'Return'
+    'enter': 'Return',
+    'esc': 'Escape',
+    'alt': 'Alt_L',
+    'control': 'Control_L',
+    'ctrl': 'Control_L',
+    'shift': 'Shift_L',
+    'del': 'Delete',
+    'ins': 'Insert',
+    'pageup': 'Page_Up',
+    'pagedown': 'Page_Down',
+    ' ': 'space',
+    '\t': 'Tab',
+    '\n': 'Return'
 }
+
 
 def keySymToUniChar(keySym):
     i = Gdk.keyval_to_unicode(keySym)
-    if i: UniChar = unichr(i)
-    else: UniChar = ''
+    if i:
+        UniChar = unichr(i)
+    else:
+        UniChar = ''
     return UniChar
+
 
 def uniCharToKeySym(uniChar):
     # OK, if it's not actually unicode we can fix that, right?
-    if not isinstance(uniChar, unicode): uniChar = unicode(uniChar)
+    if not isinstance(uniChar, unicode):
+        uniChar = unicode(uniChar)
     i = ord(uniChar)
     keySym = Gdk.unicode_to_keyval(i)
     return keySym
 
+
 def keySymToKeyName(keySym):
     return Gdk.keyval_name(keySym)
+
 
 def keyNameToKeySym(keyName):
     try:
         keyName = keyNameAliases.get(keyName.lower(), keyName)
         keySym = Gdk.keyval_from_name(keyName)
-        if not keySym: keySym = getattr(Gdk, keyName)
+        if not keySym:
+            keySym = getattr(Gdk, keyName)
     except AttributeError:
-        try: keySym = uniCharToKeySym(keyName)
-        except TypeError: raise KeyError, keyName
+        try:
+            keySym = uniCharToKeySym(keyName)
+        except TypeError:
+            raise KeyError(keyName)
     return keySym
+
 
 def keyNameToKeyCode(keyName):
     """
@@ -173,10 +194,13 @@ def keyNameToKeyCode(keyName):
     function for nonprintable keys anyway.
     """
     keymap = Gdk.Keymap.get_for_display(Gdk.Display.get_default())
-    entries = keymap.get_entries_for_keyval( \
-                Gdk.keyval_from_name(keyName))
-    try: return entries[1][0].keycode
-    except TypeError: pass
+    entries = keymap.get_entries_for_keyval(
+        Gdk.keyval_from_name(keyName))
+    try:
+        return entries[1][0].keycode
+    except TypeError:
+        pass
+
 
 def pressKey(keyName):
     """
@@ -188,6 +212,7 @@ def pressKey(keyName):
     keySym = keyNameToKeySym(keyName)
     registry.generateKeyboardEvent(keySym, None, KEY_SYM)
     doTypingDelay()
+
 
 def keyCombo(comboString):
     """
@@ -207,7 +232,7 @@ def keyCombo(comboString):
     for s in strings:
         if not hasattr(Gdk, s):
             if not hasattr(Gdk, 'KEY_' + s):
-                raise ValueError, "Cannot find key %s" % s
+                raise ValueError("Cannot find key %s" % s)
     modifiers = strings[:-1]
     finalKey = strings[-1]
     for modifier in modifiers:
@@ -220,4 +245,3 @@ def keyCombo(comboString):
         code = keyNameToKeyCode(modifier)
         registry.generateKeyboardEvent(code, None, KEY_RELEASE)
     doDelay()
-

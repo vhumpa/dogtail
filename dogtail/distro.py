@@ -8,7 +8,9 @@ import re
 from version import Version
 from logging import debugLogger as logger
 
+
 class DistributionNotSupportedError(Exception):
+
     """
     This distribution is not supported.
     """
@@ -20,7 +22,9 @@ class DistributionNotSupportedError(Exception):
     def __str__(self):
         return self.distro + ". " + DistributionNotSupportedError.PATCH_MESSAGE
 
+
 class PackageNotFoundError(Exception):
+
     """
     Error finding the requested package.
     """
@@ -29,32 +33,35 @@ class PackageNotFoundError(Exception):
 global packageDb
 global distro
 
+
 class PackageDb:
+
     """
     Class to abstract the details of whatever software package database is in
     use (RPM, APT, etc)
     """
+
     def __init__(self):
         self.prefix = '/usr'
         self.localePrefixes = [self.prefix + '/share/locale']
 
     def getVersion(self, packageName):
         """
-        Method to get the version of an installed package as a Version 
-        instance (or raise an exception if not found)
-        
+        Method to get the version of an installed package as a Version
+         instance (or raise an exception if not found)
+
         Note: does not know about distributions' internal revision numbers.
         """
         raise NotImplementedError
 
     def getFiles(self, packageName):
         """
-        Method to get a list of filenames owned by the package, or raise an 
-        exception if not found.
+        Method to get a list of filenames owned by the package, or raise an
+         exception if not found.
         """
         raise NotImplementedError
 
-    def getMoFiles(self, locale = None):
+    def getMoFiles(self, locale=None):
         """
         Method to get a list of all .mo files on the system, optionally for a
         specific locale.
@@ -68,7 +75,8 @@ class PackageDb:
                     moFiles[dirName + '/' + fName] = None
 
         for localePrefix in self.localePrefixes:
-            if locale: localePrefix = localePrefix + '/' + locale
+            if locale:
+                localePrefix = localePrefix + '/' + locale
             os.path.walk(localePrefix, appendIfMoFile, moFiles)
 
         return moFiles.keys()
@@ -81,7 +89,9 @@ class PackageDb:
         """
         raise NotImplementedError
 
+
 class _RpmPackageDb(PackageDb):
+
     def __init__(self):
         PackageDb.__init__(self)
 
@@ -90,14 +100,14 @@ class _RpmPackageDb(PackageDb):
         ts = rpm.TransactionSet()
         for header in ts.dbMatch("name", packageName):
             return Version.fromString(header["version"])
-        raise PackageNotFoundError, packageName
+        raise PackageNotFoundError(packageName)
 
     def getFiles(self, packageName):
         import rpm
         ts = rpm.TransactionSet()
         for header in ts.dbMatch("name", packageName):
             return header["filenames"]
-        raise PackageNotFoundError, packageName
+        raise PackageNotFoundError(packageName)
 
     def getDependencies(self, packageName):
         import rpm
@@ -116,13 +126,15 @@ class _RpmPackageDb(PackageDb):
                 # this requirement:
                 for depPackageHeader in ts.dbMatch("provides", requirement):
                     depName = depPackageHeader['name']
-                    if depName!=packageName:
+                    if depName != packageName:
                         # Add to the Hash with a dummy value
-                        result[depName]=None
+                        result[depName] = None
             return result.keys()
-        raise PackageNotFoundError, packageName
+        raise PackageNotFoundError(packageName)
+
 
 class _AptPackageDb(PackageDb):
+
     def __init__(self):
         PackageDb.__init__(self)
         self.cache = None
@@ -135,20 +147,21 @@ class _AptPackageDb(PackageDb):
         packages = self.cache.Packages
         for package in packages:
             if package.Name == packageName:
-                import re
-                verString = re.match('.*Ver:\'(.*)-.*\' Section:', str(package.CurrentVer)).group(1)
+                verString = re.match(
+                    '.*Ver:\'(.*)-.*\' Section:', str(package.CurrentVer)).group(1)
                 return Version.fromString(verString)
-        raise PackageNotFoundError, packageName
+        raise PackageNotFoundError(packageName)
 
     def getFiles(self, packageName):
         files = []
         list = os.popen('dpkg -L %s' % packageName).readlines()
         if not list:
-            raise PackageNotFoundError, packageName
+            raise PackageNotFoundError(packageName)
         else:
             for line in list:
                 file = line.strip()
-                if file: files.append(file)
+                if file:
+                    files.append(file)
             return files
 
     def getDependencies(self, packageName):
@@ -164,7 +177,7 @@ class _AptPackageDb(PackageDb):
             if package.Name == packageName:
                 current = package.CurrentVer
                 if not current:
-                    raise PackageNotFoundError, packageName
+                    raise PackageNotFoundError(packageName)
                 depends = current.DependsList
                 list = depends['Depends']
                 for dependency in list:
@@ -173,52 +186,63 @@ class _AptPackageDb(PackageDb):
                     result[name] = None
         return result.keys()
 
+
 class _UbuntuAptPackageDb(_AptPackageDb):
+
     def __init__(self):
         _AptPackageDb.__init__(self)
         self.localePrefixes.append(self.prefix + '/share/locale-langpack')
 
+
 class _PortagePackageDb(PackageDb):
+
     def __init__(self):
         PackageDb.__init__(self)
 
     def getVersion(self, packageName):
-        # the portage utilities are almost always going to be in 
+        # the portage utilities are almost always going to be in
         # /usr/lib/portage/pym
         import sys
-        sys.path.append ('/usr/lib/portage/pym')
+        sys.path.append('/usr/lib/portage/pym')
         import portage
-        # FIXME: this takes the first package returned in the list, in the 
-        # case that there are slotted packages, and removes the leading 
+        # FIXME: this takes the first package returned in the list, in the
+        # case that there are slotted packages, and removes the leading
         # category such as 'sys-apps'
-        gentooPackageName = portage.db["/"]["vartree"].dbapi.match(packageName)[0].split('/')[1];
+        gentooPackageName = portage.db["/"][
+            "vartree"].dbapi.match(packageName)[0].split('/')[1]
         # this removes the distribution specific versioning returning only the
         # upstream version
         upstreamVersion = portage.pkgsplit(gentooPackageName)[1]
-        #print "Version of package is: " + upstreamVersion
-        return Version.fromString(upstreamVersion);
+        # print "Version of package is: " + upstreamVersion
+        return Version.fromString(upstreamVersion)
+
 
 class _ConaryPackageDb(PackageDb):
+
     def __init__(self):
         PackageDb.__init__(self)
 
     def getVersion(self, packageName):
-        import conary
         from conaryclient import ConaryClient
         client = ConaryClient()
         dbVersions = client.db.getTroveVersionList(packageName)
         if not len(dbVersions):
-            raise PackageNotFoundError, packageName
+            raise PackageNotFoundError(packageName)
         return dbVersions[0].trailingRevision().asString().split("-")[0]
 
 # getVersion not implemented because on Solaris multiple modules are installed
 # in single packages, so it is hard to tell what version number of a specific
 # module.
+
+
 class _SolarisPackageDb(PackageDb):
+
     def __init__(self):
         PackageDb.__init__(self)
 
+
 class JhBuildPackageDb(PackageDb):
+
     def __init__(self):
         PackageDb.__init__(self)
         prefixes = []
@@ -236,57 +260,77 @@ class JhBuildPackageDb(PackageDb):
                 result[line.strip()] = None
         return result.keys()
 
+
 class Distro:
+
     """
     Class representing a distribution.
 
     Scripts may want to do arbitrary logic based on whichever distro is in use
-    (e.g. handling differences in names of packages, distribution-specific 
-    patches, etc.)
+    (e.g. handling differences in names of packages, distribution-specific
+     patches, etc.)
 
-    We can either create methods in the Distro class to handle these, or we 
-    can use constructs like isinstance(distro, Ubuntu) to handle this. We can
+    We can either create methods in the Distro class to handle these, or we
+     can use constructs like isinstance(distro, Ubuntu) to handle this. We can
     even create hierarchies of distro subclasses to handle this kind of thing
     (could get messy fast though)
     """
 
+
 class Fedora(Distro):
+
     def __init__(self):
         self.packageDb = _RpmPackageDb()
+
 
 class RHEL(Fedora):
     pass
 
+
 class Debian(Distro):
+
     def __init__(self):
         self.packageDb = _AptPackageDb()
 
+
 class Ubuntu(Debian):
+
     def __init__(self):
         self.packageDb = _UbuntuAptPackageDb()
 
+
 class Suse(Distro):
+
     def __init__(self):
         self.packageDb = _RpmPackageDb()
 
+
 class Gentoo(Distro):
+
     def __init__(self):
         self.packageDb = _PortagePackageDb()
 
+
 class Conary(Distro):
+
     def __init__(self):
         self.packageDb = _ConaryPackageDb()
 
+
 class Solaris(Distro):
+
     def __init__(self):
         self.packageDb = _SolarisPackageDb()
 
+
 class JHBuild(Distro):
+
     def __init__(self):
         self.packageDb = JhBuildPackageDb()
 
+
 def detectDistro():
-    logger.log("Detecting distribution:", newline = False)
+    logger.log("Detecting distribution:", newline=False)
 
     if os.environ.get("CERTIFIED_GNOMIE", "no") == "yes":
         distro = JHBuild()
@@ -306,8 +350,8 @@ def detectDistro():
         raise DistributionNotSupportedError("Slackware")
     elif os.path.exists("/var/lib/conarydb/conarydb"):
         distro = Conary()
-    elif os.path.exists ("/etc/release") and \
-            re.match(".*Solaris", open ("/etc/release").readline()):
+    elif os.path.exists("/etc/release") and \
+            re.match(".*Solaris", open("/etc/release").readline()):
         distro = Solaris()
     else:
         raise DistributionNotSupportedError("Unknown")
@@ -316,4 +360,3 @@ def detectDistro():
 
 distro = detectDistro()
 packageDb = distro.packageDb
-

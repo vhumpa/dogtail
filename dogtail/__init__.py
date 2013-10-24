@@ -12,6 +12,5 @@ Vita Humpa <vhumpa@redhat.com>"""
 __version__ = "0.8.3"
 __copyright__ = "Copyright © 2005-2012 Red Hat, Inc."
 __license__ = "GPL"
-
-import gi.repository
-__all__ = ("config", "predicate", "procedural", "tc", "tree", "utils", "errors")
+__all__ = ("config", "predicate",
+           "procedural", "tc", "tree", "utils", "errors")

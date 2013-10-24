@@ -41,27 +41,32 @@ from dogtail.sessions import Script
 
 preserve_envs = ['PYTHONPATH', 'TEST']
 
+
 def getSessionEnvironment(sessionBinary):
 
     def isSessionProcess(fileName):
         try:
-            if os.path.realpath(fileName + 'exe') != ('/usr/bin/plasma-desktop' \
-                        if sessionBinary.split('/')[-1] == 'startkde'
-                        else sessionBinary):
+            if os.path.realpath(fileName + 'exe') != ('/usr/bin/plasma-desktop'
+                                                      if sessionBinary.split('/')[-1] == 'startkde'
+                                                      else sessionBinary):
                 return False
         except OSError:
             return False
         pid = fileName.split('/')[2]
-        if pid == 'self' or pid == str(os.getpid()): return False
+        if pid == 'self' or pid == str(os.getpid()):
+            return False
         return True
 
     def getEnvDict(fileName):
-        try: envString = open(fileName, 'r').read()
-        except IOError: return {}
+        try:
+            envString = open(fileName, 'r').read()
+        except IOError:
+            return {}
         envItems = envString.split('\x00')
         envDict = {}
         for item in envItems:
-            if not '=' in item: continue
+            if not '=' in item:
+                continue
             k, v = item.split('=', 1)
             envDict[k] = v
         return envDict
@@ -73,44 +78,49 @@ def getSessionEnvironment(sessionBinary):
                 envDict[env] = os.environ[env]
         return envDict
 
-
     envDict = False
     for path in glob.glob('/proc/*/'):
-        if not isSessionProcess(path): continue
+        if not isSessionProcess(path):
+            continue
         envFile = path + 'environ'
         envDict = getEnvDict(envFile)
     if not envDict:
         raise RuntimeError("Can't find our environment!")
     return copyVars(envDict)
 
+
 def execCodeWithEnv(code, env=None):
     with open("/tmp/execcode.dogtail", "w") as text_file:
         text_file.write(code)
-    subprocess.Popen('python /tmp/execcode.dogtail'.split(), env=(os.environ if env is None else env)).wait()
+    subprocess.Popen('python /tmp/execcode.dogtail'.split(),
+                     env=(os.environ if env is None else env)).wait()
+
 
 class DisplayManagerSession(object):
 
     gdm_config = '/etc/gdm/custom.conf'
     kdm_config = '/etc/kde/kdm/kdmrc'
-    gdm_options = {'section':'daemon', 'enable':'AutomaticLoginEnable', 'user':'AutomaticLogin'}
-    kdm_options = {'section':'X-:0-Core', 'enable':'AutoLoginEnable', 'user':'AutoLoginUser'}
+    gdm_options = {'section': 'daemon', 'enable':
+                   'AutomaticLoginEnable', 'user': 'AutomaticLogin'}
+    kdm_options = {'section': 'X-:0-Core', 'enable':
+                   'AutoLoginEnable', 'user': 'AutoLoginUser'}
     scriptDelay = 20
     user = 'test'
 
     def isProcessRunning(self, process):
-        doc='''Gives true if process can be greped out of full ps dump '''
-        s = subprocess.Popen(["ps", "axw"],stdout=subprocess.PIPE)
+        doc = '''Gives true if process can be greped out of full ps dump '''
+        s = subprocess.Popen(["ps", "axw"], stdout=subprocess.PIPE)
         for x in s.stdout:
             if re.search(process, x):
                 return True
         return False
 
     def waitForProcess(self, process, invert=False):
-        doc='''Waits until a process appears'''
+        doc = '''Waits until a process appears'''
         while self.isProcessRunning(process) is invert:
             time.sleep(1)
 
-    def __init__(self, dm = 'gdm', user = None):
+    def __init__(self, dm='gdm', user=None):
         if user is not None:
             self.user = user
         if dm == 'gdm':
@@ -130,60 +140,76 @@ class DisplayManagerSession(object):
         config.read(self.tmp_file)
         if not restore:
             config.set(self.options['section'], self.options['enable'], 'true')
-            config.set(self.options['section'], self.options['user'], self.user)
+            config.set(
+                self.options['section'], self.options['user'], self.user)
         else:
-            config.remove_option(self.options['section'], self.options['enable'])
+            config.remove_option(
+                self.options['section'], self.options['enable'])
             config.remove_option(self.options['section'], self.options['user'])
         output = open(self.tmp_file, 'w')
         config.write(output)
         output.flush()
-        subprocess.Popen('sudo mv -f %s %s' % (self.tmp_file , self.config), shell=True).wait()
+        subprocess.Popen('sudo mv -f %s %s' %
+                         (self.tmp_file, self.config), shell=True).wait()
         if self.dm == 'kdm':
             try:
                 os.makedirs(os.getenv('HOME') + '/.kde/env/')
             except:
                 pass
-            subprocess.Popen('echo "export QT_ACCESSIBILITY=1" > ~/.kde/env/qt-at-spi.sh', shell=True).wait()
-            subprocess.Popen('echo "[Desktop]\nSession=kde-plasma" > ~/.dmrc', shell=True).wait()
+            subprocess.Popen(
+                'echo "export QT_ACCESSIBILITY=1" > ~/.kde/env/qt-at-spi.sh', shell=True).wait()
+            subprocess.Popen(
+                'echo "[Desktop]\nSession=kde-plasma" > ~/.dmrc', shell=True).wait()
 
     def start(self, session_binary):
         subprocess.Popen(('sudo service %s start' % (self.dm)).split())
         self.session_binary = session_binary
         self.waitForProcess(session_binary)
-        # some extra time for an environment (shell/kwin) to load all resources etc.
+        # some extra time for an environment (shell/kwin) to load all resources
+        # etc.
         if self.dm == 'kdm':
-            time.sleep(10) # KDE keeps loading screen on untill all is loaded
+            time.sleep(10)  # KDE keeps loading screen on untill all is loaded
         else:
-            time.sleep(4) # GNOME shows stuff as it appears
+            time.sleep(4)  # GNOME shows stuff as it appears
 
     def setA11y(self, enable):
-        subprocess.Popen('/usr/bin/gsettings set org.gnome.desktop.interface toolkit-accessibility %s' \
+        subprocess.Popen('/usr/bin/gsettings set org.gnome.desktop.interface toolkit-accessibility %s'
                          % ('true' if enable else 'false'), shell=True, env=os.environ)
-#       if enable: # mouse is at 0x0 at the start - which brings in the overview
+# if enable: # mouse is at 0x0 at the start - which brings in the overview
 #            execCodeWithEnv(drop_overview, env = os.environ)
-#            time.sleep(2) # time for the overview to go away
+# time.sleep(2) # time for the overview to go away
 
     def stop(self):
         subprocess.Popen(('sudo service %s stop' % (self.dm)).split()).wait()
         self.waitForProcess('/usr/bin/%s' % self.dm, invert=True)
-        time.sleep(3) # extra safe time
+        time.sleep(3)  # extra safe time
         # did i.e. gnome-shell get stuck running?
         if self.isProcessRunning(self.session_binary):
-            print('dogtail-run-headless-next: WARNING: %s still running, proceeding with kill -9' % self.session_binary)
-            subprocess.Popen(('sudo pkill --signal 9 %s' % (self.session_binary)).split()).wait()
+            print(
+                'dogtail-run-headless-next: WARNING: %s still running, proceeding with kill -9' %
+                self.session_binary)
+            subprocess.Popen(
+                ('sudo pkill --signal 9 %s' % (self.session_binary)).split()).wait()
             time.sleep(1)
 
 
 def parse():
     import argparse
-    parser = argparse.ArgumentParser(prog='$ dogtail-run-headless-next', description=descr)
+    parser = argparse.ArgumentParser(
+        prog='$ dogtail-run-headless-next', description=descr)
     parser.add_argument('script', help="""Command to execute the script""")
-    parser.add_argument('--session', required=False, help="""What session to use, 'kde' or 'gnome' (default).""")
-    parser.add_argument('--dont-start', action='store_true', help="""Use already running session (doesn't have to be under Display Manager)""")
-    parser.add_argument('--dont-kill', action='store_true', help="""Do not kill session when script exits.""")
-    parser.add_argument('--disable-a11y', action='store_true', help="""Disable accessibility technologies on script(not session) exit.""")
-    parser.add_argument('--remove-overview', action='store_true', help="""Just moves mouse from 0,0 and turns off the overview.""")
+    parser.add_argument('--session', required=False,
+                        help="""What session to use, 'kde' or 'gnome' (default).""")
+    parser.add_argument('--dont-start', action='store_true',
+                        help="""Use already running session (doesn't have to be under Display Manager)""")
+    parser.add_argument('--dont-kill', action='store_true',
+                        help="""Do not kill session when script exits.""")
+    parser.add_argument('--disable-a11y', action='store_true',
+                        help="""Disable accessibility technologies on script(not session) exit.""")
+    parser.add_argument('--remove-overview', action='store_true',
+                        help="""Just moves mouse from 0,0 and turns off the overview.""")
     return parser.parse_args()
+
 
 def main():
     args = parse()
@@ -207,8 +233,10 @@ def main():
 
     try:
         os.environ = getSessionEnvironment(session_binary)
-    except :
-        print('dogtail-run-headless-next: Could not get the environment from %s process' % session_binary)
+    except:
+        print(
+            'dogtail-run-headless-next: Could not get the environment from %s process' %
+            session_binary)
         dm.stop()
         dm.setup(restore=True)
         sys.exit(1)
@@ -229,4 +257,5 @@ def main():
 
     sys.exit(exitCode)
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    main()

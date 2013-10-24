@@ -10,38 +10,45 @@ import random
 import glob
 from dogtail.config import config
 
+
 def scratchFile(label):
-    """Uses tempfile.NamedTemporaryFile() to create a unique tempfile in 
-    config.scratchDir, with a filename like: 
-    dogtail-headless-<label>.<random junk>"""
+    """Uses tempfile.NamedTemporaryFile() to create a unique tempfile in
+     config.scratchDir, with a filename like:
+     dogtail-headless-<label>.<random junk>"""
     prefix = "dogtail-headless-"
-    return tempfile.NamedTemporaryFile(prefix = "%s%s." % (prefix, label), 
-            dir = config.scratchDir)
+    return tempfile.NamedTemporaryFile(prefix="%s%s." % (prefix, label),
+                                       dir=config.scratchDir)
+
 
 def testBinary(path):
     if (path.startswith(os.path.sep) or
-            path.startswith(os.path.join('.','')) or 
-            path.startswith(os.path.join('..',''))):
+            path.startswith(os.path.join('.', '')) or
+            path.startswith(os.path.join('..', ''))):
         if not os.path.exists(path):
-            raise IOError, (errno.ENOENT, "No such file", path)
+            raise IOError(errno.ENOENT, "No such file", path)
         if not os.access(path, os.X_OK):
-            raise IOError, (errno.ENOEXEC, "Permission denied", path)
+            raise IOError(errno.ENOEXEC, "Permission denied", path)
     return True
 
+
 def get_username():
-    return pwd.getpwuid( os.getuid() )[ 0 ]
+    return pwd.getpwuid(os.getuid())[0]
+
 
 class Subprocess(object):
-    def __init__(self, cmdList, environ = None):
+
+    def __init__(self, cmdList, environ=None):
         testBinary(cmdList[0])
         self.cmdList = cmdList
         self.environ = environ
         self._exitCode = None
 
     def start(self):
-        if self.environ == None: self.environ = os.environ
-        self.popen = subprocess.Popen(self.cmdList, env = self.environ)#, stdout = subprocess.PIPE, 
-                #stderr = subprocess.STDOUT, close_fds = True)
+        if self.environ is None:
+            self.environ = os.environ
+        self.popen = subprocess.Popen(
+            self.cmdList, env=self.environ)  # , stdout = subprocess.PIPE,
+                # stderr = subprocess.STDOUT, close_fds = True)
         return self.popen.pid
 
     def wait(self):
@@ -49,19 +56,21 @@ class Subprocess(object):
 
     def stop(self):
         # The following doesn't exist in python < 2.6, if you can believe it.
-        #self.popen.terminate()
+        # self.popen.terminate()
         os.kill(self.popen.pid, signal.SIGTERM)
 
     @property
     def exitCode(self):
-        if self._exitCode == None:
+        if self._exitCode is None:
             self._exitCode = self.wait()
         return self._exitCode
 
+
 class XServer(Subprocess):
-    def __init__(self, server = "/usr/bin/Xorg", 
-            xinitrc = "/etc/X11/xinit/Xclients", 
-            resolution = "1024x768x16"):
+
+    def __init__(self, server="/usr/bin/Xorg",
+                 xinitrc="/etc/X11/xinit/Xclients",
+                 resolution="1024x768x16"):
         """resolution is only used with Xvfb."""
         testBinary(server)
         self.server = server
@@ -78,8 +87,10 @@ class XServer(Subprocess):
         usedDisplays = []
         for file in tmp:
             match = re.match(pattern, file)
-            if match: usedDisplays.append(int(match.groups()[0]))
-        if not usedDisplays: return ':0'
+            if match:
+                usedDisplays.append(int(match.groups()[0]))
+        if not usedDisplays:
+            return ':0'
         usedDisplays.sort()
         return ':' + str(usedDisplays[-1] + 1)
 
@@ -89,7 +100,8 @@ class XServer(Subprocess):
         cmd = []
         if self.xinit:
             cmd.append(self.xinit)
-            if self.xinitrc: cmd.append(self.xinitrc)
+            if self.xinitrc:
+                cmd.append(self.xinitrc)
             cmd.append('--')
         cmd.append(self.server)
         cmd.append(self.display)
@@ -100,18 +112,20 @@ class XServer(Subprocess):
         return cmd
 
     def start(self):
-        print ' '.join(self.cmdList)
+        print(' '.join(self.cmdList))
         self.popen = subprocess.Popen(self.cmdList)
         return self.popen.pid
 
+
 class Script(Subprocess):
     pass
+
 
 class Session(object):
 
     cookieName = "DOGTAIL_SESSION_COOKIE"
 
-    def __init__(self, sessionBinary, scriptCmdList = [], scriptDelay = 20, logout = True):
+    def __init__(self, sessionBinary, scriptCmdList=[], scriptDelay=20, logout=True):
         testBinary(sessionBinary)
         self.sessionBinary = sessionBinary
         self.script = Script(scriptCmdList)
@@ -135,40 +149,46 @@ class Session(object):
     def environment(self):
         def isSessionProcess(fileName):
             try:
-                if os.path.realpath(path + 'exe') != ('/usr/bin/plasma-desktop' \
-                            if self.sessionBinary.split('/')[-1] == 'startkde'
-                            else self.sessionBinary): 
+                if os.path.realpath(path + 'exe') != ('/usr/bin/plasma-desktop'
+                                                      if self.sessionBinary.split('/')[-1] == 'startkde'
+                                                      else self.sessionBinary):
                     return False
             except OSError:
                 return False
             pid = fileName.split('/')[2]
-            if pid == 'self' or pid == str(os.getpid()): return False
+            if pid == 'self' or pid == str(os.getpid()):
+                return False
             return True
 
         def getEnvDict(fileName):
-            try: envString = open(fileName, 'r').read()
-            except IOError: return {}
+            try:
+                envString = open(fileName, 'r').read()
+            except IOError:
+                return {}
             envItems = envString.split('\x00')
             envDict = {}
             for item in envItems:
-                if not '=' in item: continue
+                if not '=' in item:
+                    continue
                 k, v = item.split('=', 1)
                 envDict[k] = v
             return envDict
 
         def isSessionEnv(envDict):
-            if not envDict: return False
+            if not envDict:
+                return False
             if envDict.get(self.cookieName, 'notacookie') == self.cookie:
                 return True
             return False
 
         for path in glob.glob('/proc/*/'):
-            if not isSessionProcess(path): continue
+            if not isSessionProcess(path):
+                continue
             envFile = path + 'environ'
             envDict = getEnvDict(envFile)
-            if isSessionEnv(envDict): 
-                #print path
-                #print envDict
+            if isSessionEnv(envDict):
+                # print path
+                # print envDict
                 self._environment = envDict
         if not self._environment:
             raise RuntimeError("Can't find our environment!")
@@ -179,13 +199,15 @@ class Session(object):
         return self.xserver.wait()
 
     def stop(self):
-        try: self.script.stop()
-        except OSError: pass
+        try:
+            self.script.stop()
+        except OSError:
+            pass
         self.xserver.stop()
 
     def attemptLogout(self):
-        logoutScript = Script('dogtail-logout', 
-                environ = self.environment)
+        logoutScript = Script('dogtail-logout',
+                              environ=self.environment)
         logoutScript.start()
         logoutScript.wait()
 
@@ -196,17 +218,13 @@ class Session(object):
         return self._cookie
 
     def _buildXInitRC(self, fileObj):
-        if self.logout:
-            logoutString = "; dogtail-logout"
-        else:
-            logoutString = ""
         lines = [
             "export %s=%s" % (self.cookieName, self.cookie),
             "gsettings set org.gnome.desktop.interface toolkit-accessibility true",
             ". /etc/X11/xinit/xinitrc-common",
             "export %s" % self.cookieName,
-            "exec -l $SHELL -c \"$CK_XINIT_SESSION $SSH_AGENT %s\"" % \
-                    (self.sessionBinary),
+            "exec -l $SHELL -c \"$CK_XINIT_SESSION $SSH_AGENT %s\"" %
+            (self.sessionBinary),
             ""]
 
         fileObj.write('\n'.join(lines).strip())

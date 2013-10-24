@@ -92,6 +92,8 @@ except ImportError:
     # libwnck. Window-manager manipulation will not be available."
     gotWnck = False
 
+from gi.repository import GLib
+
 haveWarnedAboutChildrenLimit = False
 
 
@@ -906,7 +908,14 @@ class Node(object):
                     result.append(child)
             return result
         else:
-            return pyatspi.utils.findAllDescendants(self, pred)
+            descendants = []
+            while True:
+                try:
+                    descendants = pyatspi.utils.findAllDescendants(self, pred)
+                    break
+                except GLib.GError:
+                    continue
+            return descendants
 
     # The canonical "search above this node" method:
     def findAncestor(self, pred):

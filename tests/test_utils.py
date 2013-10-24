@@ -9,10 +9,10 @@ import dogtail.tree
 import dogtail.predicate
 dogtail.config.config.logDebugToFile = False
 dogtail.config.config.logDebugToStdOut = True
-import Node
+from gtkdemotest import GtkDemoTest
 
 
-class TestScreenshot(Node.GtkDemoTest):
+class TestScreenshot(GtkDemoTest):
 
     def make_expected_and_compare(self, actual_path, jpg_tolerance=None):
         extension = actual_path.split('.')[-1]
@@ -21,7 +21,8 @@ class TestScreenshot(Node.GtkDemoTest):
         import os
         os.system("gnome-screenshot -f %s" % expected_path)
 
-        command = ["compare", "-metric", "MAE", actual_path, expected_path, "output"]
+        command = ["compare", "-metric", "MAE",
+                   actual_path, expected_path, "output"]
         import subprocess
         p = subprocess.Popen(command, stderr=subprocess.PIPE)
         output, error = p.communicate()
@@ -31,7 +32,8 @@ class TestScreenshot(Node.GtkDemoTest):
         self.assertTrue(0.1 >= float(m.group(1)))
 
     def test_screenshot_incorrect_timestamp(self):
-        self.assertRaises(TypeError, dogtail.utils.screenshot, "timeStamp", None)
+        self.assertRaises(
+            TypeError, dogtail.utils.screenshot, "timeStamp", None)
 
     def test_screenshot_default(self):
         actual_path = dogtail.utils.screenshot()
@@ -60,6 +62,3 @@ class TestA11Y(unittest.TestCase):
 
     def test_enable_a11y(self):
         dogtail.utils.enableA11y()
-
-if __name__ == '__main__':
-    unittest.main()

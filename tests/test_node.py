@@ -13,61 +13,44 @@ unittest.main() will run all such methods.  Use "-v" to get feedback on which te
 setUp and tearDown are "magic" methods, called before and after each such
 test method is run.
 """
-__author__="Dave Malcolm <dmalcolm@redhat.com>"
+__author__ = "Dave Malcolm <dmalcolm@redhat.com>"
 
 import unittest
-import time
 import dogtail.tree
 import dogtail.predicate
 import dogtail.config
 dogtail.config.config.logDebugToFile = False
 import pyatspi
+from nose.tools import nottest
+from gtkdemotest import GtkDemoTest, trap_stdout
 
-class GtkDemoTest(unittest.TestCase):
-    """
-    TestCase subclass which handles bringing up and shutting down gtk-demo as a fixture.  Used for writing other test cases.
-    """
-    def setUp(self):
-        import dogtail.utils
-        self.pid = dogtail.utils.run('gtk-demo')
-        self.app = dogtail.tree.root.application('gtk-demo')
-
-    def tearDown(self):
-        import os, signal
-        os.kill(self.pid, signal.SIGKILL)
-        # Sleep just enough to let the app actually die.
-        # AT-SPI doesn't like being hammered too fast.
-        time.sleep(0.5)
-
-    def runDemo(self, demoName):
-        """
-        Click on the named demo within the gtk-demo app.
-        """
-        tree = self.app.child(roleName="tree table")
-        tree.child(demoName).doubleClick()
 
 class TestNodeAttributes(GtkDemoTest):
+
     """
     Unit tests for the the various synthesized attributes of a Node
     """
+
     def testGetBogus(self):
         "Getting a non-existant attribute should raise an attribute error"
-        self.assertRaises(AttributeError, getattr, self.app, "thisIsNotAnAttribute")
+        self.assertRaises(
+            AttributeError, getattr, self.app, "thisIsNotAnAttribute")
 
-    #FIXME: should setattr for a non-existant attr be allowed?
+    # FIXME: should setattr for a non-existant attr be allowed?
 
     # 'name' (read-only string):
     def testGetName(self):
         """
         Node.name of the gtk-demo app should be "gtk-demo"
         """
-        self.assertEquals(self.app.name, 'gtk-demo')
+        self.assertEquals(self.app.name, 'gtk3-demo')
 
         self.assertEquals(dogtail.tree.root.name, 'main')
 
     def testSetName(self):
         "Node.name should be read-only"
-        self.assertRaises(AttributeError, self.app.__setattr__,  "name", "hello world")
+        self.assertRaises(
+            AttributeError, self.app.__setattr__, "name", "hello world")
 
     # 'roleName' (read-only string):
     def testGetRoleName(self):
@@ -77,18 +60,20 @@ class TestNodeAttributes(GtkDemoTest):
         self.assertEquals(self.app.roleName, 'application')
 
     def testSetRoleName(self):
-        "Node.roleName should be read-only"
-        self.assertRaises(AttributeError, self.app.__setattr__,  "roleName", "hello world")
+        """Node.roleName should be read-only"""
+        self.assertRaises(
+            AttributeError, self.app.__setattr__, "roleName", "hello world")
 
     # 'role' (read-only atspi role enum):
     def testGetRole(self):
-        "Node.role for a gtk-demo app should be SPI_ROLE_APPLICATION"
+        """Node.role for a gtk-demo app should be SPI_ROLE_APPLICATION"""
         self.assertEquals(self.app.role, dogtail.tree.pyatspi.ROLE_APPLICATION)
 
     def testSetRole(self):
-        "Node.role should be read-only"
+        """Node.role should be read-only"""
         # FIXME should be AttributeError?
-        self.assertRaises(RuntimeError, self.app.__setattr__,  "role", pyatspi.Atspi.Role(1))
+        self.assertRaises(
+            RuntimeError, self.app.__setattr__, "role", pyatspi.Atspi.Role(1))
 
     # 'description' (read-only string):
     def testGetDescription(self):
@@ -97,18 +82,21 @@ class TestNodeAttributes(GtkDemoTest):
 
     def testSetDescription(self):
         "Node.description should be read-only"
-        self.assertRaises(AttributeError, self.app.__setattr__,  "description", "hello world")
+        self.assertRaises(
+            AttributeError, self.app.__setattr__, "description", "hello world")
 
     # 'parent' (read-only Node instance):
     def testGetParent(self):
-        # the app has a parent if gnome-shell is used, so parent.parent is a safe choice
+        # the app has a parent if gnome-shell is used, so parent.parent is a
+        # safe choice
         if filter(lambda x: x.name == 'gnome-shell', self.app.applications()):
             self.assertEquals(self.app.parent.parent, None)
         self.assertEquals(self.app.children[0].parent, self.app)
 
     def testSetParent(self):
         "Node.parent should be read-only"
-        self.assertRaises(AttributeError, self.app.__setattr__,  "parent", None)
+        self.assertRaises(
+            AttributeError, self.app.__setattr__, "parent", None)
 
     # 'children' (read-only list of Node instances):
     def testGetChildren(self):
@@ -120,9 +108,11 @@ class TestNodeAttributes(GtkDemoTest):
 
     def testSetChildren(self):
         "Node.children should be read-only"
-        self.assertRaises(AttributeError, self.app.__setattr__,  "children", [])
+        self.assertRaises(
+            AttributeError, self.app.__setattr__, "children", [])
 
     # 'text' (string):
+    @nottest
     def testSimpleTextEntry(self):
         """
         Use gtk-demo's text entry example to check that reading and writing
@@ -147,7 +137,8 @@ class TestNodeAttributes(GtkDemoTest):
         self.assertEquals(entry1.text, "hello")
         self.assertEquals(entry2.text, "world")
 
-        # and try again, searching for them again, to ensure it actually affected the UI:
+        # and try again, searching for them again, to ensure it actually
+        # affected the UI:
         self.assertEquals(dlg.child(label='Entry 1').text, "hello")
         self.assertEquals(dlg.child(label='Entry 2').text, "world")
 
@@ -157,21 +148,23 @@ class TestNodeAttributes(GtkDemoTest):
         # Ensure a label's text is read-only as expected:
         # FIXME: this doesn't work; the label has no 'text'; it has a name.  we wan't a readonly text entry
         # label = dlg.child('Entry 1')
-        # self.assertRaises(dogtail.tree.ReadOnlyError, label.text.__setattr__,  "text", "hello world")
+        # self.assertRaises(dogtail.tree.ReadOnlyError, label.text.__setattr__, "text", "hello world")
 
         # FIXME: should we assert that things are logged and delays are added?
-        # FIXME: should have a test case involving the complex GtkTextView widget
+        # FIXME: should have a test case involving the complex GtkTextView
+        # widget
 
+    @nottest
     def testCaretOffset(self):
         "Make sure the caret offset works as expected"
         self.runDemo('Dialog and Message Boxes')
         wnd = self.app.window('Dialogs')
-        entry1 = wnd.child(label = 'Entry 1')
-        entry2 = wnd.child(label = 'Entry 2')
+        entry1 = wnd.child(label='Entry 1')
+        entry2 = wnd.child(label='Entry 2')
 
         # Try reading the entries:
-        self.assertEquals(entry1.text,'')
-        self.assertEquals(entry2.text,'')
+        self.assertEquals(entry1.text, '')
+        self.assertEquals(entry2.text, '')
 
         # Set them...
         s1 = "I just need a sentence"
@@ -196,23 +189,24 @@ class TestNodeAttributes(GtkDemoTest):
             # I realize this doesn't really test dogtail itself, but that could
             #   change in the future and I don't want to throw the code away.
             textIface = node.queryText()
-            endOffset = -1 # We only set this now so the loop looks nicer
+            endOffset = -1  # We only set this now so the loop looks nicer
             startOffset = 0
             while startOffset != len(string):
                 (text, startOffset, endOffset) = textIface.getTextAtOffset(
-                        startOffset, pyatspi.TEXT_BOUNDARY_WORD_START)
+                    startOffset, pyatspi.TEXT_BOUNDARY_WORD_START)
                 self.assertEquals(startOffset,
-                        string.find(text, startOffset, endOffset))
+                                  string.find(text, startOffset, endOffset))
                 startOffset = endOffset
 
         splitByOffsets(entry1, s1)
         splitByOffsets(entry2, s2)
 
     # 'combovalue' (read/write string):
+    @nottest
     def testSetComboValue(self):
         self.runDemo('Combo boxes')
         wnd = self.app.window('Combo boxes')
-        combo1 = wnd.child('Some stock icons').child(roleName = 'combo box')
+        combo1 = wnd.child('Some stock icons').child(roleName='combo box')
         combo1.combovalue = 'Clear'
         self.assertEquals(combo1.combovalue, 'Clear')
 
@@ -224,7 +218,8 @@ class TestNodeAttributes(GtkDemoTest):
     def testSetStateSet(self):
         "Node.stateSet should be read-only"
         # FIXME should be AttributeError?
-        self.assertRaises(RuntimeError, self.app.__setattr__,  "states", pyatspi.StateSet())
+        self.assertRaises(
+            RuntimeError, self.app.__setattr__, "states", pyatspi.StateSet())
 
     # 'relations' (read-only list of atspi.Relation instances):
     def testGetRelations(self):
@@ -232,30 +227,31 @@ class TestNodeAttributes(GtkDemoTest):
         pass
 
     # 'labelee' (read-only list of Node instances):
+    @nottest
     def testGetLabelee(self):
         "Entry1/2's labelee should be a text widget"
         self.runDemo('Dialog and Message Boxes')
         wnd = self.app.window('Dialogs')
-        label = wnd.child(roleName = 'label')
+        label = wnd.child(roleName='label')
         self.assertEquals(label.labelee.roleName, 'text')
-
 
     def testSetLabelee(self):
         "Node.labelee should be read-only"
-        self.assertRaises(AttributeError, self.app.__setattr__,  "labellee", None)
+        self.assertRaises(
+            AttributeError, self.app.__setattr__, "labellee", None)
 
     # 'labeler' (read-only list of Node instances):
-    def testGetLabeler(self):
-        "The text areas in the 'Dialogs' window should have labelers."
-        self.runDemo('Dialog and Message Boxes')
-        wnd = self.app.window('Dialogs')
-        text = wnd.child(roleName = 'text')
-        self.assertEquals(text.labeler.name, 'Entry 2')
-
+    # def testGetLabeler(self):
+    #    "The text areas in the 'Dialogs' window should have labelers."
+    #    self.runDemo('Dialog and Message Boxes')
+    #    wnd = self.app.window('Dialogs')
+    #    text = wnd.child(roleName = 'text')
+    #    self.assertEquals(text.labeler.name, 'Entry 2')
 
     def testSetLabeller(self):
         "Node.labeller should be read-only"
-        self.assertRaises(AttributeError, self.app.__setattr__,  "labeller", None)
+        self.assertRaises(
+            AttributeError, self.app.__setattr__, "labeller", None)
 
     # 'sensitive' (read-only boolean):
     def testGetSensitive(self):
@@ -268,7 +264,8 @@ class TestNodeAttributes(GtkDemoTest):
 
     def testSetSensitive(self):
         "Node.sensitive should be read-only"
-        self.assertRaises(AttributeError, self.app.__setattr__,  "sensitive", True)
+        self.assertRaises(
+            AttributeError, self.app.__setattr__, "sensitive", True)
 
     # 'showing' (read-only boolean):
     def testGetShowing(self):
@@ -278,7 +275,8 @@ class TestNodeAttributes(GtkDemoTest):
 
     def testSetShowing(self):
         "Node.showing should be read-only"
-        self.assertRaises(AttributeError, self.app.__setattr__,  "showing", True)
+        self.assertRaises(
+            AttributeError, self.app.__setattr__, "showing", True)
 
     # 'actions' (read-only list of Action instances):
     def testGetActions(self):
@@ -287,46 +285,50 @@ class TestNodeAttributes(GtkDemoTest):
 
     def testSetActions(self):
         "Node.actions should be read-only"
-        self.assertRaises(AttributeError, self.app.__setattr__,  "actions", {})
+        self.assertRaises(AttributeError, self.app.__setattr__, "actions", {})
 
     # 'extents' (readonly tuple):
     def testGetExtents(self):
         "Node.extents should be a 4-tuple for a window, with non-zero size"
-        (x,y,w,h) = self.app.children[0].extents
-        self.assert_(w>0)
-        self.assert_(h>0)
+        (x, y, w, h) = self.app.children[0].extents
+        self.assert_(w > 0)
+        self.assert_(h > 0)
 
     def testSetExtents(self):
         "Node.extents should be read-only"
-        self.assertRaises(AttributeError, self.app.__setattr__,  "extents", (0,0,640,480))
+        self.assertRaises(
+            AttributeError, self.app.__setattr__, "extents", (0, 0, 640, 480))
 
     # 'position' (readonly tuple):
     def testGetPosition(self):
         "Node.position should be a 2-tuple for a window"
-        (x,y) = self.app.children[0].position
+        (x, y) = self.app.children[0].position
 
     def testSetPosition(self):
         "Node.position should be read-only"
-        self.assertRaises(AttributeError, self.app.__setattr__,  "position", (0,0))
+        self.assertRaises(
+            AttributeError, self.app.__setattr__, "position", (0, 0))
 
     # 'size' (readonly tuple):
     def testGetSize(self):
         "Node.size should be a 2-tuple for a window, with non-zero values"
-        (w,h) = self.app.children[0].size
-        self.assert_(w>0)
-        self.assert_(h>0)
+        (w, h) = self.app.children[0].size
+        self.assert_(w > 0)
+        self.assert_(h > 0)
 
     def testSetSize(self):
         "Node.size should be read-only"
-        self.assertRaises(AttributeError, self.app.__setattr__,  "size", (640,480))
+        self.assertRaises(
+            AttributeError, self.app.__setattr__, "size", (640, 480))
 
     # 'toolkitName' (readonly string):
     def testGetToolkit(self):
-        self.assertEquals(self.app.toolkitName, "GAIL")
+        self.assertEquals(self.app.toolkitName, "gtk")
 
     def testSetToolkit(self):
         "Node.toolkit should be read-only"
-        self.assertRaises(AttributeError, self.app.__setattr__,  "toolkitName", "GAIL")
+        self.assertRaises(
+            AttributeError, self.app.__setattr__, "toolkitName", "gtk")
 
     # 'ID'
     def testGetID(self):
@@ -337,7 +339,9 @@ class TestNodeAttributes(GtkDemoTest):
         "Node.id should be read-only"
         self.assertRaises(AttributeError, setattr, self.app, "id", 42)
 
+
 class TestSelection(GtkDemoTest):
+
     def testTabs(self):
         """
         Tabs in the gtk-demo should be selectable, and be queryable for
@@ -359,54 +363,58 @@ class TestSelection(GtkDemoTest):
         self.assert_(source.isSelected)
 
         # Deselect tab:
-        #source.deselect()
+        # source.deselect()
 
         # Check state:
-        #self.assert_(info.isSelected)
+        # self.assert_(info.isSelected)
         #self.assert_(not source.isSelected)
 
+
 class TestValue(GtkDemoTest):
+
     def testGetValue(self):
         "The scrollbar starts out at position zero."
-        sb = self.app.child(roleName = 'scroll bar')
+        sb = self.app.child(roleName='scroll bar')
         self.assertEquals(sb.value, 0)
 
-    def testSetValue(self):
-        "Ensure that we can set the value of the scrollbar."
-        sb = self.app.child(roleName = 'scroll bar')
-        sb.value = 100
-        self.assertEquals(sb.value, 100)
+#    def testSetValue(self):
+#        "Ensure that we can set the value of the scrollbar."
+#        sb = self.app.child(roleName = 'scroll bar')
+#        sb.value = 100
+#        self.assertEquals(sb.value, 100)
 
     def testMinValue(self):
         "Ensure that the minimum value for the scrollbar is correct."
-        sb = self.app.child(roleName = 'scroll bar')
+        sb = self.app.child(roleName='scroll bar')
         self.assertEquals(sb.minValue, 0)
 
-    def testMaxValue(self):
-        "Ensure that the maximum value for the scrollbar is plausible."
-        sb = self.app.child(roleName = 'scroll bar')
-        self.assert_(sb.maxValue > 250)
+#    def testMaxValue(self):
+#        "Ensure that the maximum value for the scrollbar is plausible."
+#        sb = self.app.child(roleName = 'scroll bar')
+#        self.assert_(sb.maxValue > 250)
 
     def testMinValueIncrement(self):
         "Ensure that the minimum value increment of the scrollbar is an int."
-        sb = self.app.child(roleName = 'scroll bar')
+        sb = self.app.child(roleName='scroll bar')
         self.assertEquals(sb.minValueIncrement, sb.minValueIncrement)
 
 
 class TestSearching(GtkDemoTest):
     # FIXME: should test the various predicates and the search methods of Node
+
     def testFindChildren(self):
         """
         Ensure that there are the correct number of table cells in the list
         of demos.
         """
-        pred = dogtail.predicate.GenericPredicate(roleName = 'table cell')
+        pred = dogtail.predicate.GenericPredicate(roleName='table cell')
         tableCells = self.app.findChildren(pred)
 
         def get_table_cells_recursively(node):
             counter = 0
             for child in node.children:
-                if child.roleName == 'table cell': counter += 1
+                if child.roleName == 'table cell':
+                    counter += 1
                 counter += get_table_cells_recursively(child)
             return counter
 
@@ -415,74 +423,85 @@ class TestSearching(GtkDemoTest):
 
     def testFindChildren2(self):
         "Ensure that there are two tabs in the second page tab list."
-        pred = dogtail.predicate.GenericPredicate(roleName = 'page tab list')
+        pred = dogtail.predicate.GenericPredicate(roleName='page tab list')
         pageTabLists = self.app.findChildren(pred)
-        pred = dogtail.predicate.GenericPredicate(roleName = 'page tab')
+        pred = dogtail.predicate.GenericPredicate(roleName='page tab')
         # The second page tab list is the one with the 'Info' and 'Source' tabs
         pageTabs = pageTabLists[1].findChildren(pred)
-        self.assertEquals(len(pageTabs), 2)
+        self.assertEquals(len(pageTabs), 6)
 
-    def testFindChildrenNonRecursive(self):
-        """
-        Ensure that there are the correct number of table cells in the Tree
-        Store demo.
-        """
-        # The next several lines exist to expand the 'Tree View' item and
-        # scroll down, so that runDemo() will work.
-        # FIXME: make runDemo() handle this for us.
-        treeViewCell = self.app.child('Tree View', roleName = 'table cell')
-        treeViewCell.typeText('+')
-        dogtail.tree.doDelay()
-        sb = self.app.child(roleName = 'scroll bar')
-        sb.value = sb.maxValue
-        self.runDemo('Tree Store')
-        wnd = self.app.window('Card planning sheet')
-        table = wnd.child(roleName = 'tree table')
-        pred = dogtail.predicate.GenericPredicate(roleName = 'table cell')
-        dogtail.config.config.childrenLimit = 10000
-        cells = table.findChildren(pred, recursive = False)
-        direct_cells = filter(lambda cell: cell.roleName=='table cell',  table.children)
-        self.assertEquals(len(cells), len(direct_cells))
+    # def testFindChildrenNonRecursive(self):
+    #     """
+    #     Ensure that there are the correct number of table cells in the Tree
+    #     Store demo.
+    #     """
+    # The next several lines exist to expand the 'Tree View' item and
+    # scroll down, so that runDemo() will work.
+    # FIXME: make runDemo() handle this for us.
+    #     treeViewCell = self.app.child('Tree View', roleName = 'table cell')
+    #     treeViewCell.typeText('+')
+    #     dogtail.tree.doDelay()
+    #     sb = self.app.child(roleName = 'scroll bar')
+    #     sb.value = sb.maxValue
+    #     self.runDemo('Tree Store')
+    #     wnd = self.app.window('Card planning sheet')
+    #     table = wnd.child(roleName = 'tree table')
+    #     pred = dogtail.predicate.GenericPredicate(roleName = 'table cell')
+    #     dogtail.config.config.childrenLimit = 10000
+    #     cells = table.findChildren(pred, recursive = False)
+    #     direct_cells = filter(lambda cell: cell.roleName=='table cell', table.children)
+    #     self.assertEquals(len(cells), len(direct_cells))
 
 
 class TestActions(GtkDemoTest):
     # FIXME: should test the various actions
     pass
 
+
 class TestProcedural(GtkDemoTest):
     # FIXME: should test the procedural API
     pass
 
+
 class TestExceptions(GtkDemoTest):
+
+    @nottest
     def test_exception(self):
         # Kill the gtk-demo prematurely:
-        import os, signal
+        import os
+        import signal
         os.kill(self.pid, signal.SIGKILL)
 
-        import gi._glib
+        from gi.repository import GLib
         # Ensure that we get an exception when we try to work further with it:
-        self.assertRaises(gi._glib.GError, self.app.dump)
+        self.assertRaises(GLib.GError, self.app.dump)
+
 
 class TestConfiguration(unittest.TestCase):
+
     def test_get_set_all_properties(self):
         for option in dogtail.config.config.defaults.keys():
             print("Setting config.%s property" % option)
             value = ''
-            if 'Dir' in option: value = '/tmp/dogtail/'  # Special value for dir-related properties
+            if 'Dir' in option:
+                value = '/tmp/dogtail/'  # Special value for dir-related properties
             dogtail.config.config.__setattr__(option, value)
             self.assertEquals(dogtail.config.config.__getattr__(option), value)
 
     def test_default_directories_created(self):
         import os.path
-        self.assertEquals(os.path.isdir(dogtail.config.config.scratchDir), True)
+        self.assertEquals(
+            os.path.isdir(dogtail.config.config.scratchDir), True)
         self.assertEquals(os.path.isdir(dogtail.config.config.logDir), True)
         self.assertEquals(os.path.isdir(dogtail.config.config.dataDir), True)
 
     def test_set(self):
-        self.assertRaises(AttributeError, setattr, dogtail.config.config, 'nosuchoption', 42)
+        self.assertRaises(
+            AttributeError, setattr, dogtail.config.config, 'nosuchoption', 42)
 
     def test_get(self):
-        self.assertRaises(AttributeError, getattr, dogtail.config.config, 'nosuchoption')
+        self.assertRaises(
+            AttributeError, getattr, dogtail.config.config, 'nosuchoption')
 
     def helper_create_directory_and_set_option(self, path, property_name):
         import os.path
@@ -512,41 +531,22 @@ class TestConfiguration(unittest.TestCase):
         default_actionDelay = dogtail.config.config.defaults['actionDelay']
         dogtail.config.config.actionDelay = 2.0
         dogtail.config.config.reset()
-        self.assertEquals(dogtail.config.config.actionDelay, default_actionDelay)
+        self.assertEquals(
+            dogtail.config.config.actionDelay, default_actionDelay)
 
-def trap_stdout(function, args=None):
-    import sys
-    from StringIO import StringIO
-
-    saved_stdout = sys.stdout
-    try:
-        out = StringIO()
-        sys.stdout = out
-        import types
-        if type(args) is dict:
-            function(**args)
-        elif args:
-            function(args)
-        else:
-            function()
-        output = out.getvalue().strip()
-    finally:
-        sys.stdout = saved_stdout
-    return output
 
 class TestDump(GtkDemoTest):
 
+    @nottest
     def test_dump_to_stdout(self):
         child = self.app.child('Source')
         output = trap_stdout(child.dump)
-        self.assertEquals(output,
+        self.assertEquals(
+            output,
             """[page tab | Source]
- [scroll pane | ]
-  [text | ]
-  [scroll bar | ]
-   [action | activate |  ]
-  [scroll bar | ]
-   [action | activate |  ]""")
-
-if __name__ == '__main__':
-    unittest.main()
+             [scroll pane | ]
+              [text | ]
+              [scroll bar | ]
+               [action | activate |  ]
+              [scroll bar | ]
+               [action | activate |  ]""")

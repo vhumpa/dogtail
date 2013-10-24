@@ -4,28 +4,31 @@ Unit tests for the dogtail.procedural API
 """
 __author__ = "Zack Cerza <zcerza@redhat.com>"
 
-import unittest
-from dogtail.procedural import *
+from dogtail.procedural import focus, keyCombo, deselect, select, click, tree, FocusError, run, config, type
 config.logDebugToFile = False
 config.logDebugToStdOut = True
 import pyatspi
-import Node
+from gtkdemotest import GtkDemoTest, trap_stdout
+from nose.tools import nottest
 
 
-class GtkDemoTest(Node.GtkDemoTest):
+class GtkDemoTest(GtkDemoTest):
+
     def setUp(self):
-        self.pid = run('gtk-demo')
+        self.pid = run('gtk3-demo')
         self.app = focus.application.node
 
-    #FIXME: Implement doubleclick() in d.procedural and override the other
+    # FIXME: Implement doubleclick() in d.procedural and override the other
     # methods of Node.GtkDemoTest
 
 
 class TestFocusApplication(GtkDemoTest):
+
     def testFocusingBogusNameWithoutAFatalError(self):
         config.fatalErrors = False
-        output = Node.trap_stdout(focus.application, "should not be found")
-        self.assertTrue('The requested widget could not be focused: "should not be found" application' in output)
+        output = trap_stdout(focus.application, "should not be found")
+        self.assertTrue(
+            'The requested widget could not be focused: "should not be found" application' in output)
 
     def testThrowExceptionOnFocusingBogusName(self):
         config.fatalErrors = True
@@ -34,16 +37,18 @@ class TestFocusApplication(GtkDemoTest):
     def testFocusingBasic(self):
         "Ensure that focus.application() sets focus.application.node properly"
         focus.application.node = None
-        focus.application("gtk-demo")
+        focus.application("gtk3-demo")
         self.assertEquals(focus.application.node, self.app)
 
 
 class TestFocusWindow(GtkDemoTest):
+
     def testFocusingBogusNameWithoutAFatalError(self):
         config.fatalErrors = False
-        output = Node.trap_stdout(focus.window, "should not be found")
+        output = trap_stdout(focus.window, "should not be found")
         self.assertEquals(focus.window.node, None)
-        self.assertTrue('The requested widget could not be focused: "should not be found" window' in output)
+        self.assertTrue(
+            'The requested widget could not be focused: "should not be found" window' in output)
 
     def testThrowExceptionOnFocusingBogusName(self):
         config.fatalErrors = True
@@ -51,11 +56,13 @@ class TestFocusWindow(GtkDemoTest):
 
 
 class TestFocusDialog(GtkDemoTest):
+
     def testFocusingBogusNameWithoutAFatalError(self):
         config.fatalErrors = False
-        output = Node.trap_stdout(focus.dialog, "should not be found")
+        output = trap_stdout(focus.dialog, "should not be found")
         self.assertEquals(focus.dialog.node, None)
-        self.assertTrue('The requested widget could not be focused: "should not be found" dialog' in output)
+        self.assertTrue(
+            'The requested widget could not be focused: "should not be found" dialog' in output)
 
     def testThrowExceptionOnFocusingBogusName(self):
         config.fatalErrors = True
@@ -63,14 +70,16 @@ class TestFocusDialog(GtkDemoTest):
 
 
 class TestFocusWidget(GtkDemoTest):
+
     def testFocusingEmptyName(self):
         self.assertRaises(TypeError, focus.widget)
 
     def testFocusingBogusNameWithoutAFatalError(self):
         config.fatalErrors = False
-        output = Node.trap_stdout(focus.widget, "should not be found")
+        output = trap_stdout(focus.widget, "should not be found")
         self.assertEquals(focus.widget.node, None)
-        self.assertTrue('The requested widget could not be focused: child with name="should not be found"' in output)
+        self.assertTrue(
+            'The requested widget could not be focused: child with name="should not be found"' in output)
 
     def testThrowExceptionOnFocusingBogusName(self):
         config.fatalErrors = True
@@ -78,14 +87,15 @@ class TestFocusWidget(GtkDemoTest):
 
     def testFocusingBasic(self):
         "Ensure that focus.widget('foo') finds a node with name 'foo'"
-        focus.widget("Application main window")
-        self.assertEquals(focus.widget.name, "Application main window")
+        focus.widget("Application window")
+        self.assertEquals(focus.widget.name, "Application window")
 
 
 class TestFocus(GtkDemoTest):
+
     def testInitialState(self):
         "Ensure that focus.widget, focus.dialog and focus.window are None " + \
-                "initially."
+            "initially."
         self.assertEquals(focus.widget.node, None)
         self.assertEquals(focus.dialog.node, None)
         self.assertEquals(focus.window.node, None)
@@ -93,20 +103,21 @@ class TestFocus(GtkDemoTest):
     def testFocusingApp(self):
         "Ensure that focus.app() works"
         focus.app.node = None
-        focus.app('gtk-demo')
+        focus.app('gtk3-demo')
         self.assertEquals(focus.app.node, self.app)
 
     def testFocusingAppViaApplication(self):
         "Ensure that focus.application() works"
         focus.app.node = None
-        focus.application('gtk-demo')
+        focus.application('gtk3-demo')
         self.assertEquals(focus.app.node, self.app)
 
     def testFocusGettingBogusAttribute(self):
         self.assertRaises(AttributeError, getattr, focus, 'nosuchtype')
 
     def testFocusSettingBogusAttribute(self):
-        self.assertRaises(AttributeError, setattr, focus, 'nosuchtype', 'nothing')
+        self.assertRaises(
+            AttributeError, setattr, focus, 'nosuchtype', 'nothing')
 
     def testFocusingRoleName(self):
         "Ensure that focus.widget(roleName=...) works."
@@ -115,14 +126,14 @@ class TestFocus(GtkDemoTest):
         self.assertEquals(focus.widget.node.role, pyatspi.ROLE_PAGE_TAB)
 
     def testFocusMenu(self):
-        self.runDemo('Application main window')
+        self.runDemo('Application window')
         focus.window('Application Window')
         focus.menu('File')
         self.assert_(isinstance(focus.widget.node, tree.Node))
         self.assertEquals(focus.widget.node.role, pyatspi.ROLE_MENU)
 
     def testFocusMenuItem(self):
-        self.runDemo('Application main window')
+        self.runDemo('Application window')
         focus.window('Application Window')
         click.menu('File')
         focus.menuItem('New')
@@ -130,7 +141,7 @@ class TestFocus(GtkDemoTest):
         self.assertEquals(focus.widget.node.role, pyatspi.ROLE_MENU_ITEM)
 
     def testFocusButton(self):
-        self.runDemo('Application main window')
+        self.runDemo('Application window')
         focus.window('Application Window')
         focus.button('Open')
         self.assert_(isinstance(focus.widget.node, tree.Node))
@@ -151,7 +162,7 @@ class TestFocus(GtkDemoTest):
         self.assertEquals(focus.widget.node.role, pyatspi.ROLE_TABLE_CELL)
 
     def testFocusText(self):
-        self.runDemo('Application main window')
+        self.runDemo('Application window')
         focus.window('Application Window')
         focus.text('')
         self.assert_(isinstance(focus.widget.node, tree.Node))
@@ -159,14 +170,16 @@ class TestFocus(GtkDemoTest):
 
 
 class TestKeyCombo(GtkDemoTest):
+
     def testKeyCombo(self):
-        self.runDemo('Application main window')
+        self.runDemo('Application window')
         focus.window('Application Window')
         keyCombo("<ctrl>a")
         focus.dialog('About GTK+ Code Demos')
 
 
 class TestActions(GtkDemoTest):
+
     def testClick(self):
         click('Source')
         self.assertTrue(focus.widget.isSelected)
@@ -179,6 +192,7 @@ class TestActions(GtkDemoTest):
         select('Source')
         self.assertTrue(focus.widget.isSelected)
 
+    @nottest
     def testDeselect(self):
         type('Icon View')
         click('Icon View')
@@ -197,7 +211,3 @@ class TestActions(GtkDemoTest):
         focus.widget(roleName='text')
         type("hello world")
         self.assertEquals(focus.widget.node.text, 'hello world')
-
-
-if __name__ == "__main__":
-    unittest.main()

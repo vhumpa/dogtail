@@ -5,7 +5,7 @@ Unit tests for the dogtail.logging package
 """
 import unittest
 import dogtail.tree
-from Node import trap_stdout
+from gtkdemotest import trap_stdout
 
 
 class TestLogging(unittest.TestCase):
@@ -14,6 +14,7 @@ class TestLogging(unittest.TestCase):
         self.old_log_dir = dogtail.config.config.logDir
 
     def tearDown(self):
+        dogtail.config.config.logDebugToFile = False
         dogtail.config.config.logDir = self.old_log_dir
 
     def test_entryStamp_is_not_empty(self):
@@ -43,15 +44,22 @@ class TestLogging(unittest.TestCase):
     def test_no_new_line_to_stdout(self):
         dogtail.config.config.logDebugToFile = False
         logger = dogtail.logging.Logger("log", file=False, stdOut=True)
-        output = trap_stdout(logger.log, {'message': 'hello world', 'newline': False})
+        output = trap_stdout(
+            logger.log, {'message': 'hello world', 'newline': False})
         self.assertEquals(output, "hello world")
 
     def test_no_new_line_to_both_file_and_stdout(self):
         dogtail.config.config.logDebugToFile = True
         logger = dogtail.logging.Logger("log", file=True, stdOut=True)
-        output = trap_stdout(logger.log, {'message': 'hello world', 'newline': False})
+        output = trap_stdout(
+            logger.log, {'message': 'hello world', 'newline': False})
         self.assertTrue("hello world" in output)
         self.assertTrue("hello world " in open(logger.fileName, 'r').read())
+
+    def test_empty_script_name(self):
+        dogtail.config.config.scriptName = None
+        logger = dogtail.logging.Logger("log", file=True, stdOut=True)
+        self.assertTrue(logger.fileName, "log")
 
     def test_force_to_file(self):
         dogtail.config.config.logDebugToFile = False
@@ -67,7 +75,3 @@ class TestLogging(unittest.TestCase):
     def test_results_logger_incorrect_dict(self):
         logger = dogtail.logging.ResultsLogger("log")
         self.assertRaises(ValueError, logger.log, "not a dict")
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -179,7 +179,7 @@ class GenericPredicate(Predicate):
 
     def makeScriptMethodCall(self, isRecursive):
         if self.label:
-            args = "label='%s'" % self.label
+            args = "label=%s" % self.label
         else:
             args = ""
             if self.name:

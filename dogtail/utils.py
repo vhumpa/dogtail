@@ -118,7 +118,7 @@ def run(string, timeout=config.runTimeout, interval=config.runInterval, desktop=
                                 focus.application.node = child
                                 doDelay(interval)
                                 return pid
-            except AttributeError:
+            except AttributeError:  # pragma: no cover
                 pass
             doDelay(interval)
     return pid
@@ -136,9 +136,9 @@ def doDelay(delay=None):
     sleep(delay)
 
 
-class Highlight (Gtk.Window):
+class Highlight (Gtk.Window):  # pragma: no cover
 
-    def __init__(self, x, y, w, h):
+    def __init__(self, x, y, w, h):  # pragma: no cover
         super(Highlight, self).__init__()
         self.set_decorated(False)
         self.set_has_resize_grip(False)
@@ -152,7 +152,7 @@ class Highlight (Gtk.Window):
         self.show_all()
         self.move(x, y)
 
-    def area_draw(self, widget, cr):
+    def area_draw(self, widget, cr):  # pragma: no cover
         cr.set_source_rgba(.0, .0, .0, 0.0)
         cr.set_operator(cairo.OPERATOR_SOURCE)
         cr.paint()
@@ -163,11 +163,11 @@ class Highlight (Gtk.Window):
         cr.stroke()
 
 
-class Blinker(object):
+class Blinker(object):  # pragma: no cover
     INTERVAL_MS = 1000
     main_loop = GObject.MainLoop()
 
-    def __init__(self, x, y, w, h):
+    def __init__(self, x, y, w, h):  # pragma: no cover
         self.highlight_window = Highlight(x, y, w, h)
         if self.highlight_window.screen.is_composited() is not False:
             self.timeout_handler_id = GObject.timeout_add(
@@ -176,7 +176,7 @@ class Blinker(object):
         else:
             self.highlight_window.destroy()
 
-    def destroyHighlight(self):
+    def destroyHighlight(self):  # pragma: no cover
         self.highlight_window.destroy()
         self.main_loop.quit()
         return False
@@ -258,18 +258,18 @@ def isA11yEnabled():
     if os.environ.get('GTK_MODULES', '').find('gail:atk-bridge') == -1:
         envEnabled = False
     else:
-        envEnabled = True
+        envEnabled = True  # pragma: no cover
     return (dconfEnabled or envEnabled)
 
 
 def bailBecauseA11yIsDisabled():
     if sys.argv[0].endswith("pydoc"):
-        return
+        return  # pragma: no cover
     try:
         if file("/proc/%s/cmdline" % os.getpid()).read().find('epydoc') != -1:
-            return
-    except:
-        pass
+            return  # pragma: no cover
+    except:   # pragma: no cover
+        pass  # pragma: no cover
     logger.log("Dogtail requires that Assistive Technology support be enabled."
                "\nYou can enable accessibility with sniff or by running:\n"
                "'gsettings set org.gnome.desktop.interface toolkit-accessibility true'\nAborting...")
@@ -289,11 +289,11 @@ def checkForA11y():
     """
     Checks if accessibility is enabled, and halts execution if it is not.
     """
-    if not isA11yEnabled():
+    if not isA11yEnabled():  # pragma: no cover
         bailBecauseA11yIsDisabled()
 
 
-def checkForA11yInteractively():
+def checkForA11yInteractively():  # pragma: no cover
     """
     Checks if accessibility is enabled, and presents a dialog prompting the
     user if it should be enabled if it is not already, then halts execution.
@@ -324,7 +324,7 @@ Note that you will have to log out for the change to fully take effect.
     dialog.destroy()
 
 
-class GnomeShell(object):
+class GnomeShell(object):  # pragma: no cover
 
     """
     Utility class to help working with certain atributes of gnome-shell.

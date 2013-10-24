@@ -205,7 +205,7 @@ debugLogger = Logger('debug', config.logDebugToFile)
 import traceback
 
 
-def exceptionHook(exc, value, tb):
+def exceptionHook(exc, value, tb):  # pragma: no cover
     tbStringList = traceback.format_exception(exc, value, tb)
     tbString = ''.join(tbStringList)
     debugLogger.log(tbString)

@@ -79,13 +79,13 @@ from logging import debugLogger as logger
 try:
     import pyatspi
     import Accessibility
-except ImportError:
+except ImportError:  # pragma: no cover
     raise ImportError("Error importing the AT-SPI bindings")
 
 # We optionally import the bindings for libWnck.
 try:
     from gi.repository import Wnck
-    gotWnck = True
+    gotWnck = True  # pragma: no cover
 except ImportError:
     # Skip this warning, since the functionality is almost entirely nonworking anyway.
     # print "Warning: Dogtail could not import the Python bindings for
@@ -1138,7 +1138,7 @@ class Application (Node):
         #       result.activate()
         return result
 
-    def getWnckApplication(self):
+    def getWnckApplication(self):  # pragma: no cover
         """
         Get the wnck.Application instance for this application, or None
 
@@ -1157,7 +1157,7 @@ class Application (Node):
 
 class Window (Node):
 
-    def getWnckWindow(self):
+    def getWnckWindow(self):  # pragma: no cover
         """
         Get the wnck.Window instance for this window, or None
         """
@@ -1173,7 +1173,7 @@ class Window (Node):
             if wnckWindow.get_name() == self.name:
                 return wnckWindow
 
-    def activate(self):
+    def activate(self):  # pragma: no cover
         """
         Activates the wnck.Window associated with this Window.
 
@@ -1266,14 +1266,14 @@ Accessibility.Accessible.__bases__ = (
 try:
     root = pyatspi.Registry.getDesktop(0)
     root.debugName = 'root'
-except Exception:
+except Exception:  # pragma: no cover
     # Warn if AT-SPI's desktop object doesn't show up.
     logger.log(
         "Error: AT-SPI's desktop is not visible. Do you have accessibility enabled?")
 
 # Check that there are applications running. Warn if none are.
 children = root.children
-if not children:
+if not children:  # pragma: no cover
     logger.log(
         "Warning: AT-SPI's desktop is visible but it has no children. Are you running any AT-SPI-aware applications?")
 del children
@@ -1288,7 +1288,7 @@ if not os.path.exists('/tmp/sniff_running.lock'):
         sniff_lock = Lock(lockname='sniff_refresh.lock', randomize=False)
         try:
             sniff_lock.lock()
-        except OSError:
+        except OSError:  # pragma: no cover
             pass  # lock was already present from other script instance or leftover from killed instance
         # lock should unlock automatically on script exit.
 

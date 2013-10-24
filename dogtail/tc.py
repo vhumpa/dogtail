@@ -12,7 +12,7 @@ from PIL import Image, ImageChops, ImageStat
 from __builtin__ import unicode, long
 
 
-class TC(object):
+class TC(object):  # pragma: no cover
 
     """
     The Test Case Superclass
@@ -73,7 +73,7 @@ class TC(object):
 
 
 # String Test Case subclass
-class TCString(TC):
+class TCString(TC):  # pragma: no cover
 
     """
     String Test Case Class
@@ -85,7 +85,7 @@ class TCString(TC):
 # Image test case subclass
 
 
-class TCImage(TC):
+class TCImage(TC):  # pragma: no cover
 
     """
     Image Test Case Class.
@@ -132,7 +132,7 @@ class TCImage(TC):
         return self.result
 
 
-class TCNumber(TC):
+class TCNumber(TC):  # pragma: no cover
 
     """
     Number Comparaison Test Case Class
@@ -184,7 +184,7 @@ class TCNumber(TC):
             return self.result
 
 
-class TCBool(TC):
+class TCBool(TC):  # pragma: no cover
 
     def __init__(self):
         pass
@@ -205,7 +205,7 @@ class TCBool(TC):
 from tree import Node
 
 
-class TCNode(TC):
+class TCNode(TC):  # pragma: no cover
 
     def __init__(self):
         pass

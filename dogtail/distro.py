@@ -9,7 +9,7 @@ from version import Version
 from logging import debugLogger as logger
 
 
-class DistributionNotSupportedError(Exception):
+class DistributionNotSupportedError(Exception):  # pragma: no cover
 
     """
     This distribution is not supported.
@@ -90,7 +90,7 @@ class PackageDb:
         raise NotImplementedError
 
 
-class _RpmPackageDb(PackageDb):
+class _RpmPackageDb(PackageDb):  # pragma: no cover
 
     def __init__(self):
         PackageDb.__init__(self)
@@ -194,7 +194,7 @@ class _UbuntuAptPackageDb(_AptPackageDb):
         self.localePrefixes.append(self.prefix + '/share/locale-langpack')
 
 
-class _PortagePackageDb(PackageDb):
+class _PortagePackageDb(PackageDb):  # pragma: no cover
 
     def __init__(self):
         PackageDb.__init__(self)
@@ -217,7 +217,7 @@ class _PortagePackageDb(PackageDb):
         return Version.fromString(upstreamVersion)
 
 
-class _ConaryPackageDb(PackageDb):
+class _ConaryPackageDb(PackageDb):  # pragma: no cover
 
     def __init__(self):
         PackageDb.__init__(self)
@@ -235,13 +235,13 @@ class _ConaryPackageDb(PackageDb):
 # module.
 
 
-class _SolarisPackageDb(PackageDb):
+class _SolarisPackageDb(PackageDb):  # pragma: no cover
 
     def __init__(self):
         PackageDb.__init__(self)
 
 
-class JhBuildPackageDb(PackageDb):
+class JhBuildPackageDb(PackageDb):  # pragma: no cover
 
     def __init__(self):
         PackageDb.__init__(self)
@@ -277,17 +277,17 @@ class Distro:
     """
 
 
-class Fedora(Distro):
+class Fedora(Distro):  # pragma: no cover
 
     def __init__(self):
         self.packageDb = _RpmPackageDb()
 
 
-class RHEL(Fedora):
+class RHEL(Fedora):  # pragma: no cover
     pass
 
 
-class Debian(Distro):
+class Debian(Distro):  # pragma: no cover
 
     def __init__(self):
         self.packageDb = _AptPackageDb()
@@ -299,31 +299,31 @@ class Ubuntu(Debian):
         self.packageDb = _UbuntuAptPackageDb()
 
 
-class Suse(Distro):
+class Suse(Distro):  # pragma: no cover
 
     def __init__(self):
         self.packageDb = _RpmPackageDb()
 
 
-class Gentoo(Distro):
+class Gentoo(Distro):  # pragma: no cover
 
     def __init__(self):
         self.packageDb = _PortagePackageDb()
 
 
-class Conary(Distro):
+class Conary(Distro):  # pragma: no cover
 
     def __init__(self):
         self.packageDb = _ConaryPackageDb()
 
 
-class Solaris(Distro):
+class Solaris(Distro):  # pragma: no cover
 
     def __init__(self):
         self.packageDb = _SolarisPackageDb()
 
 
-class JHBuild(Distro):
+class JHBuild(Distro):  # pragma: no cover
 
     def __init__(self):
         self.packageDb = JhBuildPackageDb()
@@ -333,28 +333,28 @@ def detectDistro():
     logger.log("Detecting distribution:", newline=False)
 
     if os.environ.get("CERTIFIED_GNOMIE", "no") == "yes":
-        distro = JHBuild()
+        distro = JHBuild()  # pragma: no cover
     elif os.path.exists("/etc/SuSE-release"):
-        distro = Suse()
+        distro = Suse()  # pragma: no cover
     elif os.path.exists("/etc/fedora-release"):
-        distro = Fedora()
+        distro = Fedora()  # pragma: no cover
     elif os.path.exists("/etc/redhat-release"):
-        distro = RHEL()
+        distro = RHEL()  # pragma: no cover
     elif os.path.exists("/usr/share/doc/ubuntu-minimal"):
         distro = Ubuntu()
-    elif os.path.exists("/etc/debian_version"):
-        distro = Debian()
-    elif os.path.exists("/etc/gentoo-release"):
-        distro = Gentoo()
-    elif os.path.exists("/etc/slackware-version"):
-        raise DistributionNotSupportedError("Slackware")
-    elif os.path.exists("/var/lib/conarydb/conarydb"):
-        distro = Conary()
+    elif os.path.exists("/etc/debian_version"):  # pragma: no cover
+        distro = Debian()  # pragma: no cover
+    elif os.path.exists("/etc/gentoo-release"):  # pragma: no cover
+        distro = Gentoo()  # pragma: no cover
+    elif os.path.exists("/etc/slackware-version"):  # pragma: no cover
+        raise DistributionNotSupportedError("Slackware")  # pragma: no cover
+    elif os.path.exists("/var/lib/conarydb/conarydb"):  # pragma: no cover
+        distro = Conary()  # pragma: no cover
     elif os.path.exists("/etc/release") and \
-            re.match(".*Solaris", open("/etc/release").readline()):
-        distro = Solaris()
+            re.match(".*Solaris", open("/etc/release").readline()):  # pragma: no cover
+        distro = Solaris()  # pragma: no cover
     else:
-        raise DistributionNotSupportedError("Unknown")
+        raise DistributionNotSupportedError("Unknown")  # pragma: no cover
     logger.log(distro.__class__.__name__)
     return distro
 

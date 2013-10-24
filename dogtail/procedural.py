@@ -437,7 +437,8 @@ def run(application, arguments='', appName=''):
 
 import os
 # tell sniff not to use auto-refresh while script using this module is running
-if not os.path.exists('/tmp/sniff_refresh.lock'):  # may have already been locked by dogtail.tree
+# may have already been locked by dogtail.tree
+if not os.path.exists('/tmp/sniff_refresh.lock'):  # pragma: no cover
     sniff_lock = Lock(lockname='sniff_refresh.lock', randomize=False)
     try:
         sniff_lock.lock()

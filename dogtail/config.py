@@ -199,7 +199,8 @@ class _Config(object):
                 os.makedirs(dirName, perms)
                 os.umask(umask)
             else:
-                os.makedirs(dirName)
+                # This is probably a dead code - no other functions call this without the permissions set
+                os.makedirs(dirName)  # pragma: no cover
     __createDir = classmethod(__createDir)
 
     def load(self, dict):

@@ -8,7 +8,7 @@ __author__ = "Zack Cerza <zcerza@redhat.com>"
 import Accessibility
 
 
-def makeWrapperClass(wrappedClass, name):
+def makeWrapperClass(wrappedClass, name):  # pragma: no cover
     class klass(object):
 
         def __init__(self, obj):

@@ -147,7 +147,8 @@ keyNameAliases = {
 }
 
 
-def keySymToUniChar(keySym):
+# TODO: Dead code
+def keySymToUniChar(keySym):  # pragma: no cover
     i = Gdk.keyval_to_unicode(keySym)
     if i:
         UniChar = unichr(i)
@@ -165,7 +166,8 @@ def uniCharToKeySym(uniChar):
     return keySym
 
 
-def keySymToKeyName(keySym):
+# dead code
+def keySymToKeyName(keySym):  # pragma: no cover
     return Gdk.keyval_name(keySym)
 
 

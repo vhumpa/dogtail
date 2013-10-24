@@ -11,7 +11,7 @@ import glob
 from dogtail.config import config
 
 
-def scratchFile(label):
+def scratchFile(label):  # pragma: no cover
     """Uses tempfile.NamedTemporaryFile() to create a unique tempfile in
      config.scratchDir, with a filename like:
      dogtail-headless-<label>.<random junk>"""
@@ -20,7 +20,7 @@ def scratchFile(label):
                                        dir=config.scratchDir)
 
 
-def testBinary(path):
+def testBinary(path):  # pragma: no cover
     if (path.startswith(os.path.sep) or
             path.startswith(os.path.join('.', '')) or
             path.startswith(os.path.join('..', ''))):
@@ -31,11 +31,11 @@ def testBinary(path):
     return True
 
 
-def get_username():
+def get_username():  # pragma: no cover
     return pwd.getpwuid(os.getuid())[0]
 
 
-class Subprocess(object):
+class Subprocess(object):  # pragma: no cover
 
     def __init__(self, cmdList, environ=None):
         testBinary(cmdList[0])
@@ -66,7 +66,7 @@ class Subprocess(object):
         return self._exitCode
 
 
-class XServer(Subprocess):
+class XServer(Subprocess):  # pragma: no cover
 
     def __init__(self, server="/usr/bin/Xorg",
                  xinitrc="/etc/X11/xinit/Xclients",
@@ -117,11 +117,11 @@ class XServer(Subprocess):
         return self.popen.pid
 
 
-class Script(Subprocess):
+class Script(Subprocess):  # pragma: no cover
     pass
 
 
-class Session(object):
+class Session(object):  # pragma: no cover
 
     cookieName = "DOGTAIL_SESSION_COOKIE"
 

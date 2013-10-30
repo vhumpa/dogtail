@@ -923,7 +923,7 @@ class Node(object):
                 try:
                     descendants = pyatspi.utils.findAllDescendants(self, pred)
                     break
-                except GLib.GError:
+                except (GLib.GError, TypeError):
                     continue
             return descendants
 

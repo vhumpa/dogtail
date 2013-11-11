@@ -890,10 +890,20 @@ class Node(object):
             raise SearchError(describeSearch(self, pred, recursive, debugName))
 
     # The canonical "search for multiple" method:
-    def findChildren(self, pred, recursive=True):
+    def findChildren(self, pred, recursive=True, isLambda=False):
         """
         Find all children/descendents satisfying the predicate.
         """
+        if isLambda is True:
+            nodes = self.findChildren(predicate.GenericPredicate(), recursive=recursive)
+            result = []
+            for node in nodes:
+                try:
+                    if pred(node):
+                        result.append(node)
+                except:
+                    pass
+            return result
         if isinstance(pred, predicate.Predicate):
             pred = pred.satisfiedByNode
         if not recursive:

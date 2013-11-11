@@ -430,6 +430,24 @@ class TestSearching(GtkDemoTest):
         pageTabs = pageTabLists[1].findChildren(pred)
         self.assertEquals(len(pageTabs), 6)
 
+    def testFindChildrenLambdas(self):
+        self.runDemo('Dialog and Message Boxes')
+        wnd = self.app.window('Dialogs')
+        texts = wnd.findChildren(lambda x: x.roleName=='text', isLambda = True)
+        self.assertEquals(len(texts), 2)
+        self.assertEquals(texts[0].roleName, 'text')
+        self.assertEquals(texts[1].roleName, 'text')
+        texts1 = wnd.findChildren(lambda x: x.roleName=='text' and x.labeler.name == 'Entry 1', isLambda = True)
+        self.assertEquals(len(texts1), 1)
+        self.assertEquals(texts1[0].roleName, 'text')
+        self.assertEquals(texts1[0].labeler.name, 'Entry 1')
+        texts2 = wnd.findChildren(lambda x: x.roleName=='text' and x.showing, isLambda = True)
+        self.assertEquals(len(texts2), 2)
+        self.assertEquals(texts2[0].roleName, 'text')
+        self.assertTrue(texts2[0].showing)
+        self.assertEquals(texts2[1].roleName, 'text')
+        self.assertTrue(texts2[1].showing)
+
     # def testFindChildrenNonRecursive(self):
     #     """
     #     Ensure that there are the correct number of table cells in the Tree

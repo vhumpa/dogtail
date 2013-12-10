@@ -124,6 +124,9 @@ def drag(fromXY, toXY, button=1, check=True):
 def typeText(string):
     """
     Types the specified string, one character at a time.
+    Please note, you may have to set a higher typing delay,
+    if your machine misses/switches the characters typed.
+    Needed sometimes on slow setups/VMs typing non-ASCII utf8 chars.
     """
     if not isinstance(string, unicode):
         string = string.decode('utf-8')
@@ -160,7 +163,7 @@ def keySymToUniChar(keySym):  # pragma: no cover
 def uniCharToKeySym(uniChar):
     # OK, if it's not actually unicode we can fix that, right?
     if not isinstance(uniChar, unicode):
-        uniChar = unicode(uniChar)
+        uniChar = unicode(uniChar, 'utf-8')
     i = ord(uniChar)
     keySym = Gdk.unicode_to_keyval(i)
     return keySym
@@ -172,16 +175,17 @@ def keySymToKeyName(keySym):  # pragma: no cover
 
 
 def keyNameToKeySym(keyName):
-    try:
-        keyName = keyNameAliases.get(keyName.lower(), keyName)
-        keySym = Gdk.keyval_from_name(keyName)
-        if not keySym:
-            keySym = getattr(Gdk, keyName)
-    except AttributeError:
+    keyName = keyNameAliases.get(keyName.lower(), keyName)
+    keySym = Gdk.keyval_from_name(keyName)
+    # various error 'codes' returned for non-recognized chars in versions of GTK3.X
+    if keySym == 0xffffff or keySym == 0x0 or keySym is None:
         try:
             keySym = uniCharToKeySym(keyName)
-        except TypeError:
-            raise KeyError(keyName)
+        except: # not even valid utf-8 char
+            try: # Last attempt run at a keyName ('Meta_L', 'Dash' ...)
+                keySym = getattr(Gdk, 'KEY_' + keyName)
+            except AttributeError:
+                raise KeyError(keyName)
     return keySym
 
 
@@ -238,7 +242,6 @@ def keyCombo(comboString):
     modifiers = strings[:-1]
     finalKey = strings[-1]
     for modifier in modifiers:
-
         code = keyNameToKeyCode(modifier)
         registry.generateKeyboardEvent(code, None, KEY_PRESS)
     code = keyNameToKeyCode(finalKey)

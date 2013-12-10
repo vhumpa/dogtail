@@ -126,7 +126,7 @@ class _Config(object):
 
         # Timing and Limits
         'actionDelay': 1.0,
-        'typingDelay': 0.075,
+        'typingDelay': 0.1,
         'runInterval': 0.5,
         'runTimeout': 30,
         'searchBackoffDuration': 0.5,

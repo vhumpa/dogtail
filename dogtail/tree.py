@@ -464,6 +464,7 @@ class Node(object):
             - 2 is middle,
             - 3 is right.
         """
+        logger.log("Clicking on %s" % self.getLogString())
         clickX = self.position[0] + self.size[0] / 2
         clickY = self.position[1] + self.size[1] / 2
         if config.debugSearching:

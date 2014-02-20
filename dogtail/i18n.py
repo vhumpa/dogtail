@@ -22,9 +22,8 @@ def safeDecode(string):
         try:
             string = string.decode('utf-8')
         except UnicodeDecodeError:
-            # logger.log(traceback.format_exc())
-            #logger.log("The following string is invalid and caused the above error: '%s'" % string)
             string = string.decode('utf-8', 'replace')
+            logger.log("The following string is invalid and problematic characters were replaced: '%s'" % string)
     return string
 
 
@@ -134,10 +133,7 @@ class TranslatableString(object):
         Constructor looks up the string in all of the translation databases, storing
         the various translations it finds.
         """
-        if isinstance(untranslatedString, unicode):
-            untranslatedString = safeDecode(untranslatedString)
-        else:
-            untranslatedString = safeDecode(untranslatedString)
+        untranslatedString = safeDecode(untranslatedString)
         self.untranslatedString = untranslatedString
         self.translatedStrings = translate(untranslatedString)
 

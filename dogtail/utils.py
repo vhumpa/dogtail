@@ -16,6 +16,7 @@ import subprocess
 import cairo
 import predicate
 import errno
+import shlex
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -92,7 +93,7 @@ def run(string, timeout=config.runTimeout, interval=config.runInterval, desktop=
     """
     if not desktop:
         from tree import root as desktop
-    args = string.split()
+    args = shlex.split(string)
     os.environ['GTK_MODULES'] = 'gail:atk-bridge'
     pid = subprocess.Popen(args, env=os.environ).pid
 

@@ -275,7 +275,7 @@ class Node(object):
                                    linkIndex=li,
                                    anchorIndex=ai)
                     children.append(child)
-        except NotImplementedError:
+        except (NotImplementedError, AttributeError):
             pass
 
         return children

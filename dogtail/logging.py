@@ -148,7 +148,11 @@ class Logger(object):
 
         If force is True, log to a file irrespective of config.logDebugToFile.
         """
-        message = message.decode('utf-8', 'replace')
+        try:
+             message = message.decode('utf-8', 'replace')
+        except UnicodeEncodeError:
+             pass
+
 
         # Try to open and write the result to the log file.
         if isinstance(self.file, bool) and (force or config.logDebugToFile):

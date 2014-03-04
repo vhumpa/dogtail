@@ -18,12 +18,10 @@ from __builtin__ import unicode
 
 
 def safeDecode(string):
-    if not isinstance(string, unicode):
-        try:
-            string = string.decode('utf-8')
-        except UnicodeDecodeError:
-            string = string.decode('utf-8', 'replace')
-            logger.log("The following string is invalid and problematic characters were replaced: '%s'" % string)
+    try:
+        string = string.decode('utf-8', 'replace')
+    except UnicodeEncodeError:
+        string = string.encode('utf-8', 'replace')
     return string
 
 

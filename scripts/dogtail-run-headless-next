@@ -167,7 +167,12 @@ class DisplayManagerSession(object):
                 account_config = ConfigParser.SafeConfigParser()
                 account_config.optionxform = str
                 account_config.read(tempfile)
-                account_config.set('User', 'XSession', self.session)
+                try:
+                    account_config.set('User', 'XSession', self.session)
+                except ConfigParser.NoSectionError: # user has not logged in before, lets set one up
+                    account_config.add_section('User')
+                    account_config.set('User', 'XSession', self.session)
+                    account_config.set('User', 'SystemAccount', 'false')
                 output = open(tempfile, 'w')
                 account_config.write(output)
                 output.flush()

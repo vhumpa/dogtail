@@ -263,8 +263,9 @@ def main():
     else:
         print('dogtail-run-headless-next: I do not recognize the display manager!')
         sys.exit(-1)
-    print args.session_binary
-    print dm_name
+
+    print('dogtail-run-headless-next: Using %s to bind to the session' % args.session_binary)
+    print('dogtail-run-headless-next: Using display manager: %s' % dm_name)
 
     dm = DisplayManagerSession(dm_name, args.session, args.session_binary.split('/')[-1])
 

@@ -156,39 +156,51 @@ class DisplayManagerSession(object):
                     pass
                 subprocess.Popen(
                     'echo "export QT_ACCESSIBILITY=1" > ~/.kde/env/qt-at-spi.sh', shell=True).wait()
-            if self.session is None:
-                if self.dm == 'gdm':
-                    subprocess.Popen('sudo rm -f %s' % self.accountfile, shell=True).wait()
-                elif self.dm == 'kdm':
-                    subprocess.Popen('sudo rm -f /home/%s/.dmrc' % self.user, shell=True).wait()
-            if self.dm == 'gdm' and self.session is not None:
+            if self.dm == 'gdm':
+                need_restart = False
                 tempfile = '/tmp/%s_headless' % self.user
                 subprocess.Popen('cp -f %s %s' % (self.accountfile, tempfile), shell=True).wait()
                 account_config = ConfigParser.SafeConfigParser()
                 account_config.optionxform = str
                 account_config.read(tempfile)
                 try:
-                    account_config.set('User', 'XSession', self.session)
-                except ConfigParser.NoSectionError: # user has not logged in before, lets set one up
+                    saved_session = account_config.get('User', 'XSession')
+                    if self.session is None:
+                        if 'kde' in saved_session and 'gnome-shell' in self.session_binary:
+                            self.session_binary = '/usr/bin/kwin'
+                        elif 'gnome' in saved_session and 'kwin' in self.session_binary:
+                            self.session_binary = '/usr/bin/gnome-shell'
+                    elif saved_session != self.session:
+                        account_config.set('User', 'XSession', self.session)
+                        need_restart = True
+                except ConfigParser.NoSectionError:
                     account_config.add_section('User')
-                    account_config.set('User', 'XSession', self.session)
+                    account_config.set('User', 'XSession', self.session if self.session else '')
                     account_config.set('User', 'SystemAccount', 'false')
-                output = open(tempfile, 'w')
-                account_config.write(output)
-                output.flush()
-                subprocess.Popen('sudo mv -f %s %s' % (tempfile, self.accountfile), shell=True).wait()
-            elif self.dm == 'kdm' and self.session is not None:
-                subprocess.Popen(
-                'echo "[Desktop]\nSession=%s" > /home/%s/.dmrc' % (self.session, self.user), shell=True).wait()
-            subprocess.Popen('sudo service accounts-daemon restart', shell=True).wait()
-            subprocess.Popen('sudo service systemd-logind restart', shell=True).wait()
+                    need_restart = True
+                if need_restart:
+                    output = open(tempfile, 'w')
+                    account_config.write(output)
+                    output.flush()
+                    subprocess.Popen('sudo mv -f %s %s' % (tempfile, self.accountfile), shell=True).wait()
+                    time.sleep(1)
+                    os.system('sudo service accounts-daemon restart')
+                    time.sleep(6) # prevent a possible race condition
+                    os.system('sudo service systemd-logind restart')
+                    time.sleep(6) # these are fast, but we still need to make sure no races happen
+                else:
+                    subprocess.Popen('sudo rm -f %s' % tempfile, shell=True).wait()
+            elif self.dm == 'kdm':
+                if self.session is not None:
+                    subprocess.Popen(
+                    'echo "[Desktop]\nSession=%s" > /home/%s/.dmrc' % (self.session, self.user), shell=True).wait()
 
     def start(self, restart=False):
         if restart:
             subprocess.Popen(('sudo service %s stop' % (self.dm)).split())
             time.sleep(0.5)
         subprocess.Popen(('sudo service %s start' % (self.dm)).split())
-        self.waitForProcess(self.session_binary)
+        self.waitForProcess(self.session_binary.split('/')[-1])
         # some extra time for an environment (shell/kwin) to load all resources
         # etc.
         if self.dm == 'kdm':
@@ -208,12 +220,12 @@ class DisplayManagerSession(object):
         self.waitForProcess('/usr/bin/%s' % self.dm, invert=True)
         time.sleep(3)  # extra safe time
         # did i.e. gnome-shell get stuck running?
-        if self.isProcessRunning(self.session_binary):
+        if self.isProcessRunning(self.session_binary.split('/')[-1]):
             print(
                 'dogtail-run-headless-next: WARNING: %s still running, proceeding with kill -9' %
-                self.session_binary)
+                self.session_binary.split('/')[-1])
             subprocess.Popen(
-                ('sudo pkill --signal 9 %s' % (self.session_binary)).split()).wait()
+                ('sudo pkill --signal 9 %s' % (self.session_binary.split('/')[-1])).split()).wait()
             time.sleep(1)
 
 
@@ -222,7 +234,8 @@ def parse():
         prog='$ dogtail-run-headless-next', description=descr, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('script', help="""Command to execute the script""")
     parser.add_argument('--session', required=False,
-                        help="""What session to use. Not specifying results in system default session.
+                        help="""What session to use. Not specifying results in system default session on first login
+                        or test user's last session with follow-up logins.
                         Otherwise you can set any xsession desktop file name here (i.e. 'gnome-classic', 'gnome', 'lxde' etc.).
                         'kde' defaults to 'kde-plasma for legacy reasons.'""")
     parser.add_argument('--session-binary', required=False,
@@ -264,21 +277,22 @@ def main():
         print('dogtail-run-headless-next: I do not recognize the display manager!')
         sys.exit(-1)
 
-    print('dogtail-run-headless-next: Using %s to bind to the session' % args.session_binary)
     print('dogtail-run-headless-next: Using display manager: %s' % dm_name)
 
-    dm = DisplayManagerSession(dm_name, args.session, args.session_binary.split('/')[-1])
+    dm = DisplayManagerSession(dm_name, args.session, args.session_binary)
 
     if args.dont_start is not True:
         dm.setup()
         dm.start(restart=args.restart)
 
+    print('dogtail-run-headless-next: Using %s to bind to the session' % dm.session_binary)
+
     try:
-        os.environ = getSessionEnvironment(args.session_binary)
+        os.environ = getSessionEnvironment(dm.session_binary)
     except:
         print(
             'dogtail-run-headless-next: Could not get the environment from %s process' %
-            args.session_binary)
+            dm.session_binary)
         dm.stop()
         dm.setup(restore=True)
         sys.exit(1)

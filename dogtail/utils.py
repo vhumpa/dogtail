@@ -23,7 +23,7 @@ gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
 
 from gi.repository import Gtk
-from gi.repository import GObject
+from gi.repository import GLib
 from config import config
 from time import sleep
 from logging import debugLogger as logger
@@ -61,7 +61,7 @@ def screenshot(file='screenshot.png', timeStamp=True):
         path = config.scratchDir + newFile
 
     from gi.repository import Gdk
-    from gi.repository import GObject
+    from gi.repository import GLib
     from gi.repository import GdkPixbuf
     rootWindow = Gdk.get_default_root_window()
     geometry = rootWindow.get_geometry()
@@ -78,7 +78,7 @@ def screenshot(file='screenshot.png', timeStamp=True):
         fileExt = 'jpeg'
     try:
         pixbuf.savev(path, fileExt, [], [])
-    except GObject.GError:
+    except GLib.GError:
         raise ValueError("Failed to save screenshot in %s format" % fileExt)
     assert os.path.exists(path)
     logger.log("Screenshot taken: " + path)
@@ -166,12 +166,12 @@ class Highlight (Gtk.Window):  # pragma: no cover
 
 class Blinker(object):  # pragma: no cover
     INTERVAL_MS = 1000
-    main_loop = GObject.MainLoop()
+    main_loop = GLib.MainLoop()
 
     def __init__(self, x, y, w, h):  # pragma: no cover
         self.highlight_window = Highlight(x, y, w, h)
         if self.highlight_window.screen.is_composited() is not False:
-            self.timeout_handler_id = GObject.timeout_add(
+            self.timeout_handler_id = GLib.timeout_add(
                 Blinker.INTERVAL_MS, self.destroyHighlight)
             self.main_loop.run()
         else:
@@ -282,7 +282,7 @@ def enableA11y(enable=True):
     Enables accessibility via DConf.
     """
     from gi.repository.Gio import Settings
-    InterfaceSettings = Settings(a11yDConfKey)
+    InterfaceSettings = Settings(schema=a11yDConfKey)
     InterfaceSettings.set_boolean('toolkit-accessibility', enable)
 
 

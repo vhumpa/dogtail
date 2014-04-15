@@ -4,7 +4,10 @@ Author: David Malcolm <dmalcolm@redhat.com>"""
 __author__ = 'David Malcolm <dmalcolm@redhat.com>'
 
 from i18n import TranslatableString
-
+from gi.repository import GLib
+from time import sleep
+from logging import debugLogger as logger
+from config import config
 
 def stringMatches(scriptName, reportedName):
     assert isinstance(scriptName, TranslatableString)
@@ -102,7 +105,19 @@ class IsAnApplicationNamed(Predicate):
 
     def _genCompareFunc(self):
         def satisfiedByNode(node):
-            return node.roleName == 'application' and stringMatches(self.appName, node.name)
+            try:
+                return node.roleName == 'application' and stringMatches(self.appName, node.name)
+            except GLib.GError as e:
+                if 'name :1.0 was not provided' in e.message:
+                    logger.log("Dogtail: warning: omiting possibly broken at-spi application record")
+                    return False
+                else:
+                    try:
+                        sleep(config.defaults['searchWarningThreshold'])
+                        return node.roleName == 'application' and stringMatches(self.appName, node.name)
+                    except GLib.GError:
+                        logger.log("Dogtail: warning: application may be hanging")
+                        return False
         return satisfiedByNode
 
     def describeSearchResult(self):
@@ -162,15 +177,22 @@ class GenericPredicate(Predicate):
                     return False
             else:
                 # Ensure the node matches any criteria that were set:
-                if self.name:
-                    if not stringMatches(self.name, node.name):
+                try:
+                    if self.name:
+                        if not stringMatches(self.name, node.name):
+                            return False
+                    if self.roleName:
+                        if self.roleName != node.roleName:
+                            return False
+                    if self.description:
+                        if self.description != node.description:
+                            return False
+                except GLib.GError as e:
+                    if 'name :1.0 was not provided' in e.message:
+                        logger.log("Dogtail: warning: omiting possibly broken at-spi application record")
                         return False
-                if self.roleName:
-                    if self.roleName != node.roleName:
-                        return False
-                if self.description:
-                    if self.description != node.description:
-                        return False
+                    else:
+                        raise e
                 return True
         return satisfiedByNode
 

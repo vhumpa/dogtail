@@ -1,10 +1,10 @@
 # dogtail *development* Makefile
 
 all:
-	python setup.py build_ext --inplace
+	python setup.py build
 
 install:
-	python setup.py install
+	python setup.py install --root=$(DESTDIR)
 
 clean:
 	rm -rf api_docs/

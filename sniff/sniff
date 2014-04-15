@@ -29,6 +29,7 @@ from gi.repository import Gdk
 from gi.repository import Gio
 from gi.repository import GdkPixbuf
 from gi.repository import GObject
+from gi.repository import GLib
 
 builder = Gtk.Builder()
 
@@ -470,10 +471,14 @@ class SniffModel(Gtk.TreeStore):
             return False
         result = True
         node = self.getNode(iter)
-        for child in node.children:
-            if child in self:
-                continue
-            result = result and self.append(iter, child)
+        try:
+            for child in node.children:
+                if child in self:
+                    continue
+                result = result and self.append(iter, child)
+        except GLib.GError as e:
+            if 'name :1.0 was not provided' in e.message:
+                print("Dogtail: warning: omiting possibly broken at-spi application record")
         return result
 
     def appendAndPopulate(self, iter, node):

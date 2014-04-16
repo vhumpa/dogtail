@@ -9,8 +9,8 @@ __author__ = """Zack Cerza <zcerza@redhat.com>,
 Ed Rousseau <rousseau@redhat.com>,
 David Malcolm <dmalcolm@redhat.com>,
 Vita Humpa <vhumpa@redhat.com>"""
-__version__ = "0.8.3"
-__copyright__ = "Copyright © 2005-2012 Red Hat, Inc."
+__version__ = "0.9.0"
+__copyright__ = "Copyright © 2005-2014 Red Hat, Inc."
 __license__ = "GPL"
 __all__ = ("config", "predicate",
            "procedural", "tc", "tree", "utils", "errors")

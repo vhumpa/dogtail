@@ -1,3 +1,94 @@
+dogtail 0.9.0
+=============
+Over the last year we've made a good number of fixes, added some new features
+and got overall stability to the point where we can make a new 'major minor'
+release. With 0.9 we're finally getting only a step away from what we'd like
+to get done with 1.0.
+
+
+ * Added a fix for situations when a previously crashed application
+   still registered with at-spi blocks search ('Broken' session problem)
+   Fixed for root.application(), root.applications() and for whenever
+   GeneralPredicate is used (.child()). Also done for Sniff. RHBZ 972257
+
+ * Added a support for gnome-continuous build-api (#36)
+
+ * Added a direct lambda support in the findChildren method, that allows
+   using non-predicate lambdas to create search properties. These can be
+   all pure dogtail Node properties (i.e. showing), not limiting to just
+   pyatspi ones as is when using Predicate.
+
+ * Added a GnomeShell 'helper' class into utils module allowing to work
+   with the new top-panel application menu.
+
+ * With GTK3.10+ Gdk changes, needed to tune the keyNameToKeyCode function
+   so that it provides valid keySym in as many cases possible - with both
+   pre-GTK3.10 as well as GTK3.11+ having the same behavior in typeText and
+   pressKey
+
+ * Sniff ui update: the info pane now stays down on resizing
+
+ * Got rid of some deprecated GObject calls
+
+ * Several updates to the dogtail-run-headless-next
+    - Any kind of session can now be used in any combination with both gdm/kdm
+      --session can be used to specify any xsession desktop file, 'kde' defaults
+        to 'kde-plasma' too keep pre-updated compatibility; default is now the previous user session
+      --dm - new param to pick either gdm (default) or kdm
+      --session-binary - new param to specify any in-session binary to grab script env from
+                       - to be used with non gnome/kde session (lxde, ubuntu)
+                       - do not confuse with session execs like gnome-session and starkde, that may
+                         actually exit after session loadup; it should be everpresent (kwin, shell...)
+    - Added a --restart switch to force restart the previously running (often left-over) session before proceeding
+    - More logging of script execution (start/stop/PID), and some cleanups
+
+ * Trap GErrors in findAllDescendants and retry if it occurs: This fixes crashes in findChildren if elements are being added/removed quickly
+
+ * Unicode handling updates:
+    - Make sure safeDecode is not skipping any strings
+    - Don't crash when logging message contains unicode
+
+ * Error Handling for Attribute Error
+
+ * Fixed utils.run issue when having whitespace containing binary by
+   using shlex shell-like parsing split.
+
+ * Removed an always true if condition in i18n
+
+ * Log child description when clicking. The log will now print the element description when it will be clicked
+
+ * Trap TypeError in findAllDescendants: Sometimes pytaspi returns None as a Node if children are being removed too fast.
+   We should retry search in this case
+
+ * Extended the default TypingDelay from 0.075 to 0.1 seconds (helps working with certain high unicode charactes)
+
+ * Fixed an bug in sniff discovered by jmolet that made sniff crash when
+   run from /bin/sniff not /usr/bin/sniff
+
+ * Generate a better script method call for labels
+
+ * Fix for failing 'focus.application.node' seting
+
+ * Derive all classes from object explicitely
+
+ * Changed icons used in sniff that got moved to the gnome-icon-theme-legacy
+   recently for the ones from non-legacy package.
+
+ * Unified the 'isSth' vs. 'sth' properties for only 'sth' - added 'selected', but also introduced
+   'isChecked' property for 0.7.x compatibility
+
+ * Added instructions on how to enable accessibility into utils.bailBecauseA11yIsDisabled()
+
+ * Added a 'retry' option to the tree.root.application()
+
+ * Fixed the concurrent creation of sniff_refresh lock from both tree and procedural
+
+ * Switched to use environ value to get user in config. os.getlogin breaks when run scheduled from a testing system with no terminal.
+
+ * Patched the mouse related rawinput methods to prevent using negative coordinates
+
+ * Updated and added more unittests
+
 dogtail 0.8.2
 =============
 Second update to the 0.8 series containing several fixes and improvements

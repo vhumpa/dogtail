@@ -143,12 +143,12 @@ class _AptPackageDb(PackageDb):
         if not self.cache:
             import apt_pkg
             apt_pkg.init()
-            self.cache = apt_pkg.GetCache()
-        packages = self.cache.Packages
+            self.cache = apt_pkg.Cache()
+        packages = self.cache.packages
         for package in packages:
-            if package.Name == packageName:
+            if package.name == packageName:
                 verString = re.match(
-                    '.*Ver:\'(.*)-.*\' Section:', str(package.CurrentVer)).group(1)
+                    '.*Ver:\'(.*)-.*\' Section:', str(package.current_ver)).group(1)
                 return Version.fromString(verString)
         raise PackageNotFoundError(packageName)
 
@@ -171,17 +171,17 @@ class _AptPackageDb(PackageDb):
         if not self.cache:
             import apt_pkg
             apt_pkg.init()
-            self.cache = apt_pkg.GetCache()
-        packages = self.cache.Packages
+            self.cache = apt_pkg.Cache()
+        packages = self.cache.packages
         for package in packages:
-            if package.Name == packageName:
-                current = package.CurrentVer
+            if package.name == packageName:
+                current = package.current_ver
                 if not current:
                     raise PackageNotFoundError(packageName)
-                depends = current.DependsList
+                depends = current.depends_list
                 list = depends['Depends']
                 for dependency in list:
-                    name = dependency[0].TargetPkg.Name
+                    name = dependency[0].target_pkg.name
                     # Add to the hash using a dummy value
                     result[name] = None
         return result.keys()

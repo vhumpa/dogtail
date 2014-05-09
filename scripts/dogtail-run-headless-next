@@ -159,7 +159,8 @@ class DisplayManagerSession(object):
             if self.dm == 'gdm':
                 need_restart = False
                 tempfile = '/tmp/%s_headless' % self.user
-                subprocess.Popen('cp -f %s %s' % (self.accountfile, tempfile), shell=True).wait()
+                if os.path.isfile(self.accountfile):
+                    subprocess.Popen('cp -f %s %s' % (self.accountfile, tempfile), shell=True).wait()
                 account_config = ConfigParser.SafeConfigParser()
                 account_config.optionxform = str
                 account_config.read(tempfile)
@@ -174,10 +175,11 @@ class DisplayManagerSession(object):
                         account_config.set('User', 'XSession', self.session)
                         need_restart = True
                 except ConfigParser.NoSectionError:
-                    account_config.add_section('User')
-                    account_config.set('User', 'XSession', self.session if self.session else '')
-                    account_config.set('User', 'SystemAccount', 'false')
-                    need_restart = True
+                    if self.session is not None:
+                        account_config.add_section('User')
+                        account_config.set('User', 'XSession', self.session)
+                        account_config.set('User', 'SystemAccount', 'false')
+                        need_restart = True
                 if need_restart:
                     output = open(tempfile, 'w')
                     account_config.write(output)

@@ -73,7 +73,7 @@ from utils import Lock
 import rawinput
 import path
 from __builtin__ import xrange
-
+from types import LambdaType
 from logging import debugLogger as logger
 
 try:
@@ -894,8 +894,12 @@ class Node(object):
     def findChildren(self, pred, recursive=True, isLambda=False):
         """
         Find all children/descendents satisfying the predicate.
+        You can also use lambdas in place of pred that will enable search also against
+        pure dogtail Node properties (like showing). I.e: "lambda x: x.roleName == 'menu item'
+        and x.showing is True". isLambda does not have to be set, it's kept only for api compatibility.
         """
-        if isLambda is True:
+        # always use lambda search, but we keep isLambda param for api compatibility
+        if isLambda is True or isinstance(pred, LambdaType):
             nodes = self.findChildren(predicate.GenericPredicate(), recursive=recursive)
             result = []
             for node in nodes:

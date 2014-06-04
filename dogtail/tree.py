@@ -543,6 +543,7 @@ class Node(object):
 
     @property
     def showing(self):
+        """Is the Accessible really showing (rendered and visible) on the screen?"""
         return self.getState().contains(pyatspi.STATE_SHOWING)
 
     @property
@@ -564,6 +565,11 @@ class Node(object):
     def isChecked(self):
         """Is the Accessible a checked checkbox? Compatibility property, same as Node.checked."""
         return self.checked
+
+    @property
+    def visible(self):
+        """Is the Accessible set to be visible? A widget with set attribute 'visible' is supposed to be shown and doesn't need to be actually rendered. On the other hand, a widget with unset attribute 'visible' will not show not even in the case when it's parent is shown (e.g. will be never shown)."""
+        return self.getState().contains(pyatspi.STATE_VISIBLE)
 
     #
     # Selection

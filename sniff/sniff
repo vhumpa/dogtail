@@ -649,7 +649,7 @@ class SniffModel(Gtk.TreeStore):
 class StateModel(Gtk.ListStore):
     stateColumn = 0
     statesSupported = ['checked', 'focusable', 'focused', 'sensitive',
-                       'showing']
+                       'showing', 'visible']
 
     def __init__(self):
         Gtk.ListStore.__init__(self, GObject.TYPE_STRING)

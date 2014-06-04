@@ -254,7 +254,7 @@ def isA11yEnabled():
     Checks if accessibility is enabled via DConf.
     """
     from gi.repository.Gio import Settings
-    InterfaceSettings = Settings(a11yDConfKey)
+    InterfaceSettings = Settings(schema=a11yDConfKey)
     dconfEnabled = InterfaceSettings.get_boolean('toolkit-accessibility')
     if os.environ.get('GTK_MODULES', '').find('gail:atk-bridge') == -1:
         envEnabled = False

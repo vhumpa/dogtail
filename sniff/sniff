@@ -733,6 +733,7 @@ iconForRole = {
     pyatspi.ROLE_LABEL: label_xpm,
     pyatspi.ROLE_LAYERED_PANE: viewport_xpm,
     pyatspi.ROLE_LIST: None,
+    pyatspi.ROLE_LIST_BOX: None,
     pyatspi.ROLE_LIST_ITEM: None,
     pyatspi.ROLE_MENU: menuitem_xpm,
     pyatspi.ROLE_MENU_BAR: menubar_xpm,

@@ -8,6 +8,7 @@ from gi.repository import GLib
 from time import sleep
 from logging import debugLogger as logger
 from config import config
+import re
 
 def stringMatches(scriptName, reportedName):
     assert isinstance(scriptName, TranslatableString)
@@ -108,7 +109,7 @@ class IsAnApplicationNamed(Predicate):
             try:
                 return node.roleName == 'application' and stringMatches(self.appName, node.name)
             except GLib.GError as e:
-                if 'name :1.0 was not provided' in e.message:
+                if re.match("name :[0-9]+\.[0-9]+ was not provided", e.message):
                     logger.log("Dogtail: warning: omiting possibly broken at-spi application record")
                     return False
                 else:
@@ -188,7 +189,7 @@ class GenericPredicate(Predicate):
                         if self.description != node.description:
                             return False
                 except GLib.GError as e:
-                    if 'name :1.0 was not provided' in e.message:
+                    if re.match("name :[0-9]+\.[0-9]+ was not provided", e.message):
                         logger.log("Dogtail: warning: omiting possibly broken at-spi application record")
                         return False
                     else:

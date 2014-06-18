@@ -343,7 +343,7 @@ class SniffController(object):
         """Generic code for setting up the table under the TreeView"""
         if node == None:
             return
-        self.nameTextLabel.set_text(node.name)
+        self.nameTextLabel.set_text(node.name if len(node.name) <= 128 else "%s..." % node.name[:128])
         self.roleNameTextLabel.set_text(node.roleName)
         self.descTextLabel.set_text(node.description)
         str = ''

@@ -379,7 +379,7 @@ class GnomeShell(object):  # pragma: no cover
         except:
             menu_items = self.getApplicationMenuList(item)
         for node in menu_items:
-            if node.name == item:
+            if node.name == item or unicode(node.name, errors='ignore') == item:
                 return node
         raise Exception(
             'Could not find the item, did application focus change?')

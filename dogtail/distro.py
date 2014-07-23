@@ -7,6 +7,7 @@ import os
 import re
 from version import Version
 from logging import debugLogger as logger
+from subprocess import check_output
 
 
 class DistributionNotSupportedError(Exception):  # pragma: no cover
@@ -261,6 +262,25 @@ class JhBuildPackageDb(PackageDb):  # pragma: no cover
         return result.keys()
 
 
+class _ContinuousPackageDb(PackageDb):
+
+    def __init__(self):
+        PackageDb.__init__(self)
+
+    def getVersion(self, packageName):
+        return ''
+
+    def getFiles(self, packageName):
+        return check_output(
+            ["ls -1 /usr/share/locale/*/LC_MESSAGES/%s.mo" % packageName],
+            shell=True).strip().split('\n')
+
+    def getDependencies(self, packageName):
+        # Simulate a set using a hash (to a dummy value);
+        # sets were only added in Python 2.4
+        return []
+
+
 class Distro(object):
 
     """
@@ -329,6 +349,12 @@ class JHBuild(Distro):  # pragma: no cover
         self.packageDb = JhBuildPackageDb()
 
 
+class GnomeContinuous(Distro):  # pragma: no cover
+
+    def __init__(self):
+        self.packageDb = _ContinuousPackageDb()
+
+
 def detectDistro():
     logger.log("Detecting distribution:", newline=False)
 
@@ -353,6 +379,9 @@ def detectDistro():
     elif os.path.exists("/etc/release") and \
             re.match(".*Solaris", open("/etc/release").readline()):  # pragma: no cover
         distro = Solaris()  # pragma: no cover
+    elif os.path.exists("/etc/os-release") and \
+            re.match(".*GNOME-Continuous", open("/etc/os-release").readline()):  # pragma: no cover
+        distro = GnomeContinuous()  # pragma: no cover
     else:
         raise DistributionNotSupportedError("Unknown")  # pragma: no cover
     logger.log(distro.__class__.__name__)

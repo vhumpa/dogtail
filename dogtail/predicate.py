@@ -109,7 +109,7 @@ class IsAnApplicationNamed(Predicate):
             try:
                 return node.roleName == 'application' and stringMatches(self.appName, node.name)
             except GLib.GError as e:
-                if re.match("name :[0-9]+\.[0-9]+ was not provided", e.message):
+                if re.match(".*name :[0-9]+\.[0-9]+ was not provided.*", str(e)):
                     logger.log("Dogtail: warning: omiting possibly broken at-spi application record")
                     return False
                 else:
@@ -189,7 +189,7 @@ class GenericPredicate(Predicate):
                         if self.description != node.description:
                             return False
                 except GLib.GError as e:
-                    if re.match("name :[0-9]+\.[0-9]+ was not provided", e.message):
+                    if re.match(".*name :[0-9]+\.[0-9]+ was not provided.*", str(e)):
                         logger.log("Dogtail: warning: omiting possibly broken at-spi application record")
                         return False
                     else:

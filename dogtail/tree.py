@@ -905,38 +905,23 @@ class Node(object):
         and x.showing is True". isLambda does not have to be set, it's kept only for api compatibility.
         """
         # always use lambda search, but we keep isLambda param for api compatibility
+        compare_func = None
         if isLambda is True or isinstance(pred, LambdaType):
-            nodes = self.findChildren(predicate.GenericPredicate(), recursive=recursive)
-            result = []
-            for node in nodes:
-                try:
-                    if pred(node):
-                        result.append(node)
-                except:
-                    pass
-            return result
-        if isinstance(pred, predicate.Predicate):
-            pred = pred.satisfiedByNode
-        if not recursive:
-            cIter = iter(self)
-            result = []
-            while True:
-                try:
-                    child = cIter.next()
-                except StopIteration:
-                    break
-                if child is not None and pred(child):
-                    result.append(child)
-            return result
+            compare_func = pred
         else:
-            descendants = []
-            while True:
-                try:
-                    descendants = pyatspi.utils.findAllDescendants(self, pred)
-                    break
-                except (GLib.GError, TypeError):
-                    continue
-            return descendants
+            assert isinstance(pred, predicate.Predicate)
+            compare_func = pred.satisfiedByNode
+
+        results = []
+        while True:
+            try:
+                if recursive:
+                    results = pyatspi.utils.findAllDescendants(self, compare_func)
+                else:
+                    results = pyatspi.utils.findDescendant(self, compare_func)
+            except (GLib.GError, TypeError):
+                continue
+        return results
 
     # The canonical "search above this node" method:
     def findAncestor(self, pred):

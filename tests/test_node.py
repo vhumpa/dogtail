@@ -103,7 +103,7 @@ class TestNodeAttributes(GtkDemoTest):
         "A fresh gtk-demo app should have a single child: the window."
         kids = self.app.children
         self.assertEquals(len(kids), 1)
-        self.assertEquals(kids[0].name, "GTK+ Code Demos")
+        self.assertEquals(kids[0].name, "Application Class")
         self.assertEquals(kids[0].roleName, "frame")
 
     def testSetChildren(self):
@@ -424,11 +424,17 @@ class TestSearching(GtkDemoTest):
     def testFindChildren2(self):
         "Ensure that there are two tabs in the second page tab list."
         pred = dogtail.predicate.GenericPredicate(roleName='page tab list')
-        pageTabLists = self.app.findChildren(pred)
+        pageTabList = self.app.findChildren(pred)
         pred = dogtail.predicate.GenericPredicate(roleName='page tab')
-        # The second page tab list is the one with the 'Info' and 'Source' tabs
-        pageTabs = pageTabLists[1].findChildren(pred)
-        self.assertEquals(len(pageTabs), 6)
+        # only one page tab list present since gtk3-demo 3.14
+        pageTabs = pageTabList[0].findChildren(pred)
+        self.assertEquals(len(pageTabs), 4)
+
+    def testFindChildren2Lambda(self):
+        "Ensure that there are two tabs in the second page tab list, use lambdas"
+        pageTabList = self.app.findChildren(lambda x: x.roleName == 'page tab list')
+        pageTabs = pageTabList[0].findChildren(lambda x: x.roleName == 'page tab')
+        self.assertEquals(len(pageTabs), 4)
 
     def testFindChildrenLambdas(self):
         self.runDemo('Dialog and Message Boxes')

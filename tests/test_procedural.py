@@ -87,8 +87,8 @@ class TestFocusWidget(GtkDemoTest):
 
     def testFocusingBasic(self):
         "Ensure that focus.widget('foo') finds a node with name 'foo'"
-        focus.widget("Application window")
-        self.assertEquals(focus.widget.name, "Application window")
+        focus.widget("Application Class")
+        self.assertEquals(focus.widget.name, "Application Class")
 
 
 class TestFocus(GtkDemoTest):
@@ -126,24 +126,26 @@ class TestFocus(GtkDemoTest):
         self.assertEquals(focus.widget.node.role, pyatspi.ROLE_PAGE_TAB)
 
     def testFocusMenu(self):
-        self.runDemo('Application window')
-        focus.window('Application Window')
-        focus.menu('File')
+        self.runDemo('Application Class')
+        focus.application('gtk3-demo-application')
+        focus.window('Application Class')
+        focus.menu('Help')
         self.assert_(isinstance(focus.widget.node, tree.Node))
         self.assertEquals(focus.widget.node.role, pyatspi.ROLE_MENU)
 
     def testFocusMenuItem(self):
-        self.runDemo('Application window')
-        focus.window('Application Window')
-        click.menu('File')
-        focus.menuItem('New')
+        self.runDemo('Application Class')
+        focus.application('gtk3-demo-application')
+        focus.window('Application Class')
+        click.menu('Help')
+        focus.menuItem('About')
         self.assert_(isinstance(focus.widget.node, tree.Node))
         self.assertEquals(focus.widget.node.role, pyatspi.ROLE_MENU_ITEM)
 
     def testFocusButton(self):
-        self.runDemo('Application window')
-        focus.window('Application Window')
-        focus.button('Open')
+        self.runDemo('Button Boxes')
+        focus.window('Button Boxes')
+        focus.button('Help')
         self.assert_(isinstance(focus.widget.node, tree.Node))
         self.assertEquals(focus.widget.node.role, pyatspi.ROLE_PUSH_BUTTON)
 
@@ -162,8 +164,9 @@ class TestFocus(GtkDemoTest):
         self.assertEquals(focus.widget.node.role, pyatspi.ROLE_TABLE_CELL)
 
     def testFocusText(self):
-        self.runDemo('Application window')
-        focus.window('Application Window')
+        self.runDemo('Application Class')
+        focus.application('gtk3-demo-application')
+        focus.window('Application Class')
         focus.text('')
         self.assert_(isinstance(focus.widget.node, tree.Node))
         self.assertEquals(focus.widget.node.role, pyatspi.ROLE_TEXT)
@@ -172,8 +175,9 @@ class TestFocus(GtkDemoTest):
 class TestKeyCombo(GtkDemoTest):
 
     def testKeyCombo(self):
-        self.runDemo('Application window')
-        focus.window('Application Window')
+        self.runDemo('Application Class')
+        focus.application('gtk3-demo-application')
+        focus.window('Application Class')
         keyCombo("<ctrl>a")
         focus.dialog('About GTK+ Code Demos')
 

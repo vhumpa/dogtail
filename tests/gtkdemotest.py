@@ -16,10 +16,11 @@ class GtkDemoTest(unittest.TestCase):
         self.app = dogtail.tree.root.application('gtk3-demo')
 
     def tearDown(self):
-        import os
-        import signal
+        from subprocess import call
         import time
-        os.kill(self.pid, signal.SIGKILL)
+        # kill all running instances now that we have demos in split-processes
+        call('pkill -9 gtk3-demo', shell=True) # *-application
+
         # Sleep just enough to let the app actually die.
         # AT-SPI doesn't like being hammered too fast.
         time.sleep(0.5)

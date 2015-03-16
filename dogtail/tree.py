@@ -913,13 +913,22 @@ class Node(object):
             compare_func = pred.satisfiedByNode
 
         results = []
-        while True:
+        numAttempts = 0
+        while numAttempts < config.searchCutoffCount:
+            if numAttempts >= config.searchWarningThreshold or config.debugSearching:
+                logger.log("a11y errors caught, making attempt %i" % numAttempts)
             try:
                 if recursive:
                     results = pyatspi.utils.findAllDescendants(self, compare_func)
                 else:
-                    results = pyatspi.utils.findDescendant(self, compare_func)
+                    results = list(filter(compare_func, self.children))
+                break
             except (GLib.GError, TypeError):
+                numAttempts += 1
+                if numAttempts == config.searchCutoffCount:
+                    logger.log("warning: errors caught from the a11y tree, giving up search")
+                else:
+                    sleep(config.searchBackoffDuration)
                 continue
         return results
 

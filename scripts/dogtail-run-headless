@@ -39,11 +39,17 @@ def parse():
     parser.add_option("-x", "--x-server", type = "choice", 
             dest = "xserver", 
             choices = findXServers(), help = "which X server to use")
+    parser.add_option("-d", "--display", type = "string",
+            dest = "display",
+            help = "X display number to use.  If omitted, the first " +
+                "available display will be used")
     parser.add_option("-r", "--reuse", type = "choice",
             dest = "reuse",
             choices = yesno,
-            help = "use an already running session instead of launching " +
-                "a new one (ignores -x and disables -l and -t)")
+            help = "use an existing session running on DISPLAY instead of " +
+                "launching a new one.  If DISPLAY is not specified, the " +
+                "first session found will be used.  Ignores -x and disables " +
+                "-l and -t")
     parser.add_option("-l", "--logout", type = "choice", 
             dest = "logout", 
             choices = yesno,
@@ -88,7 +94,7 @@ def main():
         # Reuse an existing X server instance
         server = None
 
-    session = sessions.Session(binary, server, args)
+    session = sessions.Session(binary, server, options.display, args)
     session.start()
     scriptExitCode = session.script.exitCode
 

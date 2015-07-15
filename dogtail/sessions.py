@@ -57,6 +57,7 @@ class Subprocess(object):
 
 class XServer(Subprocess):
     def __init__(self, server = "/usr/bin/Xorg", 
+            display = None,
             xinitrc = "/etc/X11/xinit/Xclients", 
             resolution = "1024x768x16"):
         """resolution is only used with Xvfb."""
@@ -64,7 +65,7 @@ class XServer(Subprocess):
         self.server = server
         self._exitCode = None
         self.xinit = "/usr/bin/xinit"
-        self.display = None
+        self.display = display
         self.xinitrc = xinitrc
         self.resolution = resolution
 
@@ -82,7 +83,8 @@ class XServer(Subprocess):
 
     @property
     def cmdList(self):
-        self.display = self.findFreeDisplay()
+        if self.display is None:
+            self.display = self.findFreeDisplay()
         cmd = []
         if self.xinit:
             cmd.append(self.xinit)
@@ -108,7 +110,8 @@ class Session(object):
 
     cookieName = "DOGTAIL_SESSION_COOKIE"
 
-    def __init__(self, sessionBinary, server, scriptCmdList = [], scriptDelay = 10, logout = True):
+    def __init__(self, sessionBinary, server, display=None, scriptCmdList=[],
+                 scriptDelay=10, logout=True):
         testBinary(sessionBinary)
         self.sessionBinary = sessionBinary
         self.script = Script(scriptCmdList)
@@ -117,8 +120,9 @@ class Session(object):
         if server is None:
             # Indicates that no X server shall be started
             self.xserver = None
+            self._reuseDisplay = display
         else:
-            self.xserver = XServer(server)
+            self.xserver = XServer(server, display)
         self._cookie = None
         self._environment = None
 
@@ -164,11 +168,22 @@ class Session(object):
         def isSessionEnv(envDict):
             if not envDict:
                 return False
+
             if self.xserver is None:
-                return True
-            if envDict.get(self.cookieName, 'notacookie') == self.cookie:
-                return True
-            return False
+                # We haven't launched any X server
+                if self._reuseDisplay is None:
+                    # No specific DISPLAY was requested so we're done here
+                    return True
+                else:
+                    # A specific DISPLAY was requested
+                    return envDict['DISPLAY'] == self._reuseDisplay
+            else:
+                # We're only interested in an X server instance that we
+                # launched (i.e. has the right cookie)
+                try:
+                    return envDict[self.cookieName] == self.cookie
+                except KeyError:
+                    return False
 
         for path in glob.glob('/proc/*/'):
             if not isSessionProcess(path): continue

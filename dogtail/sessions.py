@@ -114,18 +114,28 @@ class Session(object):
         self.script = Script(scriptCmdList)
         self.scriptDelay = scriptDelay
         self.logout = logout
-        self.xserver = XServer(server)
+        if server is None:
+            # Indicates that no X server shall be started
+            self.xserver = None
+        else:
+            self.xserver = XServer(server)
         self._cookie = None
         self._environment = None
 
     def start(self):
-        self.xinitrcFileObj = scratchFile('xinitrc')
-        self.xserver.xinitrc = self.xinitrcFileObj.name
-        self._buildXInitRC(self.xinitrcFileObj)
-        xServerPid = self.xserver.start()
-        time.sleep(self.scriptDelay)
+        # Start an X server if requested
+        if self.xserver is None:
+            xServerPid = None
+        else:
+            self.xinitrcFileObj = scratchFile('xinitrc')
+            self.xserver.xinitrc = self.xinitrcFileObj.name
+            self._buildXInitRC(self.xinitrcFileObj)
+            xServerPid = self.xserver.start()
+            time.sleep(self.scriptDelay)
+
         self.script.environ = self.environment
         scriptPid = self.script.start()
+
         return (xServerPid, scriptPid)
 
     @property
@@ -152,7 +162,10 @@ class Session(object):
             return envDict
 
         def isSessionEnv(envDict):
-            if not envDict: return False
+            if not envDict:
+                return False
+            if self.xserver is None:
+                return True
             if envDict.get(self.cookieName, 'notacookie') == self.cookie:
                 return True
             return False
@@ -161,22 +174,31 @@ class Session(object):
             if not isSessionProcess(path): continue
             envFile = path + 'environ'
             envDict = getEnvDict(envFile)
-            if isSessionEnv(envDict): 
-                #print path
-                #print envDict
+            if isSessionEnv(envDict):
+                if self.xserver is None:
+                    # Make sure the script output is in color on color
+                    # terminals.  This is necessary if we are reusing a session
+                    # that was launched by GDM which sets the TERM variable to
+                    # "dumb".
+                    envDict['TERM'] = os.environ['TERM']
                 self._environment = envDict
+                break
         if not self._environment:
             raise RuntimeError("Can't find our environment!")
         return self._environment
 
     def wait(self):
         self.script.wait()
-        return self.xserver.wait()
+        if self.xserver is None:
+            return None
+        else:
+            return self.xserver.wait()
 
     def stop(self):
         try: self.script.stop()
         except OSError: pass
-        self.xserver.stop()
+        if self.xserver is not None:
+            self.xserver.stop()
 
     def attemptLogout(self):
         logoutScript = Script('dogtail-logout', 

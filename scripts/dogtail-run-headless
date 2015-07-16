@@ -39,6 +39,11 @@ def parse():
     parser.add_option("-x", "--x-server", type = "choice", 
             dest = "xserver", 
             choices = findXServers(), help = "which X server to use")
+    parser.add_option("-r", "--reuse", type = "choice",
+            dest = "reuse",
+            choices = yesno,
+            help = "use an already running session instead of launching " +
+                "a new one (ignores -x and disables -l and -t)")
     parser.add_option("-l", "--logout", type = "choice", 
             dest = "logout", 
             choices = yesno,
@@ -50,7 +55,12 @@ def parse():
             help = "after script completion, and after any attempt to log" +
                 "out, terminate the session")
 
-    parser.set_defaults(session = sessions[0], logout = 'y', terminate = 'y')
+    parser.set_defaults(
+        session=sessions[0],
+        reuse='n',
+        logout='y',
+        terminate='y',
+    )
     options, args = parser.parse_args()
     if not args:
         parser.print_usage()
@@ -59,20 +69,38 @@ def parse():
 
 def main():
     options, args = parse()
-    if options.xserver:
-        server = options.xserver
+
+    if options.session == 'GNOME':
+        binary = '/usr/bin/gnome-session'
     else:
-        print "Autodetection mode"
-        servers = findXServers()
-        server = servers[0]
-        if '/usr/bin/Xorg' in servers: server = '/usr/bin/Xorg'
-    if options.session == "GNOME":
-        session = sessions.Session(sessionBinary = '/usr/bin/gnome-session', server=server, scriptCmdList = args)
-    pid = session.start()
+        raise RuntimeError('Unsupported session: %s' % options.session)
+
+    if options.reuse == 'n':
+        # Pick an X server binary to use
+        if options.xserver is None:
+            print "Autodetection mode"
+            servers = findXServers()
+            server = servers[0]
+            if '/usr/bin/Xorg' in servers: server = '/usr/bin/Xorg'
+        else:
+            server = options.xserver
+    else:
+        # Reuse an existing X server instance
+        server = None
+
+    session = sessions.Session(binary, server, args)
+    session.start()
     scriptExitCode = session.script.exitCode
-    if options.logout == 'y': session.attemptLogout()
-    if options.terminate == 'y': session.stop()
-    else: session.wait()
+
+    if options.reuse == 'n':
+        if options.logout == 'y':
+            session.attemptLogout()
+
+        if options.terminate == 'y':
+            session.stop()
+        else:
+            session.wait()
+
     sys.exit(scriptExitCode)
 
 if __name__ == "__main__": main()

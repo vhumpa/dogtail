@@ -230,6 +230,11 @@ class DisplayManagerSession(object):
                 ('sudo pkill --signal 9 %s' % (self.session_binary.split('/')[-1])).split()).wait()
             time.sleep(1)
 
+    def gnome_logout(self):
+        """ Try to logout of gnome cleanly to prevent unrelated crashes """
+        subprocess.Popen('gnome-session-quit --force', shell=True, env=os.environ).wait()
+        time.sleep(1)
+
 
 def parse():
     parser = argparse.ArgumentParser(
@@ -312,6 +317,8 @@ def main():
         dm.setA11y(False)
 
     if args.dont_kill is False:
+        if args.session is None or 'gnome' in args.session:
+            dm.gnome_logout()
         dm.stop()
         dm.setup(restore=True)
 

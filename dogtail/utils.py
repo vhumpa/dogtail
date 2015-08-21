@@ -267,7 +267,11 @@ def bailBecauseA11yIsDisabled():
     if sys.argv[0].endswith("pydoc"):
         return  # pragma: no cover
     try:
-        if file("/proc/%s/cmdline" % os.getpid()).read().find('epydoc') != -1:
+        with open("/proc/%s/cmdline" % os.getpid(), 'r') as f:
+            content = f.read()
+        if content.find('epydoc') != -1:
+            return  # pragma: no cover
+        if content.find('sphinx') != -1:
             return  # pragma: no cover
     except:   # pragma: no cover
         pass  # pragma: no cover

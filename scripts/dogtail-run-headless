@@ -50,6 +50,12 @@ def parse():
                 "launching a new one.  If DISPLAY is not specified, the " +
                 "first session found will be used.  Ignores -x and disables " +
                 "-l and -t")
+    parser.add_option("-o", "--outfile", type = "string",
+            dest = "outfile",
+            help = "write script stdout to OUTFILE")
+    parser.add_option("-e", "--errfile", type = "string",
+            dest = "errfile",
+            help = "write script stderr to ERRFILE")
     parser.add_option("-l", "--logout", type = "choice", 
             dest = "logout", 
             choices = yesno,
@@ -94,9 +100,19 @@ def main():
         # Reuse an existing X server instance
         server = None
 
-    session = sessions.Session(binary, server, options.display, args)
+    if options.outfile is not None:
+        outfile = open(options.outfile, 'w')
+    else:
+        outfile = None
+    if options.errfile is not None:
+        errfile = open(options.errfile, 'w')
+    else:
+        errfile = None
+
+    script = sessions.Script(args, stdout=outfile, stderr=errfile)
+    session = sessions.Session(binary, server, script, options.display)
     session.start()
-    scriptExitCode = session.script.exitCode
+    scriptExitCode = script.exitCode
 
     if options.reuse == 'n':
         if options.logout == 'y':

@@ -28,17 +28,18 @@ def testBinary(path):
     return True
 
 class Subprocess(object):
-    def __init__(self, cmdList, environ = None):
+    def __init__(self, cmdList, environ=None, stdout=None, stderr=None):
         testBinary(cmdList[0])
         self.cmdList = cmdList
         self.environ = environ
+        self.stdout = stdout
+        self.stderr = stderr
         self._exitCode = None
 
     def start(self):
         if self.environ == None: environ = os.environ
-        self.popen = subprocess.Popen(self.cmdList,
-                env = self.environ)#, stdout = subprocess.PIPE, 
-                #stderr = subprocess.STDOUT, close_fds = True)
+        self.popen = subprocess.Popen(self.cmdList, env=self.environ,
+                                      stdout=self.stdout, stderr=self.stderr)
         return self.popen.pid
 
     def wait(self):
@@ -110,19 +111,19 @@ class Session(object):
 
     cookieName = "DOGTAIL_SESSION_COOKIE"
 
-    def __init__(self, sessionBinary, server, display=None, scriptCmdList=[],
+    def __init__(self, sessionBinary, server, script, display=None,
                  scriptDelay=10, logout=True):
         testBinary(sessionBinary)
         self.sessionBinary = sessionBinary
-        self.script = Script(scriptCmdList)
-        self.scriptDelay = scriptDelay
-        self.logout = logout
         if server is None:
             # Indicates that no X server shall be started
             self.xserver = None
             self._reuseDisplay = display
         else:
             self.xserver = XServer(server, display)
+        self.script = script
+        self.scriptDelay = scriptDelay
+        self.logout = logout
         self._cookie = None
         self._environment = None
 

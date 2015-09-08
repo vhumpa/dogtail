@@ -57,16 +57,15 @@ class Subprocess(object):
         return self._exitCode
 
 class XServer(Subprocess):
-    def __init__(self, server = "/usr/bin/Xorg", 
-            display = None,
-            xinitrc = "/etc/X11/xinit/Xclients", 
-            resolution = "1024x768x16"):
+    def __init__(self, server="/usr/bin/Xorg", display=None, outfile=None,
+                 xinitrc="/etc/X11/xinit/Xclients", resolution="1024x768x16"):
         """resolution is only used with Xvfb."""
         testBinary(server)
         self.server = server
         self._exitCode = None
         self.xinit = "/usr/bin/xinit"
         self.display = display
+        self.outfile = outfile
         self.xinitrc = xinitrc
         self.resolution = resolution
 
@@ -100,8 +99,9 @@ class XServer(Subprocess):
         return cmd
 
     def start(self):
-        print ' '.join(self.cmdList)
-        self.popen = subprocess.Popen(self.cmdList)
+        print >> self.outfile, ' '.join(self.cmdList)
+        self.popen = subprocess.Popen(self.cmdList, stdout=self.outfile,
+                                      stderr=self.outfile)
         return self.popen.pid
 
 class Script(Subprocess):
@@ -112,15 +112,23 @@ class Session(object):
     cookieName = "DOGTAIL_SESSION_COOKIE"
 
     def __init__(self, sessionBinary, server, script, display=None,
-                 scriptDelay=10, logout=True):
+                 quiet=False, scriptDelay=10, logout=True):
+
         testBinary(sessionBinary)
         self.sessionBinary = sessionBinary
+
+        if quiet:
+            self.outfile = open(os.devnull, 'w')
+        else:
+            self.outfile = None
+
         if server is None:
             # Indicates that no X server shall be started
             self.xserver = None
             self._reuseDisplay = display
         else:
-            self.xserver = XServer(server, display)
+            self.xserver = XServer(server, display, self.outfile)
+
         self.script = script
         self.scriptDelay = scriptDelay
         self.logout = logout
@@ -217,8 +225,8 @@ class Session(object):
             self.xserver.stop()
 
     def attemptLogout(self):
-        logoutScript = Script('dogtail-logout', 
-                environ = self.environment)
+        logoutScript = Script('dogtail-logout', self.environment, self.outfile,
+                              self.outfile)
         logoutScript.start()
         logoutScript.wait()
 

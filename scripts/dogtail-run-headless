@@ -50,6 +50,10 @@ def parse():
                 "launching a new one.  If DISPLAY is not specified, the " +
                 "first session found will be used.  Ignores -x and disables " +
                 "-l and -t")
+    parser.add_option("-q", "--quiet", type = "choice",
+            dest = "quiet",
+            choices = yesno,
+            help = "suppress any output other than from the script")
     parser.add_option("-o", "--outfile", type = "string",
             dest = "outfile",
             help = "write script stdout to OUTFILE")
@@ -70,6 +74,7 @@ def parse():
     parser.set_defaults(
         session=sessions[0],
         reuse='n',
+        quiet='n',
         logout='y',
         terminate='y',
     )
@@ -90,7 +95,8 @@ def main():
     if options.reuse == 'n':
         # Pick an X server binary to use
         if options.xserver is None:
-            print "Autodetection mode"
+            if options.quiet == 'n':
+                print "Autodetection mode"
             servers = findXServers()
             server = servers[0]
             if '/usr/bin/Xorg' in servers: server = '/usr/bin/Xorg'
@@ -99,6 +105,11 @@ def main():
     else:
         # Reuse an existing X server instance
         server = None
+
+    if options.quiet == 'y':
+        quiet = True
+    else:
+        quiet = False
 
     if options.outfile is not None:
         outfile = open(options.outfile, 'w')
@@ -110,7 +121,7 @@ def main():
         errfile = None
 
     script = sessions.Script(args, stdout=outfile, stderr=errfile)
-    session = sessions.Session(binary, server, script, options.display)
+    session = sessions.Session(binary, server, script, options.display, quiet)
     session.start()
     scriptExitCode = script.exitCode
 

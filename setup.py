@@ -62,7 +62,7 @@ def session_file():
 
 setup (
         name = 'dogtail',
-        version = '0.9.0',
+        version = '0.9.1',
         description = """GUI test tool and automation framework that uses Accessibility (a11y) technologies to communicate with desktop applications.""",
         author = """Zack Cerza <zcerza@redhat.com>,
 Ed Rousseau <rousseau@redhat.com>,

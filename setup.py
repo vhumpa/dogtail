@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 __author__ = "Zack Cerza <zcerza@redhat.com>"
 
-from distutils.core import setup
 from distutils.command.bdist_rpm import bdist_rpm
+from setuptools import setup
 
 def examples():
     import os

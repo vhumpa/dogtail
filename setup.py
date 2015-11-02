@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 __author__ = "Zack Cerza <zcerza@redhat.com>"
 
-from distutils.command.bdist_rpm import bdist_rpm
 from setuptools import setup
 
 def examples():
@@ -86,10 +85,7 @@ Vitezslav Humpa <vhumpa@redhat.com>""",
         ('share/applications', ['sniff/sniff.desktop']),
         ('share/icons/hicolor/48x48/apps', icons('png')),
         ('share/icons/hicolor/scalable/apps', icons('svg'))
-    ],
-    cmdclass={
-        'bdist_rpm': bdist_rpm
-    }
+    ]
 )
 
 # vim: sw=4 ts=4 sts=4 noet ai

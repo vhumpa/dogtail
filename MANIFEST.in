@@ -7,6 +7,7 @@ include NEWS
 include dogtail.spec
 recursive-include docs *
 recursive-include scripts *
-include sniff/sniff.glade sniff/sniff.desktop sniff/icons/*.xpm
+include sniff/sniff.ui sniff/sniff.desktop sniff/icons/*.xpm
 recursive-include examples *.py *.txt *.png *.cfg
 include icons/*.svg icons/*.png
+recursive-include tests *.py

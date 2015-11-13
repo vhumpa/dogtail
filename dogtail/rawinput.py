@@ -94,6 +94,36 @@ def absoluteMotion(x, y, mouseDelay=None, check=True):
         doDelay()
 
 
+def absoluteMotionWithTrajectory(source_x, source_y, dest_x, dest_y, mouseDelay=None, check=True):
+    """
+    Synthetize an absolute motion
+    """
+    if check:
+        checkCoordinates(source_x, source_y)
+        checkCoordinates(dest_x, dest_y)
+    logger.log("Mouse absolute motion with trajectory to (%s,%s)" % (dest_x, dest_y))
+
+    dx = float(dest_x - source_x)
+    dy = float(dest_y - source_y)
+    max_len = abs(max(dx, dy))
+    dx /= max_len
+    dy /= max_len
+    act_x = float(source_x)
+    act_y = float(source_y)
+
+    for i in range(0, int(max_len)):
+        act_x += dx
+        act_y += dy
+        if mouseDelay:
+            doDelay(mouseDelay)
+        registry.generateMouseEvent(int(act_x), int(act_y), 'abs')
+
+    if mouseDelay:
+        doDelay(mouseDelay)
+    else:
+        doDelay()
+
+
 def relativeMotion(x, y, mouseDelay=None):
     logger.log("Mouse relative motion of (%s,%s)" % (x, y))
     registry.generateMouseEvent(x, y, 'rel')
@@ -115,6 +145,24 @@ def drag(fromXY, toXY, button=1, check=True):
 
     (x, y) = toXY
     absoluteMotion(x, y, check=check)
+    doDelay()
+
+    release(x, y, button, check)
+    doDelay()
+
+
+def dragWithTrajectory(fromXY, toXY, button=1, check=True):
+    """
+    Synthetize a mouse press, drag (including move events), and release on the screen
+    """
+    logger.log("Mouse button %s drag with trajectory from %s to %s" % (button, fromXY, toXY))
+
+    (x, y) = fromXY
+    press(x, y, button, check)
+    # doDelay()
+
+    (x, y) = toXY
+    absoluteMotionWithTrajectory(fromXY[0], fromXY[1], x, y, check=check)
     doDelay()
 
     release(x, y, button, check)

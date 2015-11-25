@@ -105,7 +105,10 @@ def absoluteMotionWithTrajectory(source_x, source_y, dest_x, dest_y, mouseDelay=
 
     dx = float(dest_x - source_x)
     dy = float(dest_y - source_y)
-    max_len = abs(max(dx, dy))
+    max_len = max(abs(dx), abs(dy))
+    if max_len == 0:
+        # actually, no motion requested
+        return
     dx /= max_len
     dy /= max_len
     act_x = float(source_x)

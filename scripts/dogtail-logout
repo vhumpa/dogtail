@@ -1,4 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
 # Logs out the full gnome session. Be sure to have your documents saved, as running
 # may cause loosing the changes, or it may halt the logout process.
 

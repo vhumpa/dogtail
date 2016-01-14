@@ -1,9 +1,11 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
 """
 dogtail-detect session
 
-This script checks for some main pieces of a running GNOME session, 
-specifically gnome-panel and metacity. 
+This script checks for some main pieces of a running GNOME session,
+specifically gnome-panel and metacity.
 
 It checks to see that the gnome-panel node has at least some child nodes.
 For example, the main gnome-panel node by default has two direct descendents:
@@ -36,12 +38,12 @@ def GNOME():
         assert focus.application.children
 
         focus.application('metacity')
-        print focus.application.node
+        print(focus.application.node)
         assert focus.application.node
         running = True
-        print "GNOME Session detected."
+        print("GNOME Session detected.")
     except AttributeError or AssertionError or FocusError:
-        print "ERROR: No session found."
+        print("ERROR: No session found.")
     return running
 
 

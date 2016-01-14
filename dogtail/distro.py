@@ -1,17 +1,18 @@
-"""Handles differences between different distributions
-
-Authors: Dave Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.com>"""
-__author__ = "Dave Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.com>"
-
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
 import os
 import re
-from version import Version
-from logging import debugLogger as logger
+from dogtail.version import Version
+from dogtail.logging import debugLogger as logger
 from subprocess import check_output
+
+"""
+Handles differences between different distributions
+"""
+__author__ = "Dave Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.com>"
 
 
 class DistributionNotSupportedError(Exception):  # pragma: no cover
-
     """
     This distribution is not supported.
     """
@@ -25,7 +26,6 @@ class DistributionNotSupportedError(Exception):  # pragma: no cover
 
 
 class PackageNotFoundError(Exception):
-
     """
     Error finding the requested package.
     """
@@ -36,7 +36,6 @@ global distro
 
 
 class PackageDb(object):
-
     """
     Class to abstract the details of whatever software package database is in
     use (RPM, APT, etc)
@@ -49,7 +48,7 @@ class PackageDb(object):
     def getVersion(self, packageName):
         """
         Method to get the version of an installed package as a Version
-         instance (or raise an exception if not found)
+        instance (or raise an exception if not found)
 
         Note: does not know about distributions' internal revision numbers.
         """
@@ -58,7 +57,7 @@ class PackageDb(object):
     def getFiles(self, packageName):
         """
         Method to get a list of filenames owned by the package, or raise an
-         exception if not found.
+        exception if not found.
         """
         raise NotImplementedError
 
@@ -78,9 +77,9 @@ class PackageDb(object):
         for localePrefix in self.localePrefixes:
             if locale:
                 localePrefix = localePrefix + '/' + locale
-            os.path.walk(localePrefix, appendIfMoFile, moFiles)
+            os.walk(localePrefix, appendIfMoFile, moFiles)
 
-        return moFiles.keys()
+        return list(moFiles.keys())
 
     def getDependencies(self, packageName):
         """
@@ -92,7 +91,6 @@ class PackageDb(object):
 
 
 class _RpmPackageDb(PackageDb):  # pragma: no cover
-
     def __init__(self):
         PackageDb.__init__(self)
 
@@ -130,12 +128,11 @@ class _RpmPackageDb(PackageDb):  # pragma: no cover
                     if depName != packageName:
                         # Add to the Hash with a dummy value
                         result[depName] = None
-            return result.keys()
+            return list(result.keys())
         raise PackageNotFoundError(packageName)
 
 
 class _AptPackageDb(PackageDb):
-
     def __init__(self):
         PackageDb.__init__(self)
         self.cache = None
@@ -148,8 +145,7 @@ class _AptPackageDb(PackageDb):
         packages = self.cache.packages
         for package in packages:
             if package.name == packageName:
-                verString = re.match(
-                    '.*Ver:\'(.*)-.*\' Section:', str(package.current_ver)).group(1)
+                verString = re.match('.*Ver:\'(.*)-.*\' Section:', str(package.current_ver)).group(1)
                 return Version.fromString(verString)
         raise PackageNotFoundError(packageName)
 
@@ -185,18 +181,16 @@ class _AptPackageDb(PackageDb):
                     name = dependency[0].target_pkg.name
                     # Add to the hash using a dummy value
                     result[name] = None
-        return result.keys()
+        return list(result.keys())
 
 
 class _UbuntuAptPackageDb(_AptPackageDb):
-
     def __init__(self):
         _AptPackageDb.__init__(self)
         self.localePrefixes.append(self.prefix + '/share/locale-langpack')
 
 
 class _PortagePackageDb(PackageDb):  # pragma: no cover
-
     def __init__(self):
         PackageDb.__init__(self)
 
@@ -209,17 +203,15 @@ class _PortagePackageDb(PackageDb):  # pragma: no cover
         # FIXME: this takes the first package returned in the list, in the
         # case that there are slotted packages, and removes the leading
         # category such as 'sys-apps'
-        gentooPackageName = portage.db["/"][
-            "vartree"].dbapi.match(packageName)[0].split('/')[1]
+        gentooPackageName = portage.db["/"]["vartree"].dbapi.match(packageName)[0].split('/')[1]
         # this removes the distribution specific versioning returning only the
         # upstream version
         upstreamVersion = portage.pkgsplit(gentooPackageName)[1]
-        # print "Version of package is: " + upstreamVersion
+        # print("Version of package is: " + upstreamVersion)
         return Version.fromString(upstreamVersion)
 
 
 class _ConaryPackageDb(PackageDb):  # pragma: no cover
-
     def __init__(self):
         PackageDb.__init__(self)
 
@@ -237,13 +229,11 @@ class _ConaryPackageDb(PackageDb):  # pragma: no cover
 
 
 class _SolarisPackageDb(PackageDb):  # pragma: no cover
-
     def __init__(self):
         PackageDb.__init__(self)
 
 
 class JhBuildPackageDb(PackageDb):  # pragma: no cover
-
     def __init__(self):
         PackageDb.__init__(self)
         prefixes = []
@@ -259,7 +249,7 @@ class JhBuildPackageDb(PackageDb):  # pragma: no cover
         for line in lines:
             if line:
                 result[line.strip()] = None
-        return result.keys()
+        return list(result.keys())
 
 
 class _ContinuousPackageDb(PackageDb):
@@ -272,8 +262,7 @@ class _ContinuousPackageDb(PackageDb):
 
     def getFiles(self, packageName):
         return check_output(
-            ["ls -1 /usr/share/locale/*/LC_MESSAGES/%s.mo" % packageName],
-            shell=True).strip().split('\n')
+            ["ls -1 /usr/share/locale/*/LC_MESSAGES/%s.mo" % packageName], shell=True).strip().split('\n')
 
     def getDependencies(self, packageName):
         # Simulate a set using a hash (to a dummy value);
@@ -282,23 +271,21 @@ class _ContinuousPackageDb(PackageDb):
 
 
 class Distro(object):
-
     """
     Class representing a distribution.
 
     Scripts may want to do arbitrary logic based on whichever distro is in use
     (e.g. handling differences in names of packages, distribution-specific
-     patches, etc.)
+    patches, etc.)
 
     We can either create methods in the Distro class to handle these, or we
-     can use constructs like isinstance(distro, Ubuntu) to handle this. We can
+    can use constructs like isinstance(distro, Ubuntu) to handle this. We can
     even create hierarchies of distro subclasses to handle this kind of thing
     (could get messy fast though)
     """
 
 
 class Fedora(Distro):  # pragma: no cover
-
     def __init__(self):
         self.packageDb = _RpmPackageDb()
 
@@ -308,49 +295,41 @@ class RHEL(Fedora):  # pragma: no cover
 
 
 class Debian(Distro):  # pragma: no cover
-
     def __init__(self):
         self.packageDb = _AptPackageDb()
 
 
 class Ubuntu(Debian):
-
     def __init__(self):
         self.packageDb = _UbuntuAptPackageDb()
 
 
 class Suse(Distro):  # pragma: no cover
-
     def __init__(self):
         self.packageDb = _RpmPackageDb()
 
 
 class Gentoo(Distro):  # pragma: no cover
-
     def __init__(self):
         self.packageDb = _PortagePackageDb()
 
 
 class Conary(Distro):  # pragma: no cover
-
     def __init__(self):
         self.packageDb = _ConaryPackageDb()
 
 
 class Solaris(Distro):  # pragma: no cover
-
     def __init__(self):
         self.packageDb = _SolarisPackageDb()
 
 
 class JHBuild(Distro):  # pragma: no cover
-
     def __init__(self):
         self.packageDb = JhBuildPackageDb()
 
 
 class GnomeContinuous(Distro):  # pragma: no cover
-
     def __init__(self):
         self.packageDb = _ContinuousPackageDb()
 

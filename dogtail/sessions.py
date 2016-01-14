@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
 import time
 import os
 import pwd
 import errno
 import re
 import subprocess
-import signal
 import tempfile
 import random
 import glob
@@ -17,7 +18,7 @@ def scratchFile(label):  # pragma: no cover
      dogtail-headless-<label>.<random junk>"""
     prefix = "dogtail-headless-"
     return tempfile.NamedTemporaryFile(prefix="%s%s." % (prefix, label),
-                                       dir=config.scratchDir)
+                                       dir=config.scratchDir, mode='w')
 
 
 def testBinary(path):  # pragma: no cover
@@ -47,17 +48,14 @@ class Subprocess(object):  # pragma: no cover
         if self.environ is None:
             self.environ = os.environ
         self.popen = subprocess.Popen(
-            self.cmdList, env=self.environ)  # , stdout = subprocess.PIPE,
-                # stderr = subprocess.STDOUT, close_fds = True)
+            self.cmdList, env=self.environ)
         return self.popen.pid
 
     def wait(self):
         return self.popen.wait()
 
     def stop(self):
-        # The following doesn't exist in python < 2.6, if you can believe it.
-        # self.popen.terminate()
-        os.kill(self.popen.pid, signal.SIGTERM)
+        self.popen.terminate()
 
     @property
     def exitCode(self):
@@ -162,13 +160,14 @@ class Session(object):  # pragma: no cover
 
         def getEnvDict(fileName):
             try:
-                envString = open(fileName, 'r').read()
+                with open(fileName, 'r') as f:
+                    envString = f.read()
             except IOError:
                 return {}
             envItems = envString.split('\x00')
             envDict = {}
             for item in envItems:
-                if not '=' in item:
+                if '=' not in item:
                     continue
                 k, v = item.split('=', 1)
                 envDict[k] = v

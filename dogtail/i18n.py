@@ -1,32 +1,15 @@
 # -*- coding: utf-8 -*-
-"""
-Internationalization facilities
-
-Authors: David Malcolm <dmalcolm@redhat.com>
-"""
-
-__author__ = """David Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.com>"""
-
-import config
-
+from __future__ import absolute_import, division, print_function, unicode_literals
+from dogtail import config
 import os
 import re
 import gettext
+from dogtail.logging import debugLogger as logger
 
-from logging import debugLogger as logger
-from __builtin__ import unicode
-
-
-def safeDecode(string):
-    try:
-        string = string.decode('utf-8', 'replace')
-    except UnicodeEncodeError:
-        string = string.encode('utf-8', 'replace')
-    return string
-
-
-def safeEncode(string):
-    pass
+"""
+Internationalization facilities
+"""
+__author__ = """David Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.com>"""
 
 
 """
@@ -37,11 +20,9 @@ translationDbs = []
 
 
 class TranslationDb(object):
-
     """
     Abstract base class representing a database of translations
     """
-
     def getTranslationsOf(self, srcName):
         """
         Pure virtual method to look up the translation of a string.
@@ -57,18 +38,15 @@ class TranslationDb(object):
 
 
 class GettextTranslationDb(TranslationDb):
-
     """
     Implementation of TranslationDb which leverages gettext, using a single
     translation mo-file.
     """
-
     def __init__(self, moFile):
         self.__moFile = moFile
         self.__gnutranslations = gettext.GNUTranslations(open(moFile))
 
     def getTranslationsOf(self, srcName):
-        srcName = safeDecode(srcName)
         # print "searching for translations of %s"%srcName
         # Use a dict to get uniqueness:
         results = {}
@@ -96,7 +74,7 @@ class GettextTranslationDb(TranslationDb):
                 # Strip out the underscore, and add to the result:
                 results[result.replace('_', '')] = True
 
-        return results.keys()
+        return list(results.keys())
 
 
 def translate(srcString):
@@ -109,18 +87,16 @@ def translate(srcString):
     # Try to translate the string:
     for translationDb in translationDbs:
         for result in translationDb.getTranslationsOf(srcString):
-            result = safeDecode(result)
             results[result] = True
 
     # No translations found:
     if len(results) == 0:
         if config.config.debugTranslation:
             logger.log('Translation not found for "%s"' % srcString)
-    return results.keys()
+    return list(results.keys())
 
 
 class TranslatableString(object):
-
     """
     Class representing a string that we want to match strings against, handling
     translation for us, by looking it up once at construction time.
@@ -131,7 +107,6 @@ class TranslatableString(object):
         Constructor looks up the string in all of the translation databases, storing
         the various translations it finds.
         """
-        untranslatedString = safeDecode(untranslatedString)
         self.untranslatedString = untranslatedString
         self.translatedStrings = translate(untranslatedString)
 
@@ -140,7 +115,6 @@ class TranslatableString(object):
         Compare the test string against either the translation of the original
         string (or simply the original string, if no translation was found).
         """
-        # print "comparing %s against %s"%(string, self)
         def stringsMatch(inS, outS):
             """
             Compares a regular expression to a string
@@ -153,8 +127,6 @@ class TranslatableString(object):
             if inString == outString:
                 return True
             inString = inString + '$'
-            inString = safeDecode(inString)
-            outString = safeDecode(outString)
             if inString[0] == '*':
                 inString = "\\" + inString
             # Escape all parentheses, since grouping will never be needed here
@@ -187,10 +159,10 @@ class TranslatableString(object):
             # build an output string, with commas in the correct places
             translations = ""
             for tString in self.translatedStrings:
-                translations += u'"%s", ' % safeDecode(tString)
-            result = u'"%s" (%s)' % (
-                safeDecode(self.untranslatedString), translations)
-            return safeDecode(result)
+                translations += '"%s", ' % tString
+            result = '"%s" (%s)' % (
+                self.untranslatedString, translations)
+            return result
         else:
             return '"%s"' % (self.untranslatedString)
 
@@ -205,8 +177,7 @@ def isMoFile(filename, language=''):
     if re.match('(.*)\\.mo$', filename):
         if not language:
             return True
-        elif re.match('/usr/share/locale(.*)/%s(.*)/LC_MESSAGES/(.*)\\.mo$' %
-                      language, filename):
+        elif re.match('/usr/share/locale(.*)/%s(.*)/LC_MESSAGES/(.*)\\.mo$' % language, filename):
             return True
         else:
             return False
@@ -215,7 +186,7 @@ def isMoFile(filename, language=''):
 
 
 def loadAllTranslationsForLanguage(language):
-    import distro
+    from dogtail import distro
     for moFile in distro.packageDb.getMoFiles(language):
         translationDbs.append(GettextTranslationDb(moFile))
 
@@ -226,7 +197,7 @@ def getMoFilesForPackage(packageName, language='', getDependencies=True):
     dependencies. It is possible to restrict the results to those of a certain
     language, for example 'ja'.
     """
-    import distro
+    from dogtail import distro
 
     result = []
     for filename in distro.packageDb.getFiles(packageName):
@@ -264,8 +235,7 @@ def loadTranslationsFromPackageMoFiles(packageName, getDependencies=True):
                     if config.config.debugTranslation:
                         #import traceback
                         # logger.log(traceback.format_exc())
-                        logger.log(
-                            "Warning: Failed to load mo-file for translation: " + moFile)
+                        logger.log("Warning: Failed to load mo-file for translation: " + moFile)
 
     # Hack alert:
     #
@@ -274,7 +244,7 @@ def loadTranslationsFromPackageMoFiles(packageName, getDependencies=True):
     # this special case, aside from the simple fact that there is one,
     # is that it makes automatic translations much slower.
 
-    import distro
+    from dogtail import distro
     language = os.environ.get('LANGUAGE', os.environ['LANG'])[0:2]
     if isinstance(distro.distro, distro.Ubuntu):
         load('language-pack-gnome-%s' % language, language)

@@ -1,11 +1,13 @@
-"""Handles versioning of software packages
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-Author: Dave Malcolm <dmalcolm@redhat.com>"""
+"""
+Handles versioning of software packages
+"""
 __author__ = 'Dave Malcolm <dmalcolm@redhat.com>'
 
 
 class Version(object):
-
     """
     Class representing a version of a software package.
     Stored internally as a list of subversions, from major to minor.
@@ -19,7 +21,7 @@ class Version(object):
         """
         Parse a string of the form number.number.number
         """
-        return Version(map(int, versionString.split(".")))
+        return Version(list(map(int, versionString.split("."))))
     fromString = staticmethod(fromString)
 
     def __str__(self):

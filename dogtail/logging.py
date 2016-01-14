@@ -1,34 +1,32 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
+from dogtail.config import config
+import os
+import sys
+import time
+import traceback
+
 """
 Logging facilities
-
-Authors: Ed Rousseau <rousseau@redhat.com>, Zack Cerza <zcerza@redhat.com, David Malcolm <dmalcolm@redhat.com>
 """
 
 __author__ = """Ed Rousseau <rousseau@redhat.com>,
 Zack Cerza <zcerza@redhat.com,
 David Malcolm <dmalcolm@redhat.com>
 """
-import os
-import sys
-import time
-from config import config
-import codecs
-
-# Timestamp class for file logs
 
 
 class TimeStamp(object):
-
     """
+    Timestamp class for file logs
+
     Generates timestamps tempfiles and log entries
     """
-
     def __init__(self):
         self.now = "0"
         self.timetup = time.localtime()
 
-    def zeroPad(self, int, width=2):
+    def zeroPad(self, intt, width=2):
         """
         Pads an integer 'int' with zeroes, up to width 'width'.
 
@@ -36,10 +34,10 @@ class TimeStamp(object):
 
         It will not truncate. If you call zeroPad(100, 2), '100' will be returned.
         """
-        if int < 10 ** width:
-            return ("0" * (width - len(str(int)))) + str(int)
+        if intt < 10 ** width:
+            return ("0" * (width - len(str(intt)))) + str(intt)
         else:
-            return str(int)
+            return str(intt)
 
     # file stamper
     def fileStamp(self, filename, addTime=True):
@@ -87,7 +85,6 @@ class TimeStamp(object):
 
 
 class Logger(object):
-
     """
     Writes entries to standard out.
     """
@@ -101,12 +98,14 @@ class Logger(object):
         """
         self.logName = logName
         self.stdOut = stdOut
-        self.file = file  # Handle to the logfile
-        if not self.file:
+        self.filee = file  # Handle to the logfile
+        if not self.filee:
             return
 
         scriptName = config.scriptName
-        if not scriptName:
+
+        # most probably non-reachable code
+        if not scriptName:  # pragma: no cover
             scriptName = 'log'
         self.fileName = scriptName
 
@@ -115,13 +114,11 @@ class Logger(object):
             self.findUniqueName()
         else:
             # If path doesn't exist, raise an exception
-            raise IOError(
-                "Log path %s does not exist or is not a directory" % config.logDir)
+            raise IOError("Log path %s does not exist or is not a directory" % config.logDir)
 
     def findUniqueName(self):
         # generate a logfile name and check if it already exists
-        self.fileName = config.logDir + self.stamper.fileStamp(self.fileName) \
-            + '_' + self.logName
+        self.fileName = config.logDir + self.stamper.fileStamp(self.fileName) + '_' + self.logName
         i = 0
         while os.path.exists(self.fileName):
             # Append the pathname
@@ -136,10 +133,9 @@ class Logger(object):
     def createFile(self):
         # Try to create the file and write the header info
         print("Creating logfile at %s ..." % self.fileName)
-        self.file = codecs.open(self.fileName, mode='wb', encoding=
-                                'utf-8')
-        self.file.write("##### " + os.path.basename(self.fileName) + '\n')
-        self.file.flush()
+        self.filee = open(self.fileName, mode='w')
+        self.filee.write("##### " + os.path.basename(self.fileName) + '\n')
+        self.filee.flush()
 
     def log(self, message, newline=True, force=False):
         """
@@ -148,71 +144,58 @@ class Logger(object):
 
         If force is True, log to a file irrespective of config.logDebugToFile.
         """
-        try:
-            message = message.decode('utf-8', 'replace')
-        except UnicodeEncodeError:
-            pass
-
 
         # Try to open and write the result to the log file.
-        if isinstance(self.file, bool) and (force or config.logDebugToFile):
+        if isinstance(self.filee, bool) and (force or config.logDebugToFile):
             self.createFile()
 
         if force or config.logDebugToFile:
             if newline:
-                self.file.write(message + '\n')
+                self.filee.write(message + '\n')
             else:
-                self.file.write(message + ' ')
-            self.file.flush()
+                self.filee.write(message + ' ')
+            self.filee.flush()
 
         if self.stdOut and config.logDebugToStdOut:
-            if newline:
-                print(message)
-            else:
-                print(message)
+            print(message)
 
 
 class ResultsLogger(Logger):
-
     """
     Writes entries into the Dogtail log
     """
-
     def __init__(self, stdOut=True):
         Logger.__init__(self, 'results', file=True, stdOut=stdOut)
 
     # Writes the result of a test case comparison to the log
     def log(self, entry):
         """
-        Writes the log entry. Requires a 1 {key: value} pair dict for an argument or else it will throw an exception.
+        Writes the log entry. Requires a 1 {key: value} pair dict for an argument or else it will
+        throw an exception.
         """
         # We require a 1 key: value dict
         # Strip all leading and trailing witespace from entry dict and convert
-    # to string for writing
+        # to string for writing
 
         if len(entry) == 1:
-            key = entry.keys()
-            value = entry.values()
+            key = list(entry.keys())
+            value = list(entry.values())
             key = key[0]
             value = value[0]
             entry = str(key) + ":      " + str(value)
         else:
+            print("Method argument requires a 1 {key: value} dict. Supplied argument not one {key: value}")
             raise ValueError(entry)
-            print(
-                "Method argument requires a 1 {key: value} dict. Supplied argument not one {key: value}")
 
-        Logger.log(self, self.stamper.entryStamp() + "      " + entry,
-                   force=True)
+        Logger.log(self, self.stamper.entryStamp() + "      " + entry, force=True)
 
 debugLogger = Logger('debug', config.logDebugToFile)
-
-import traceback
 
 
 def exceptionHook(exc, value, tb):  # pragma: no cover
     tbStringList = traceback.format_exception(exc, value, tb)
     tbString = ''.join(tbStringList)
     debugLogger.log(tbString)
-    sys.exc_clear()
+    # sys.exc_clear()
 
 sys.excepthook = exceptionHook

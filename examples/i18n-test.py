@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Dogtail demo script
 __author__ = 'David Malcolm <dmalcolm@redhat.com>'
 
@@ -17,12 +17,12 @@ def translateAllStrings(appName):
     and try translating them all into the locale that this script is running in.
     """
     for string in root.application(appName).getUserVisibleStrings():
-        print "User-visible string: %s"%string
-        print "Translation is:%s"%dogtail.i18n.translate(string)
+        print(("User-visible string: %s" % string))
+        print(("Translation is:%s"%dogtail.i18n.translate(string)))
 
-print "Package dependencies: %s"%dogtail.distro.packageDb.getDependencies('evolution')
+print(("Package dependencies: %s"%dogtail.distro.packageDb.getDependencies('evolution')))
 #print dogtail.i18n.getMoFilesForPackage('evolution', True)
-print "Translation domains: %s"%dogtail.i18n.getTranslationDomainsForPackage('evolution', True)
+print(("Translation domains: %s"%dogtail.i18n.getTranslationDomainsForPackage('evolution', True)))
 
 #dogtail.i18n.loadTranslationsFromPackageMoFiles('evolution')
 #translateAllStrings('evolution')

@@ -1,25 +1,43 @@
 # dogtail *development* Makefile
 
-all:
-	python setup.py build
+all: install3 install2
 
-install:
+install: clean
+	python setup.py build
 	python setup.py install --root=$(DESTDIR)
+
+
+install3: clean3
+	python3 setup.py build
+	python3 setup.py install --root=$(DESTDIR)
+
+install2: clean2
+	python2 setup.py build
+	python2 setup.py install --root=$(DESTDIR)
 
 clean:
 	rm -rf api_docs/
-	python setup.py clean
 	rm -f MANIFEST
 	rm -rf build dist
-	
 	find . -name '*.pyc' -exec rm {} \;
 
-# Dollar signs must be escaped with dollar signs in variables.
-export camelCAPS='[a-z_][a-zA-Z0-9_]*$$'
-export StudlyCaps='[a-zA-Z_][a-zA-Z0-9_]*$$'
+clean2: clean
+	python2 setup.py clean
+
+clean3: clean
+	python3 setup.py clean
 
 check:
-	pylint --indent-string="    " --class-rgx=${StudlyCaps} --function-rgx=${camelCAPS} --method-rgx=${camelCAPS} --variable-rgx=${camelCAPS} --argument-rgx=${camelCaps} dogtail sniff/sniff examples/*.py recorder/dogtail-recorder scripts/*.py
+	pep8 --max-line-length=120 dogtail/*.py tests/*.py scripts/* sniff/sniff
+
+test:
+	nosetests tests/
+
+test2:
+	nosetests2 tests/
+
+test3:
+	nosetests3 tests/
 
 tarball:
 	python setup.py sdist

@@ -1,4 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
 descr = """
 Unlike the original headless script this will make use of an Display Manager
 (DM - currently gdm) to handle starting the X server and user session. It's motivated
@@ -28,9 +30,13 @@ import os
 import glob
 import subprocess
 import time
-import ConfigParser
 import shutil
 import re
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
+
 from dogtail.sessions import Script
 
 preserve_envs = ['PYTHONPATH', 'TEST']
@@ -68,7 +74,7 @@ def getSessionEnvironment(sessionBinary):
     def copyVars(envDict):
         '''Copy a couple of old variables we want to preserve'''
         for env in preserve_envs:
-            if os.environ.has_key(env):
+            if env in os.environ:
                 envDict[env] = os.environ[env]
         return envDict
 
@@ -105,7 +111,7 @@ class DisplayManagerSession(object):
         '''Gives true if process can be greped out of full ps dump '''
         s = subprocess.Popen(["ps", "axw"], stdout=subprocess.PIPE)
         for x in s.stdout:
-            if re.search(process, x):
+            if re.search(process, str(x)):
                 return True
         return False
 
@@ -132,7 +138,7 @@ class DisplayManagerSession(object):
 
     def setup(self, restore=False):
         shutil.copy(self.config, self.tmp_file)
-        config = ConfigParser.SafeConfigParser()
+        config = configparser.SafeConfigParser()
         config.optionxform = str
         config.read(self.tmp_file)
         if not restore:
@@ -161,7 +167,7 @@ class DisplayManagerSession(object):
                 tempfile = '/tmp/%s_headless' % self.user
                 if os.path.isfile(self.accountfile):
                     subprocess.Popen('cp -f %s %s' % (self.accountfile, tempfile), shell=True).wait()
-                account_config = ConfigParser.SafeConfigParser()
+                account_config = configparser.SafeConfigParser()
                 account_config.optionxform = str
                 account_config.read(tempfile)
                 try:
@@ -174,7 +180,7 @@ class DisplayManagerSession(object):
                     elif saved_session != self.session:
                         account_config.set('User', 'XSession', self.session)
                         need_restart = True
-                except ConfigParser.NoSectionError:
+                except configparser.NoSectionError:
                     if self.session is not None:
                         account_config.add_section('User')
                         account_config.set('User', 'XSession', self.session)
@@ -187,15 +193,15 @@ class DisplayManagerSession(object):
                     subprocess.Popen('sudo mv -f %s %s' % (tempfile, self.accountfile), shell=True).wait()
                     time.sleep(1)
                     os.system('sudo service accounts-daemon restart')
-                    time.sleep(6) # prevent a possible race condition
+                    time.sleep(6)  # prevent a possible race condition
                     os.system('sudo service systemd-logind restart')
-                    time.sleep(6) # these are fast, but we still need to make sure no races happen
+                    time.sleep(6)  # these are fast, but we still need to make sure no races happen
                 else:
                     subprocess.Popen('sudo rm -f %s' % tempfile, shell=True).wait()
             elif self.dm == 'kdm':
                 if self.session is not None:
                     subprocess.Popen(
-                    'echo "[Desktop]\nSession=%s" > /home/%s/.dmrc' % (self.session, self.user), shell=True).wait()
+                        'echo "[Desktop]\nSession=%s" > /home/%s/.dmrc' % (self.session, self.user), shell=True).wait()
 
     def start(self, restart=False):
         if restart:
@@ -225,15 +231,10 @@ class DisplayManagerSession(object):
         if self.isProcessRunning(self.session_binary.split('/')[-1]):
             print(
                 'dogtail-run-headless-next: WARNING: %s still running, proceeding with kill -9' %
-                self.session_binary.split('/')[-1])
+                (self.session_binary.split('/')[-1]))
             subprocess.Popen(
                 ('sudo pkill --signal 9 %s' % (self.session_binary.split('/')[-1])).split()).wait()
             time.sleep(1)
-
-    def gnome_logout(self):
-        """ Try to logout of gnome cleanly to prevent unrelated crashes """
-        subprocess.Popen('gnome-session-quit --force', shell=True, env=os.environ).wait()
-        time.sleep(1)
 
 
 def parse():
@@ -243,12 +244,15 @@ def parse():
     parser.add_argument('--session', required=False,
                         help="""What session to use. Not specifying results in system default session on first login
                         or test user's last session with follow-up logins.
-                        Otherwise you can set any xsession desktop file name here (i.e. 'gnome-classic', 'gnome', 'lxde' etc.).
+                        Otherwise you can set any xsession desktop file name here (i.e. 'gnome-classic', 'gnome',
+                        'lxde' etc.).
                         'kde' defaults to 'kde-plasma for legacy reasons.'""")
     parser.add_argument('--session-binary', required=False,
-                        help="""Specify an in-session ever-running binary (full path) to get the environment from. Only needed for non-gnome/kde sessions.""")
+                        help="""Specify an in-session ever-running binary (full path) to get the environment from.
+                            Only needed for non-gnome/kde sessions.""")
     parser.add_argument('--dm', required=False,
-                        help="""What display manager to use for spawning session. Supported are 'gdm' (default) and 'kdm'.""")
+                        help="""What display manager to use for spawning session. Supported are 'gdm' (default) and
+                        'kdm'.""")
     parser.add_argument('--restart', action='store_true',
                         help="""Restart previously running display manager session before script execution.""")
     parser.add_argument('--dont-start', action='store_true',
@@ -274,7 +278,8 @@ def main():
             args.session = 'kde-plasma'
     else:
         if args.session_binary is None:
-            print('dogtail-run-headless-next: Need to specify a --session-binary ever-present in the session to get env from.')
+            print('dogtail-run-headless-next: Need to specify a --session-binary ever-present in the session to get'
+                  ' env from.')
             sys.exit(-1)
     if args.dm == 'gdm' or args.dm is None:
         dm_name = 'gdm'
@@ -284,7 +289,7 @@ def main():
         print('dogtail-run-headless-next: I do not recognize the display manager!')
         sys.exit(-1)
 
-    print('dogtail-run-headless-next: Using display manager: %s' % dm_name)
+    print('dogtail-run-headless-next: Using display manager: %s' % (dm_name))
 
     dm = DisplayManagerSession(dm_name, args.session, args.session_binary)
 
@@ -292,14 +297,12 @@ def main():
         dm.setup()
         dm.start(restart=args.restart)
 
-    print('dogtail-run-headless-next: Using %s to bind to the session' % dm.session_binary)
+    print('dogtail-run-headless-next: Using %s to bind to the session' % (dm.session_binary))
 
     try:
         os.environ = getSessionEnvironment(dm.session_binary)
     except:
-        print(
-            'dogtail-run-headless-next: Could not get the environment from %s process' %
-            dm.session_binary)
+        print('dogtail-run-headless-next: Could not get the environment from %s process' % (dm.session_binary))
         dm.stop()
         dm.setup(restore=True)
         sys.exit(1)
@@ -309,16 +312,14 @@ def main():
 
     script = Script(scriptCmdList)
     scriptPid = script.start()
-    print('dogtail-run-headless-next: Started the script with PID %d' % scriptPid)
+    print('dogtail-run-headless-next: Started the script with PID %d' % (scriptPid))
     exitCode = script.wait()
-    print('dogtail-run-headless-next: The script has finnished with return code %d' % exitCode)
+    print('dogtail-run-headless-next: The script has finnished with return code %d' % (exitCode))
 
     if args.disable_a11y is True:
         dm.setA11y(False)
 
     if args.dont_kill is False:
-        if args.session is None or 'gnome' in args.session:
-            dm.gnome_logout()
         dm.stop()
         dm.setup(restore=True)
 

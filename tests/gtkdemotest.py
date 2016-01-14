@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
 import unittest
 
 
 class GtkDemoTest(unittest.TestCase):
     """
-    TestCase subclass which handles bringing up and shutting down gtk-demo as a fixture.  Used for writing other test cases.
+    TestCase subclass which handles bringing up and shutting down gtk3-demo as a fixture.  Used for writing other test
+    cases.
     """
 
     def setUp(self):
@@ -16,21 +18,21 @@ class GtkDemoTest(unittest.TestCase):
         self.app = dogtail.tree.root.application('gtk3-demo')
 
     def tearDown(self):
-        from subprocess import call
+        import os
+        import signal
         import time
-        # kill all running instances now that we have demos in split-processes
-        call('pkill -9 gtk3-demo', shell=True) # *-application
-
+        os.kill(self.pid, signal.SIGKILL)
+        os.system('killall gtk3-demo-application > /dev/null 2>&1')
         # Sleep just enough to let the app actually die.
         # AT-SPI doesn't like being hammered too fast.
         time.sleep(0.5)
 
-    def runDemo(self, demoName):
+    def runDemo(self, demoName, retry=True):
         """
-        Click on the named demo within the gtk-demo app.
+        Click on the named demo within the gtk3-demo app.
         """
         tree = self.app.child(roleName="tree table")
-        tree.child(demoName).doActionNamed('activate')
+        tree.child(demoName, retry=retry).doActionNamed('activate')
 
 
 def trap_stdout(function, args=None):
@@ -39,7 +41,7 @@ def trap_stdout(function, args=None):
     """
 
     import sys
-    from StringIO import StringIO
+    from io import StringIO
 
     saved_stdout = sys.stdout
     try:

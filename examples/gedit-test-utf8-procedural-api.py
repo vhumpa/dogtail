@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Dogtail demo script
 
 from dogtail.config import config
@@ -58,7 +58,7 @@ except FocusError:
     try:
         # This string changed somewhere around gedit 2.13.2.
         # This is the new string
-        focus.dialog(u'Save As\u2026')
+        focus.dialog('Save As\u2026')
     except FocusError:
         # Fall back to the old string.
         focus.dialog('Save as...')
@@ -73,7 +73,7 @@ except FocusError:
     try:
         # This string changed somewhere around gedit 2.13.2.
         # This is the new string
-        focus.dialog(u'Save As\u2026')
+        focus.dialog('Save As\u2026')
     except FocusError:
         # Fall back to the old string.
         focus.dialog('Save as...')
@@ -89,7 +89,7 @@ except FocusError:
     try:
         # This string changed somewhere around gedit 2.13.2.
         # This is the new string
-        focus.dialog(u'Save As\u2026')
+        focus.dialog('Save As\u2026')
     except FocusError:
         # Fall back to the old string.
         focus.dialog('Save as...')
@@ -111,7 +111,7 @@ try:
     # encoding we're using, otherwise python gets confused later.
     gold = open(path[0] + '/data/UTF-8-demo.txt', encoding='utf-8').readlines()
 except IOError:
-    print "File open failed"
+    print ("File open failed")
 
 # Read the test file for comparison
 filepath = environ['HOME'] + '/Desktop/UTF8demo.txt'

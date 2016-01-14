@@ -1,6 +1,6 @@
 Installation on Red-Hat-like systems:
 	make rpm
-	rpm -Uvh ./dist/dogtail-*.noarch.rpm
+	rpm -Uvh ./dist/dogtail3-*.noarch.rpm
 
 Installation on other systems:
 	./setup.py install --prefix=/usr

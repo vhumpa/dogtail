@@ -8,4 +8,4 @@ We use 4 spaces for indentation.
 
 == Python versions ==
 Currently the 0.8.x versions of dogtail target Python 2.7
-We might not be 3.x compatible yet.
+Python3 compatible version of dogtail is in separate branch and will be built in separate package

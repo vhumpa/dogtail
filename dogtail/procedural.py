@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
+from dogtail import errors
+from dogtail import predicate
+from dogtail import rawinput
+from dogtail import tree
+from dogtail.config import config
+from dogtail.utils import Lock
+import os
+
 """
 Dogtail's procedural UI
 All the classes here are intended to be single-instance, except for Action.
@@ -6,7 +16,7 @@ __author__ = 'Zack Cerza <zcerza@redhat.com>'
 #
 #
 # WARNING: Here There Be Dragons (TM)                                        #
-#
+#                                                                            #
 # If you don't understand how to use this API, you almost certainly don't    #
 # want to read the code first. We make use of some very non-intuitive        #
 # features of Python in order to make the API very simplistic. Therefore,    #
@@ -15,30 +25,18 @@ __author__ = 'Zack Cerza <zcerza@redhat.com>'
 #
 #
 
-import tree
-import predicate
-from config import config
-from utils import Lock
-import rawinput
-
-#FocusError = "FocusError: %s not found"
-
 
 class FocusError(Exception):
     pass
 
-import errors
-
 
 def focusFailed(pred):
-    errors.warn('The requested widget could not be focused: %s' %
-                pred.debugName)
+    errors.warn('The requested widget could not be focused: %s' % pred.debugName)
 
 ENOARGS = "At least one argument is needed"
 
 
 class FocusBase(object):
-
     """
     The base for every class in the module. Does nothing special, really.
     """
@@ -62,8 +60,7 @@ class FocusBase(object):
                 raise AttributeError(name)
 
 
-class FocusApplication (FocusBase):
-
+class FocusApplication(FocusBase):
     """
     Keeps track of which application is currently focused.
     """
@@ -75,8 +72,7 @@ class FocusApplication (FocusBase):
         """
         try:
             pred = predicate.IsAnApplicationNamed(name)
-            app = self.desktop.findChild(
-                pred, recursive=False, retry=False)
+            app = self.desktop.findChild(pred, recursive=False, retry=False)
         except tree.SearchError:
             if config.fatalErrors:
                 raise FocusError(name)
@@ -91,16 +87,14 @@ class FocusApplication (FocusBase):
         return True
 
 
-class FocusDesktop (FocusBase):
-
+class FocusDesktop(FocusBase):
     """
     This isn't used yet, and may never be used.
     """
     pass
 
 
-class FocusWindow (FocusBase):
-
+class FocusWindow(FocusBase):
     """
     Keeps track of which window is currently focused.
     """
@@ -112,8 +106,7 @@ class FocusWindow (FocusBase):
         result = None
         pred = predicate.IsAWindowNamed(name)
         try:
-            result = FocusApplication.node.findChild(
-                pred, requireResult=False, recursive=False)
+            result = FocusApplication.node.findChild(pred, requireResult=False, recursive=False)
         except AttributeError:
             pass
         if result:
@@ -129,8 +122,7 @@ class FocusWindow (FocusBase):
         return True
 
 
-class FocusDialog (FocusBase):
-
+class FocusDialog(FocusBase):
     """
     Keeps track of which dialog is currently focused.
     """
@@ -142,8 +134,7 @@ class FocusDialog (FocusBase):
         result = None
         pred = predicate.IsADialogNamed(name)
         try:
-            result = FocusApplication.node.findChild(
-                pred, requireResult=False, recursive=False)
+            result = FocusApplication.node.findChild(pred, requireResult=False, recursive=False)
         except AttributeError:
             pass
         if result:
@@ -158,8 +149,7 @@ class FocusDialog (FocusBase):
         return True
 
 
-class FocusWidget (FocusBase):
-
+class FocusWidget(FocusBase):
     """
     Keeps track of which widget is currently focused.
     """
@@ -167,32 +157,28 @@ class FocusWidget (FocusBase):
     def findByPredicate(self, pred):
         result = None
         try:
-            result = FocusWidget.node.findChild(
-                pred, requireResult=False, retry=False)
+            result = FocusWidget.node.findChild(pred, requireResult=False, retry=False)
         except AttributeError:
             pass
         if result:
             FocusWidget.node = result
         else:
             try:
-                result = FocusDialog.node.findChild(
-                    pred, requireResult=False, retry=False)
+                result = FocusDialog.node.findChild(pred, requireResult=False, retry=False)
             except AttributeError:
                 pass
         if result:
             FocusWidget.node = result
         else:
             try:
-                result = FocusWindow.node.findChild(
-                    pred, requireResult=False, retry=False)
+                result = FocusWindow.node.findChild(pred, requireResult=False, retry=False)
             except AttributeError:
                 pass
         if result:
             FocusWidget.node = result
         else:
             try:
-                result = FocusApplication.node.findChild(
-                    pred, requireResult=False, retry=False)
+                result = FocusApplication.node.findChild(pred, requireResult=False, retry=False)
                 if result:
                     FocusWidget.node = result
             except AttributeError:
@@ -219,13 +205,11 @@ class FocusWidget (FocusBase):
             raise TypeError(ENOARGS)
 
         # search for a widget.
-        pred = predicate.GenericPredicate(name=name,
-                                          roleName=roleName, description=description)
+        pred = predicate.GenericPredicate(name=name, roleName=roleName, description=description)
         return self.findByPredicate(pred)
 
 
-class Focus (FocusBase):
-
+class Focus(FocusBase):
     """
     The container class for the focused application, dialog and widget.
     """
@@ -290,8 +274,7 @@ class Focus (FocusBase):
         return self.widget.findByPredicate(predicate.IsATextEntryNamed(name))
 
 
-class Action (FocusWidget):
-
+class Action(FocusWidget):
     """
     Aids in executing AT-SPI actions, refocusing the widget if necessary.
     """
@@ -308,8 +291,7 @@ class Action (FocusWidget):
         Then execute the action.
         """
         if name or roleName or description:
-            FocusWidget.__call__(
-                self, name=name, roleName=roleName, description=description)
+            FocusWidget.__call__(self, name=name, roleName=roleName, description=description)
         self.node.doActionNamed(self.action)
 
     def __getattr__(self, attr):
@@ -358,8 +340,7 @@ class Action (FocusWidget):
         self.__call__(name=name, roleName='text')
 
 
-class Click (Action):
-
+class Click(Action):
     """
     A special case of Action, Click will eventually handle raw mouse events.
     """
@@ -377,18 +358,15 @@ class Click (Action):
         the arguments to Action.
         """
         if name or roleName or description:
-            FocusWidget.__call__(
-                self, name=name, roleName=roleName, description=description)
+            FocusWidget.__call__(self, name=name, roleName=roleName, description=description)
         if raw and button:
             # We're doing a raw mouse click
             Click.node.click(button)
         else:
-            Action.__call__(
-                self, name=name, roleName=roleName, description=description, delay=delay)
+            Action.__call__(self, name=name, roleName=roleName, description=description, delay=delay)
 
 
-class Select (Action):
-
+class Select(Action):
     """
     Aids in selecting and deselecting widgets, i.e. page tabs
     """
@@ -409,8 +387,7 @@ class Select (Action):
         Then execute the action.
         """
         if name or roleName or description:
-            FocusWidget.__call__(
-                self, name=name, roleName=roleName, description=description)
+            FocusWidget.__call__(self, name=name, roleName=roleName, description=description)
         func = getattr(self.node, self.action)
         func()
 
@@ -430,12 +407,11 @@ def keyCombo(combo):
 
 
 def run(application, arguments='', appName=''):
-    from utils import run as utilsRun
+    from dogtail.utils import run as utilsRun
     pid = utilsRun(application + ' ' + arguments, appName=appName)
     focus.application(application)
     return pid
 
-import os
 # tell sniff not to use auto-refresh while script using this module is running
 # may have already been locked by dogtail.tree
 if not os.path.exists('/tmp/sniff_refresh.lock'):  # pragma: no cover

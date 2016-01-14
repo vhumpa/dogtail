@@ -1,3 +1,4 @@
+include README
 include COPYING
 include MANIFEST.in
 include Makefile

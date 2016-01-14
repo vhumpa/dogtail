@@ -1,14 +1,17 @@
-"""Predicates that can be used when searching for nodes.
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
+from dogtail.config import config
+from dogtail.i18n import TranslatableString
+from dogtail.logging import debugLogger as logger
+from gi.repository import GLib
+import re
+from time import sleep
 
-Author: David Malcolm <dmalcolm@redhat.com>"""
+"""
+Predicates that can be used when searching for nodes.
+"""
 __author__ = 'David Malcolm <dmalcolm@redhat.com>'
 
-from i18n import TranslatableString
-from gi.repository import GLib
-from time import sleep
-from logging import debugLogger as logger
-from config import config
-import re
 
 def stringMatches(scriptName, reportedName):
     assert isinstance(scriptName, TranslatableString)
@@ -50,13 +53,16 @@ def makeCamel(string):
 
 
 class Predicate(object):
+    """
+    Abstract base class representing a predicate function on nodes.
 
-    """Abstract base class representing a predicate function on nodes.
-
-    It's more than just a function in that it has data and can describe itself"""
+    It's more than just a function in that it has data and can describe itself
+    """
 
     def satisfiedByNode(self, node):
-        """Pure virtual method returning a boolean if the predicate is satisfied by the node"""
+        """
+        Pure virtual method returning a boolean if the predicate is satisfied by the node
+        """
         raise NotImplementedError
 
     def describeSearchResult(self, node):
@@ -89,14 +95,13 @@ class Predicate(object):
         # print "predeq: selfdict:%s"%self.__dict__
         # print "               otherdict:%s"%other.__dict__
 
-        if type(self) != type(other):
+        if not isinstance(self, type(other)):
             return False
         else:
             return self.__dict__ == other.__dict__
 
 
 class IsAnApplicationNamed(Predicate):
-
     """Search subclass that looks for an application by name"""
 
     def __init__(self, appName):
@@ -109,7 +114,7 @@ class IsAnApplicationNamed(Predicate):
             try:
                 return node.roleName == 'application' and stringMatches(self.appName, node.name)
             except GLib.GError as e:
-                if re.match(".*name :[0-9]+\.[0-9]+ was not provided.*", str(e)):
+                if re.match(r"name :[0-9]+\.[0-9]+ was not provided", e.message):
                     logger.log("Dogtail: warning: omiting possibly broken at-spi application record")
                     return False
                 else:
@@ -133,8 +138,9 @@ class IsAnApplicationNamed(Predicate):
 
 
 class GenericPredicate(Predicate):
-
-    """SubtreePredicate subclass that takes various optional search fields"""
+    """
+    SubtreePredicate subclass that takes various optional search fields
+    """
 
     def __init__(self, name=None, roleName=None, description=None, label=None, debugName=None):
         if name:
@@ -189,7 +195,7 @@ class GenericPredicate(Predicate):
                         if self.description != node.description:
                             return False
                 except GLib.GError as e:
-                    if re.match(".*name :[0-9]+\.[0-9]+ was not provided.*", str(e)):
+                    if re.match(r"name :[0-9]+\.[0-9]+ was not provided", e.message):
                         logger.log("Dogtail: warning: omiting possibly broken at-spi application record")
                         return False
                     else:
@@ -227,7 +233,6 @@ class GenericPredicate(Predicate):
 
 
 class IsNamed(Predicate):
-
     """Predicate subclass that looks simply by name"""
 
     def __init__(self, name):
@@ -251,8 +256,9 @@ class IsNamed(Predicate):
 
 
 class IsAWindowNamed(Predicate):
-
-    """Predicate subclass that looks for a top-level window by name"""
+    """
+    Predicate subclass that looks for a top-level window by name
+    """
 
     def __init__(self, windowName):
         self.windowName = TranslatableString(windowName)
@@ -275,8 +281,9 @@ class IsAWindowNamed(Predicate):
 
 
 class IsAWindow(Predicate):
-
-    """Predicate subclass that looks for top-level windows"""
+    """
+    Predicate subclass that looks for top-level windows
+    """
 
     def __init__(self):
         self.satisfiedByNode = lambda node: node.roleName == 'frame'
@@ -286,8 +293,9 @@ class IsAWindow(Predicate):
 
 
 class IsADialogNamed(Predicate):
-
-    """Predicate subclass that looks for a top-level dialog by name"""
+    """
+    Predicate subclass that looks for a top-level dialog by name
+    """
 
     def __init__(self, dialogName):
         self.dialogName = TranslatableString(dialogName)
@@ -310,14 +318,16 @@ class IsADialogNamed(Predicate):
 
 
 class IsLabelledBy(Predicate):
-
-    """Predicate: is this node labelled by another node"""
+    """
+    Predicate: is this node labelled by another node
+    """
     pass
 
 
 class IsLabelledAs(Predicate):
-
-    """Predicate: is this node labelled with the text string (i.e. by another node with that as a name)"""
+    """
+    Predicate: is this node labelled with the text string (i.e. by another node with that as a name)
+    """
 
     def __init__(self, labelText):
         self.labelText = TranslatableString(labelText)
@@ -344,14 +354,14 @@ class IsLabelledAs(Predicate):
 
 
 class IsAMenuNamed(Predicate):
-
-    """Predicate subclass that looks for a menu by name"""
+    """
+    Predicate subclass that looks for a menu by name
+    """
 
     def __init__(self, menuName):
         self.menuName = TranslatableString(menuName)
         self.debugName = self.describeSearchResult()
-        self.satisfiedByNode = lambda node: node.roleName == 'menu' and \
-            stringMatches(self.menuName, node.name)
+        self.satisfiedByNode = lambda node: node.roleName == 'menu' and stringMatches(self.menuName, node.name)
 
     def describeSearchResult(self):
         return '%s menu' % (self.menuName)
@@ -364,15 +374,15 @@ class IsAMenuNamed(Predicate):
 
 
 class IsAMenuItemNamed(Predicate):
-
-    """Predicate subclass that looks for a menu item by name"""
+    """
+    Predicate subclass that looks for a menu item by name
+    """
 
     def __init__(self, menuItemName):
         self.menuItemName = TranslatableString(menuItemName)
         self.debugName = self.describeSearchResult()
         self.satisfiedByNode = lambda node: \
-            node.roleName.endswith('menu item') and \
-            stringMatches(self.menuItemName, node.name)
+            node.roleName.endswith('menu item') and stringMatches(self.menuItemName, node.name)
 
     def describeSearchResult(self):
         return '%s menuitem' % (self.menuItemName)
@@ -385,14 +395,14 @@ class IsAMenuItemNamed(Predicate):
 
 
 class IsATextEntryNamed(Predicate):
-
-    """Predicate subclass that looks for a text entry by name"""
+    """
+    Predicate subclass that looks for a text entry by name
+    """
 
     def __init__(self, textEntryName):
         self.textEntryName = TranslatableString(textEntryName)
         self.debugName = self.describeSearchResult()
-        self.satisfiedByNode = lambda node: node.roleName == 'text' and \
-            stringMatches(self.textEntryName, node.name)
+        self.satisfiedByNode = lambda node: node.roleName == 'text' and stringMatches(self.textEntryName, node.name)
 
     def describeSearchResult(self):
         return '%s textentry' % (self.textEntryName)
@@ -405,14 +415,14 @@ class IsATextEntryNamed(Predicate):
 
 
 class IsAButtonNamed(Predicate):
-
-    """Predicate subclass that looks for a button by name"""
+    """
+    Predicate subclass that looks for a button by name
+    """
 
     def __init__(self, buttonName):
         self.buttonName = TranslatableString(buttonName)
         self.debugName = self.describeSearchResult()
-        self.satisfiedByNode = lambda node: node.roleName == 'push button' \
-            and stringMatches(self.buttonName, node.name)
+        self.satisfiedByNode = lambda node: node.roleName == 'push button' and stringMatches(self.buttonName, node.name)
 
     def describeSearchResult(self):
         return '%s button' % (self.buttonName)
@@ -425,14 +435,14 @@ class IsAButtonNamed(Predicate):
 
 
 class IsATabNamed(Predicate):
-
-    """Predicate subclass that looks for a tab by name"""
+    """
+    Predicate subclass that looks for a tab by name
+    """
 
     def __init__(self, tabName):
         self.tabName = TranslatableString(tabName)
         self.debugName = self.describeSearchResult()
-        self.satisfiedByNode = lambda node: node.roleName == 'page tab' and \
-            stringMatches(self.tabName, node.name)
+        self.satisfiedByNode = lambda node: node.roleName == 'page tab' and stringMatches(self.tabName, node.name)
 
     def describeSearchResult(self):
         return '%s tab' % (self.tabName)

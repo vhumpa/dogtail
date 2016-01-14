@@ -1,20 +1,10 @@
 # -*- coding: utf-8 -*-
-"""
-Various utilities
-
-Authors: Ed Rousseau <rousseau@redhat.com>, Zack Cerza <zcerza@redhat.com, David Malcolm <dmalcolm@redhat.com>
-"""
-
-__author__ = """Ed Rousseau <rousseau@redhat.com>,
-Zack Cerza <zcerza@redhat.com,
-David Malcolm <dmalcolm@redhat.com>
-"""
-
+from __future__ import absolute_import, division, print_function, unicode_literals
 import os
 import sys
 import subprocess
 import cairo
-import predicate
+from dogtail import predicate
 import errno
 import shlex
 
@@ -22,13 +12,20 @@ import gi
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
 
-from gi.repository import Gtk
-from gi.repository import GLib
-from config import config
+from gi.repository import Gtk, GLib
+from dogtail.config import config
 from time import sleep
-from logging import debugLogger as logger
-from logging import TimeStamp
-from __builtin__ import file
+from dogtail.logging import debugLogger as logger
+from dogtail.logging import TimeStamp
+
+"""
+Various utilities
+"""
+
+__author__ = """Ed Rousseau <rousseau@redhat.com>,
+Zack Cerza <zcerza@redhat.com,
+David Malcolm <dmalcolm@redhat.com>
+"""
 
 
 def screenshot(file='screenshot.png', timeStamp=True):
@@ -61,7 +58,6 @@ def screenshot(file='screenshot.png', timeStamp=True):
         path = config.scratchDir + newFile
 
     from gi.repository import Gdk
-    from gi.repository import GLib
     from gi.repository import GdkPixbuf
     rootWindow = Gdk.get_default_root_window()
     geometry = rootWindow.get_geometry()
@@ -71,8 +67,7 @@ def screenshot(file='screenshot.png', timeStamp=True):
                               width=geometry[2],
                               height=geometry[3])
 
-    pixbuf = Gdk.pixbuf_get_from_window(rootWindow, 0, 0,
-                                        geometry[2], geometry[3])
+    pixbuf = Gdk.pixbuf_get_from_window(rootWindow, 0, 0, geometry[2], geometry[3])
     # GdkPixbuf.Pixbuf.save() needs 'jpeg' and not 'jpg'
     if fileExt == 'jpg':
         fileExt = 'jpeg'
@@ -88,11 +83,12 @@ def screenshot(file='screenshot.png', timeStamp=True):
 def run(string, timeout=config.runTimeout, interval=config.runInterval, desktop=None, dumb=False, appName=''):
     """
     Runs an application. [For simple command execution such as 'rm *', use os.popen() or os.system()]
-    If dumb is omitted or is False, polls at interval seconds until the application is finished starting, or until timeout is reached.
+    If dumb is omitted or is False, polls at interval seconds until the application is finished starting, or until
+    timeout is reached.
     If dumb is True, returns when timeout is reached.
     """
     if not desktop:
-        from tree import root as desktop
+        from dogtail.tree import root as desktop
     args = shlex.split(string)
     os.environ['GTK_MODULES'] = 'gail:atk-bridge'
     pid = subprocess.Popen(args, env=os.environ).pid
@@ -115,7 +111,7 @@ def run(string, timeout=config.runTimeout, interval=config.runInterval, desktop=
                     if child.name == appName:
                         for grandchild in child.children:
                             if grandchild.roleName == 'frame':
-                                from procedural import focus
+                                from dogtail.procedural import focus
                                 focus.application.node = child
                                 doDelay(interval)
                                 return pid
@@ -184,7 +180,6 @@ class Blinker(object):  # pragma: no cover
 
 
 class Lock(object):
-
     """
     A mutex implementation that uses atomicity of the mkdir operation in UNIX-like
     systems. This can be used by scripts to provide for mutual exlusion, either in single
@@ -243,7 +238,7 @@ class Lock(object):
     def __getPostfix(self):
         import random
         import string
-        return ''.join(random.choice(string.letters + string.digits) for x in range(5))
+        return ''.join(random.choice(string.ascii_letters + string.digits) for x in range(5))
 
 
 a11yDConfKey = 'org.gnome.desktop.interface'
@@ -254,7 +249,10 @@ def isA11yEnabled():
     Checks if accessibility is enabled via DConf.
     """
     from gi.repository.Gio import Settings
-    InterfaceSettings = Settings(schema=a11yDConfKey)
+    try:
+        InterfaceSettings = Settings(schema_id=a11yDConfKey)
+    except TypeError: # if we have older glib that has deprecated param name
+        InterfaceSettings = Settings(schema=a11yDConfKey)
     dconfEnabled = InterfaceSettings.get_boolean('toolkit-accessibility')
     if os.environ.get('GTK_MODULES', '').find('gail:atk-bridge') == -1:
         envEnabled = False
@@ -265,7 +263,7 @@ def isA11yEnabled():
 
 def bailBecauseA11yIsDisabled():
     if sys.argv[0].endswith("pydoc"):
-        return  # pragma: no cover
+        return
     try:
         with open("/proc/%s/cmdline" % os.getpid(), 'r') as f:
             content = f.read()
@@ -286,7 +284,7 @@ def enableA11y(enable=True):
     Enables accessibility via DConf.
     """
     from gi.repository.Gio import Settings
-    InterfaceSettings = Settings(schema=a11yDConfKey)
+    InterfaceSettings = Settings(schema_id=a11yDConfKey)
     InterfaceSettings.set_boolean('toolkit-accessibility', enable)
 
 
@@ -305,13 +303,13 @@ def checkForA11yInteractively():  # pragma: no cover
     """
     if isA11yEnabled():
         return
-    from gi.repository import Gtk
     dialog = Gtk.Dialog('Enable Assistive Technology Support?',
                         None,
                         Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
                         (Gtk.STOCK_QUIT, Gtk.ResponseType.CLOSE,
                          "_Enable", Gtk.ResponseType.ACCEPT))
-    question = """Dogtail requires that Assistive Technology Support be enabled for it to function. Would you like to enable Assistive Technology support now?
+    question = """Dogtail requires that Assistive Technology Support be enabled for it to function. Would you like to
+enable Assistive Technology support now?
 
 Note that you will have to log out for the change to fully take effect.
     """.strip()
@@ -343,7 +341,7 @@ class GnomeShell(object):  # pragma: no cover
     """
 
     def __init__(self, classic_mode=False):
-        from tree import root
+        from dogtail.tree import root
         self.shell = root.application('gnome-shell')
 
     def getApplicationMenuList(self, search_by_item='Quit'):
@@ -358,9 +356,10 @@ class GnomeShell(object):  # pragma: no cover
             ancestor = match.parent.parent.parent
             if ancestor.roleName == 'panel':
                 return ancestor.findChildren(predicate.GenericPredicate(roleName='label'))
-        from tree import SearchError
-        raise SearchError("Could not find the Application menu based on '%s' item. Please provide an existing reference item"
-                          % search_by_item)
+        from dogtail.tree import SearchError
+        raise SearchError(
+            "Could not find the Application menu based on '%s' item. Please provide an existing reference item"
+            % search_by_item)
 
     def getApplicationMenuButton(self, app_name):
         """
@@ -369,7 +368,7 @@ class GnomeShell(object):  # pragma: no cover
         try:
             return self.shell[0][0][3].child(app_name, roleName='label')
         except:
-            from tree import SearchError
+            from dogtail.tree import SearchError
             raise SearchError(
                 "Application menu button of %s could not be found within gnome-shell!" % app_name)
 
@@ -383,7 +382,7 @@ class GnomeShell(object):  # pragma: no cover
         except:
             menu_items = self.getApplicationMenuList(item)
         for node in menu_items:
-            if node.name == item or unicode(node.name, errors='ignore') == item:
+            if node.name == item:
                 return node
         raise Exception(
             'Could not find the item, did application focus change?')

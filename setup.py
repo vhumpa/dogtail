@@ -61,13 +61,13 @@ def session_file():
 
 setup(
     name='dogtail',
-    version='0.9.1',
+    version='0.9.9',
     description="GUI test tool and automation framework " +
     "that uses Accessibility (a11y) technologies to " +
     "communicate with desktop applications.",
     author="""Zack Cerza <zcerza@redhat.com>,
 Ed Rousseau <rousseau@redhat.com>,
-David Malcolm <dmalcolm@redhat.com>
+David Malcolm <dmalcolm@redhat.com>,
 Vitezslav Humpa <vhumpa@redhat.com>""",
     author_email='dogtail-list@gnome.org',
     url='http://dogtail.fedorahosted.org/',
@@ -83,9 +83,13 @@ Vitezslav Humpa <vhumpa@redhat.com>""",
         ('share/dogtail/glade', ['sniff/sniff.ui']),
         ('share/dogtail/icons', sniff_icons()),
         ('share/applications', ['sniff/sniff.desktop']),
-        ('share/icons/hicolor/48x48/apps', icons('png')),
         ('share/icons/hicolor/scalable/apps', icons('svg'))
-    ]
+    ],
+    options = {
+    'build_scripts': {
+        'executable': '/usr/bin/env python',
+    }
+}
 )
 
 # vim: sw=4 ts=4 sts=4 noet ai

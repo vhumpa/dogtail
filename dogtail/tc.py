@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
-"""Test Case magic
+from __future__ import absolute_import, division, print_function, unicode_literals
+from dogtail.config import config
+from dogtail.logging import ResultsLogger
 
-Author: Ed Rousseau <rousseau@redhat.com>"""
+"""
+Test Case magic
+
+FIXME: This module has not been tested since while. Use it with caution!
+(and even better - avoid it and use dogtail.tree)
+"""
 __author__ = "Ed Rousseau <rousseau@redhat.com>"
-
-import os
-import os.path
-from config import config
-from logging import ResultsLogger, TimeStamp
-from PIL import Image, ImageChops, ImageStat
-from __builtin__ import unicode, long
 
 
 class TC(object):  # pragma: no cover
-
     """
     The Test Case Superclass
     """
@@ -44,7 +43,7 @@ class TC(object):  # pragma: no cover
         self.undertest = undertest
         for string in [self.baseline, self.undertest]:
             try:
-                string = unicode(string, 'utf-8')
+                string = str(string, 'utf-8')
             except TypeError:
                 pass
         self.encoding = encoding
@@ -59,7 +58,8 @@ class TC(object):  # pragma: no cover
                 self.result = {self.label: "Passed"}
             else:
                 self.result = {self.label: "Failed - " + self.encoding +
-                               " strings do not match. " + self.baseline + " expected: Got " + self.undertest}
+                               " strings do not match. " + self.baseline +
+                               " expected: Got " + self.undertest}
             # Pass the test result to the ResultsLogger for writing
             TC.logger.log(self.result)
             return self.result
@@ -74,7 +74,6 @@ class TC(object):  # pragma: no cover
 
 # String Test Case subclass
 class TCString(TC):  # pragma: no cover
-
     """
     String Test Case Class
     """
@@ -82,65 +81,66 @@ class TCString(TC):  # pragma: no cover
     def __init__(self):
         TC.__init__(self)
 
+
+# TODO: rewrite to Python3 compatible image library
+#from PIL import Image, ImageChops, ImageStat
+# TODO: rewrite to Python3 compatible image library OR remove
 # Image test case subclass
+#class TCImage(TC):  # pragma: no cover
+#
+#    """
+#    Image Test Case Class.
+#    """
+#
+#    def compare(self, label, baseline, undertest):
+#        for _file in (baseline, undertest):
+#            if type(_file) is not str and type(_file) is not str:
+#                raise TypeError("Need filenames!")
+#        self.label = label.strip()
+#        self.baseline = baseline.strip()
+#        self.undertest = undertest.strip()
+#        diffName = TimeStamp().fileStamp("diff") + ".png"
+#        self.diff = os.path.normpath(
+#            os.path.sep.join((config.scratchDir, diffName)))
+#
+#        self.baseImage = Image.open(self.baseline)
+#        self.testImage = Image.open(self.undertest)
+#        try:
+#            if self.baseImage.size != self.testImage.size:
+#                self.result = {
+#                    self.label: "Failed - images are different sizes"}
+#                raise StopIteration
+#
+#            self.diffImage = ImageChops.difference(self.baseImage,
+#                                                   self.testImage)
+#            self.diffImage.save(self.diff)
+#            result = False
+#            for stat in ('stddev', 'mean', 'sum2'):
+#                for item in getattr(ImageStat.Stat(self.diffImage), stat):
+#                    if item:
+#                        self.result = {self.label: "Failed - see %s" %
+#                                       self.diff}
+#                        raise StopIteration
+#                    else:
+#                        result = True
+#        except StopIteration:
+#            result = False
+#
+#        if result:
+#            self.result = {self.label: "Passed"}
+#
+#        TC.logger.log(self.result)
+#        return self.result
 
 
-class TCImage(TC):  # pragma: no cover
-
-    """
-    Image Test Case Class.
-    """
-
-    def compare(self, label, baseline, undertest):
-        for _file in (baseline, undertest):
-            if type(_file) is not unicode and type(_file) is not str:
-                raise TypeError("Need filenames!")
-        self.label = label.strip()
-        self.baseline = baseline.strip()
-        self.undertest = undertest.strip()
-        diffName = TimeStamp().fileStamp("diff") + ".png"
-        self.diff = os.path.normpath(
-            os.path.sep.join((config.scratchDir, diffName)))
-
-        self.baseImage = Image.open(self.baseline)
-        self.testImage = Image.open(self.undertest)
-        try:
-            if self.baseImage.size != self.testImage.size:
-                self.result = {
-                    self.label: "Failed - images are different sizes"}
-                raise StopIteration
-
-            self.diffImage = ImageChops.difference(self.baseImage,
-                                                   self.testImage)
-            self.diffImage.save(self.diff)
-            result = False
-            for stat in ('stddev', 'mean', 'sum2'):
-                for item in getattr(ImageStat.Stat(self.diffImage), stat):
-                    if item:
-                        self.result = {self.label: "Failed - see %s" %
-                                       self.diff}
-                        raise StopIteration
-                    else:
-                        result = True
-        except StopIteration:
-            result = False
-
-        if result:
-            self.result = {self.label: "Passed"}
-
-        TC.logger.log(self.result)
-        return self.result
-
-
-class TCNumber(TC):  # pragma: no cover
-
+class TCNumber(TC):
     """
     Number Comparaison Test Case Class
     """
 
     def __init__(self):
         TC.__init__(self)
-        self.supportedtypes = ("int", "long", "float", "complex", "oct", "hex")
+        self.supportedtypes = ("int", "float", "complex", "oct", "hex")
 
     # Compare 2 numbers by the type provided in the type arg
     def compare(self, label, baseline, undertest, type):
@@ -159,9 +159,6 @@ class TCNumber(TC):  # pragma: no cover
             if self.type == "int":
                 self.baseline = int(self.baseline)
                 self.undertest = int(self.undertest)
-            elif self.type == "long":
-                self.baseline = long(self.baseline)
-                self.undertest = long(self.undertest)
             elif self.type == "float":
                 self.baseline = float(self.baseline)
                 self.undertest = float(self.undertest)
@@ -202,7 +199,7 @@ class TCBool(TC):  # pragma: no cover
             result = {label: "Failed"}
         TC.logger.log(result)
 
-from tree import Node
+from dogtail.tree import Node
 
 
 class TCNode(TC):  # pragma: no cover

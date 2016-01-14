@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Dogtail demo script using tree.py
 # FIXME: Use TC.
 __author__ = 'Zack Cerza <zcerza@redhat.com'
@@ -29,7 +29,7 @@ textbuffer = gedit.findChildren(GenericPredicate(roleName='text'))[-1]
 
 # Load the UTF-8 demo file.
 from sys import path
-utfdemo = file(path[0] + '/data/UTF-8-demo.txt')
+utfdemo = open(path[0] + '/data/UTF-8-demo.txt', 'r')
 
 # Load the UTF-8 demo file into gedit's text buffer.
 textbuffer.text = utfdemo.read()
@@ -48,7 +48,7 @@ try:
     saveas = gedit.child(roleName='file chooser')
 except tree.SearchError:
     try:
-        saveas = gedit.dialog(u'Save As\u2026')
+        saveas = gedit.dialog('Save As\\u2026')
     except tree.SearchError:
         saveas = gedit.dialog('Save as...')
 

@@ -1,3 +1,24 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
+from dogtail.config import config
+from dogtail import path
+from dogtail import predicate
+from dogtail import rawinput
+from dogtail.logging import debugLogger as logger
+from dogtail.utils import doDelay, Blinker, Lock
+
+from time import sleep
+from types import LambdaType
+import gi
+from gi.repository import GLib
+import os
+
+try:
+    import pyatspi
+    import Accessibility
+except ImportError:  # pragma: no cover
+    raise ImportError("Error importing the AT-SPI bindings")
+
 """Makes some sense of the AT-SPI API
 
 The tree API handles various things for you:
@@ -53,46 +74,25 @@ Unfortunately, some applications do not set up the 'sensitive' state
 correctly on their buttons (e.g. Epiphany on form buttons in a web page). The
 current workaround for this is to set config.ensureSensitivity=False, which
 disables the sensitivity testing.
-
-Authors: Zack Cerza <zcerza@redhat.com>, David Malcolm <dmalcolm@redhat.com>
 """
 __author__ = """Zack Cerza <zcerza@redhat.com>,
 David Malcolm <dmalcolm@redhat.com>
 """
 
-from config import config
 if config.checkForA11y:
-    from utils import checkForA11y
+    from dogtail.utils import checkForA11y
     checkForA11y()
-
-import predicate
-from time import sleep
-from utils import doDelay
-from utils import Blinker
-from utils import Lock
-import rawinput
-import path
-from __builtin__ import xrange
-from types import LambdaType
-from logging import debugLogger as logger
-
-try:
-    import pyatspi
-    import Accessibility
-except ImportError:  # pragma: no cover
-    raise ImportError("Error importing the AT-SPI bindings")
 
 # We optionally import the bindings for libWnck.
 try:
+    gi.require_version('Wnck', '3.0')
     from gi.repository import Wnck
     gotWnck = True  # pragma: no cover
-except ImportError:
+except (ImportError, ValueError):
     # Skip this warning, since the functionality is almost entirely nonworking anyway.
     # print "Warning: Dogtail could not import the Python bindings for
     # libwnck. Window-manager manipulation will not be available."
     gotWnck = False
-
-from gi.repository import GLib
 
 haveWarnedAboutChildrenLimit = False
 
@@ -102,7 +102,6 @@ class SearchError(Exception):
 
 
 class NotSensitiveError(Exception):
-
     """
     The widget is not sensitive.
     """
@@ -116,7 +115,6 @@ class NotSensitiveError(Exception):
 
 
 class ActionNotSupported(Exception):
-
     """
     The widget does not support the requested action.
     """
@@ -131,7 +129,6 @@ class ActionNotSupported(Exception):
 
 
 class Action(object):
-
     """
     Class representing an action that can be performed on a specific node
     """
@@ -187,7 +184,6 @@ class Action(object):
 
 
 class Node(object):
-
     """
     A node in the tree of UI elements. This class is mixed in with
     Accessibility.Accessible to both make it easier to use and to add
@@ -201,26 +197,25 @@ class Node(object):
         except (AttributeError, TypeError):
             self.user_data = {}
 
-    def debugName():
-        doc = "debug name assigned during search operations"
+    @property
+    def debugName(self):
+        """debug name assigned during search operations"""
+        self.__setupUserData()
+        return self.user_data.get('debugName', None)
 
-        def fget(self):
-            self.__setupUserData()
-            return self.user_data.get('debugName', None)
+    @debugName.setter
+    def debugName(self, debugName):
+        self.__setupUserData()
+        self.user_data['debugName'] = debugName
 
-        def fset(self, debugName):
-            self.__setupUserData()
-            self.user_data['debugName'] = debugName
-
-        return property(**locals())
-    debugName = debugName()
     #
     # Accessible
     #
-
     @property
     def dead(self):
-        """Is the node dead (defunct) ?"""
+        """
+        Is the node dead (defunct)?
+        """
         try:
             if self.roleName == 'invalid':
                 return True
@@ -234,7 +229,9 @@ class Node(object):
 
     @property
     def children(self):
-        """a list of this Accessible's children"""
+        """
+        A list of this Accessible's children
+        """
         if self.parent and self.parent.roleName == 'hyper link':
             print(self.parent.role)
             return []
@@ -320,20 +317,19 @@ class Node(object):
         finally:
             return actions
 
-    def combovalue():
-        doc = "The value (as a string) currently selected in the combo box."
+    @property
+    def combovalue(self):
+        """
+        The value (as a string) currently selected in the combo box.
+        """
+        return self.name
 
-        def fget(self):
-            return self.name
+    @combovalue.setter
+    def combovalue(self, value):
+        logger.log("Setting combobox %s to '%s'" % (self.getLogString(), value))
+        self.childNamed(childName=value).doActionNamed('click')
+        doDelay()
 
-        def fset(self, value):
-            logger.log("Setting combobox %s to '%s'" % (self.getLogString(),
-                                                        value))
-            self.childNamed(childName=value).doActionNamed('click')
-            doDelay()
-
-        return property(**locals())
-    combovalue = combovalue()
     #
     # Hypertext and Hyperlink
     #
@@ -348,52 +344,51 @@ class Node(object):
     #
     # Text and EditableText
     #
-    def text():
-        doc = """For instances with an AccessibleText interface, the text as a
-    string. This is read-only, unless the instance also has an
-    AccessibleEditableText interface. In this case, you can write values
-    to the attribute. This will get logged in the debug log, and a delay
-    will be added.
 
-    If this instance corresponds to a password entry, use the passwordText
-    property instead."""
+    @property
+    def text(self):
+        """
+        For instances with an AccessibleText interface, the text as a
+        string. This is read-only, unless the instance also has an
+        AccessibleEditableText interface. In this case, you can write values
+        to the attribute. This will get logged in the debug log, and a delay
+        will be added.
 
-        def fget(self):
-            try:
-                return self.queryText().getText(0, -1)
-            except NotImplementedError:
-                return None
+        If this instance corresponds to a password entry, use the passwordText
+        property instead.
+        """
 
-        def fset(self, text):
-            try:
-                if config.debugSearching:
-                    msg = "Setting text of %s to %s"
-                    # Let's not get too crazy if 'text' is really large...
-                    # FIXME: Sometimes the next line screws up Unicode strings.
-                    if len(text) > 140:
-                        txt = text[:134] + " [...]"
-                    else:
-                        txt = text
-                    logger.log(msg % (self.getLogString(), "'%s'" % txt))
-                self.queryEditableText().setTextContents(text)
-            except NotImplementedError:
-                raise AttributeError("can't set attribute")
+        try:
+            return self.queryText().getText(0, -1)
+        except NotImplementedError:
+            return None
 
-        return property(**locals())
-    text = text()
+    @text.setter
+    def text(self, text):
+        try:
+            if config.debugSearching:
+                msg = "Setting text of %s to %s"
+                # Let's not get too crazy if 'text' is really large...
+                # FIXME: Sometimes the next line screws up Unicode strings.
+                if len(text) > 140:
+                    txt = text[:134] + " [...]"
+                else:
+                    txt = text
+                logger.log(msg % (self.getLogString(), "'%s'" % txt))
+            self.queryEditableText().setTextContents(text)
+        except NotImplementedError:
+            raise AttributeError("can't set attribute")
 
-    def caretOffset():
+    @property
+    def caretOffset(self):
+        """
+        For instances with an AccessibleText interface, the caret offset as an integer.
+        """
+        return self.queryText().caretOffset
 
-        def fget(self):
-            """For instances with an AccessibleText interface, the caret
-            offset as an integer."""
-            return self.queryText().caretOffset
-
-        def fset(self, offset):
-            return self.queryText().setCaretOffset(offset)
-
-        return property(**locals())
-    caretOffset = caretOffset()
+    @caretOffset.setter
+    def caretOffset(self, offset):
+        return self.queryText().setCaretOffset(offset)
 
     #
     # Component
@@ -401,18 +396,23 @@ class Node(object):
 
     @property
     def position(self):
-        """A tuple containing the position of the Accessible: (x, y)"""
+        """
+        A tuple containing the position of the Accessible: (x, y)
+        """
         return self.queryComponent().getPosition(pyatspi.DESKTOP_COORDS)
 
     @property
     def size(self):
-        """A tuple containing the size of the Accessible: (w, h)"""
+        """
+        A tuple containing the size of the Accessible: (w, h)
+        """
         return self.queryComponent().getSize()
 
     @property
     def extents(self):
-        """A tuple containing the location and size of the Accessible:
-        (x, y, w, h)"""
+        """
+        A tuple containing the location and size of the Accessible: (x, y, w, h)
+        """
         try:
             ex = self.queryComponent().getExtents(pyatspi.DESKTOP_COORDS)
             return (ex.x, ex.y, ex.width, ex.height)
@@ -429,8 +429,7 @@ class Node(object):
         node = self
         while True:
             try:
-                child = node.queryComponent().getAccessibleAtPoint(x, y,
-                                                                   pyatspi.DESKTOP_COORDS)
+                child = node.queryComponent().getAccessibleAtPoint(x, y, pyatspi.DESKTOP_COORDS)
                 if child and child.contains(x, y):
                     node = child
                 else:
@@ -443,19 +442,10 @@ class Node(object):
             return None
 
     def grabFocus(self):
-        "Attempts to set the keyboard focus to this Accessible."
+        """
+        Attempts to set the keyboard focus to this Accessible.
+        """
         return self.queryComponent().grabFocus()
-
-    # def blink(self, count=2):
-        #"""
-        # Blink, baby!
-        #"""
-        # if not self.extents: return False
-        # else:
-            #(x, y, w, h) = self.extents
-            #from utils import Blinker
-            #blinkData = Blinker(x, y, w, h, count)
-            # return True
 
     def click(self, button=1):
         """
@@ -502,9 +492,9 @@ class Node(object):
     #
     @property
     def labeler(self):
-        """'labeller' (read-only list of Node instances):
-        The node(s) that is/are a label for this node. Generated from
-        'relations'.
+        """
+        'labeller' (read-only list of Node instances):
+        The node(s) that is/are a label for this node. Generated from 'relations'.
         """
         relationSet = self.getRelationSet()
         for relation in relationSet:
@@ -519,7 +509,8 @@ class Node(object):
 
     @property
     def labelee(self):
-        """'labellee' (read-only list of Node instances):
+        """
+        'labellee' (read-only list of Node instances):
         The node(s) that this node is a label for. Generated from 'relations'.
         """
         relationSet = self.getRelationSet()
@@ -538,37 +529,53 @@ class Node(object):
     #
     @property
     def sensitive(self):
-        """Is the Accessible sensitive (i.e. not greyed out)?"""
+        """
+        Is the Accessible sensitive (i.e. not greyed out)?
+        """
         return self.getState().contains(pyatspi.STATE_SENSITIVE)
 
     @property
     def showing(self):
-        """Is the Accessible really showing (rendered and visible) on the screen?"""
+        """
+        Is the Accessible really showing (rendered and visible) on the screen?
+        """
         return self.getState().contains(pyatspi.STATE_SHOWING)
 
     @property
     def focusable(self):
-        """Is the Accessible capable of having keyboard focus?"""
+        """
+        Is the Accessible capable of having keyboard focus?
+        """
         return self.getState().contains(pyatspi.STATE_FOCUSABLE)
 
     @property
     def focused(self):
-        """Does the Accessible have keyboard focus?"""
+        """
+        Does the Accessible have keyboard focus?
+        """
         return self.getState().contains(pyatspi.STATE_FOCUSED)
 
     @property
     def checked(self):
-        """Is the Accessible a checked checkbox?"""
+        """
+        Is the Accessible a checked checkbox?
+        """
         return self.getState().contains(pyatspi.STATE_CHECKED)
 
     @property
     def isChecked(self):
-        """Is the Accessible a checked checkbox? Compatibility property, same as Node.checked."""
+        """
+        Is the Accessible a checked checkbox? Compatibility property, same as Node.checked.
+        """
         return self.checked
 
     @property
     def visible(self):
-        """Is the Accessible set to be visible? A widget with set attribute 'visible' is supposed to be shown and doesn't need to be actually rendered. On the other hand, a widget with unset attribute 'visible' will not show not even in the case when it's parent is shown (e.g. will be never shown)."""
+        """
+        Is the Accessible set to be visible? A widget with set attribute
+        'visible' is supposed to be shown and doesn't need to be actually
+        rendered. On the other hand, a widget with unset attribute 'visible'
+        """
         return self.getState().contains(pyatspi.STATE_VISIBLE)
 
     #
@@ -576,19 +583,25 @@ class Node(object):
     #
 
     def selectAll(self):
-        """Selects all children."""
+        """
+        Selects all children.
+        """
         result = self.querySelection().selectAll()
         doDelay()
         return result
 
     def deselectAll(self):
-        """Deselects all selected children."""
+        """
+        Deselects all selected children.
+        """
         result = self.querySelection().clearSelection()
         doDelay()
         return result
 
     def select(self):
-        """Selects the Accessible."""
+        """
+        Selects the Accessible.
+        """
         try:
             parent = self.parent
         except AttributeError:
@@ -598,7 +611,9 @@ class Node(object):
         return result
 
     def deselect(self):
-        """Deselects the Accessible."""
+        """
+        Deselects the Accessible.
+        """
         try:
             parent = self.parent
         except AttributeError:
@@ -609,7 +624,9 @@ class Node(object):
 
     @property
     def isSelected(self):
-        """Is the Accessible selected? Compatibility property, same as Node.selected."""
+        """
+        Is the Accessible selected? Compatibility property, same as Node.selected.
+        """
         try:
             parent = self.parent
         except AttributeError:
@@ -618,40 +635,48 @@ class Node(object):
 
     @property
     def selected(self):
-        """Is the Accessible selected?"""
+        """
+        Is the Accessible selected?
+        """
         return self.isSelected
 
     @property
     def selectedChildren(self):
-        """Returns a list of children that are selected."""
+        """
+        Returns a list of children that are selected.
+        """
         # TODO: hideChildren for Hyperlinks?
         selection = self.querySelection()
         selectedChildren = []
-        for i in xrange(selection.nSelectedChildren):
+        for i in range(selection.nSelectedChildren):
             selectedChildren.append(selection.getSelectedChild(i))
 
     #
     # Value
     #
 
-    def value():
-        doc = "The value contained by the AccessibleValue interface."
+    @property
+    def value(self):
+        """
+        The value contained by the AccessibleValue interface.
+        """
+        try:
+            return self.queryValue().currentValue
+        except NotImplementedError:
+            pass
 
-        def fget(self):
-            try:
-                return self.queryValue().currentValue
-            except NotImplementedError:
-                pass
-
-        def fset(self, value):
-            self.queryValue().currentValue = value
-
-        return property(**locals())
-    value = value()
+    @value.setter
+    def value(self, value):
+        """
+        Setter for the value contained by the AccessibleValue interface.
+        """
+        self.queryValue().currentValue = value
 
     @property
     def minValue(self):
-        """The minimum value of self.value"""
+        """
+        The minimum value of self.value
+        """
         try:
             return self.queryValue().minimumValue
         except NotImplementedError:
@@ -659,7 +684,9 @@ class Node(object):
 
     @property
     def minValueIncrement(self):
-        """The minimum value increment of self.value"""
+        """
+        The minimum value increment of self.value
+        """
         try:
             return self.queryValue().minimumIncrement
         except NotImplementedError:
@@ -667,7 +694,9 @@ class Node(object):
 
     @property
     def maxValue(self):
-        """The maximum value of self.value"""
+        """
+        The maximum value of self.value
+        """
         try:
             return self.queryValue().maximumValue
         except NotImplementedError:
@@ -675,8 +704,7 @@ class Node(object):
 
     def typeText(self, string):
         """
-        Type the given text into the node, with appropriate delays and
-        logging.
+        Type the given text into the node, with appropriate delays and logging.
         """
         logger.log("Typing text into %s: '%s'" % (self.getLogString(), string))
 
@@ -727,7 +755,7 @@ class Node(object):
         return pred.satisfiedByNode(self)
 
     def dump(self, type='plain', fileName=None):
-        import dump
+        from dogtail import dump
         dumper = getattr(dump, type)
         dumper(self, fileName)
 
@@ -835,17 +863,15 @@ class Node(object):
             cIter = iter(self)
             while True:
                 try:
-                    child = cIter.next()
+                    child = next(cIter)
                 except StopIteration:
                     break
-                if child is not None:
-                    if pred(child):
-                        return child
+                if child is not None and pred(child):
+                    return child
         else:
             return pyatspi.utils.findDescendant(self, pred)
 
-    def findChild(self, pred, recursive=True, debugName=None,
-                  retry=True, requireResult=True):
+    def findChild(self, pred, recursive=True, debugName=None, retry=True, requireResult=True):
         """
         Search for a node satisyfing the predicate, returning a Node.
 
@@ -890,8 +916,7 @@ class Node(object):
                     break
                 numAttempts += 1
                 if config.debugSearching or config.debugSleep:
-                    logger.log("sleeping for %f" %
-                               config.searchBackoffDuration)
+                    logger.log("sleeping for %f" % config.searchBackoffDuration)
                 sleep(config.searchBackoffDuration)
         if requireResult:
             raise SearchError(describeSearch(self, pred, recursive, debugName))
@@ -957,7 +982,8 @@ class Node(object):
         if no such child is found, and will eventually raise an exception. It
         also logs the search.
         """
-        return self.findChild(predicate.GenericPredicate(name=name, roleName=roleName, description=description, label=label), recursive=recursive, retry=retry, debugName=debugName)
+        return self.findChild(predicate.GenericPredicate(name=name, roleName=roleName, description=description,
+                              label=label), recursive=recursive, retry=retry, debugName=debugName)
 
     def isChild(self, name='', roleName='', description='', label='', recursive=True, retry=False, debugName=None):
         """
@@ -1081,7 +1107,6 @@ class Node(object):
 
 
 class LinkAnchor(object):
-
     """
     Class storing info about an anchor within an Accessibility.Hyperlink, which
     is in turn stored within an Accessibility.Hypertext.
@@ -1103,7 +1128,6 @@ class LinkAnchor(object):
 
 
 class Root (Node):
-
     """
     FIXME:
     """
@@ -1112,8 +1136,7 @@ class Root (Node):
         """
         Get all applications.
         """
-        return root.findChildren(predicate.GenericPredicate(
-            roleName="application"), recursive=False)
+        return root.findChildren(predicate.GenericPredicate(roleName="application"), recursive=False)
 
     def application(self, appName, retry=True):
         """
@@ -1128,7 +1151,6 @@ class Root (Node):
 
 
 class Application (Node):
-
     def dialog(self, dialogName, recursive=False):
         """
         Search below this node for a dialog with the given name,
@@ -1155,8 +1177,7 @@ class Application (Node):
         The window will be automatically activated (raised and focused
         by the window manager) if wnck bindings are available.
         """
-        result = self.findChild(
-            predicate.IsAWindowNamed(windowName=windowName), recursive)
+        result = self.findChild(predicate.IsAWindowNamed(windowName=windowName), recursive)
         # FIXME: activate the WnckWindow ?
         # if gotWnck:
         #       result.activate()
@@ -1212,7 +1233,6 @@ class Window (Node):
 
 
 class Wizard (Window):
-
     """
     Note that the buttons of a GnomeDruid were not accessible until
     recent versions of libgnomeui.  This is
@@ -1237,9 +1257,6 @@ class Wizard (Window):
         """
         pageHolder = self.child(roleName='panel')
         for child in pageHolder.children:
-            # current child has SHOWING state set, we hope:
-            # print child
-            # print child.showing
             if child.showing:
                 return child
         raise "Unable to determine current page of %s" % self
@@ -1292,8 +1309,7 @@ try:
     root.debugName = 'root'
 except Exception:  # pragma: no cover
     # Warn if AT-SPI's desktop object doesn't show up.
-    logger.log(
-        "Error: AT-SPI's desktop is not visible. Do you have accessibility enabled?")
+    logger.log("Error: AT-SPI's desktop is not visible. Do you have accessibility enabled?")
 
 # Check that there are applications running. Warn if none are.
 children = root.children
@@ -1302,7 +1318,6 @@ if not children:  # pragma: no cover
         "Warning: AT-SPI's desktop is visible but it has no children. Are you running any AT-SPI-aware applications?")
 del children
 
-import os
 # sniff also imports from tree and we don't want to run this code from
 # sniff itself
 if not os.path.exists('/tmp/sniff_running.lock'):
@@ -1317,6 +1332,6 @@ if not os.path.exists('/tmp/sniff_running.lock'):
         # lock should unlock automatically on script exit.
 
 # Convenient place to set some debug variables:
-#config.debugSearching = True
-#config.absoluteNodePaths = True
-#config.logDebugToFile = False
+# config.debugSearching = True
+# config.absoluteNodePaths = True
+# config.logDebugToFile = False

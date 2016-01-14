@@ -1,29 +1,24 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
+from dogtail.config import config
+from dogtail.utils import doDelay
+from dogtail.logging import debugLogger as logger
+from pyatspi import Registry as registry
+from pyatspi import (KEY_SYM, KEY_PRESS, KEY_PRESSRELEASE, KEY_RELEASE)
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('Gdk', '3.0')
+from gi.repository import Gdk
+
 """
 Handles raw input using AT-SPI event generation.
 
 Note: Think of keyvals as keysyms, and keynames as keystrings.
-
-Authors: David Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.com>
 """
-
 __author__ = """
 David Malcolm <dmalcolm@redhat.com>,
 Zack Cerza <zcerza@redhat.com>
 """
-import gi
-
-gi.require_version('Gtk', '3.0')
-gi.require_version('Gdk', '3.0')
-
-from gi.repository import Gdk
-from config import config
-from utils import doDelay
-from logging import debugLogger as logger
-from pyatspi import Registry as registry
-from pyatspi import (KEY_SYM, KEY_PRESS, KEY_PRESSRELEASE, KEY_RELEASE)
-from exceptions import ValueError
-from __builtin__ import unicode, unichr
 
 
 def doTypingDelay():
@@ -32,8 +27,7 @@ def doTypingDelay():
 
 def checkCoordinates(x, y):
     if x < 0 or y < 0:
-        raise ValueError(
-            "Attempting to generate a mouse event at negative coordinates: (%s,%s)" % (x, y))
+        raise ValueError("Attempting to generate a mouse event at negative coordinates: (%s,%s)" % (x, y))
 
 
 def click(x, y, button=1, check=True):
@@ -43,7 +37,7 @@ def click(x, y, button=1, check=True):
     if check:
         checkCoordinates(x, y)
     logger.log("Mouse button %s click at (%s,%s)" % (button, x, y))
-    registry.generateMouseEvent(x, y, 'b%sc' % button)
+    registry.generateMouseEvent(x, y, name='b%sc' % button)
     doDelay(config.actionDelay)
 
 
@@ -54,7 +48,7 @@ def doubleClick(x, y, button=1, check=True):
     if check:
         checkCoordinates(x, y)
     logger.log("Mouse button %s doubleclick at (%s,%s)" % (button, x, y))
-    registry.generateMouseEvent(x, y, 'b%sd' % button)
+    registry.generateMouseEvent(x, y, name='b%sd' % button)
     doDelay()
 
 
@@ -65,7 +59,7 @@ def press(x, y, button=1, check=True):
     if check:
         checkCoordinates(x, y)
     logger.log("Mouse button %s press at (%s,%s)" % (button, x, y))
-    registry.generateMouseEvent(x, y, 'b%sp' % button)
+    registry.generateMouseEvent(x, y, name='b%sp' % button)
     doDelay()
 
 
@@ -76,7 +70,7 @@ def release(x, y, button=1, check=True):
     if check:
         checkCoordinates(x, y)
     logger.log("Mouse button %s release at (%s,%s)" % (button, x, y))
-    registry.generateMouseEvent(x, y, 'b%sr' % button)
+    registry.generateMouseEvent(x, y, name='b%sr' % button)
     doDelay()
 
 
@@ -87,7 +81,7 @@ def absoluteMotion(x, y, mouseDelay=None, check=True):
     if check:
         checkCoordinates(x, y)
     logger.log("Mouse absolute motion to (%s,%s)" % (x, y))
-    registry.generateMouseEvent(x, y, 'abs')
+    registry.generateMouseEvent(x, y, name='abs')
     if mouseDelay:
         doDelay(mouseDelay)
     else:
@@ -96,7 +90,8 @@ def absoluteMotion(x, y, mouseDelay=None, check=True):
 
 def absoluteMotionWithTrajectory(source_x, source_y, dest_x, dest_y, mouseDelay=None, check=True):
     """
-    Synthetize an absolute motion
+    Synthetize mouse absolute motion with trajectory. The 'trajectory' means that the whole motion
+    is divided into several atomic movements which are synthetized separately.
     """
     if check:
         checkCoordinates(source_x, source_y)
@@ -114,12 +109,12 @@ def absoluteMotionWithTrajectory(source_x, source_y, dest_x, dest_y, mouseDelay=
     act_x = float(source_x)
     act_y = float(source_y)
 
-    for i in range(0, int(max_len)):
+    for _ in range(0, int(max_len)):
         act_x += dx
         act_y += dy
         if mouseDelay:
             doDelay(mouseDelay)
-        registry.generateMouseEvent(int(act_x), int(act_y), 'abs')
+        registry.generateMouseEvent(int(act_x), int(act_y), name='abs')
 
     if mouseDelay:
         doDelay(mouseDelay)
@@ -128,8 +123,12 @@ def absoluteMotionWithTrajectory(source_x, source_y, dest_x, dest_y, mouseDelay=
 
 
 def relativeMotion(x, y, mouseDelay=None):
+    """
+    Synthetize a relative motion from actual position.
+    Note: Does not check if the end coordinates are positive.
+    """
     logger.log("Mouse relative motion of (%s,%s)" % (x, y))
-    registry.generateMouseEvent(x, y, 'rel')
+    registry.generateMouseEvent(x, y, name='rel')
     if mouseDelay:
         doDelay(mouseDelay)
     else:
@@ -144,7 +143,6 @@ def drag(fromXY, toXY, button=1, check=True):
 
     (x, y) = fromXY
     press(x, y, button, check)
-    # doDelay()
 
     (x, y) = toXY
     absoluteMotion(x, y, check=check)
@@ -162,7 +160,6 @@ def dragWithTrajectory(fromXY, toXY, button=1, check=True):
 
     (x, y) = fromXY
     press(x, y, button, check)
-    # doDelay()
 
     (x, y) = toXY
     absoluteMotionWithTrajectory(fromXY[0], fromXY[1], x, y, check=check)
@@ -179,8 +176,6 @@ def typeText(string):
     if your machine misses/switches the characters typed.
     Needed sometimes on slow setups/VMs typing non-ASCII utf8 chars.
     """
-    if not isinstance(string, unicode):
-        string = string.decode('utf-8')
     for char in string:
         pressKey(char)
 
@@ -201,28 +196,10 @@ keyNameAliases = {
 }
 
 
-# TODO: Dead code
-def keySymToUniChar(keySym):  # pragma: no cover
-    i = Gdk.keyval_to_unicode(keySym)
-    if i:
-        UniChar = unichr(i)
-    else:
-        UniChar = ''
-    return UniChar
-
-
 def uniCharToKeySym(uniChar):
-    # OK, if it's not actually unicode we can fix that, right?
-    if not isinstance(uniChar, unicode):
-        uniChar = unicode(uniChar, 'utf-8')
     i = ord(uniChar)
     keySym = Gdk.unicode_to_keyval(i)
     return keySym
-
-
-# dead code
-def keySymToKeyName(keySym):  # pragma: no cover
-    return Gdk.keyval_name(keySym)
 
 
 def keyNameToKeySym(keyName):
@@ -232,8 +209,8 @@ def keyNameToKeySym(keyName):
     if keySym == 0xffffff or keySym == 0x0 or keySym is None:
         try:
             keySym = uniCharToKeySym(keyName)
-        except: # not even valid utf-8 char
-            try: # Last attempt run at a keyName ('Meta_L', 'Dash' ...)
+        except:  # not even valid utf-8 char
+            try:  # Last attempt run at a keyName ('Meta_L', 'Dash' ...)
                 keySym = getattr(Gdk, 'KEY_' + keyName)
             except AttributeError:
                 raise KeyError(keyName)

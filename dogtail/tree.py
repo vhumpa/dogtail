@@ -265,6 +265,8 @@ class Node(object):
                 link = ht.getLink(li)
                 for ai in range(link.nAnchors):
                     child = link.getObject(ai)
+                    if child == self:
+                        continue
                     child.__setupUserData()
                     child.user_data['linkAnchor'] = \
                         LinkAnchor(node=child,

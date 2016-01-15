@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # Dogtail demo script
 # Note that this script is outdated and may cause your session to lock up until
 # it is killed. It will most likely be deleted in the next release.

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # Stress test: repeatedly open and close the filechooser dialog
 
 from dogtail.tree import *
@@ -13,7 +13,7 @@ while True:
     try:
         gedit.child('Open').click()
     except SearchError: #toolbar not present?
-        gedit.child('Open...').click() 
+        gedit.child('Open...').click()
 
     try:
         filechooser = gedit.child(name='Open Files', roleName='file chooser')

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # Dogtail demo script
 __author__ = 'David Malcolm <dmalcolm@redhat.com>'
 

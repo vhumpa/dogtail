@@ -1,3 +1,108 @@
+dogtail 0.9.0
+=============
+Over the last year we've made a good number of fixes, added some new features
+and got overall stability to the point where we can make a new 'major minor'
+release. With 0.9 we're finally getting only a step away from what we'd like
+to get done with 1.0.
+
+
+ * Added a fix for situations when a previously crashed application
+   still registered with at-spi blocks search ('Broken' session problem)
+   Fixed for root.application(), root.applications() and for whenever
+   GeneralPredicate is used (.child()). Also done for Sniff. RHBZ 972257
+
+ * Added a support for gnome-continuous build-api (#36)
+
+ * Added a direct lambda support in the findChildren method, that allows
+   using non-predicate lambdas to create search properties. These can be
+   all pure dogtail Node properties (i.e. showing), not limiting to just
+   pyatspi ones as is when using Predicate.
+
+ * Added a GnomeShell 'helper' class into utils module allowing to work
+   with the new top-panel application menu.
+
+ * With GTK3.10+ Gdk changes, needed to tune the keyNameToKeyCode function
+   so that it provides valid keySym in as many cases possible - with both
+   pre-GTK3.10 as well as GTK3.11+ having the same behavior in typeText and
+   pressKey
+
+ * Sniff ui update: the info pane now stays down on resizing
+
+ * Got rid of some deprecated GObject calls
+
+ * Several updates to the dogtail-run-headless-next
+    - Any kind of session can now be used in any combination with both gdm/kdm
+      --session can be used to specify any xsession desktop file, 'kde' defaults
+        to 'kde-plasma' too keep pre-updated compatibility; default is now the previous user session
+      --dm - new param to pick either gdm (default) or kdm
+      --session-binary - new param to specify any in-session binary to grab script env from
+                       - to be used with non gnome/kde session (lxde, ubuntu)
+                       - do not confuse with session execs like gnome-session and starkde, that may
+                         actually exit after session loadup; it should be everpresent (kwin, shell...)
+    - Added a --restart switch to force restart the previously running (often left-over) session before proceeding
+    - More logging of script execution (start/stop/PID), and some cleanups
+
+ * Trap GErrors in findAllDescendants and retry if it occurs: This fixes crashes in findChildren if elements are being added/removed quickly
+
+ * Unicode handling updates:
+    - Make sure safeDecode is not skipping any strings
+    - Don't crash when logging message contains unicode
+
+ * Error Handling for Attribute Error
+
+ * Fixed utils.run issue when having whitespace containing binary by
+   using shlex shell-like parsing split.
+
+ * Removed an always true if condition in i18n
+
+ * Log child description when clicking. The log will now print the element description when it will be clicked
+
+ * Trap TypeError in findAllDescendants: Sometimes pytaspi returns None as a Node if children are being removed too fast.
+   We should retry search in this case
+
+ * Extended the default TypingDelay from 0.075 to 0.1 seconds (helps working with certain high unicode charactes)
+
+ * Fixed an bug in sniff discovered by jmolet that made sniff crash when
+   run from /bin/sniff not /usr/bin/sniff
+
+ * Generate a better script method call for labels
+
+ * Fix for failing 'focus.application.node' seting
+
+ * Derive all classes from object explicitely
+
+ * Changed icons used in sniff that got moved to the gnome-icon-theme-legacy
+   recently for the ones from non-legacy package.
+
+ * Unified the 'isSth' vs. 'sth' properties for only 'sth' - added 'selected', but also introduced
+   'isChecked' property for 0.7.x compatibility
+
+ * Added instructions on how to enable accessibility into utils.bailBecauseA11yIsDisabled()
+
+ * Added a 'retry' option to the tree.root.application()
+
+ * Fixed the concurrent creation of sniff_refresh lock from both tree and procedural
+
+ * Switched to use environ value to get user in config. os.getlogin breaks when run scheduled from a testing system with no terminal.
+
+ * Patched the mouse related rawinput methods to prevent using negative coordinates
+
+ * Updated and added more unittests
+
+dogtail 0.8.2
+=============
+Second update to the 0.8 series containing several fixes and improvements
+
+ * Added the dogtail-run-headless-next to replace the dogtail-run-headless in future.
+  -next, uses a diplay manager (kdm or gdm) for session management, should be used instead of older
+  headless on systemd systems already
+
+ * Unittests vastly improved and updated
+
+ * Fixed a missing reset of FocusWindow to None on application refocus
+
+ * Fixed the dogtail-logout to use gnome-shell instead of old gnome-panel
+
 dogtail 0.8.1
 =============
 A first update to the new GNOME3 / KDE4 compatible release containing several fixes:
@@ -9,7 +114,7 @@ A first update to the new GNOME3 / KDE4 compatible release containing several fi
  * Added a locking mechanism into utils that can be used to solve situations when
    multiple dogtail processes/thread are running (applied in tree/procedural and sniff
    already)
- 
+
  * Removed the deprecated dependency on CORBA
 
  * Icons no longer use absolute pathing in sniff (thx roignac)
@@ -100,7 +205,7 @@ This release has too many changes to list. Here are some of the major ones:
 
 * Image Comparison (TCImage) was rewritten. No more ImageMagick!
 
-Note: tests/Node.py's TestNodeAttributes is failing due to GNOME bugs #498557 
+Note: tests/Node.py's TestNodeAttributes is failing due to GNOME bugs #498557
       and #498563
 
 
@@ -117,11 +222,11 @@ Features:
 
  * New logging mechanism:
 
-    - Debug output is now written to a file. To disable this, set 
+    - Debug output is now written to a file. To disable this, set
       dogtail.config.config.logDebugToFile to False.
 
     - The procedural API defaults to not raising FocusErrors, and instead
-      issuing warnings via the debug logging mechanism (which prints to 
+      issuing warnings via the debug logging mechanism (which prints to
       standard out along with writing to a file). To re-enable FocusErrors, set
       dogtail.config.config.fatalErrors to True.
 
@@ -136,12 +241,12 @@ Bugfixes:
  * dogtail-recorder can be properly exited by clicking on the window manager
    close button. In fact, the Quit button was removed also.
 
- * dogtail-recorder's syntax hilighting works again, thanks to a patch from 
+ * dogtail-recorder's syntax hilighting works again, thanks to a patch from
    Dave Malcolm.
 
  * Searching for nodes with parentheses in their names will no longer fail.
 
- * The various pressKey() functions were blowing up on punctuation and 
+ * The various pressKey() functions were blowing up on punctuation and
    newlines. Fixed.
 
  * Predicate subclasses in dogtail.predicate which were missing debugNames have
@@ -152,7 +257,7 @@ Bugfixes:
  * Where several of our example scripts were broken, Michal Babej noticed and
    submitted patches fixing them.
 
- * dogtail's tarball is 90% smaller! Some overly large test images were 
+ * dogtail's tarball is 90% smaller! Some overly large test images were
    replaced with very, very small ones that still do the job.
 
 
@@ -163,13 +268,13 @@ Features:
 
  * Keystroke recording support in dogtail-recorder:
 
-    - Normal keypresses (e.g. typing 'foo bar baz') will be recorded as 
+    - Normal keypresses (e.g. typing 'foo bar baz') will be recorded as
       "type('foo bar baz')" in the procedural API. dogtail.tree.Node has a new
       method, typeText(), which is called by dogtail.procedural.type().
 
     - Nonprintable keypresses (e.g. typing Control-Shift-c) will be recorded as
       "keyCombo('<Control><Shift>c')" in the procedural API. dogtail.tree.Node
-      has a new method, keyCombo(), which is called by 
+      has a new method, keyCombo(), which is called by
       dogtail.procedural.keyCombo().
 
     - The now-unnecessary 'Input Text' button has been removed.
@@ -184,8 +289,8 @@ Features:
 
     - checked: Whether the node is a checkbox that is currently checked.
 
- * Dogtail now checks if accessibility is enabled before it does anything. 
-   sniff and dogtail-recorder will prompt to enable it via a dialog, and 
+ * Dogtail now checks if accessibility is enabled before it does anything.
+   sniff and dogtail-recorder will prompt to enable it via a dialog, and
    scripts themselves will just refuse to run.
 
  * Dogtail no longer uses the IconLogger (in the notification area) by default.
@@ -198,10 +303,10 @@ Bugfixes:
  * Dogtail is now much more robust in dealing with possibly-invalid Unicode
    strings passed to it via AT-SPI. (GNOME bug #354515)
 
- * Dogtail will not crash when it receives an SpiException caused by a CORBA 
+ * Dogtail will not crash when it receives an SpiException caused by a CORBA
    COMM_FAILURE, unless the source of that error is the application under test.
 
- * While exceptions occuring inside callbacks used in dogtail-recorder will 
+ * While exceptions occuring inside callbacks used in dogtail-recorder will
    still not properly be raised, they are now printed to standard out.
 
  * SuSe support in dogtail.distro is fixed. (GNOME bug #353601)
@@ -229,10 +334,10 @@ Features:
       #345374)
 
  * A completely-rewritten dogtail-run-headless, which now offers two session
-   types: minimal GNOME and metacity. The syntax has changed, so use 
+   types: minimal GNOME and metacity. The syntax has changed, so use
    'dogtail-run-headless --help' to get started. (GNOME bug #320548)
 
- * All 'name' arguments in dogtail.tree and dogtail.procedural now accept 
+ * All 'name' arguments in dogtail.tree and dogtail.procedural now accept
    regular expressions.
 
  * Support for AccessibleSelections, providing a clean way to select page
@@ -248,7 +353,7 @@ Bugfixes:
 
  * Pyspi and dogtail no longer mysteriously stop working. (GNOME bug #321273)
 
- * Sniff no longer crashes when an application being poked disappears. (GNOME 
+ * Sniff no longer crashes when an application being poked disappears. (GNOME
    bug #318135)
 
 
@@ -263,7 +368,7 @@ Features:
 
 Bugfixes:
 
- * examples/recorder.py was broken; a bug in dogtail.predicate.makeCamel() 
+ * examples/recorder.py was broken; a bug in dogtail.predicate.makeCamel()
    was breaking the predicates' makeScriptVariableName() calls. It's fixed.
 
 
@@ -273,10 +378,10 @@ dogtail 0.5.0
 Features:
 
  * Automatic runtime translation into the current locale using the application
-   under test's own translations. See 
+   under test's own translations. See
    examples/gedit-test-utf8-procedural-api.py for an example.
 
- * dogtail.distro.packageDb gained new methods: getFiles(), getMoFiles(), and 
+ * dogtail.distro.packageDb gained new methods: getFiles(), getMoFiles(), and
    getDependencies().
 
  * dogtail.distro.packageDb now has support for JHBuild environments.
@@ -285,14 +390,14 @@ Features:
 
    - PackageNotFoundError: raised when the specified package is not found.
 
-   - DistributionNotSupportedError: raised when support for the current 
+   - DistributionNotSupportedError: raised when support for the current
      distribution is not currently implemented in dogtail.distro. This does
-     not mean that dogtail will not work at all; only that 
+     not mean that dogtail will not work at all; only that
      distribution-specific functionality, like automatic runtime translation,
      will not.
 
- * dogtail.errors is a new module for very general exceptions, such as 
-   DependencyNotFoundError, which is raised when the use of a feature that 
+ * dogtail.errors is a new module for very general exceptions, such as
+   DependencyNotFoundError, which is raised when the use of a feature that
    depends on some missing piece of software is attempted.
 
  * sniff will now cause the selected node to blink onscreen.
@@ -303,9 +408,9 @@ Features:
 
  * dogtail.tree.Node has new properties and methods:
 
-   - position: the onscreen position of the node, if it wraps an 
+   - position: the onscreen position of the node, if it wraps an
      atspi.Component.
-   
+
    - size: the onscreen size of the node, if it wraps an atspi.Component.
 
    - blink(): causes the node to blink onscreen.
@@ -327,89 +432,89 @@ Features:
 
    - focus.window(): a shortcut to focus.widget(roleName='window' ...)
 
- * dogtail.procedural.click() can now synthesize raw mouse events to perform 
+ * dogtail.procedural.click() can now synthesize raw mouse events to perform
    "raw" clicks.
 
  * dogtail.rawinput has gained new methods:
 
-   - pressKey(): synthesizes a raw keyboard event, pressing the key whose 
+   - pressKey(): synthesizes a raw keyboard event, pressing the key whose
      name is specified.
 
-   - typeText(): types a specified string, one key at a time, using raw 
+   - typeText(): types a specified string, one key at a time, using raw
      keyboard events.
 
  * dogtail.config was rewritten.
 
  * dogtail.config.config has new parameters:
 
-   - ensureSensitivity: controls whether a NotSensitiveError is raised when 
-     an attempt is made to execute an action belonging to a Node instance 
+   - ensureSensitivity: controls whether a NotSensitiveError is raised when
+     an attempt is made to execute an action belonging to a Node instance
      that is not sensitive, or if a warning is simply printed instead (the
      default).
 
-   - debugTranslation: Controls whether details of the autotranslation 
+   - debugTranslation: Controls whether details of the autotranslation
      process will be outputted to the debug logger.
 
- * dogtail.config now creates its scratchDir, dataDir, and logDir as soon as 
+ * dogtail.config now creates its scratchDir, dataDir, and logDir as soon as
    the values are set.
 
  * dogtail.utils.screenshot(), by default, whether using a custom filename or
-   not, now appends a timestamp to the filename. That may be disabled by 
-   passing 'timeStamp = False' to the method. For this reason, it also prints 
+   not, now appends a timestamp to the filename. That may be disabled by
+   passing 'timeStamp = False' to the method. For this reason, it also prints
    the full path to the screenshot.
 
- * dogtail.logging.TimeStamp.fileStamp()'s format has changed, to 
-   filename_YYYYMMDD-hhmmss or just filename_YYYYMMDD, controlled by the new 
+ * dogtail.logging.TimeStamp.fileStamp()'s format has changed, to
+   filename_YYYYMMDD-hhmmss or just filename_YYYYMMDD, controlled by the new
    optional argument 'addTime'.
 
  * dogtail prints the full path to any logfiles it creates.
 
  * dogtail-run-headless will now turn accessibility on before executing the
-   script under test, and also restore the old value after the the script has 
+   script under test, and also restore the old value after the the script has
    finished executing (GNOME bug #320548).
 
 Bugfixes:
 
- * sniff will correctly show the text of a non-editable text node again 
+ * sniff will correctly show the text of a non-editable text node again
    (GNOME bug #321564).
 
- * dogtail.tree.screenshot() was mostly rewritten, and no longer breaks when 
-   given a custom filename. 
+ * dogtail.tree.screenshot() was mostly rewritten, and no longer breaks when
+   given a custom filename.
 
  * dogtail.procedural no longer causes PyDoc to fail miserably (or at all).
 
- * dogtail will no longer warn about missing wnck bindings, because they're 
+ * dogtail will no longer warn about missing wnck bindings, because they're
    not actually used anyway.
 
- * dogtail.procedural.focus.dialog() no longer searches recursively (GNOME 
+ * dogtail.procedural.focus.dialog() no longer searches recursively (GNOME
    bug #321624).
 
  * dogtail.procedural.focus.widget() and its shortcut functions now properly
    raise a FocusError if their search fails.
 
- * dogtail.tc.TCString.compare() will now fail properly again, thanks to 
+ * dogtail.tc.TCString.compare() will now fail properly again, thanks to
    Muktha Narayan (GNOME bug #321151).
 
- * dogtail.tc.TCImage.compare() now works with the newest version of 
+ * dogtail.tc.TCImage.compare() now works with the newest version of
    ImageMagick. That version had changed its behavior, breaking the function.
    (GNOME bug #321431).
 
  * Attempting to instantiate a dogtail.tc.TCImage object while ImageMagick is
-   not installed will now give a comprehensible error message, thanks to the 
+   not installed will now give a comprehensible error message, thanks to the
    new dogtail.errors.DependencyNotFoundError exception.
 
  * Calling dogtail.utils.screenshot() while ImageMagick is not installed will
    also raise a dogtail.errors.DependencyNotFoundError.
 
- * Attempting to execute an action belonging to a Node instance that isn't 
+ * Attempting to execute an action belonging to a Node instance that isn't
    sensitive no longer fails by default, but prints a warning. This behavior
    is controlled by the ensureSensitivity configuration parameter.
 
- * dogtail-run-headless now correctly returns the exit code of the script 
+ * dogtail-run-headless now correctly returns the exit code of the script
    being executed (GNOME bug #320535).
 
- * dogtail.distro's APT support implementation now only calls 
-   apt_pkg.GetCache() once, improving performance significantly when multiple 
+ * dogtail.distro's APT support implementation now only calls
+   apt_pkg.GetCache() once, improving performance significantly when multiple
    calls to packageDb.get{Version,Dependencies}() are needed.
 
  * Building RPM packages from the supplied dogtail.spec works again on distros
@@ -419,14 +524,14 @@ Bugfixes:
 
 API breaks:
 
- * Action execution via dogtail.tree.Node instances was forced to change 
-   interfaces from the "node.open()" model to a "node.doAction('open')" 
-   model. To retain backward compatibility with the application wrappers, the 
-   "click" action is still available as "node.click()". The 
+ * Action execution via dogtail.tree.Node instances was forced to change
+   interfaces from the "node.open()" model to a "node.doAction('open')"
+   model. To retain backward compatibility with the application wrappers, the
+   "click" action is still available as "node.click()". The
    dogtail.procedural interface was able to remain unchanged.
 
- * dogtail.config was rewritten to be more robust, and its interface was 
-   changed slightly. To port, First, remove any instantiations of the old 
+ * dogtail.config was rewritten to be more robust, and its interface was
+   changed slightly. To port, First, remove any instantiations of the old
    Config class, and then make the following parameter replacements:
 
    - Config  => config
@@ -439,18 +544,18 @@ dogtail 0.4.3
 =============
 
 Features:
- * Headless support has been added. Use dogtail-run-headless to spawn an X 
-   server, a minimal "Nat/Jeff" GNOME session, and execute a given dogtail 
-   script before exiting. The dogtail-detect-session script detects a running 
+ * Headless support has been added. Use dogtail-run-headless to spawn an X
+   server, a minimal "Nat/Jeff" GNOME session, and execute a given dogtail
+   script before exiting. The dogtail-detect-session script detects a running
    GNOME session, but KDE support can be dropped in once KDE has accessibility
    support.
 
- * dogtail now uses a notification icon while it is running. Its tooltip is 
-   equal to the last message relayed by the debug logger. Most of the code 
+ * dogtail now uses a notification icon while it is running. Its tooltip is
+   equal to the last message relayed by the debug logger. Most of the code
    was taken from jhbuild.
 
  * Sniff, the AT-SPI browser that uses the dogtail libraries, has gained icons
-   for both applications and specific widgets (based on the role name, taken 
+   for both applications and specific widgets (based on the role name, taken
    from at-poke) to make browsing easier.
 
  * Sniff also gained a proper dogtail icon.
@@ -458,10 +563,10 @@ Features:
  * The procedural API has been given more convenience functions for 'focusing'
    different types of widgets.
 
- * The procedural API has also been given an openItem() method, which works 
+ * The procedural API has also been given an openItem() method, which works
    just like click(), for opening icons on nautilus' desktop.
 
- * dogtail can now detect Gentoo and Conary distributions, thanks to Brent 
+ * dogtail can now detect Gentoo and Conary distributions, thanks to Brent
    Smith and Tim Gerla, respectively.
 
  * The Node class in dogtail.tree now exports the 'role' attribute in addition
@@ -471,22 +576,22 @@ Features:
 
  * A wrapper for gedit was added, thanks to Paolo Borelli.
 
- * New examples for Evolution, gcalctool and the GTK file chooser were added, 
+ * New examples for Evolution, gcalctool and the GTK file chooser were added,
    thanks to Dave Malcolm.
 
- * Dave Malcolm also enhanced the Evolution wrapper, adding support for 
+ * Dave Malcolm also enhanced the Evolution wrapper, adding support for
    creating new meetings.
 
- * A new example that generates fake documentation for a given application has 
+ * A new example that generates fake documentation for a given application has
    been added, thanks to Dave Malcolm.
 
- * dogtail.spec has been added, thanks to Jeremy Katz, to improve the quality 
+ * dogtail.spec has been added, thanks to Jeremy Katz, to improve the quality
    of the RPM packages.
 
 Bugfixes:
- * several examples had not been updated to reflect API changes before the 
+ * several examples had not been updated to reflect API changes before the
    last release. This has been corrected.
 
- * The epiphany wrapper now uses the package name 'epiphany-browser' on 
-   Debian-based distributions to detect the package version, thanks to Andrew 
+ * The epiphany wrapper now uses the package name 'epiphany-browser' on
+   Debian-based distributions to detect the package version, thanks to Andrew
    Beresford.

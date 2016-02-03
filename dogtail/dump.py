@@ -1,39 +1,47 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import print_function, unicode_literals
+"""Utility functions for 'dumping' trees of Node objects.
 
-"""
-Utility functions for 'dumping' trees of Node objects.
-"""
-__author__ = "Zack Cerza <zcerza@redhat.com>"
+Author: Zack Cerza <zcerza@redhat.com>, Matěj Cepl <mcepl@redhat.com>"""
 
-
-spacer = ' '
+spacer = u' '
 
 
-def plain(node, fileName=None):
+def plain(node, output=None):
     """
     Plain-text dump. The hierarchy is represented through indentation.
     """
+    close_output = False
+
     def crawl(node, depth):
-        dump(node, depth)
-        for action in list(node.actions.values()):
-            dump(action, depth + 1)
+        do_dump(node, depth)
+        for action in node.actions.values():
+            do_dump(action, depth + 1)
         for child in node.children:
             crawl(child, depth + 1)
 
+    def node2unicode(node):
+        return str(node).decode('utf8')
+
     def dumpFile(item, depth):
-        _file.write(str(spacer * depth) + str(item) + str('\n'))
+        _file.write(spacer * depth + node2unicode(item) + u'\n')
 
     def dumpStdOut(item, depth):
-        try:
-            print(spacer * depth + str(item))
-        except UnicodeDecodeError:
-            print(spacer * depth + str(item).decode('utf8'))
+        print(spacer * depth + node2unicode(item))
 
-    if fileName:
-        dump = dumpFile
-        _file = open(fileName, 'w')
+    _file = None
+
+    if output:
+        do_dump = dumpFile
+        if hasattr(output, 'write'):
+            _file = output
+        elif isinstance(output, basestring):
+            _file = open(output, 'w')
+            close_output = True
     else:
-        dump = dumpStdOut
+        do_dump = dumpStdOut
 
     crawl(node, 0)
+
+    if close_output:
+        _file.close()

@@ -3,8 +3,16 @@ from __future__ import print_function, unicode_literals
 """Utility functions for 'dumping' trees of Node objects.
 
 Author: Zack Cerza <zcerza@redhat.com>, Matěj Cepl <mcepl@redhat.com>"""
+from io import StringIO
 
 spacer = u' '
+
+
+def dump_str(node):
+    with StringIO as tmp_file:
+        plain(node, output=tmp_file)
+        dump_str = tmp_file.getvalue()
+        return dump_str
 
 
 def plain(node, output=None):

@@ -4,17 +4,16 @@ python:
 before_install:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
-  - 'echo "deb http://archive.ubuntu.com/ubuntu/ precise main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list'
+  - 'echo "deb http://archive.ubuntu.com/ubuntu/ saucy main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list'
   - "sudo apt-get update -qq"
 install:
   - "pip install pep8 python-coveralls pyflakes --use-mirrors"
   - "rm $VIRTUAL_ENV/lib/*/no-global-site-packages.txt"
-#  - "sudo apt-get install -qq python-gi gtk-3-examples gir1.2-gtk-3.0 python-gi-cairo gsettings-desktop-schemas python-pyatspi python-dbus at-spi2-core libatk-adaptor gnome-screenshot"
-  - "sudo apt-get install -qq python-apt python-gi python-gi-cairo python-pyatspi xvfb imagemagick"
+  - "sudo apt-get install -qq python-gi gtk-3-examples gir1.2-gtk-3.0 python-gi-cairo gsettings-desktop-schemas python-pyatspi python-dbus at-spi2-core libatk-adaptor gnome-screenshot"
   - "gsettings set org.gnome.desktop.interface toolkit-accessibility true"
 script:
   - "pyflakes dogtail scripts tests"
   - "pep8 dogtail scripts tests --ignore=E501"
-  - "nosetests --with-coverage --cover-package=dogtail -v"
+  - "nosetests --with-coverage --cover-package=dogtail"
 after_success:
   - coveralls

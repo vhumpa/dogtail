@@ -9,7 +9,8 @@ before_install:
 install:
   - "pip install pep8 python-coveralls pyflakes --use-mirrors"
   - "rm $VIRTUAL_ENV/lib/*/no-global-site-packages.txt"
-  - "sudo apt-get install -qq python-gi gtk-3-examples gir1.2-gtk-3.0 python-gi-cairo gsettings-desktop-schemas python-pyatspi python-dbus at-spi2-core libatk-adaptor gnome-screenshot"
+#  - "sudo apt-get install -qq python-gi gtk-3-examples gir1.2-gtk-3.0 python-gi-cairo gsettings-desktop-schemas python-pyatspi python-dbus at-spi2-core libatk-adaptor gnome-screenshot"
+  - "sudo apt-get install -qq python-apt python-gi python-gi-cairo python-pyatspi xvfb imagemagick"
   - "gsettings set org.gnome.desktop.interface toolkit-accessibility true"
 script:
   - "pyflakes dogtail scripts tests"

@@ -87,7 +87,7 @@ class TestRun(unittest.TestCase):
         with self.assertRaises(OSError):
             self.pid = dogtail.utils.run('gtk3-virtual-nonexisting-demo')
 
-    def test_run_dump(self):
+    def test_run_dumb(self):
         self.pid = dogtail.utils.run('gtk3-demo', dumb=True)
         dogtail.tree.root.application('gtk3-demo')
 

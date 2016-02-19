@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, unicode_literals
+from __future__ import absolute_import, division, print_function, unicode_literals
 """Utility functions for 'dumping' trees of Node objects.
 
 Author: Zack Cerza <zcerza@redhat.com>, Matěj Cepl <mcepl@redhat.com>"""
@@ -28,24 +28,29 @@ def plain(node, output=None):
         for child in node.children:
             crawl(child, depth + 1)
 
-    def node2unicode(node):
-        return str(node).decode('utf8')
-
     def dumpFile(item, depth):
-        _file.write(spacer * depth + node2unicode(item) + u'\n')
+        _file.write(str(spacer * depth) + str(item) + str('\n'))
 
     def dumpStdOut(item, depth):
-        print(spacer * depth + node2unicode(item))
+        try:
+            print(spacer * depth + str(item))  # py3
+        except UnicodeDecodeError:
+            print(spacer * depth + str(item).decode('utf8'))  # py2 fallback
 
     _file = None
 
     if output:
         do_dump = dumpFile
-        if hasattr(output, 'write'):
-            _file = output
-        elif isinstance(output, basestring):
-            _file = open(output, 'w')
-            close_output = True
+        try:
+            if hasattr(output, 'write'):
+                _file = output
+            elif isinstance(output, basestring):  # py2
+                _file = open(output, 'w')
+                close_output = True
+        except NameError:
+            if isinstance(output, str):  # there's no basestring in py3 (no str and unicode)
+                _file = open(output, 'w')
+                close_output = True
     else:
         do_dump = dumpStdOut
 

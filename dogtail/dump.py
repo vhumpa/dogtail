@@ -23,8 +23,10 @@ def plain(node, output=None):
 
     def crawl(node, depth):
         do_dump(node, depth)
-        for action in node.actions.values():
-            do_dump(action, depth + 1)
+        actions_keys = list(node.actions.keys())
+        actions_keys.sort()
+        for action in actions_keys:
+            do_dump(node.actions[action], depth + 1)
         for child in node.children:
             crawl(child, depth + 1)
 

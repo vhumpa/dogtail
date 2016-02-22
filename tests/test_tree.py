@@ -862,11 +862,11 @@ class TestDump(GtkDemoTest):
   [scroll bar | ]""")
 
     def test_dump_with_actions(self):
-        child = self.app.child('Builder')
+        child = self.app.child('Builder', roleName='table cell')
         output = trap_stdout(child.dump)
         self.assertEqual(
             output,
             """[table cell | Builder]
+ [action | activate |  ]
  [action | edit |  ]
- [action | expand or contract |  ]
- [action | activate |  ]""")
+ [action | expand or contract |  ]""")

@@ -199,13 +199,13 @@ class TestKeyCombo(GtkDemoTest):
     def test_keyCombo(self):
         self.runDemo('Builder')
         keyCombo('<F7>')
-        self.assertTrue(focus.dialog('About GtkBuilder demo'))
+        self.assertTrue(focus.dialog('About Builder demo') or focus.dialog('About GtkBuilder demo'))
 
     def test_keyCombo_on_widget(self):
         self.runDemo('Builder')
         focus.button('Copy')
         keyCombo('<F7>')
-        self.assertTrue(focus.dialog('About GtkBuilder demo'))
+        self.assertTrue(focus.dialog('About Builder demo') or focus.dialog('About GtkBuilder demo'))
 
 
 class TestActions(GtkDemoTest):

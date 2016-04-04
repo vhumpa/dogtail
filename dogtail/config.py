@@ -58,6 +58,9 @@ class _Config(object):
     searchCutoffCount (int):
     Number of times to retry when a search fails.
 
+    searchShowingOnly (boolean):
+    Whether to only search among nodes that are currently being shown.
+
     defaultDelay (float):
     Default time in seconds to sleep when delaying.
 
@@ -134,6 +137,7 @@ class _Config(object):
         'searchBackoffDuration': 0.5,
         'searchWarningThreshold': 3,
         'searchCutoffCount': 20,
+        'searchShowingOnly': False,
         'defaultDelay': 0.5,
         'childrenLimit': 100,
 

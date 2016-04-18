@@ -98,6 +98,9 @@ class SniffApp(object):
         import os
         if not os.path.exists('/tmp/sniff_refresh.lock'):
             self.autoRefreshMenuItem.set_active(True)
+        else:
+            print("Sniff warning: A running 'dogtail' script has been detected.")
+            print("Disabling 'Auto Refresh', however this still is not recommended.")
 
     def showAbout(self, *args):
         if not self.about:
@@ -772,7 +775,7 @@ def main():
     from dogtail.utils import Lock
     # We need this to prohibit sniff making(and removing on exit)
     # sniff_refresh lock when importing Node
-    sniff_running = Lock(lockname='sniff_running.lock', randomize=False)
+    sniff_running = Lock(lockname='sniff_running.lock', randomize=False, unlockOnExit=True)
     try:
         sniff_running.lock()
     except OSError:

@@ -12,6 +12,7 @@ from types import LambdaType
 import gi
 from gi.repository import GLib
 import os
+import sys
 
 try:
     import pyatspi
@@ -1332,18 +1333,20 @@ if not children:  # pragma: no cover
         "Warning: AT-SPI's desktop is visible but it has no children. Are you running any AT-SPI-aware applications?")
 del children
 
-# sniff also imports from tree and we don't want to run this code from
-# sniff itself
+# sniff also imports from tree and we don't want to run this code from sniff itself
 if not os.path.exists('/tmp/sniff_running.lock'):
     if not os.path.exists('/tmp/sniff_refresh.lock'):  # may have already been locked by dogtail.procedural
-        # tell sniff not to use auto-refresh while script using this module is
-        # running
-        sniff_lock = Lock(lockname='sniff_refresh.lock', randomize=False)
+        # 'tell' newly opened sniff not to use auto-refresh while script using this module is running
+        sniff_lock = Lock(lockname='sniff_refresh.lock', randomize=False, unlockOnExit=True)
         try:
             sniff_lock.lock()
         except OSError:  # pragma: no cover
-            pass  # lock was already present from other script instance or leftover from killed instance
-        # lock should unlock automatically on script exit.
+            pass
+elif 'sniff' not in sys.argv[0]:
+    print("Dogtail: Warning: Running sniff has been detected.")
+    print("Please make sure sniff has the 'Auto Refresh' disabled.")
+    print("NOTE: Running scripts with sniff present is not recommended.")
+
 
 # Convenient place to set some debug variables:
 # config.debugSearching = True

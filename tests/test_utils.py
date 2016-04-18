@@ -146,13 +146,6 @@ class TestLock(unittest.TestCase):
         with self.assertRaises(OSError):
             test_lock.unlock()
 
-    def test_lock_on_del(self):
-        test_lock = dogtail.utils.Lock(lockname='test.lock', randomize=False)
-        test_lock.lock()
-        test_dir = test_lock.lockdir
-        del test_lock
-        self.assertFalse(os.path.isdir(test_dir))
-
     def test_randomize(self):
         test_lock = dogtail.utils.Lock(lockname='test.lock', randomize=True)
         self.assertIn("/tmp/test.lock", test_lock.lockdir)

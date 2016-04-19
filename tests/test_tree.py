@@ -657,6 +657,15 @@ class TestSearching(GtkDemoTest):
         counter = get_table_cells_recursively(self.app)
         self.assertEqual(len(tableCells), counter)
 
+    def test_findChild_lambda(self):
+        """
+        Ensure that the lambda usage works as expected with Node.findChild
+        """
+        try:
+            self.app.findChild(lambda x: x.roleName == 'page tab list')
+        except dogtail.tree.SearchError:
+            self.fail("Got a SearchError trying to find the page tab list")
+
     def test_findChildren2(self):
         """
         Ensure that there are two tabs in the second page tab list.

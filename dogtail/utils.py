@@ -181,14 +181,14 @@ class Blinker(object):  # pragma: no cover
 
 class Lock(object):
     """
-    A mutex implementation that uses atomicity of the mkdir operation in UNIX-like
-    systems. This can be used by scripts to provide for mutual exlusion, either in single
-    scripts using threads etc. or i.e. to handle sitations of possible collisions among
-    multiple running scripts. You can choose to make randomized single-script wise locks
-    or a more general locks if you do not choose to randomize the lockdir name
+    A known sytem-wide mutex implementation that uses atomicity of the mkdir operation in UNIX-like
+    systems. This should be used mainly to provide mutual exclution in handling possible collisions
+    among multiple script instances. You can choose to make randomized single-script wise locks
+    or a more general locks if you do not choose to randomize the lockdir name. Set unLockOnExit
+    to True to enable automatic unlock when scipt process exits to avoid having to unlock manually.
     """
 
-    def __init__(self, location='/tmp', lockname='dogtail_lockdir_', randomize=True):
+    def __init__(self, location='/tmp', lockname='dogtail_lockdir_', randomize=True, unlockOnExit=False):
         """
         You can change the default lockdir location or name. Setting randomize to
         False will result in no random string being appened to the lockdir name.
@@ -196,6 +196,14 @@ class Lock(object):
         self.lockdir = os.path.join(os.path.normpath(location), lockname)
         if randomize:
             self.lockdir = "%s%s" % (self.lockdir, self.__getPostfix())
+        self.unlockOnExit = unlockOnExit
+
+    def __exit_unlock(self):
+        if os.path.exists(self.lockdir):
+            try:
+                os.rmdir(self.lockdir)
+            except OSError:
+                pass  # already deleted (by .unlock()), we're exiting, it's fine
 
     def lock(self):
         """
@@ -207,10 +215,14 @@ class Lock(object):
         if not os.path.exists(self.lockdir):
             try:
                 os.mkdir(self.lockdir)
-                return self.lockdir
             except OSError as e:
                 if e.errno == errno.EEXIST and os.path.isdir(self.lockdir):
                     raise OSError(locked_msg)
+            if os.path.exists(self.lockdir):
+                if self.unlockOnExit:
+                    import atexit
+                    atexit.register(self.__exit_unlock)
+                return self.lockdir
         else:
             raise OSError(locked_msg)
 
@@ -219,7 +231,8 @@ class Lock(object):
         Removes a lock. Will raise OSError exception if the lock was not present.
         Should be atomic on POSIX compliant systems.
         """
-        import os  # have to import here for situations when executed from __del__
+        #if self.unlockOnExit:
+        #    raise Exception('Cannot unlock with unlockOnExit set to True!')
         if os.path.exists(self.lockdir):
             try:
                 os.rmdir(self.lockdir)
@@ -229,11 +242,8 @@ class Lock(object):
         else:
             raise OSError('Dogtail unlock: not locked')
 
-    def __del__(self):
-        """
-        Makes sure lock is removed when the process ends. Although not when killed indeed.
-        """
-        self.unlock()
+    def locked(self):
+        return os.path.exists(self.lockdir)
 
     def __getPostfix(self):
         import random

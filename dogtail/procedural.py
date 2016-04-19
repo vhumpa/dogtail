@@ -415,12 +415,12 @@ def run(application, arguments='', appName=''):
 # tell sniff not to use auto-refresh while script using this module is running
 # may have already been locked by dogtail.tree
 if not os.path.exists('/tmp/sniff_refresh.lock'):  # pragma: no cover
-    sniff_lock = Lock(lockname='sniff_refresh.lock', randomize=False)
+    # this lock will automatically unlock on script exit.
+    sniff_lock = Lock(lockname='sniff_refresh.lock', randomize=False, unlockOnExit=True)
     try:
         sniff_lock.lock()
     except OSError:
         pass  # lock was already present from other script instance or leftover from killed instance
-    # lock should unlock automatically on script exit.
 
 focus = Focus()
 click = Click()

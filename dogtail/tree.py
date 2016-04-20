@@ -909,7 +909,7 @@ class Node(object):
         if isinstance(pred, LambdaType):
             compare_func = pred
             if debugName is None:
-                debugName = "child satisyfing a cutom lambda function"
+                debugName = "child satisyfing a custom lambda function"
         else:
             assert isinstance(pred, predicate.Predicate)
             compare_func = pred.satisfiedByNode

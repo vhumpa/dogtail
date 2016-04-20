@@ -164,7 +164,7 @@ class TranslatableString(object):
                 self.untranslatedString, translations)
             return result
         else:
-            return '"%s"' % (self.untranslatedString)
+            return str('"%s"') % (str(self.untranslatedString))
 
 
 def isMoFile(filename, language=''):

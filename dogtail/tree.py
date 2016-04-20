@@ -170,7 +170,7 @@ class Action(object):
         """
         Performs the given tree.Action, with appropriate delays and logging.
         """
-        logger.log("%s on %s" % (self.name, self.node.getLogString()))
+        logger.log(str("%s on %s") % (str(self.name), self.node.getLogString()))
         if not self.node.sensitive:
             if config.ensureSensitivity:
                 raise NotSensitiveError(self)
@@ -258,7 +258,7 @@ class Node(object):
 
         invalidChildren = childCount - len(children)
         if invalidChildren and config.debugSearching:
-            logger.log("Skipped %s invalid children of %s" %
+            logger.log(str("Skipped %s invalid children of %s") %
                        (invalidChildren, str(self)))
         try:
             ht = self.queryHypertext()
@@ -329,7 +329,7 @@ class Node(object):
 
     @combovalue.setter
     def combovalue(self, value):
-        logger.log("Setting combobox %s to '%s'" % (self.getLogString(), value))
+        logger.log(str("Setting combobox %s to '%s'") % (self.getLogString(), str(value)))
         self.childNamed(childName=value).doActionNamed('click')
         doDelay()
 
@@ -377,7 +377,7 @@ class Node(object):
                     txt = text[:134] + " [...]"
                 else:
                     txt = text
-                logger.log(msg % (self.getLogString(), "'%s'" % txt))
+                logger.log(str(msg) % (self.getLogString(), str("'%s'") % str(txt)))
             self.queryEditableText().setTextContents(text)
         except NotImplementedError:
             raise AttributeError("can't set attribute")
@@ -457,12 +457,12 @@ class Node(object):
             - 2 is middle,
             - 3 is right.
         """
-        logger.log("Clicking on %s" % self.getLogString())
+        logger.log(str("Clicking on %s") % self.getLogString())
         clickX = self.position[0] + self.size[0] / 2
         clickY = self.position[1] + self.size[1] / 2
         if config.debugSearching:
-            logger.log("raw click on %s %s at (%s,%s)" %
-                       (self.name, self.getLogString(), str(clickX), str(clickY)))
+            logger.log(str("raw click on %s %s at (%s,%s)") %
+                       (str(self.name), self.getLogString(), str(clickX), str(clickY)))
         rawinput.click(clickX, clickY, button)
 
     def doubleClick(self, button=1):
@@ -472,8 +472,8 @@ class Node(object):
         clickX = self.position[0] + self.size[0] / 2
         clickY = self.position[1] + self.size[1] / 2
         if config.debugSearching:
-            logger.log("raw click on %s %s at (%s,%s)" %
-                       (self.name, self.getLogString(), str(clickX), str(clickY)))
+            logger.log(str("raw click on %s %s at (%s,%s)") %
+                       (str(self.name), self.getLogString(), str(clickX), str(clickY)))
         rawinput.doubleClick(clickX, clickY, button)
 
     def point(self, mouseDelay=None):
@@ -482,8 +482,8 @@ class Node(object):
         """
         pointX = self.position[0] + self.size[0] / 2
         pointY = self.position[1] + self.size[1] / 2
-        logger.log("Pointing on %s %s at (%s,%s)" %
-                   (self.name, self.getLogString(), str(pointX), str(pointY)))
+        logger.log(str("Pointing on %s %s at (%s,%s)") %
+                   (str(self.name), self.getLogString(), str(pointX), str(pointY)))
         rawinput.registry.generateMouseEvent(pointX, pointY, 'abs')
         if mouseDelay:
             doDelay(mouseDelay)
@@ -709,7 +709,7 @@ class Node(object):
         """
         Type the given text into the node, with appropriate delays and logging.
         """
-        logger.log("Typing text into %s: '%s'" % (self.getLogString(), string))
+        logger.log(str("Typing text into %s: '%s'") % (self.getLogString(), str(string)))
 
         if self.focusable:
             if not self.focused:
@@ -727,8 +727,8 @@ class Node(object):
 
     def keyCombo(self, comboString):
         if config.debugSearching:
-            logger.log("Pressing keys '%s' into %s" %
-                       (comboString, self.getLogString()))
+            logger.log(str("Pressing keys '%s' into %s") %
+                       (str(comboString), self.getLogString()))
         if self.focusable:
             if not self.focused:
                 try:
@@ -862,7 +862,7 @@ class Node(object):
         """
         if isinstance(pred, predicate.Predicate):
             pred = pred.satisfiedByNode
-        if showingOnly == None:
+        if showingOnly is None:
             showingOnly = config.searchShowingOnly
         if showingOnly:
             orig_pred = pred
@@ -903,7 +903,7 @@ class Node(object):
                 noun = "child"
             if debugName is None:
                 debugName = pred.describeSearchResult()
-            return "%s of %s: %s" % (noun, parent.getLogString(), debugName)
+            return str("%s of %s: %s") % (str(noun), parent.getLogString(), str(debugName))
 
         compare_func = None
         if isinstance(pred, LambdaType):
@@ -917,7 +917,7 @@ class Node(object):
         numAttempts = 0
         while numAttempts < config.searchCutoffCount:
             if numAttempts >= config.searchWarningThreshold or config.debugSearching:
-                logger.log("searching for %s (attempt %i)" %
+                logger.log(str("searching for %s (attempt %i)") %
                            (describeSearch(self, pred, recursive, debugName), numAttempts))
 
             result = self._fastFindChild(compare_func, recursive, showingOnly=showingOnly)
@@ -953,7 +953,7 @@ class Node(object):
         else:
             assert isinstance(pred, predicate.Predicate)
             compare_func = pred.satisfiedByNode
-        if showingOnly == None:
+        if showingOnly is None:
             showingOnly = config.searchShowingOnly
         if showingOnly:
             orig_compare_func = compare_func
@@ -1270,7 +1270,7 @@ class Wizard (Window):
         Node.__init__(self, node)
         if debugName:
             self.debugName = debugName
-        logger.log("%s is on '%s' page" % (self, self.getPageTitle()))
+        logger.log(str("%s is on '%s' page") % (self, str(self.getPageTitle())))
 
     def currentPage(self):
         """
@@ -1308,7 +1308,7 @@ class Wizard (Window):
         fwd.click()
 
         # Log the new wizard page; it's helpful when debugging scripts
-        logger.log("%s is now on '%s' page" % (self, self.getPageTitle()))
+        logger.log(str("%s is now on '%s' page") % (self, str(self.getPageTitle())))
         # FIXME disabled for now (can't get valid page titles)
 
     def clickApply(self):

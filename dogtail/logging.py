@@ -151,9 +151,9 @@ class Logger(object):
 
         if force or config.logDebugToFile:
             if newline:
-                self.filee.write(message + '\n')
+                self.filee.write(message + str('\n'))
             else:
-                self.filee.write(message + ' ')
+                self.filee.write(message + str(' '))
             self.filee.flush()
 
         if self.stdOut and config.logDebugToStdOut:

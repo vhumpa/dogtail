@@ -905,14 +905,22 @@ class Node(object):
                 debugName = pred.describeSearchResult()
             return "%s of %s: %s" % (noun, parent.getLogString(), debugName)
 
-        assert isinstance(pred, predicate.Predicate)
+        compare_func = None
+        if isinstance(pred, LambdaType):
+            compare_func = pred
+            if debugName is None:
+                debugName = "child satisyfing a custom lambda function"
+        else:
+            assert isinstance(pred, predicate.Predicate)
+            compare_func = pred.satisfiedByNode
+
         numAttempts = 0
         while numAttempts < config.searchCutoffCount:
             if numAttempts >= config.searchWarningThreshold or config.debugSearching:
                 logger.log("searching for %s (attempt %i)" %
                            (describeSearch(self, pred, recursive, debugName), numAttempts))
 
-            result = self._fastFindChild(pred.satisfiedByNode, recursive, showingOnly=showingOnly)
+            result = self._fastFindChild(compare_func, recursive, showingOnly=showingOnly)
             if result:
                 assert isinstance(result, Node)
                 if debugName:

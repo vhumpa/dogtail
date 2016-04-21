@@ -8,6 +8,8 @@ import dogtail.rawinput
 from gtkdemotest import GtkDemoTest, trap_stdout
 import pyatspi
 import time
+import unittest
+import os
 
 """
 Unit tests for the dogtail.Node class
@@ -856,6 +858,53 @@ class TestSearching(GtkDemoTest):
         self.assertIsNotNone(wnd.childLabelled("Entry 1"))
         self.assertIsNotNone(wnd.button("Message Dialog"))
 
+
+# A painful point of collision between strings in python2 and python3!
+@unittest.skipIf(os.system('ls /usr/bin/gedit') != 0, "Skipping, need gedit")
+class TestUnicodeNames(unittest.TestCase):
+
+    def setUp(self):
+        import dogtail.config
+        dogtail.config.config.logDebugToStdOut = True
+        dogtail.config.config.logDebugToFile = True
+        dogtail.config.config.logDebugToStdOut = True
+        dogtail.config.config.debugSearching = True
+        dogtail.config.config.searchCutoffCount = 3
+        import dogtail.utils
+        self.pid = dogtail.utils.run('gedit')
+        self.app = dogtail.tree.root.application('gedit')
+
+    def test_unicode_char_in_name(self):
+        self.app.child('Open', roleName='toggle button').click()
+        unicode_button = None
+        unicode_button = self.app.child(name=u'Other Documents…', roleName='push button')
+        assert unicode_button is not None
+
+    def test_unicode_char_in_name_click(self):
+        self.app.child('Open', roleName='toggle button').click()
+        unicode_button = self.app.child(name=u'Other Documents…', roleName='push button')
+        unicode_button.click()
+        dialog = None
+        try:
+            dialog = self.app.child(name=u'Open', roleName='file chooser')
+        except dogtail.tree.SearchError:
+            self.fail()
+        assert dialog is not None
+
+    def test_unicode_logging_nocrash(self):
+        try:
+            self.app.child(name='…Other stuff…', roleName='push button')
+            self.fail()
+        except dogtail.tree.SearchError:
+            pass
+
+    def tearDown(self):
+        import signal
+        os.kill(self.pid, signal.SIGKILL)
+        os.system('killall gedit > /dev/null 2>&1')
+        # Sleep just enough to let the app actually die.
+        # AT-SPI doesn't like being hammered too fast.
+        time.sleep(0.5)
 
 class TestDump(GtkDemoTest):
 

@@ -164,9 +164,9 @@ class GenericPredicate(Predicate):
             if name:
                 self.debugName = str(self.debugName) + str(" name=%s") % str(self.name)
             if roleName:
-                self.debugName += " roleName='%s'" % roleName
+                self.debugName = str(self.debugName) + str(" roleName='%s'") % str(roleName)
             if description:
-                self.debugName += " description='%s'" % description
+                self.debugName = str(self.debugName) + str(" description='%s'") % str(description)
         assert self.debugName
 
         self.satisfiedByNode = self._genCompareFunc()

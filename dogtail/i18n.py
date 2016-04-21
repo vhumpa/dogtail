@@ -107,7 +107,10 @@ class TranslatableString(object):
         Constructor looks up the string in all of the translation databases, storing
         the various translations it finds.
         """
-        self.untranslatedString = untranslatedString
+        try:  # python3 to get a plain always unicode string
+            self.untranslatedString = str(untranslatedString)
+        except UnicodeEncodeError:  # python2 to get non-unicode string for search comparions
+            self.untranslatedString = untranslatedString.encode('utf-8')
         self.translatedStrings = translate(untranslatedString)
 
     def matchedBy(self, string):
@@ -164,7 +167,7 @@ class TranslatableString(object):
                 self.untranslatedString, translations)
             return result
         else:
-            return str('"%s"') % (str(self.untranslatedString))
+            return str('"%s"') % self.untranslatedString
 
 
 def isMoFile(filename, language=''):

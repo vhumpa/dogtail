@@ -157,7 +157,10 @@ class Logger(object):
             self.filee.flush()
 
         if self.stdOut and config.logDebugToStdOut:
-            print(message)
+            try:
+                print(message)
+            except TypeError:
+                print(message.decode('utf-8', 'replace'))
 
 
 class ResultsLogger(Logger):

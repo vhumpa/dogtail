@@ -391,6 +391,8 @@ class GnomeShell(object):  # pragma: no cover
             menu_items = self.getApplicationMenuList(search_by_item)
         except:
             menu_items = self.getApplicationMenuList(item)
+        if any(ord(x) > 127 for x in item):
+            item = item.encode('utf-8')
         for node in menu_items:
             if node.name == item:
                 return node

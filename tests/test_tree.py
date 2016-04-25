@@ -865,7 +865,6 @@ class TestUnicodeNames(unittest.TestCase):
 
     def setUp(self):
         import dogtail.config
-        dogtail.config.config.reset()
         dogtail.config.config.logDebugToStdOut = True
         dogtail.config.config.logDebugToFile = True
         dogtail.config.config.logDebugToStdOut = True
@@ -901,8 +900,6 @@ class TestUnicodeNames(unittest.TestCase):
 
     def tearDown(self):
         import signal
-        import dogtail.config
-        dogtail.config.config.reset()
         os.kill(self.pid, signal.SIGKILL)
         os.system('killall gedit > /dev/null 2>&1')
         # Sleep just enough to let the app actually die.

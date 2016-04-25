@@ -99,7 +99,9 @@ class Logger(object):
         self.logName = logName
         self.stdOut = stdOut
         self.filee = file  # Handle to the logfile
-        if not self.filee:
+        if self.filee == '' or self.filee == str(''):
+            self.filee = False
+        if isinstance(self.filee, bool):
             return
 
         scriptName = config.scriptName

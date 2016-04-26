@@ -98,10 +98,11 @@ class Logger(object):
         """
         self.logName = logName
         self.stdOut = stdOut
+        self.fileName = None
         self.filee = file  # Handle to the logfile
         if self.filee == '' or self.filee == str(''):
             self.filee = False
-        if isinstance(self.filee, bool):
+        if not self.filee:
             return
 
         scriptName = config.scriptName
@@ -134,6 +135,8 @@ class Logger(object):
 
     def createFile(self):
         # Try to create the file and write the header info
+        if self.fileName is None and os.path.isdir(config.logDir):
+            self.findUniqueName()
         print("Creating logfile at %s ..." % self.fileName)
         self.filee = open(self.fileName, mode='w')
         self.filee.write("##### " + os.path.basename(self.fileName) + '\n')

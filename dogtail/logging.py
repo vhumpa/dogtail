@@ -98,19 +98,24 @@ class Logger(object):
         """
         self.logName = logName
         self.stdOut = stdOut
-        self.fileName = None
         self.filee = file  # Handle to the logfile
-        if self.filee == '' or self.filee == str(''):
-            self.filee = False
-        if not self.filee:
-            return
 
+        # store script name
         scriptName = config.scriptName
 
+        # if script name is invalid, use the default one
         # most probably non-reachable code
         if not scriptName:  # pragma: no cover
             scriptName = 'log'
+
+        # use script name as default filename
         self.fileName = scriptName
+
+        # return if file is False or empty string
+        # rewrite it for sure to False
+        if not self.filee:
+            self.filee = False
+            return
 
         # check to see if we can write to the logDir
         if os.path.isdir(config.logDir):
@@ -120,11 +125,15 @@ class Logger(object):
             raise IOError("Log path %s does not exist or is not a directory" % config.logDir)
 
     def findUniqueName(self):
-        # generate a logfile name and check if it already exists
+        """
+        Generate a logfile name and check if it already exists to obtain a unique one
+        """
         self.fileName = config.logDir + self.stamper.fileStamp(self.fileName) + '_' + self.logName
         i = 0
+
+        # Iterate until self.fileName contains new unique file path
         while os.path.exists(self.fileName):
-            # Append the pathname
+            # Append the file path with counter id
             if i == 0:
                 self.fileName = self.fileName + "." + str(i)
             else:
@@ -134,9 +143,9 @@ class Logger(object):
             i += 1
 
     def createFile(self):
-        # Try to create the file and write the header info
-        if self.fileName is None and os.path.isdir(config.logDir):
-            self.findUniqueName()
+        """
+        Try to create the file and write the header info
+        """
         print("Creating logfile at %s ..." % self.fileName)
         self.filee = open(self.fileName, mode='w')
         self.filee.write("##### " + os.path.basename(self.fileName) + '\n')
@@ -150,10 +159,12 @@ class Logger(object):
         If force is True, log to a file irrespective of config.logDebugToFile.
         """
 
-        # Try to open and write the result to the log file.
+        # Create log file if file descriptor was not provided to constructor
+        # and force or config.logDebugToFile is set to True
         if isinstance(self.filee, bool) and (force or config.logDebugToFile):
             self.createFile()
 
+        # If force or config.logDebugToFile is set to True, write message to file
         if force or config.logDebugToFile:
             if newline:
                 self.filee.write(message + str('\n'))
@@ -161,6 +172,7 @@ class Logger(object):
                 self.filee.write(message + str(' '))
             self.filee.flush()
 
+        # If both the self.stdOut and config.logDebugToStdOut are True, write to stdout
         if self.stdOut and config.logDebugToStdOut:
             try:
                 print(message)

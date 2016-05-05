@@ -62,7 +62,10 @@ class SniffApp(object):
                 os.path.join(__file__, os.path.pardir, os.path.pardir))
             if path is '/':
                 path = '/usr'
-            self.app.set_icon_from_file(os.path.join(path, 'share/icons/hicolor/scalable/apps/dogtail-head.svg'))
+            try:
+                self.app.set_icon_from_file(os.path.join(path, 'share/icons/hicolor/scalable/apps/dogtail-head.svg'))
+            except Exception: # fallback for wierd installations, when sniff is neither in /bin or /usr/bin
+                self.app.set_icon_from_file('/usr/share/icons/hicolor/scalable/apps/dogtail-head.svg')
         self.setUpWidgets()
         self.connectSignals()
         self.app.show_all()

@@ -204,7 +204,7 @@ class TestKeyCombo(GtkDemoTest):
             res = focus.dialog('About Builder demo')
         except:
             try:
-                focus.dialog('About GtkBuilder demo')
+                res = focus.dialog('About GtkBuilder demo')
             except:
                 pass
         self.assertTrue(res)
@@ -217,7 +217,7 @@ class TestKeyCombo(GtkDemoTest):
             res = focus.dialog('About Builder demo')
         except:
             try:
-                focus.dialog('About GtkBuilder demo')
+                res = focus.dialog('About GtkBuilder demo')
             except:
                 pass
         self.assertTrue(res)

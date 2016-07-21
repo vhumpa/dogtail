@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import locale
 import os
 import sys
+import pwd
 
 """
 The configuration module.
@@ -12,7 +13,8 @@ __author__ = "Zack Cerza <zcerza@redhat.com>, David Malcolm <dmalcolm@redhat.com
 
 def _userTmpDir(baseName):
     # i.e. /tmp/dogtail-foo
-    return '-'.join(('/'.join(('/tmp', baseName)), os.environ['USER']))
+    logname = os.getenv('LOGNAME', default=pwd.getpwuid(os.getuid())[0])
+    return '-'.join(('/'.join(('/tmp', baseName)), logname))
 
 
 class _Config(object):

@@ -235,6 +235,10 @@ class DisplayManagerSession(object):
             subprocess.Popen(
                 ('sudo pkill --signal 9 %s' % (self.session_binary.split('/')[-1])).split()).wait()
             time.sleep(1)
+        if self.isProcessRunning('Xorg'):  # Xorgs respawns the session on F25.. xorg never should be here... kill it
+            print('dogtail-run-headless-next: WARNING: Xorg still running, proceeding with kill -9')
+            subprocess.Popen('sudo pkill --signal 9 Xorg'.split()).wait()
+            time.sleep(1)
 
 
 def parse():

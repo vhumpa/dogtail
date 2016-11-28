@@ -223,6 +223,12 @@ class DisplayManagerSession(object):
 #            execCodeWithEnv(drop_overview, env = os.environ)
 # time.sleep(2) # time for the overview to go away
 
+    # def stop(self):
+    #     subprocess.Popen(('sudo systemctl stop %s' % (self.dm)).split()).wait()
+    #     self.waitForProcess('/usr/bin/%s' % self.dm, invert=True)
+    #     subprocess.Popen('loginctl kill-user test', shell=True).wait()
+    #     time.sleep(3)  # extra safe time
+
     def stop(self):
         subprocess.Popen(('sudo service %s stop' % (self.dm)).split()).wait()
         self.waitForProcess('/usr/bin/%s' % self.dm, invert=True)
@@ -230,11 +236,10 @@ class DisplayManagerSession(object):
         # did i.e. gnome-shell get stuck running?
         if self.isProcessRunning(self.session_binary.split('/')[-1]):
             print(
-                'dogtail-run-headless-next: WARNING: %s still running, proceeding with kill -9' %
+                'dogtail-run-headless-next: WARNING: %s still running, proceeding with loginctl kill-user' %
                 (self.session_binary.split('/')[-1]))
-            subprocess.Popen(
-                ('sudo pkill --signal 9 %s' % (self.session_binary.split('/')[-1])).split()).wait()
-            time.sleep(1)
+            subprocess.Popen('sudo loginctl kill-user test'.split()).wait()
+            time.sleep(5)
         if self.isProcessRunning('Xorg'):  # Xorgs respawns the session on F25.. xorg never should be here... kill it
             print('dogtail-run-headless-next: WARNING: Xorg still running, proceeding with kill -9')
             subprocess.Popen('sudo pkill --signal 9 Xorg'.split()).wait()

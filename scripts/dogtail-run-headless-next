@@ -236,13 +236,18 @@ class DisplayManagerSession(object):
         # did i.e. gnome-shell get stuck running?
         if self.isProcessRunning(self.session_binary.split('/')[-1]):
             print(
-                'dogtail-run-headless-next: WARNING: %s still running, proceeding with loginctl kill-user' %
+                'dogtail-run-headless-next: WARNING: %s still running, proceeding with loginctl kill-session' %
                 (self.session_binary.split('/')[-1]))
-            subprocess.Popen('sudo loginctl kill-user test'.split()).wait()
+            print('loginctl before:')
+            os.system("sudo loginctl")
+            subprocess.Popen("sudo loginctl terminate-session $(loginctl |grep test |grep seat0 |awk '{print $1}')", shell=True).wait()
             time.sleep(5)
+            print('loginctl after:')
+            os.system("sudo loginctl")
         if self.isProcessRunning('Xorg'):  # Xorgs respawns the session on F25.. xorg never should be here... kill it
-            print('dogtail-run-headless-next: WARNING: Xorg still running, proceeding with kill -9')
-            subprocess.Popen('sudo pkill --signal 9 Xorg'.split()).wait()
+            print('dogtail-run-headless-next: WARNING: Xorg still running doing loginctl kill-session -9')
+            subprocess.Popen("sudo loginctl kill-session --signal=9 $(loginctl |grep test |grep seat0 |awk '{print $1}')", shell=True).wait()
+            #subprocess.Popen('sudo pkill --signal 9 Xorg'.split()).wait()
             time.sleep(1)
 
 

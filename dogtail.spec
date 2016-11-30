@@ -5,7 +5,7 @@
 Summary: GUI test tool and automation framework
 Name: dogtail
 Version: 0.9.9
-Release: 1%{?dist}
+Release: 5.9861e2d8%{?dist}
 License: GPLv2
 URL: http://dogtail.fedorahosted.org/
 Source0: http://fedorahosted.org/released/dogtail/%{name}-%{version}.tar.gz
@@ -23,7 +23,7 @@ Requires: python-imaging
 Requires: hicolor-icon-theme
 
 %description
-GUI test tool and automation framework that uses assistive technologies to 
+GUI test tool and automation framework that uses assistive technologies to
 communicate with desktop applications.
 
 %if 0%{?with_python3}
@@ -39,7 +39,7 @@ Requires: xorg-x11-xinit
 Requires: hicolor-icon-theme
 
 %description -n python3-dogtail
-GUI test tool and automation framework that uses assistive technologies to 
+GUI test tool and automation framework that uses assistive technologies to
 communicate with desktop applications.
 %endif # with_python3
 
@@ -249,7 +249,7 @@ fi
 - Touch _datadir/icons/hicolor/ before running gtk-update-icon-cache.
 - Require and use desktop-file-utils.
 - postun = post.
-- Shorten BuildArchitectures to BuildArch. The former worked, but even vim's 
+- Shorten BuildArchitectures to BuildArch. The former worked, but even vim's
   hilighting hated it.
 - Put each *Requires on a separate line.
 - Remove __os_install_post definition.
@@ -262,7 +262,7 @@ fi
 
 * Fri Feb 17 2006 Zack Cerza <zcerza@redhat.com> - 0.5.0-2
 - It looks like xorg-x11-Xvfb changed names. Require 'Xvfb' instead.
-- Remove Requires on python-elementtree, since RHEL4 didn't have it. The 
+- Remove Requires on python-elementtree, since RHEL4 didn't have it. The
   functionality it provides is probably never used anyway, and will most likely
   be removed in the future.
 - Don't run gtk-update-icon-cache if it doesn't exist.
@@ -271,7 +271,7 @@ fi
 - New upstream release.
 - Added missing BuildRequires on at-spi-devel.
 - Added Requires on pyspi >= 0.5.3.
-- Added Requires on rpm-python, pygtk2, ImageMagick, xorg-x11-Xvfb, 
+- Added Requires on rpm-python, pygtk2, ImageMagick, xorg-x11-Xvfb,
   python-elementtree.
 - Moved documentation (including examples) to the correct place.
 - Make sure /usr/share/doc/dogtail is removed.
@@ -282,4 +282,3 @@ fi
 
 * Sat Oct  8 2005 Jeremy Katz <katzj@redhat.com> - 0.4.2-1
 - Initial build.
-

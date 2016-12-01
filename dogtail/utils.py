@@ -406,5 +406,21 @@ class GnomeShell(object):  # pragma: no cover
         may be customized. Also attempts to use the given item for reference
         if search fails with the default/custom one.
         """
-        self.getApplicationMenuButton(app_name).click()
-        self.getApplicationMenuItem(item, search_by_item).click()
+        # ahm, we have to compensate for a gs bug on f25 (possibly all gs-3.22)
+        if os.path.isfile('/etc/redhat-release'):
+            with open("/etc/redhat-release") as f:
+                dist = f.readline()
+        if 'Fedora release 25' in dist:
+            xoffset = -130
+            from dogtail.rawinput import click
+            nd = self.getApplicationMenuButton(app_name)
+            x = nd.position[0] + nd.size[0] / 2 + xoffset
+            y = nd.position[1] + nd.size[1] / 2
+            click(x, y)
+            nd = self.getApplicationMenuItem(item, search_by_item)
+            x = nd.position[0] + nd.size[0] / 2 + xoffset
+            y = nd.position[1] + nd.size[1] / 2
+            click(x, y)
+        else:
+            self.getApplicationMenuButton(app_name).click()
+            self.getApplicationMenuItem(item, search_by_item).click()

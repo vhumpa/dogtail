@@ -406,11 +406,10 @@ class GnomeShell(object):  # pragma: no cover
         may be customized. Also attempts to use the given item for reference
         if search fails with the default/custom one.
         """
-        # ahm, we have to compensate for a gs bug on f25 (possibly all gs-3.22)
-        if os.path.isfile('/etc/redhat-release'):
-            with open("/etc/redhat-release") as f:
-                dist = f.readline()
-        if 'Fedora release 25' in dist:
+
+        # a problem with this version of GS misreporting the positions
+        from subprocess import check_output
+        if '3.22' in check_output('gnome-shell --version', shell=True):
             xoffset = -130
             from dogtail.rawinput import click
             nd = self.getApplicationMenuButton(app_name)

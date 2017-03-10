@@ -278,3 +278,15 @@ def keyCombo(comboString):
         code = keyNameToKeyCode(modifier)
         registry.generateKeyboardEvent(code, None, KEY_RELEASE)
     doDelay()
+
+
+def holdKey(keyName):
+    code = keyNameToKeyCode(keyName)
+    registry.generateKeyboardEvent(code, None, KEY_PRESS)
+    doDelay()
+
+
+def releaseKey(keyName):
+    code = keyNameToKeyCode(keyName)
+    registry.generateKeyboardEvent(code, None, KEY_RELEASE)
+    doDelay()

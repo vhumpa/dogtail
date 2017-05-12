@@ -190,6 +190,9 @@ keyNameAliases = {
     'ins': 'Insert',
     'pageup': 'Page_Up',
     'pagedown': 'Page_Down',
+    'win': 'Super_L',
+    'meta': 'Super_L',
+    'super': 'Super_L',
     ' ': 'space',
     '\t': 'Tab',
     '\n': 'Return'

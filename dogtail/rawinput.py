@@ -41,6 +41,14 @@ def click(x, y, button=1, check=True):
     doDelay(config.actionDelay)
 
 
+def point(x, y, check=True):
+    if check:
+        checkCoordinates(x, y)
+    logger.log("Pointing mouse cursor at (%s,%s)" % (x, y))
+    registry.generateMouseEvent(x, y, 'abs')
+    doDelay(config.actionDelay)
+
+
 def doubleClick(x, y, button=1, check=True):
     """
     Synthesize a mouse button double-click at (x,y)

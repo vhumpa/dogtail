@@ -51,14 +51,14 @@ Bugs
 ====
 
 Please report any bugs at:
-    https://fedorahosted.org/dogtail/newticket
+    https://gitlab.com/dogtail/dogtail/issues
 
 
 Contact
 =======
 
 Website:
-    http://dogtail.fedorahosted.org/
+    https://gitlab.com/dogtail/dogtail/
 
 API Documentation:
     http://fedorapeople.org/~vhumpa/dogtail/epydoc/
@@ -77,9 +77,19 @@ Mailing list for developers:
 
 
     News
-    Dogtail 0.9.9 is out!
+
+    May-1-2017
+
+    Releasing Dogtail 0.9.10
+
+    There has been a good deal of fixes and improvements since last year's release. We're not really ready for 1.0
+    yet, which is why we release this important cumulative release as 0.9.10. We have also moved our homesite to
+    gitlab (fedoraproject has been discontinued). For the list of changes, simply go to:
+    https://gitlab.com/dogtail/dogtail/commits/master
 
     Jan-18-2016
+
+    Dogtail 0.9.9 is out!
 
     We're happy to announce the next release of dogtail and a pre-release for 1.0! 0.9.9 contains a big number of fixes and changes done since 0.9.0. Most important of these is framework's compatibility with Python 3. We've modified the code everywhere to run with both Python 2.7 and 3.3+. This means that from now on we maintain the same code-base and are releasing the same tarball, which can be used to package both py2 and py3 installations downstream. Just run setup.py with your favorite Python.
 

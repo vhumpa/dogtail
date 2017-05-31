@@ -34,7 +34,7 @@ KDE4 and QT applications are now available too.
 
 First, enable accessibility support in your GNOME session with:
   gsettings set org.gnome.desktop.interface toolkit-accessibility true
-This only affects newly-started applications, so you may want to log out and 
+This only affects newly-started applications, so you may want to log out and
 log back in again.
 
 Then, look at some of the example scripts. Run them, tweak them, write your own.
@@ -51,14 +51,14 @@ Bugs
 ====
 
 Please report any bugs at:
-    https://fedorahosted.org/dogtail/newticket
+    https://gitlab.com/dogtail/dogtail/issues
 
 
 Contact
 =======
 
 Website:
-    http://dogtail.fedorahosted.org/
+    https://gitlab.com/dogtail/dogtail/
 
 API Documentation:
     http://fedorapeople.org/~vhumpa/dogtail/epydoc/
@@ -71,4 +71,3 @@ Mailing list for users:
 
 Mailing list for developers:
     dogtail-devel-list@gnome.org
-

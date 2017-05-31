@@ -1,3 +1,11 @@
+dogtail 0.9.10
+==============
+
+There has been a good deal of fixes and improvements since last year's release. We're not really ready for 1.0
+yet, which is why we release this important cumulative release as 0.9.10. We have also moved our homesite to
+gitlab (fedoraproject has been discontinued). For the list of changes, simply go to:
+https://gitlab.com/dogtail/dogtail/commits/master
+
 dogtail 0.9.9
 =============
 A 1.0 pre-release. Contains a big number of fixes and changes done

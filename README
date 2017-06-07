@@ -10,8 +10,10 @@ See NEWS file.
 Installation
 ============
 
-See INSTALL file.
+Check your distro for packages! If not at the latest version, we also have
+relased tarballs for download: https://gitlab.com/dogtail/dogtail/tree/released
 
+For details see INSTALL file.
 
 Dependencies
 ============

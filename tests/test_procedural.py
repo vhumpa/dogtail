@@ -272,13 +272,13 @@ class TestActions(GtkDemoTest):
         self.assertEqual(focus.widget.node.text, 'hello world')
 
     def test_custom_actions(self):
-        activate("CSS Theming")
-        self.assertEqual(focus.widget.node.text, 'CSS Theming')
+        activate("Combo Boxes")
+        self.assertEqual(focus.widget.node.text, 'Combo Boxes')
 
     def test_blink_on_actions(self):
         config.blinkOnActions = True
-        activate("CSS Theming")
-        self.assertEqual(focus.widget.node.text, 'CSS Theming')
+        activate("Combo Boxes")
+        self.assertEqual(focus.widget.node.text, 'Combo Boxes')
 
     def test_custom_actions_button(self):
         try:
@@ -330,7 +330,7 @@ class TestActions(GtkDemoTest):
         self.assertEqual(focus.widget.node.role, pyatspi.ROLE_TEXT)
 
     def test_custom_actions_table_cell(self):
-        activate.tableCell("CSS Theming")
+        activate.tableCell("Combo Boxes")
         self.assertTrue(isinstance(focus.widget.node, tree.Node))
         self.assertEqual(focus.widget.node.role, pyatspi.ROLE_TABLE_CELL)
 

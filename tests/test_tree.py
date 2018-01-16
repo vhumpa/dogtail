@@ -363,7 +363,7 @@ class TestNode(GtkDemoTest):
         Node.visible reflects a node property if is should be render or not
         """
         self.assertTrue(self.app.child(roleName='frame').visible)
-        self.assertFalse(self.app.child('column', roleName='table column header').visible)
+        self.assertFalse(self.app.child(roleName='table column header').visible)
 
     def test_set_visible(self):
         """
@@ -677,7 +677,7 @@ class TestSearching(GtkDemoTest):
         pred = dogtail.predicate.GenericPredicate(roleName='page tab')
         # only one page tab list present since gtk3-demo 3.14
         pageTabs = pageTabList[0].findChildren(pred)
-        self.assertEqual(len(pageTabs), 4)
+        self.assertEqual(len(pageTabs), 5)
 
     def test_findChildren2_lambda(self):
         """
@@ -685,7 +685,7 @@ class TestSearching(GtkDemoTest):
         """
         pageTabList = self.app.findChildren(lambda x: x.roleName == 'page tab list')
         pageTabs = pageTabList[0].findChildren(lambda x: x.roleName == 'page tab')
-        self.assertEqual(len(pageTabs), 4)
+        self.assertEqual(len(pageTabs), 5)
 
     def test_findChildren_lambdas(self):
         """
@@ -713,7 +713,7 @@ class TestSearching(GtkDemoTest):
         self.assertTrue(texts2[1].showing)
 
     def test_findAncestor(self):
-        pred = dogtail.predicate.GenericPredicate(roleName='tree table')
+        pred = dogtail.predicate.GenericPredicate(roleName='table cell')
         child = self.app.child("Builder")
         parent = child.findAncestor(pred)
         self.assertIn(child, parent.children)

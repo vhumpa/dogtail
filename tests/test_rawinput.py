@@ -84,9 +84,9 @@ class TestRawinput(GtkDemoTest):
 
     def test_click(self):
         btn = self.app.child('Builder')
-        self.assertFalse(btn.selected)
+        self.assertFalse(btn.focused)
         click(btn.position[0], btn.position[1])
-        self.assertTrue(btn.selected)
+        self.assertTrue(btn.focused)
 
     def test_press_release(self):
         self.runDemo('Builder')

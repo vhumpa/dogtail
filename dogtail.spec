@@ -5,7 +5,7 @@
 Summary: GUI test tool and automation framework
 Name: dogtail
 Version: 0.9.10
-Release: 1%{?dist}
+Release: 2.c37c3b257%{?dist}
 License: GPLv2
 URL: http://dogtail.fedorahosted.org/
 Source0: http://fedorahosted.org/released/dogtail/%{name}-%{version}.tar.gz
@@ -17,9 +17,7 @@ BuildRequires: desktop-file-utils
 Requires: pyatspi
 Requires: pygobject3
 Requires: pycairo
-Requires: rpm-python
 Requires: xorg-x11-xinit
-Requires: python-imaging
 Requires: hicolor-icon-theme
 
 %description

@@ -70,7 +70,7 @@ Ed Rousseau <rousseau@redhat.com>,
 David Malcolm <dmalcolm@redhat.com>,
 Vitezslav Humpa <vhumpa@redhat.com>""",
     author_email='dogtail-list@gnome.org',
-    url='http://dogtail.fedorahosted.org/',
+    url='https://gitlab.com/dogtail/dogtail',
     packages=['dogtail'],
     scripts=scripts(),
     data_files=[

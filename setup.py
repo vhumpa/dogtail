@@ -59,12 +59,17 @@ def session_file():
     result = ['scripts/gnome-dogtail-headless.session']
     return result
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 setup(
     name='dogtail',
     version='0.9.10',
     description="GUI test tool and automation framework " +
     "that uses Accessibility (a11y) technologies to " +
     "communicate with desktop applications.",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     author="""Zack Cerza <zcerza@redhat.com>,
 Ed Rousseau <rousseau@redhat.com>,
 David Malcolm <dmalcolm@redhat.com>,

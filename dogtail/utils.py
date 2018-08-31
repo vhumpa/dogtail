@@ -409,7 +409,7 @@ class GnomeShell(object):  # pragma: no cover
 
         # a problem with this version of GS misreporting the positions
         from subprocess import check_output
-        if 'Fedora release 25' in check_output('cat /etc/redhat-release', shell=True):
+        if 'Fedora release 25' in check_output('cat /etc/redhat-release', shell=True).decode('utf-8'):
             xoffset = -130
             from dogtail.rawinput import click
             nd = self.getApplicationMenuButton(app_name)

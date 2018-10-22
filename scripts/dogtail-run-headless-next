@@ -182,7 +182,8 @@ class DisplayManagerSession(object):
                         need_restart = True
                 except (configparser.NoOptionError, configparser.NoSectionError) as e:
                     if self.session is not None:
-                        account_config.add_section('User')
+                        if not account_config.has_section('User'):
+                            account_config.add_section('User')
                         account_config.set('User', 'XSession', self.session)
                         account_config.set('User', 'SystemAccount', 'false')
                         need_restart = True

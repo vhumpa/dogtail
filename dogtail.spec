@@ -1,38 +1,48 @@
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} > 7
 %global with_python3 1
 %endif
 
 Summary: GUI test tool and automation framework
 Name: dogtail
 Version: 0.9.10
-Release: 2.c37c3b257%{?dist}
+Release: 5.084c2642%{?dist}
 License: GPLv2
-URL: http://dogtail.fedorahosted.org/
-Source0: http://fedorahosted.org/released/dogtail/%{name}-%{version}.tar.gz
+URL: https://gitlab.com/dogtail/dogtail/
+Source0: https://gitlab.com/dogtail/dogtail/raw/released/%{name}-%{version}.tar.gz
 BuildArch: noarch
 
 BuildRequires: python2-devel
-BuildRequires: python-setuptools
+BuildRequires: python2-setuptools
 BuildRequires: desktop-file-utils
-Requires: pyatspi
-Requires: pygobject3
-Requires: pycairo
+
+%global _description\
+GUI test tool and automation framework that uses assistive technologies to\
+communicate with desktop applications.
+
+%description %_description
+
+%package -n python2-dogtail
+Summary: %summary
+Requires: python2-pyatspi
+Requires: python2-gobject
+Requires: python2-cairo
 Requires: xorg-x11-xinit
 Requires: hicolor-icon-theme
+%{?python_provide:%python_provide python2-dogtail}
+# Remove before F30
+Provides: dogtail%{?_isa} = %{version}-%{release}
+Obsoletes: dogtail < %{version}-%{release}
 
-%description
-GUI test tool and automation framework that uses assistive technologies to
-communicate with desktop applications.
+%description -n python2-dogtail %_description
 
 %if 0%{?with_python3}
 %package -n python3-dogtail
-Summary: GUI test tool and automation framework, python3 install
+Summary: GUI test tool and automation framework - python3 installation
 BuildRequires: python3-devel
 BuildRequires: python3-setuptools
 Requires: python3-pyatspi
 Requires: python3-gobject
 Requires: python3-cairo
-Requires: rpm-python3
 Requires: xorg-x11-xinit
 Requires: hicolor-icon-theme
 
@@ -87,7 +97,7 @@ fi
 %posttrans
 /usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
-%files -n dogtail
+%files -n python2-dogtail
 %{_bindir}/*
 %{python2_sitelib}/dogtail/
 %{_datadir}/applications/*
@@ -112,6 +122,48 @@ fi
 %endif # with_python3
 
 %changelog
+* Mon Jul 16 2018 Vitezslav Humpa <vhumpa@redhat.com> - 0.9.10-1
+- Update to upstream version 0.9.10
+
+* Thu Jul 12 2018 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.9-12
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
+
+* Tue Jun 19 2018 Miro Hrončok <mhroncok@redhat.com> - 0.9.9-11
+- Rebuilt for Python 3.7
+
+* Wed Feb 07 2018 Iryna Shcherbina <ishcherb@redhat.com> - 0.9.9-10
+- Update Python 2 dependency declarations to new packaging standards
+  (See https://fedoraproject.org/wiki/FinalizingFedoraSwitchtoPython3)
+
+* Wed Feb 07 2018 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.9-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
+
+* Tue Jan 09 2018 Troy Dawson <tdawson@redhat.com> - 0.9.9-8
+- Update conditional
+
+* Sat Aug 19 2017 Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl> - 0.9.9-7
+- Python 2 binary package renamed to python2-dogtail
+  See https://fedoraproject.org/wiki/FinalizingFedoraSwitchtoPython3
+
+* Wed Jul 26 2017 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.9-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
+
+* Fri Feb 10 2017 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.9-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
+
+* Mon Dec 19 2016 Miro Hrončok <mhroncok@redhat.com> - 0.9.9-4
+- Rebuild for Python 3.6
+
+* Tue Jul 19 2016 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.9.9-3
+- https://fedoraproject.org/wiki/Changes/Automatic_Provides_for_Python_RPM_Packages
+
+* Wed Feb 03 2016 Fedora Release Engineering <releng@fedoraproject.org> - 0.9.9-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
+
+* Mon Jan 18 2016 Vitezslav Humpa <vhumpa@redhat.com> - 0.9.9-1
+- Update to upstream version 0.9.9
+- Upstream now supports Python 3, built as python3-dogtail sub-package
+
 * Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.9.0-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
 
@@ -140,10 +192,10 @@ fi
 * Wed Feb 13 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.8.1-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
-* Wed Oct 18 2012 Vitezslav Humpa <vhumpa@redhat.com> - 0.8.1-2
+* Thu Oct 18 2012 Vitezslav Humpa <vhumpa@redhat.com> - 0.8.1-2
 - Respin
 
-* Wed Oct 16 2012 Vitezslav Humpa <vhumpa@redhat.com> - 0.8.1-1
+* Tue Oct 16 2012 Vitezslav Humpa <vhumpa@redhat.com> - 0.8.1-1
 - New upstream release
 
 * Wed Jul 18 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.8.0-3

@@ -92,7 +92,7 @@ Vitezslav Humpa <vhumpa@redhat.com>""",
     ],
     options = {
     'build_scripts': {
-        'executable': '/usr/bin/env python',
+        'executable': '/usr/bin/python3',
     }
 }
 )

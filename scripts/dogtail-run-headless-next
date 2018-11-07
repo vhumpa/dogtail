@@ -138,7 +138,10 @@ class DisplayManagerSession(object):
 
     def setup(self, restore=False):
         shutil.copy(self.config, self.tmp_file)
-        config = configparser.SafeConfigParser()
+        if sys.version < '3.2':
+            config = configparser.SafeConfigParser()
+        else:
+            config = configparser.ConfigParser()
         config.optionxform = str
         config.read(self.tmp_file)
         if not restore:
@@ -167,7 +170,10 @@ class DisplayManagerSession(object):
                 tempfile = '/tmp/%s_headless' % self.user
                 if os.path.isfile(self.accountfile):
                     subprocess.Popen('cp -f %s %s' % (self.accountfile, tempfile), shell=True).wait()
-                account_config = configparser.SafeConfigParser()
+                if sys.version < '3.2':
+                    account_config = configparser.SafeConfigParser()
+                else:
+                    account_config = configparser.ConfigParser()
                 account_config.optionxform = str
                 account_config.read(tempfile)
                 try:
@@ -342,3 +348,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -77,8 +77,15 @@ Mailing list for developers:
 
 -----
 
-
     News
+
+    November-9-2018
+
+    A number of fixes related mainly to python3 and bilingual nature of dogtail.
+    Scripts (sniff and scripts/) get /usr/bin/python3 shebangs, so distros can
+    consider splitting those to subpackage.
+
+    Note: Wayland (on gnome) support is likely coming in the next release!
 
     May-1-2017
 

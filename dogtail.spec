@@ -4,16 +4,12 @@
 
 Summary: GUI test tool and automation framework
 Name: dogtail
-Version: 0.9.10
-Release: 5.084c2642%{?dist}
+Version: 0.9.11
+Release: 1%{?dist}
 License: GPLv2
 URL: https://gitlab.com/dogtail/dogtail/
 Source0: https://gitlab.com/dogtail/dogtail/raw/released/%{name}-%{version}.tar.gz
 BuildArch: noarch
-
-BuildRequires: python2-devel
-BuildRequires: python2-setuptools
-BuildRequires: desktop-file-utils
 
 %global _description\
 GUI test tool and automation framework that uses assistive technologies to\
@@ -23,15 +19,15 @@ communicate with desktop applications.
 
 %package -n python2-dogtail
 Summary: %summary
+BuildRequires: python2-devel
+BuildRequires: python2-setuptools
+BuildRequires: desktop-file-utils
 Requires: python2-pyatspi
 Requires: python2-gobject
 Requires: python2-cairo
 Requires: xorg-x11-xinit
 Requires: hicolor-icon-theme
 %{?python_provide:%python_provide python2-dogtail}
-# Remove before F30
-Provides: dogtail%{?_isa} = %{version}-%{release}
-Obsoletes: dogtail < %{version}-%{release}
 
 %description -n python2-dogtail %_description
 
@@ -40,6 +36,7 @@ Obsoletes: dogtail < %{version}-%{release}
 Summary: GUI test tool and automation framework - python3 installation
 BuildRequires: python3-devel
 BuildRequires: python3-setuptools
+BuildRequires: desktop-file-utils
 Requires: python3-pyatspi
 Requires: python3-gobject
 Requires: python3-cairo
@@ -49,6 +46,25 @@ Requires: hicolor-icon-theme
 %description -n python3-dogtail
 GUI test tool and automation framework that uses assistive technologies to
 communicate with desktop applications.
+
+%package -n python3-dogtail-scripts
+Summary: Sniff and other scripts for use with Dogtail framework
+BuildRequires: python3-devel
+BuildRequires: python3-setuptools
+BuildRequires: desktop-file-utils
+Requires: python3-pyatspi
+Requires: python3-gobject
+Requires: python3-cairo
+Requires: xorg-x11-xinit
+Requires: hicolor-icon-theme
+Requires: python3-dogtail >= 0.9.11
+
+%description -n python3-dogtail-scripts
+GUI test tool and automation framework that uses assistive technologies to
+communicate with desktop applications. This subpackage contains Sniff,
+the a11y exploration tool as well dogtail-run-headless scripts to start
+session to run tests in.
+
 %endif # with_python3
 
 %prep
@@ -98,9 +114,7 @@ fi
 /usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %files -n python2-dogtail
-%{_bindir}/*
 %{python2_sitelib}/dogtail/
-%{_datadir}/applications/*
 %{_datadir}/dogtail/
 %{_datadir}/icons/hicolor/*/apps/%{name}*.*
 %doc COPYING
@@ -110,18 +124,27 @@ fi
 
 %if 0%{?with_python3}
 %files -n python3-dogtail
-%{_bindir}/*
 %{python3_sitelib}/dogtail/
-%{_datadir}/applications/*
 %{_datadir}/dogtail/
 %{_datadir}/icons/hicolor/*/apps/%{name}*.*
 %doc COPYING
 %doc README
 %doc NEWS
 %doc examples/
+
+%files -n python3-dogtail-scripts
+%{_bindir}/*
+%{_datadir}/applications/*
+%doc COPYING
+%doc README
+%doc NEWS
+
 %endif # with_python3
 
 %changelog
+* Fri Nov 09 2018 Vitezslav Humpa <vhumpa@redhat.com> - 0.9.11-1
+- Update to upstream version 0.9.10
+
 * Mon Jul 16 2018 Vitezslav Humpa <vhumpa@redhat.com> - 0.9.10-1
 - Update to upstream version 0.9.10
 

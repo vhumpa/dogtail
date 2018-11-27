@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Dogtail script for generating unhelpful help file.
 

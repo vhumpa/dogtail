@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Dogtail demo script using tree.py
 # FIXME: Use TC.
 __author__ = 'Zack Cerza <zcerza@redhat.com'

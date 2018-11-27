@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# Stress test: repeatedly open and close the filechooser dialog
-
 from dogtail.tree import *
 from dogtail.utils import run
 from sys import exit

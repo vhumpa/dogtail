@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Dogtail demo script
 
 from dogtail.config import config

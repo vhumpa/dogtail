@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import os
 import signal
 import sys
@@ -11,7 +9,7 @@ from dogtail.tc import TCNode, TCBool
 tcn = TCNode()
 
 def appStartup(binary, roleName = "menu item"):
-    """Launches the given binary, then checks to see that the application 
+    """Launches the given binary, then checks to see that the application
     started correctly by looking for a Node with the given roleName."""
 
     pid = run(binary)
@@ -23,4 +21,3 @@ def appStartup(binary, roleName = "menu item"):
 if __name__ == "__main__":
     binary = sys.argv[1]
     appStartup(binary)
-

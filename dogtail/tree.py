@@ -4,6 +4,7 @@ from dogtail.config import config
 from dogtail import path
 from dogtail import predicate
 from dogtail import rawinput
+from dogtail.rawinput import ponytail
 from dogtail.logging import debugLogger as logger
 from dogtail.utils import doDelay, Blinker, Lock
 
@@ -286,6 +287,32 @@ class Node(object):
 
     indexInParent = property(Accessibility.Accessible.getIndexInParent)
 
+    __window_id = None
+
+    @property
+    def window_id(self):
+        if self.__window_id is None:
+            print('blik')
+            window_list = ponytail.window_list
+            node = self
+            parent_list = [node]
+            while node.parent is not None:
+                parent_list.append(node.parent)
+                node = node.parent
+            for ancestor in parent_list:
+                #import ipdb; ipdb.set_trace()
+                if ancestor.parent.roleName == 'application' and ancestor.roleName == 'window' and ancestor.name == '':
+                    self.__window_id = [x['id'] for x in ponytail.window_list if bool(x['has_focus']) is True]
+                    return [x['id'] for x in ponytail.window_list if bool(x['has_focus']) is True]
+                elif ancestor.parent.roleName == 'application' and ancestor.name in [x['title'] for x in window_list]:
+                    self.__window_id = [x['id'] for x in window_list if x['title'] == ancestor.name][0]
+                    return [x['id'] for x in window_list if x['title'] == ancestor.name][0]
+                elif ancestor.parent.roleName == 'application':
+                    self.__window_id = [x['id'] for x in ponytail.window_list if bool(x['has_focus']) is True][0]
+                    return [x['id'] for x in ponytail.window_list if bool(x['has_focus']) is True][0]
+        else:
+            return self.__window_id
+
     #
     # Action
     #
@@ -463,7 +490,7 @@ class Node(object):
         if config.debugSearching:
             logger.log(str("raw click on %s %s at (%s,%s)") %
                        (str(self.name), self.getLogString(), str(clickX), str(clickY)))
-        rawinput.click(clickX, clickY, button)
+        rawinput.click(clickX, clickY, button, window_id=self.window_id)
 
     def doubleClick(self, button=1):
         """
@@ -474,7 +501,7 @@ class Node(object):
         if config.debugSearching:
             logger.log(str("raw click on %s %s at (%s,%s)") %
                        (str(self.name), self.getLogString(), str(clickX), str(clickY)))
-        rawinput.doubleClick(clickX, clickY, button)
+        rawinput.doubleClick(clickX, clickY, button, window_id=self.window_id)
 
     def point(self, mouseDelay=None):
         """
@@ -484,11 +511,7 @@ class Node(object):
         pointY = self.position[1] + self.size[1] / 2
         logger.log(str("Pointing on %s %s at (%s,%s)") %
                    (str(self.name), self.getLogString(), str(pointX), str(pointY)))
-        rawinput.registry.generateMouseEvent(pointX, pointY, 'abs')
-        if mouseDelay:
-            doDelay(mouseDelay)
-        else:
-            doDelay()
+        rawinput.point(pointX, pointY, window_id=self.window_id)
 
     #
     # RelationSet

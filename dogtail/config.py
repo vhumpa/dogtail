@@ -136,6 +136,7 @@ class _Config(object):
         'typingDelay': 0.1,
         'runInterval': 0.5,
         'runTimeout': 30,
+        'doubleClickDelay': 0.1,
         'searchBackoffDuration': 0.5,
         'searchWarningThreshold': 3,
         'searchCutoffCount': 20,

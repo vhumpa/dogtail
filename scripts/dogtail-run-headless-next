@@ -335,7 +335,7 @@ def main():
     scriptPid = script.start()
     print('dogtail-run-headless-next: Started the script with PID %d' % (scriptPid))
     exitCode = script.wait()
-    print('dogtail-run-headless-next: The script has finnished with return code %d' % (exitCode))
+    print('dogtail-run-headless-next: The script has finished with return code %d' % (exitCode))
 
     if args.disable_a11y is True:
         dm.setA11y(False)

@@ -7,6 +7,7 @@ from dogtail import rawinput
 from dogtail.rawinput import ponytail
 from dogtail.logging import debugLogger as logger
 from dogtail.utils import doDelay, Blinker, Lock
+from dogtail.rawinput import SESSION_TYPE, ponytail_check_is_xwayland
 
 from time import sleep
 from types import LambdaType
@@ -293,7 +294,11 @@ class Node(object):
     def window_id(self):
         if self.__window_id is None:
             print('blik')
+            # remove the non-titled windows
             window_list = ponytail.window_list
+            for window in window_list:
+                if 'title' not in window.keys():
+                    window['title'] = ''
             node = self
             parent_list = [node]
             while node.parent is not None:
@@ -303,7 +308,7 @@ class Node(object):
                 #import ipdb; ipdb.set_trace()
                 if ancestor.parent.roleName == 'application' and ancestor.roleName == 'window' and ancestor.name == '':
                     self.__window_id = [x['id'] for x in ponytail.window_list if bool(x['has_focus']) is True]
-                    return [x['id'] for x in ponytail.window_list if bool(x['has_focus']) is True]
+                    return [x['id'] for x in ponytail.window_list if bool(x['has_focus']) is True] # context menus
                 elif ancestor.parent.roleName == 'application' and ancestor.name in [x['title'] for x in window_list]:
                     self.__window_id = [x['id'] for x in window_list if x['title'] == ancestor.name][0]
                     return [x['id'] for x in window_list if x['title'] == ancestor.name][0]
@@ -474,8 +479,23 @@ class Node(object):
     def grabFocus(self):
         """
         Attempts to set the keyboard focus to this Accessible.
+        Affected by rhbz 1656447 on Wayland! We do different actions based on type of the node
+        to get it focused there as workaround. For some we can do nothing (push button)
         """
-        return self.queryComponent().grabFocus()
+        if SESSION_TYPE == 'x11' or ponytail_check_is_xwayland(self.window_id):
+            return self.queryComponent().grabFocus()
+        else:
+            if 'toggle' in self.roleName or 'check box' in self.roleName:
+                self.doubleClick()
+            elif 'text' in self.roleName or 'table cell' in self.roleName:
+                self.click()
+            elif 'menu item' in self.roleName and self.position[0] > 0:
+                self.select()
+            elif 'menu item' in self.roleName and self.findAncestor(predicate.GenericPredicate(roleName='combo box')):
+                self.doActionNamed('click')
+            else:
+                pass
+
 
     def click(self, button=1):
         """
@@ -490,7 +510,10 @@ class Node(object):
         if config.debugSearching:
             logger.log(str("raw click on %s %s at (%s,%s)") %
                        (str(self.name), self.getLogString(), str(clickX), str(clickY)))
-        rawinput.click(clickX, clickY, button, window_id=self.window_id)
+        if self.roleName == 'menu item' and 'click' in self.actions:
+            self.doActionNamed('click')
+        else:
+            rawinput.click(clickX, clickY, button, window_id=self.window_id)
 
     def doubleClick(self, button=1):
         """

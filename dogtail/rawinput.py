@@ -47,7 +47,7 @@ def update_coords(coords):
 
 
 # Detect Xwayland windows in order to use globals and recordMonitor
-def ponytail_check_is_xwayland(window_id, window_list=None):
+def ponytail_check_is_xwayland(window_id=None, window_list=None):
     if window_list is None:
         window_list = ponytail.window_list
     if type(window_id) is int: # node.* input functions

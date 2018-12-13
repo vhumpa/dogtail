@@ -4,8 +4,8 @@
 
 Summary: GUI test tool and automation framework
 Name: dogtail
-Version: 0.9.11
-Release: 1%{?dist}
+Version: 0.10.0
+Release: 0.1wayland%{?dist}
 License: GPLv2
 URL: https://gitlab.com/dogtail/dogtail/
 Source0: https://gitlab.com/dogtail/dogtail/raw/released/%{name}-%{version}.tar.gz
@@ -17,19 +17,19 @@ communicate with desktop applications.
 
 %description %_description
 
-%package -n python2-dogtail
-Summary: %summary
-BuildRequires: python2-devel
-BuildRequires: python2-setuptools
-BuildRequires: desktop-file-utils
-Requires: python2-pyatspi
-Requires: python2-gobject
-Requires: python2-cairo
-Requires: xorg-x11-xinit
-Requires: hicolor-icon-theme
-%{?python_provide:%python_provide python2-dogtail}
-
-%description -n python2-dogtail %_description
+# %package -n python2-dogtail
+# Summary: %summary
+# BuildRequires: python2-devel
+# BuildRequires: python2-setuptools
+# BuildRequires: desktop-file-utils
+# Requires: python2-pyatspi
+# Requires: python2-gobject
+# Requires: python2-cairo
+# Requires: xorg-x11-xinit
+# Requires: hicolor-icon-theme
+# %{?python_provide:%python_provide python2-dogtail}
+#
+# %description -n python2-dogtail %_description
 
 %if 0%{?with_python3}
 %package -n python3-dogtail
@@ -38,6 +38,7 @@ BuildRequires: python3-devel
 BuildRequires: python3-setuptools
 BuildRequires: desktop-file-utils
 Requires: python3-pyatspi
+Requires: gnome-ponytail-daemon
 Requires: python3-gobject
 Requires: python3-cairo
 Requires: xorg-x11-xinit
@@ -75,8 +76,8 @@ rm -rf %{py3dir}
 cp -a . %{py3dir}
 %endif # with_python3
 
-%build
-%{__python2} setup.py build
+# %build
+# %{__python2} setup.py build
 
 %if 0%{?with_python3}
 pushd %{py3dir}
@@ -84,10 +85,10 @@ pushd %{py3dir}
 popd
 %endif # with_python3
 
-%install
-%{__python2} ./setup.py install -O2 --root=$RPM_BUILD_ROOT --record=%{name}.files
-rm -rf $RPM_BUILD_ROOT/%{_docdir}/dogtail
-rm -rf $RPM_BUILD_ROOT/%{python2_sitelib}/%{name}-%{version}-py%{python2_version}.egg-info
+# %install
+# %{__python2} ./setup.py install -O2 --root=$RPM_BUILD_ROOT --record=%{name}.files
+# rm -rf $RPM_BUILD_ROOT/%{_docdir}/dogtail
+# rm -rf $RPM_BUILD_ROOT/%{python2_sitelib}/%{name}-%{version}-py%{python2_version}.egg-info
 
 %if 0%{?with_python3}
 pushd %{py3dir}
@@ -113,14 +114,14 @@ fi
 %posttrans
 /usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
-%files -n python2-dogtail
-%{python2_sitelib}/dogtail/
-%{_datadir}/dogtail/
-%{_datadir}/icons/hicolor/*/apps/%{name}*.*
-%doc COPYING
-%doc README
-%doc NEWS
-%doc examples/
+# %files -n python2-dogtail
+# %{python2_sitelib}/dogtail/
+# %{_datadir}/dogtail/
+# %{_datadir}/icons/hicolor/*/apps/%{name}*.*
+# %doc COPYING
+# %doc README
+# %doc NEWS
+# %doc examples/
 
 %if 0%{?with_python3}
 %files -n python3-dogtail

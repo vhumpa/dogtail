@@ -40,7 +40,7 @@ test3:
 	nosetests3 tests/
 
 tarball:
-	python setup.py sdist
+	python3 setup.py sdist
 
 rpm: tarball
 	# Build using the custom rpmrc in the rpms/ sub-dir

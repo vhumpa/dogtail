@@ -308,7 +308,7 @@ class Node(object):
                 #import ipdb; ipdb.set_trace()
                 if ancestor.parent.roleName == 'application' and ancestor.roleName == 'window' and ancestor.name == '':
                     self.__window_id = [x['id'] for x in ponytail.window_list if bool(x['has_focus']) is True]
-                    return [x['id'] for x in ponytail.window_list if bool(x['has_focus']) is True] # context menus
+                    return [x['id'] for x in ponytail.window_list if bool(x['has_focus']) is True][0] # context menus
                 elif ancestor.parent.roleName == 'application' and ancestor.name in [x['title'] for x in window_list]:
                     self.__window_id = [x['id'] for x in window_list if x['title'] == ancestor.name][0]
                     return [x['id'] for x in window_list if x['title'] == ancestor.name][0]
@@ -317,6 +317,18 @@ class Node(object):
                     return [x['id'] for x in ponytail.window_list if bool(x['has_focus']) is True][0]
         else:
             return self.__window_id
+
+    @property
+    def window_has_focus(self):
+        if SESSION_TYPE == 'wayland':
+            window_list = ponytail.window_list
+            window_id = self.window_id
+            for window in window_list:
+                if window['id'] == window_id and bool(window['has_focus']) is True:
+                    return True
+            return False
+        else:
+            raise NotImplementedError
 
     #
     # Action
@@ -482,7 +494,9 @@ class Node(object):
         Affected by rhbz 1656447 on Wayland! We do different actions based on type of the node
         to get it focused there as workaround. For some we can do nothing (push button)
         """
-        if SESSION_TYPE == 'x11' or ponytail_check_is_xwayland(self.window_id):
+        print(self.window_id)
+        print(self.window_has_focus)
+        if SESSION_TYPE == 'x11' or ponytail_check_is_xwayland(self.window_id) or self.window_has_focus:
             return self.queryComponent().grabFocus()
         else:
             if 'toggle' in self.roleName or 'check box' in self.roleName:

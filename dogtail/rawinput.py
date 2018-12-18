@@ -51,16 +51,20 @@ def ponytail_check_is_xwayland(window_id=None, window_list=None):
     if window_list is None:
         window_list = ponytail.window_list
     if type(window_id) is int: # node.* input functions
-        return int([x['type'] for x in window_list if x['id'] == window_id][0])
+        return int([x['client-type'] for x in window_list if x['id'] == window_id][0])
     elif window_id is None: # direct rawinput functions
         for window in window_list:
-            if bool(window['has_focus']) is True:
-                return int(window['type'])
+            if bool(window['has-focus']) is True:
+                return int(window['client-type'])
     else:
         return 0
 
 
 def ponytail_check_connection(window_id=None, input_source='mouse'): # mouse/keyboard. No need to switch context for keys
+    window_list = ponytail.window_list # need it more, let's save some dbus traffic
+    if ponytail.connected and type(ponytail.connected) is int: # we need to check if possibly connected window still exists
+        if ponytail.connected not in [x['id'] for x in window_list]:
+            ponytail.disconnect() # clear the connected status of window that has already been closed
     if input_source == 'keyboard' and ponytail.connected is None:
         print("Keyboard event, connecting monitor")
         ponytail.connectMonitor()
@@ -68,12 +72,11 @@ def ponytail_check_connection(window_id=None, input_source='mouse'): # mouse/key
         print('Any window/monitor already connected for keyboard event')
     else: # mouse mouse events
         print("Mouse input event")
-        window_list = ponytail.window_list # need it more, let's save some dbus traffic
         if ponytail_check_is_xwayland(window_id, window_list):
             window_id = '' # 'window' id for monitor
         if ponytail.connected is None and window_id is None: # direct click() etc. functions, take focused window
             for window in window_list:
-                if bool(window['has_focus']) is True:
+                if bool(window['has-focus']) is True:
                     ponytail.connectWindow(window['id'])
                     print("Connected active window")
         elif ponytail.connected is None:

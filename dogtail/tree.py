@@ -293,7 +293,7 @@ class Node(object):
     @property
     def window_id(self):
         if self.__window_id is None:
-            print('blik')
+            print('window id event')
             # remove the non-titled windows
             window_list = ponytail.window_list
             for window in window_list:
@@ -306,15 +306,17 @@ class Node(object):
                 node = node.parent
             for ancestor in parent_list:
                 #import ipdb; ipdb.set_trace()
-                if ancestor.parent.roleName == 'application' and ancestor.roleName == 'window' and ancestor.name == '':
-                    self.__window_id = [x['id'] for x in ponytail.window_list if bool(x['has_focus']) is True]
-                    return [x['id'] for x in ponytail.window_list if bool(x['has_focus']) is True][0] # context menus
+                if ancestor.parent.roleName == 'application' and ancestor.parent.name == 'gnome-shell':
+                    return ''
+                elif ancestor.parent.roleName == 'application' and ancestor.roleName == 'window' and ancestor.name == '':
+                    self.__window_id = [x['id'] for x in window_list if bool(x['has-focus']) is True]
+                    return [x['id'] for x in window_list if bool(x['has-focus']) is True][0] # context menus
                 elif ancestor.parent.roleName == 'application' and ancestor.name in [x['title'] for x in window_list]:
                     self.__window_id = [x['id'] for x in window_list if x['title'] == ancestor.name][0]
                     return [x['id'] for x in window_list if x['title'] == ancestor.name][0]
                 elif ancestor.parent.roleName == 'application':
-                    self.__window_id = [x['id'] for x in ponytail.window_list if bool(x['has_focus']) is True][0]
-                    return [x['id'] for x in ponytail.window_list if bool(x['has_focus']) is True][0]
+                    self.__window_id = [x['id'] for x in window_list if bool(x['has-focus']) is True][0]
+                    return [x['id'] for x in window_list if bool(x['has-focus']) is True][0]
         else:
             return self.__window_id
 
@@ -324,7 +326,7 @@ class Node(object):
             window_list = ponytail.window_list
             window_id = self.window_id
             for window in window_list:
-                if window['id'] == window_id and bool(window['has_focus']) is True:
+                if window['id'] == window_id and bool(window['has-focus']) is True:
                     return True
             return False
         else:
@@ -524,7 +526,7 @@ class Node(object):
         if config.debugSearching:
             logger.log(str("raw click on %s %s at (%s,%s)") %
                        (str(self.name), self.getLogString(), str(clickX), str(clickY)))
-        if self.roleName == 'menu item' and 'click' in self.actions:
+        if ('menu item' in self.roleName or self.roleName == 'menu') and 'click' in self.actions:
             self.doActionNamed('click')
         else:
             rawinput.click(clickX, clickY, button, window_id=self.window_id)
@@ -548,7 +550,10 @@ class Node(object):
         pointY = self.position[1] + self.size[1] / 2
         logger.log(str("Pointing on %s %s at (%s,%s)") %
                    (str(self.name), self.getLogString(), str(pointX), str(pointY)))
-        rawinput.point(pointX, pointY, window_id=self.window_id)
+        if 'menu item' in self.roleName or self.roleName == 'menu':
+            self.select() # Local coords are OFF under wayland for menu/context menu 'windows'
+        else:
+            rawinput.point(pointX, pointY, window_id=self.window_id)
 
     #
     # RelationSet

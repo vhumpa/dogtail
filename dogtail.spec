@@ -33,7 +33,7 @@ communicate with desktop applications.
 
 %if 0%{?with_python3}
 %package -n python3-dogtail
-Summary: GUI test tool and automation framework - python3 installation
+Summary: GUI test tool and automation framework
 BuildRequires: python3-devel
 BuildRequires: python3-setuptools
 BuildRequires: desktop-file-utils
@@ -58,7 +58,7 @@ Requires: python3-gobject
 Requires: python3-cairo
 Requires: xorg-x11-xinit
 Requires: hicolor-icon-theme
-Requires: python3-dogtail >= 0.9.11
+Requires: python3-dogtail >= 0.10.0
 
 %description -n python3-dogtail-scripts
 GUI test tool and automation framework that uses assistive technologies to

@@ -64,7 +64,10 @@ def ponytail_check_connection(window_id=None, input_source='mouse'): # mouse/key
     window_list = ponytail.window_list # need it more, let's save some dbus traffic
     if ponytail.connected and type(ponytail.connected) is int: # we need to check if possibly connected window still exists
         if ponytail.connected not in [x['id'] for x in window_list]:
+            print('Disconnecting no longer open window')
             ponytail.disconnect() # clear the connected status of window that has already been closed
+            sleep(1)
+            print('Done')
     if input_source == 'keyboard' and ponytail.connected is None:
         print("Keyboard event, connecting monitor")
         ponytail.connectMonitor()

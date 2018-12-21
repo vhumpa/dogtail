@@ -433,7 +433,7 @@ def keyCombo(comboString):
             registry.generateKeyboardEvent(code, None, KEY_RELEASE)
     else:
         # always use monitor, window will often get closed before final release i.e. with alt-f4 ctrl-q etc!
-        ponytail_check_connection(input_source='keyboard', window_id='', force_monitor=True)
+        ponytail_check_connection(input_source='keyboard', window_id='')
         for modifier in modifiers:
             code = keyNameToKeyCode(modifier)
             ponytail.generateKeycodePress(code)

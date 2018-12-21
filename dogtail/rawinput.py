@@ -72,7 +72,13 @@ def ponytail_check_connection(window_id=None, input_source='mouse'): # mouse/key
         print("Keyboard event, connecting monitor")
         ponytail.connectMonitor()
     elif input_source == 'keyboard' and ponytail.connected is not None:
-        print('Any window/monitor already connected for keyboard event')
+        if window_id == '' and type(ponytail.connected) is int:
+            ponytail.disconnect()
+            sleep(1)
+            print("Keyboard event, monitor request, forcing monitor")
+            ponytail.connectMonitor()
+        else:
+            print('Any window/monitor already connected for keyboard event')
     else: # mouse mouse events
         print("Mouse input event")
         if ponytail_check_is_xwayland(window_id, window_list):
@@ -426,7 +432,8 @@ def keyCombo(comboString):
             code = keyNameToKeyCode(modifier)
             registry.generateKeyboardEvent(code, None, KEY_RELEASE)
     else:
-        ponytail_check_connection(input_source='keyboard')
+        # always use monitor, window will often get closed before final release i.e. with alt-f4 ctrl-q etc!
+        ponytail_check_connection(input_source='keyboard', window_id='', force_monitor=True)
         for modifier in modifiers:
             code = keyNameToKeyCode(modifier)
             ponytail.generateKeycodePress(code)

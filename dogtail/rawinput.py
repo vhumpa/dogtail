@@ -15,6 +15,7 @@ from gi.repository import Gdk
 
 SESSION_TYPE = 'x11'
 if 'XDG_SESSION_TYPE' in os.environ and 'wayland' in os.environ['XDG_SESSION_TYPE']:
+    os.system('gsettings set org.gnome.shell introspect true')
     SESSION_TYPE = 'wayland'
 
 ponytail = None

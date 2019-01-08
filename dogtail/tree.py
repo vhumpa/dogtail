@@ -292,10 +292,17 @@ class Node(object):
 
     @property
     def window_id(self):
+        if SESSION_TYPE == 'x11':
+            return None
         if self.__window_id is None:
             print('window id event')
             # remove the non-titled windows
             window_list = ponytail.window_list
+            if len(window_list) == 0:
+                doDelay(config.actionDelay)
+                window_list = ponytail.window_list
+                # if len(window_list) == 0:
+                #     raise AttributeError("Cannot get window ID for Node. Window list is empty even after 1s retry!")
             for window in window_list:
                 if 'title' not in window.keys():
                     window['title'] = ''
@@ -496,8 +503,8 @@ class Node(object):
         Affected by rhbz 1656447 on Wayland! We do different actions based on type of the node
         to get it focused there as workaround. For some we can do nothing (push button)
         """
-        print(self.window_id)
-        print(self.window_has_focus)
+        # print(self.window_id)
+        # print(self.window_has_focus)
         if SESSION_TYPE == 'x11' or ponytail_check_is_xwayland(self.window_id) or self.window_has_focus:
             return self.queryComponent().grabFocus()
         else:

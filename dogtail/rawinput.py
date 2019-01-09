@@ -89,6 +89,14 @@ def ponytail_check_connection(window_id=None, input_source='mouse'): # mouse/key
                 if bool(window['has-focus']) is True:
                     ponytail.connectWindow(window['id'])
                     print("Connected active window")
+        elif ponytail.connected is not None and window_id is None: # direct click() etc. functions, take focused window
+            for window in window_list:
+                if bool(window['has-focus']) is True:
+                    if ponytail.connected != window['id']:
+                        ponytail.disconnect()
+                        sleep(1)
+                        ponytail.connectWindow(window['id'])
+                        print("RE-CONNECTED to active window (direct click() etc. function)")
         elif ponytail.connected is None:
             if type(window_id) is int:
                 ponytail.connectWindow(window_id)

@@ -192,6 +192,8 @@ def press(x, y, button=1, check=True, window_id=None):
         registry.generateMouseEvent(x, y, name='b%sp' % button)
     else:
         ponytail_check_connection(window_id)
+        ponytail.generateMotionEvent(x, y)
+        doDelay()
         ponytail.generateButtonPress(button)
     doDelay()
 
@@ -208,6 +210,8 @@ def release(x, y, button=1, check=True, window_id=None):
         registry.generateMouseEvent(x, y, name='b%sr' % button)
     else:
         ponytail_check_connection(window_id)
+        ponytail.generateMotionEvent(x, y)
+        doDelay()
         ponytail.generateButtonRelease(button)
     doDelay()
 

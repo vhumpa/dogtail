@@ -23,6 +23,7 @@ if SESSION_TYPE == 'wayland':
     from ponytail.ponytail import Ponytail
     ponytail = Ponytail()
     ponytail.disconnect()
+    sleep(1) # needed now to overcome fast reconnect issue in ponytail
 
 """
 Handles raw input using AT-SPI event generation.
@@ -106,7 +107,7 @@ def ponytail_check_connection(window_id=None, input_source='mouse'): # mouse/key
                 print('Connected monitor (Xwayand?)')
         elif ponytail.connected != window_id and type(window_id) is int:
             ponytail.disconnect()
-            sleep(1)
+            sleep(1.5)
             print(ponytail.connected)
             print('Reconnecting window')
             print(window_id)
@@ -193,7 +194,6 @@ def press(x, y, button=1, check=True, window_id=None):
     else:
         ponytail_check_connection(window_id)
         ponytail.generateMotionEvent(x, y)
-        doDelay()
         ponytail.generateButtonPress(button)
     doDelay()
 
@@ -317,7 +317,7 @@ def dragWithTrajectory(fromXY, toXY, button=1, check=True):
     press(x, y, button, check)
 
     (x, y) = toXY
-    absoluteMotionWithTrajectory(fromXY[0], fromXY[1], x, y, check=check)
+    absoluteMotionWithTrajectory(fromXY[0], fromXY[1], x, y, mouseDelay=0.01, check=check)
     doDelay()
 
     release(x, y, button, check)
@@ -410,7 +410,7 @@ def pressKey(keyName):
         registry.generateKeyboardEvent(keySym, None, KEY_SYM)
     else:
         ponytail_check_connection(input_source='keyboard')
-        ponytail.generateKeysymEvent(keySym, delay=0.02)
+        ponytail.generateKeysymEvent(keySym)
     doTypingDelay()
 
 

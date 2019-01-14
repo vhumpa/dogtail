@@ -533,8 +533,10 @@ class Node(object):
         if config.debugSearching:
             logger.log(str("raw click on %s %s at (%s,%s)") %
                        (str(self.name), self.getLogString(), str(clickX), str(clickY)))
-        if ('menu item' in self.roleName or self.roleName == 'menu') and 'click' in self.actions:
+        if ('menu item' in self.roleName or self.roleName == 'menu') and self.parent.roleName != 'menu bar' \
+        and 'click' in self.actions:
             self.doActionNamed('click')
+            sleep(1)
         else:
             rawinput.click(clickX, clickY, button, window_id=self.window_id)
 

@@ -313,10 +313,13 @@ class Node(object):
                 node = node.parent
             for ancestor in parent_list:
                 #import ipdb; ipdb.set_trace()
-                if ancestor.parent.roleName == 'application' and ancestor.parent.name == 'gnome-shell':
+                if ancestor.parent is None:
+                    self.__window_id = [x['id'] for x in window_list if bool(x['has-focus']) is True][0]
+                    return [x['id'] for x in window_list if bool(x['has-focus']) is True][0]
+                elif ancestor.parent.roleName == 'application' and ancestor.parent.name == 'gnome-shell':
                     return ''
                 elif ancestor.parent.roleName == 'application' and ancestor.roleName == 'window' and ancestor.name == '':
-                    self.__window_id = [x['id'] for x in window_list if bool(x['has-focus']) is True]
+                    self.__window_id = [x['id'] for x in window_list if bool(x['has-focus']) is True][0]
                     return [x['id'] for x in window_list if bool(x['has-focus']) is True][0] # context menus
                 elif ancestor.parent.roleName == 'application' and ancestor.name in [x['title'] for x in window_list]:
                     self.__window_id = [x['id'] for x in window_list if x['title'] == ancestor.name][0]

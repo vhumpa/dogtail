@@ -251,11 +251,13 @@ class DisplayManagerSession(object):
             time.sleep(5)
             print('loginctl after:')
             os.system("sudo loginctl")
-        if self.isProcessRunning('Xorg'):  # Xorgs respawns the session on F25.. xorg never should be here... kill it
-            print('dogtail-run-headless-next: WARNING: Xorg still running doing loginctl kill-session -9')
+        if os.system('loginctl |grep test |grep seat0') == 0:  # still there...?
+            print('dogtail-run-headless-next: WARNING: test seat0 still there? Doing loginctl kill-session -9')
+            print('loginctl:')
+            os.system("sudo loginctl")
             subprocess.Popen("sudo loginctl kill-session --signal=9 $(loginctl |grep test |grep seat0 |awk '{print $1}')", shell=True).wait()
             #subprocess.Popen('sudo pkill --signal 9 Xorg'.split()).wait()
-            time.sleep(1)
+            time.sleep(3)
 
 
 def parse():
@@ -348,4 +350,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

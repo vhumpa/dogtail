@@ -538,8 +538,11 @@ class Node(object):
                        (str(self.name), self.getLogString(), str(clickX), str(clickY)))
         if ('menu item' in self.roleName or self.roleName == 'menu') and self.parent.roleName != 'menu bar' \
         and 'click' in self.actions:
-            self.doActionNamed('click')
-            sleep(1)
+            self.select()
+            doDelay(config.typingDelay)
+            # if self.parent.roleName != 'menu bar':
+            rawinput.pressKey('enter')
+            doDelay(config.typingDelay)
         else:
             rawinput.click(clickX, clickY, button, window_id=self.window_id)
 

@@ -16,6 +16,7 @@ from gi.repository import Gdk
 SESSION_TYPE = 'x11'
 if 'XDG_SESSION_TYPE' in os.environ and 'wayland' in os.environ['XDG_SESSION_TYPE']:
     os.system('gsettings set org.gnome.shell introspect true')
+    os.system('gsettings set org.gnome.desktop.peripherals.keyboard delay 2000')
     SESSION_TYPE = 'wayland'
 
 ponytail = None
@@ -409,7 +410,7 @@ def pressKey(keyName):
     if SESSION_TYPE == 'x11':
         registry.generateKeyboardEvent(keySym, None, KEY_SYM)
     else:
-        ponytail_check_connection(input_source='keyboard')
+        ponytail_check_connection(input_source='keyboard', delay=0.1)
         ponytail.generateKeysymEvent(keySym)
     doTypingDelay()
 

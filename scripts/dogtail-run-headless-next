@@ -211,9 +211,22 @@ class DisplayManagerSession(object):
                         'echo "[Desktop]\nSession=%s" > /home/%s/.dmrc' % (self.session, self.user), shell=True).wait()
 
     def start(self, restart=False):
-        if restart:
-            subprocess.Popen(('sudo service %s stop' % (self.dm)).split())
-            time.sleep(0.5)
+        #if restart:
+        subprocess.Popen(('sudo service %s stop' % (self.dm)).split())
+        time.sleep(0.5)
+        if os.system('sudo loginctl |grep test |grep seat0') == 0:
+            print('Found pre-existing sesssion! Loginctl:')
+            os.system("sudo loginctl")
+            subprocess.Popen("sudo loginctl kill-session --signal=9 $(loginctl |grep test |grep seat0 |awk '{print $1}')", shell=True).wait()
+            time.sleep(5) # check whether there is another
+            print('loginctl after kill-session --signal=9:')
+            os.system("sudo loginctl")
+            if os.system('sudo loginctl |grep test |grep seat0') == 0:
+                print('Found (another?) pre-existing sesssion!')
+                subprocess.Popen("sudo loginctl kill-session --signal=9 $(loginctl |grep test |grep seat0 |awk '{print $1}')", shell=True).wait()
+                time.sleep(5)
+                os.system("sudo loginctl")
+
         subprocess.Popen(('sudo service %s start' % (self.dm)).split())
         self.waitForProcess(self.session_binary.split('/')[-1])
         # some extra time for an environment (shell/kwin) to load all resources
@@ -243,7 +256,7 @@ class DisplayManagerSession(object):
         # did i.e. gnome-shell get stuck running?
         if self.isProcessRunning(self.session_binary.split('/')[-1]):
             print(
-                'dogtail-run-headless-next: WARNING: %s still running, proceeding with loginctl kill-session' %
+                'dogtail-run-headless-next: WARNING: %s still running, proceeding with loginctl terminate-session' %
                 (self.session_binary.split('/')[-1]))
             print('loginctl before:')
             os.system("sudo loginctl")
@@ -251,7 +264,7 @@ class DisplayManagerSession(object):
             time.sleep(5)
             print('loginctl after:')
             os.system("sudo loginctl")
-        if os.system('loginctl |grep test |grep seat0') == 0:  # still there...?
+        if self.isProcessRunning('Xorg') or self.isProcessRunning('gnome-shell') or self.isProcessRunning('Xwayland'):  # still there...?
             print('dogtail-run-headless-next: WARNING: test seat0 still there? Doing loginctl kill-session -9')
             print('loginctl:')
             os.system("sudo loginctl")

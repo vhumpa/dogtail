@@ -465,6 +465,13 @@ class Node(object):
         """
         A tuple containing the size of the Accessible: (w, h)
         """
+        if SESSION_TYPE == 'wayland':
+            if self.roleName == 'window' or self.roleName == 'dialog' or self.roleName == 'frame':
+                window_list = ponytail.window_list
+                window_id = self.window_id
+                for window in window_list:
+                    if window['id'] == window_id:
+                        return (int(window['width']), int(window['height']))
         return self.queryComponent().getSize()
 
     @property

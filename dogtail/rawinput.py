@@ -410,8 +410,8 @@ def pressKey(keyName):
     if SESSION_TYPE == 'x11':
         registry.generateKeyboardEvent(keySym, None, KEY_SYM)
     else:
-        ponytail_check_connection(input_source='keyboard', delay=0.1)
-        ponytail.generateKeysymEvent(keySym)
+        ponytail_check_connection(input_source='keyboard')
+        ponytail.generateKeysymEvent(keySym, delay=0.15)
     doTypingDelay()
 
 

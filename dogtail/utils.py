@@ -337,6 +337,21 @@ Note that you will have to log out for the change to fully take effect.
     dialog.destroy()
 
 
+def waitForWindow(name):
+    """
+    Wait for window to appear. Currently wayland only.
+    name can be a window 'title' as reported via Node.name
+    or an app id (from .desktop file. i.e. "org.gnome.Calculator.desktop")
+    Returns true on success, false on x11.
+    """
+    from dogtail.rawinput import ponytail, SESSION_TYPE
+    if SESSION_TYPE == 'wayland':
+        ponytail.waitFor(name)
+        return True
+    else:
+        return False
+
+
 class GnomeShell(object):  # pragma: no cover
 
     """

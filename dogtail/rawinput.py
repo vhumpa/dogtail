@@ -351,6 +351,7 @@ keyNameAliases = {
     'meta': 'Super_L',
     'super': 'Super_L',
     'tab': 'Tab',
+    'print': 'Print', # printscreen
     ' ': 'space',
     '\t': 'Tab',
     '\n': 'Return',

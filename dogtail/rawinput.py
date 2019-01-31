@@ -182,7 +182,7 @@ def doubleClick(x, y, button=1, check=True, window_id=None):
     doDelay(config.actionDelay)
 
 
-def press(x, y, button=1, check=True, window_id=None):
+def press(x, y, button=1, check=True, window_id=None, delay=config.defaultDelay):
     """
     Synthesize a mouse button press at (x,y)
     """
@@ -196,7 +196,7 @@ def press(x, y, button=1, check=True, window_id=None):
         ponytail_check_connection(window_id)
         ponytail.generateMotionEvent(x, y)
         ponytail.generateButtonPress(button)
-    doDelay()
+    doDelay(delay)
 
 
 def release(x, y, button=1, check=True, window_id=None):
@@ -308,14 +308,68 @@ def drag(fromXY, toXY, button=1, check=True):
     doDelay()
 
 
-def dragWithTrajectory(fromXY, toXY, button=1, check=True):
+def dragNodeToNode(source_node, dest_node, button=1, check=True):
+    """
+    Drag source_node onto dest_node. These are tree.Node objects. Takes positions
+    of these Nodes directly, so you don't have to calculate end enter them directly.
+    """
+    logger.log("Mouse button %s drag from %s to %s" % (button, source_node, dest_node))
+
+    x = source_node.position[0] + source_node.size[0] / 2
+    y = source_node.position[1] + source_node.size[1] / 2
+    press(x, y, button, check, source_node.window_id)
+
+    x = dest_node.position[0] + dest_node.size[0] / 2
+    y = dest_node.position[1] + dest_node.size[1] / 2
+
+    release(x, y, button, check, window_id=dest_node.window_id)
+    doDelay()
+
+
+def dragWithTrajectoryGlobal(fromXY, toXY, button=1):
     """
     Synthetize a mouse press, drag (including move events), and release on the screen
+    For use on Wayland - as this function forces using global coords, although we get
+    local ones from a11y. So this function is targeted to be used for inter-window drags
+    on Wayland, where you will need to questimate the coords. Which is doable i.e by having
+    source window placed on the left *half* of the screen (local coords will be very similar
+    to globals perhaps with the top panel offset).
+
+    Having 'trajectory' appears to be necessary on Wayland for any drags. Use 'dragWithTrajectory'
+    or just 'drag' on X sessions like in pre-wayland version of dogtail.
+    """
+    if SESSION_TYPE == 'wayland':
+        logger.log("GLOBAL Mouse button %s drag from %s to %s" % (button, fromXY, toXY))
+
+        (x, y) = fromXY
+        ponytail_check_connection(window_id='') # connect MONITOR
+
+        ponytail.generateMotionEvent(x, y)
+        doDelay(config.defaultDelay)
+        ponytail.generateButtonPress(1)
+        doDelay(config.defaultDelay)
+
+        (x, y) = toXY
+        absoluteMotionWithTrajectory(fromXY[0], fromXY[1], x, y, mouseDelay=0.01, window_id='')
+
+        ponytail.generateMotionEvent(x, y)
+        doDelay(config.defaultDelay)
+        ponytail.generateButtonRelease(1)
+        doDelay()
+    else:
+        dragWithTrajectory(fromXY, toXY, button)
+
+
+def dragWithTrajectory(fromXY, toXY, button=1, check=True, press_delay=config.defaultDelay):
+    """
+    Synthetize a mouse press, drag (including move events), and release on the screen
+    Please note, that on Wayland, this function works for drags only within a single window.
+    On X this function works with global coords and equals dragWithTrajectoryGlobal
     """
     logger.log("Mouse button %s drag with trajectory from %s to %s" % (button, fromXY, toXY))
 
     (x, y) = fromXY
-    press(x, y, button, check)
+    press(x, y, button, check, delay=press_delay)
 
     (x, y) = toXY
     absoluteMotionWithTrajectory(fromXY[0], fromXY[1], x, y, mouseDelay=0.01, check=check)

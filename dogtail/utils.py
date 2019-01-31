@@ -337,7 +337,7 @@ Note that you will have to log out for the change to fully take effect.
     dialog.destroy()
 
 
-def waitForWindow(name):
+def waitForWindow(name, timeout=30):
     """
     Wait for window to appear. Currently wayland only.
     name can be a window 'title' as reported via Node.name
@@ -346,7 +346,7 @@ def waitForWindow(name):
     """
     from dogtail.rawinput import ponytail, SESSION_TYPE
     if SESSION_TYPE == 'wayland':
-        ponytail.waitFor(name)
+        ponytail.waitFor(name, timeout=timeout)
         return True
     else:
         return False

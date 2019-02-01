@@ -177,20 +177,20 @@ class DisplayManagerSession(object):
                 account_config.optionxform = str
                 account_config.read(tempfile)
                 try:
-                    saved_session = account_config.get('User', 'XSession')
+                    saved_session = account_config.get('User', 'Session')
                     if self.session is None:
                         if 'kde' in saved_session and 'gnome-shell' in self.session_binary:
                             self.session_binary = '/usr/bin/kwin'
                         elif 'gnome' in saved_session and 'kwin' in self.session_binary:
                             self.session_binary = '/usr/bin/gnome-shell'
                     elif saved_session != self.session:
-                        account_config.set('User', 'XSession', self.session)
+                        account_config.set('User', 'Session', self.session)
                         need_restart = True
                 except (configparser.NoOptionError, configparser.NoSectionError) as e:
                     if self.session is not None:
                         if not account_config.has_section('User'):
                             account_config.add_section('User')
-                        account_config.set('User', 'XSession', self.session)
+                        account_config.set('User', 'Session', self.session)
                         account_config.set('User', 'SystemAccount', 'false')
                         need_restart = True
                 if need_restart:
@@ -280,9 +280,9 @@ def parse():
     parser.add_argument('--session', required=False,
                         help="""What session to use. Not specifying results in system default session on first login
                         or test user's last session with follow-up logins.
-                        Otherwise you can set any xsession desktop file name here (i.e. 'gnome-classic', 'gnome',
-                        'lxde' etc.).
-                        'kde' defaults to 'kde-plasma for legacy reasons.'""")
+                        Otherwise you can set any session desktop file name here (i.e. 'gnome-classic', 'gnome',
+                        'lxde' etc.) - comes from either /usr/share/wayland-sessions/ or /usr/share/xsessions/.
+                        If you have Wayland disabled with /etc/gdm/custom.conf, choose from /usr/share/xsessions/ only. """)
     parser.add_argument('--session-binary', required=False,
                         help="""Specify an in-session ever-running binary (full path) to get the environment from.
                             Only needed for non-gnome/kde sessions.""")

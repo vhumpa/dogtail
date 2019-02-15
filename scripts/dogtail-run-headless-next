@@ -41,7 +41,6 @@ from dogtail.sessions import Script
 
 preserve_envs = ['PYTHONPATH', 'TEST']
 
-
 def getSessionEnvironment(sessionBinary):
 
     def isSessionProcess(fileName):
@@ -336,8 +335,13 @@ def main():
     print('dogtail-run-headless-next: Using %s to bind to the session' % (dm.session_binary))
 
     try:
+        term = None
+        if 'TERM' in os.environ:
+            term = os.environ['TERM']
         os.environ = getSessionEnvironment(dm.session_binary)
-    except:
+        if term is not None:
+            os.environ['TERM'] = term
+    except Exception:
         print('dogtail-run-headless-next: Could not get the environment from %s process' % (dm.session_binary))
         dm.stop()
         dm.setup(restore=True)

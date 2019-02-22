@@ -160,7 +160,7 @@ def drag(fromXY, toXY, button=1, check=True):
     doDelay()
 
 
-def dragWithTrajectory(fromXY, toXY, button=1, check=True):
+def dragWithTrajectory(fromXY, toXY, button=1, check=True, mouse_delay=0.01):
     """
     Synthetize a mouse press, drag (including move events), and release on the screen
     """
@@ -170,7 +170,7 @@ def dragWithTrajectory(fromXY, toXY, button=1, check=True):
     press(x, y, button, check)
 
     (x, y) = toXY
-    absoluteMotionWithTrajectory(fromXY[0], fromXY[1], x, y, check=check)
+    absoluteMotionWithTrajectory(fromXY[0], fromXY[1], x, y, mouseDelay=mouse_delay, check=check)
     doDelay()
 
     release(x, y, button, check)

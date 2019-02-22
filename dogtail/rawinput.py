@@ -360,7 +360,7 @@ def dragWithTrajectoryGlobal(fromXY, toXY, button=1):
         dragWithTrajectory(fromXY, toXY, button)
 
 
-def dragWithTrajectory(fromXY, toXY, button=1, check=True, press_delay=config.defaultDelay):
+def dragWithTrajectory(fromXY, toXY, button=1, check=True, press_delay=config.defaultDelay, mouse_delay=0.01):
     """
     Synthetize a mouse press, drag (including move events), and release on the screen
     Please note, that on Wayland, this function works for drags only within a single window.
@@ -372,7 +372,7 @@ def dragWithTrajectory(fromXY, toXY, button=1, check=True, press_delay=config.de
     press(x, y, button, check, delay=press_delay)
 
     (x, y) = toXY
-    absoluteMotionWithTrajectory(fromXY[0], fromXY[1], x, y, mouseDelay=0.01, check=check)
+    absoluteMotionWithTrajectory(fromXY[0], fromXY[1], x, y, mouseDelay=mouse_delay, check=check)
     doDelay()
 
     release(x, y, button, check)

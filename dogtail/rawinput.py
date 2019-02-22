@@ -460,7 +460,7 @@ def pressKey(keyName, window_id=None):
     Names are looked up in Gdk.KEY_ If they are not found there, they are
     looked up by uniCharToKeySym().
     """
-    if 'esc' in keyName.lower():
+    if keyName.lower() in ('esc', 'escape', 'enter', 'return'):
         window_id = '' # when this would quit a window, release event would be doomed
     keySym = keyNameToKeySym(keyName)
     if SESSION_TYPE == 'x11':

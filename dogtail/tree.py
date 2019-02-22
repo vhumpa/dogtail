@@ -548,7 +548,10 @@ class Node(object):
             self.select()
             doDelay(config.typingDelay)
             # if self.parent.roleName != 'menu bar':
-            rawinput.pressKey('enter')
+            window_id = None
+            if self.name.lower() in ['quit', 'exit'] or 'close' in self.name.lower(): # when window exits in the middle of pressKey and cant release...
+                window_id = ''
+            rawinput.pressKey('enter', window_id)
             doDelay(config.typingDelay)
         else:
             rawinput.click(clickX, clickY, button, window_id=self.window_id)

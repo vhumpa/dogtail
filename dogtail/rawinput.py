@@ -453,19 +453,20 @@ def keyNameToKeyCode(keyName):
         pass
 
 
-def pressKey(keyName):
+def pressKey(keyName, window_id=None):
     """
     Presses (and releases) the key specified by keyName.
     keyName is the English name of the key as seen on the keyboard. Ex: 'enter'
     Names are looked up in Gdk.KEY_ If they are not found there, they are
     looked up by uniCharToKeySym().
     """
-
+    if 'esc' in keyName.lower():
+        window_id = '' # when this would quit a window, release event would be doomed
     keySym = keyNameToKeySym(keyName)
     if SESSION_TYPE == 'x11':
         registry.generateKeyboardEvent(keySym, None, KEY_SYM)
     else:
-        ponytail_check_connection(input_source='keyboard')
+        ponytail_check_connection(window_id, input_source='keyboard')
         ponytail.generateKeysymEvent(keySym, delay=0.15)
     doTypingDelay()
 

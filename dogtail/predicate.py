@@ -153,7 +153,7 @@ class GenericPredicate(Predicate):
     SubtreePredicate subclass that takes various optional search fields
     """
 
-    def __init__(self, name=None, roleName=None, description=None, label=None, debugName=None):
+    def __init__(self, name=None, roleName=None, description=None, label=None, identifier=None, debugName=None):
         if name:
             self.name = TranslatableString(name)
         else:
@@ -166,6 +166,7 @@ class GenericPredicate(Predicate):
             self.label = TranslatableString(label)
         else:
             self.label = None
+        self.identifier = identifier
 
         if debugName:
             self.debugName = debugName
@@ -244,6 +245,8 @@ class GenericPredicate(Predicate):
 
             if self.description:
                 args += " description='%s'" % self.description
+            if self.identifier:
+                args += " identifier='%s'" % self.identifier
         return "child(%s%s)" % (args, makeScriptRecursiveArgument(isRecursive, True))
 
 
@@ -252,15 +255,15 @@ class GenericPredicate(Predicate):
 
         if self.label:
             return makeCamel(self.label) + "Node"
-
-        if self.name:
-            return makeCamel(self.name) + "Node"
-
-        if self.roleName:
-            return makeCamel(self.roleName) + "Node"
-
-        if self.description:
-            return makeCamel(self.description) + "Node"
+        else:
+            if self.name:
+                return makeCamel(self.name) + "Node"
+            if self.roleName:
+                return makeCamel(self.roleName) + "Node"
+            if self.description:
+                return makeCamel(self.description) + "Node"
+            if self.identifier:
+                return makeCamel(self.identifier) + "Node"
 
         return
 

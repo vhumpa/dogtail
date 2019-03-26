@@ -1429,8 +1429,8 @@ class Node(object):
 
         return None
 
-
-    def child(self, name="", roleName="", description="", label="", recursive=True, retry=True, debugName=None, showingOnly=None):
+    # Various wrapper/helper search methods:
+    def child(self, name='', roleName='', description='', label='', identifier='', recursive=True, retry=True, debugName=None, showingOnly=None):
         """
         Finds a child satisying the given criteria.
 
@@ -1438,15 +1438,10 @@ class Node(object):
         if no such child is found, and will eventually raise an exception. It
         also logs the search.
         """
+        return self.findChild(predicate.GenericPredicate(name=name, roleName=roleName, description=description,
+                              label=label, identifier=identifier), recursive=recursive, retry=retry, debugName=debugName, showingOnly=showingOnly)
 
-        debug_log("child(self, name=%s, roleName=%s, description=%s, label=%s, recursive=%s, retry=%s, debugName=%s, showingOnly=%s)" %
-                      (str(name), str(roleName), str(description), str(label), str(recursive), str(retry), str(debugName), str(showingOnly)))
-
-        return self.findChild(predicate.GenericPredicate(name=name, roleName=roleName, description=description, label=label),
-                              recursive=recursive, retry=retry, debugName=debugName, showingOnly=showingOnly)
-
-
-    def isChild(self, name="", roleName="", description="", label="", recursive=True, retry=False, debugName=None, showingOnly=None):
+    def isChild(self, name='', roleName='', description='', label='', identifier='', recursive=True, retry=False, debugName=None, showingOnly=None):
         """
         Determines whether a child satisying the given criteria exists.
 
@@ -1461,9 +1456,10 @@ class Node(object):
                       (str(name), str(roleName), str(description), str(label), str(recursive), str(retry), str(debugName), str(showingOnly)))
 
         try:
-            self.findChild(predicate.GenericPredicate(name=name, roleName=roleName, description=description, label=label),
-                           recursive=recursive, retry=retry, debugName=debugName, showingOnly=showingOnly)
-            return True
+            self.findChild(
+                predicate.GenericPredicate(
+                    name=name, roleName=roleName, description=description, label=label, identifier=identifier),
+                recursive=recursive, retry=retry, debugName=debugName, showingOnly=showingOnly)
         except SearchError:
             return False
 

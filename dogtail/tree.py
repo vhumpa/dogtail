@@ -997,7 +997,7 @@ class Node(object):
         return None
 
     # Various wrapper/helper search methods:
-    def child(self, name='', roleName='', description='', label='', recursive=True, retry=True, debugName=None, showingOnly=None):
+    def child(self, name='', roleName='', description='', label='', identifier='', recursive=True, retry=True, debugName=None, showingOnly=None):
         """
         Finds a child satisying the given criteria.
 
@@ -1006,9 +1006,9 @@ class Node(object):
         also logs the search.
         """
         return self.findChild(predicate.GenericPredicate(name=name, roleName=roleName, description=description,
-                              label=label), recursive=recursive, retry=retry, debugName=debugName, showingOnly=showingOnly)
+                              label=label, identifier=identifier), recursive=recursive, retry=retry, debugName=debugName, showingOnly=showingOnly)
 
-    def isChild(self, name='', roleName='', description='', label='', recursive=True, retry=False, debugName=None, showingOnly=None):
+    def isChild(self, name='', roleName='', description='', label='', identifier='', recursive=True, retry=False, debugName=None, showingOnly=None):
         """
         Determines whether a child satisying the given criteria exists.
 
@@ -1022,7 +1022,7 @@ class Node(object):
         try:
             self.findChild(
                 predicate.GenericPredicate(
-                    name=name, roleName=roleName, description=description, label=label),
+                    name=name, roleName=roleName, description=description, label=label, identifier=identifier),
                 recursive=recursive, retry=retry, debugName=debugName, showingOnly=showingOnly)
         except SearchError:
             found = False

@@ -1464,12 +1464,14 @@ class Node(object):
 
         return None
 
+    # Various wrapper/helper search methods:
     def child(
         self,
         name="",
         roleName="",
         description="",
         label="",
+        identifier="",
         recursive=True,
         retry=True,
         debugName=None,
@@ -1482,24 +1484,13 @@ class Node(object):
         if no such child is found, and will eventually raise an exception. It
         also logs the search.
         """
-
-        debug_log(
-            "child(self, name=%s, roleName=%s, description=%s, label=%s, recursive=%s, retry=%s, debugName=%s, showingOnly=%s)"
-            % (
-                str(name),
-                str(roleName),
-                str(description),
-                str(label),
-                str(recursive),
-                str(retry),
-                str(debugName),
-                str(showingOnly),
-            )
-        )
-
         return self.findChild(
             predicate.GenericPredicate(
-                name=name, roleName=roleName, description=description, label=label
+                name=name,
+                roleName=roleName,
+                description=description,
+                label=label,
+                identifier=identifier,
             ),
             recursive=recursive,
             retry=retry,
@@ -1513,6 +1504,7 @@ class Node(object):
         roleName="",
         description="",
         label="",
+        identifier="",
         recursive=True,
         retry=False,
         debugName=None,
@@ -1545,14 +1537,17 @@ class Node(object):
         try:
             self.findChild(
                 predicate.GenericPredicate(
-                    name=name, roleName=roleName, description=description, label=label
+                    name=name,
+                    roleName=roleName,
+                    description=description,
+                    label=label,
+                    identifier=identifier,
                 ),
                 recursive=recursive,
                 retry=retry,
                 debugName=debugName,
                 showingOnly=showingOnly,
             )
-            return True
         except SearchError:
             return False
 

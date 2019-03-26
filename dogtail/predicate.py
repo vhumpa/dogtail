@@ -209,10 +209,7 @@ class GenericPredicate(Predicate):
                         if self.description != node.description:
                             return False
                     if self.identifier:
-                        if ('id' not in node.get_attributes() or \
-                            self.identifier != node.get_attributes()['id']) and \
-                           ('accessibleId' not in dir(node) or \
-                            self.identifier != node.accessibleId):
+                        if self.identifier != node.get_attributes()['id']:
                             return False
                 except GLib.GError as e:
                     if re.match(r"name :[0-9]+\.[0-9]+ was not provided", e.message):
@@ -264,8 +261,6 @@ class GenericPredicate(Predicate):
                 return makeCamel(self.description) + "Node"
             if self.identifier:
                 return makeCamel(self.identifier) + "Node"
-
-        return
 
 
 class IsNamed(Predicate):

@@ -193,27 +193,33 @@ class GenericPredicate(Predicate):
             if self.label:
                 if node.labeller:
                     return stringMatches(self.label, node.labeller.name)
-                return False
-
-            try:
-                if self.name:
-                    if not stringMatches(self.name, node.name):
-                        return False
-
-                if self.roleName:
-                    if self.roleName != node.roleName:
-                        return False
-
-                if self.description:
-                    if self.description != node.description:
-                        return False
-            except GLib.GError as error:
-                if re.match(r"name :[0-9]+\.[0-9]+ was not provided", error):
-                    logger.log("Dogtail: warning: omiting possibly broken at-spi application record")
+                else:
                     return False
-
-                raise error
-            return True
+            else:
+                # Ensure the node matches any criteria that were set:
+                try:
+                    if self.name:
+                        if not stringMatches(self.name, node.name):
+                            return False
+                    if self.roleName:
+                        if self.roleName != node.roleName:
+                            return False
+                    if self.description:
+                        if self.description != node.description:
+                            return False
+                    if self.identifier:
+                        if ('id' not in node.get_attributes() or \
+                            self.identifier != node.get_attributes()['id']) and \
+                           ('accessibleId' not in dir(node) or \
+                            self.identifier != node.accessibleId):
+                            return False
+                except GLib.GError as e:
+                    if re.match(r"name :[0-9]+\.[0-9]+ was not provided", e.message):
+                        logger.log("Dogtail: warning: omiting possibly broken at-spi application record")
+                        return False
+                    else:
+                        raise e
+                return True
         return satisfiedByNode
 
 

@@ -209,7 +209,10 @@ class GenericPredicate(Predicate):
                         if self.description != node.description:
                             return False
                     if self.identifier:
-                        if self.identifier != node.get_attributes()['id']:
+                        if ('id' not in node.get_attributes() or \
+                            self.identifier != node.get_attributes()['id']) and \
+                           ('accessibleId' not in dir(node) or \
+                            self.identifier != node.accessibleId):
                             return False
                 except GLib.GError as e:
                     if re.match(r"name :[0-9]+\.[0-9]+ was not provided", e.message):

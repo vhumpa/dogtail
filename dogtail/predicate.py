@@ -142,7 +142,7 @@ class GenericPredicate(Predicate):
     SubtreePredicate subclass that takes various optional search fields
     """
 
-    def __init__(self, name=None, roleName=None, description=None, label=None, debugName=None):
+    def __init__(self, name=None, roleName=None, description=None, label=None, identifier=None, debugName=None):
         if name:
             self.name = TranslatableString(name)
         else:
@@ -153,6 +153,7 @@ class GenericPredicate(Predicate):
             self.label = TranslatableString(label)
         else:
             self.label = None
+        self.identifier = identifier
 
         if debugName:
             self.debugName = debugName
@@ -194,6 +195,9 @@ class GenericPredicate(Predicate):
                     if self.description:
                         if self.description != node.description:
                             return False
+                    if self.identifier:
+                        if self.identifier != node.get_attributes()['id']:
+                            return False
                 except GLib.GError as e:
                     if re.match(r"name :[0-9]+\.[0-9]+ was not provided", e.message):
                         logger.log("Dogtail: warning: omiting possibly broken at-spi application record")
@@ -218,6 +222,8 @@ class GenericPredicate(Predicate):
                 args += " roleName='%s'" % self.roleName
             if self.description:
                 args += " description='%s'" % self.description
+            if self.identifier:
+                args += " identifier='%s'" % self.identifier
         return "child(%s%s)" % (args, makeScriptRecursiveArgument(isRecursive, True))
 
     def makeScriptVariableName(self):
@@ -230,6 +236,8 @@ class GenericPredicate(Predicate):
                 return makeCamel(self.roleName) + "Node"
             if self.description:
                 return makeCamel(self.description) + "Node"
+            if self.identifier:
+                return makeCamel(self.identifier) + "Node"
 
 
 class IsNamed(Predicate):

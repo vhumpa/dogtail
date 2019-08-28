@@ -11,19 +11,22 @@ class GtkDemoTest(unittest.TestCase):
 
     def setUp(self):
         import dogtail.config
+
         dogtail.config.config.logDebugToStdOut = True
         dogtail.config.config.logDebugToFile = False
         import dogtail.utils
-        self.pid = dogtail.utils.run('gtk3-demo')
-        self.app = dogtail.tree.root.application('gtk3-demo')
+
+        self.pid = dogtail.utils.run("gtk3-demo")
+        self.app = dogtail.tree.root.application("gtk3-demo")
 
     def tearDown(self):
         import os
         import signal
         import time
+
         os.kill(self.pid, signal.SIGKILL)
-        os.system('killall gtk3-demo-application > /dev/null 2>&1')
-        os.system('killall gtk3-demo > /dev/null 2>&1')
+        os.system("killall gtk3-demo-application > /dev/null 2>&1")
+        os.system("killall gtk3-demo-appli > /dev/null 2>&1")
         # Sleep just enough to let the app actually die.
         # AT-SPI doesn't like being hammered too fast.
         time.sleep(0.5)
@@ -33,7 +36,7 @@ class GtkDemoTest(unittest.TestCase):
         Click on the named demo within the gtk3-demo app.
         """
         tree = self.app.child(roleName="tree table")
-        tree.child(demoName, retry=retry).doActionNamed('activate')
+        tree.child(demoName, retry=retry).doActionNamed("activate")
 
 
 def trap_stdout(function, args=None):

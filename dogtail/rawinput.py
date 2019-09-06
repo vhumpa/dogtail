@@ -86,7 +86,7 @@ def ponytail_check_connection(window_id=None, input_source="mouse"):
         ponytail.connectMonitor()
 
     elif input_source == "keyboard" and ponytail.connected is not None:
-        if window_id == '' and isinstance(ponytail.connected, int):
+        if window_id == "" and isinstance(ponytail.connected, int):
             debug_message(message="Keyboard event, monitor request, forcing monitor.")
             ponytail.disconnect()
             sleep(1)
@@ -180,7 +180,7 @@ def point(x, y, check=True, window_id=None):
     """
     Synthesize a button point at (x,y)
     """
-    
+
     (x, y) = update_coords((x, y))
 
     if check:
@@ -348,7 +348,7 @@ def relativeMotion(x, y, mouseDelay=None):
     debug_message(message="Mouse relative motion of (%s,%s)" % (x, y))
 
     if SESSION_TYPE == "wayland":
-        debug_message(message="Relative motion unavailable under wayland.")
+        debug_message(message="Relative motion unavailable under wayland not available.")
         return
 
     registry.generateMouseEvent(x, y, name="rel")
@@ -408,10 +408,10 @@ def dragWithTrajectoryGlobal(fromXY, toXY, button=1):
     Having 'trajectory' appears to be necessary on Wayland for any drags. Use 'dragWithTrajectory'
     or just 'drag' on X sessions like in pre-wayland version of dogtail.
     """
+    
+    debug_message(message="Global Mouse button '%s' drag from %s to %s" % (button, fromXY, toXY))
 
     if SESSION_TYPE == "wayland":
-        debug_message(message="Global Mouse button '%s' drag from %s to %s" % (button, fromXY, toXY))
-
         (x, y) = fromXY
         ponytail_check_connection(window_id="")
 
@@ -517,7 +517,7 @@ def keyNameToKeySym(keyName):
             keySym = uniCharToKeySym(keyName)
         except Exception:  # not even valid utf-8 char
             try:  # Last attempt run at a keyName ('Meta_L', 'Dash' ...)
-                keySym = getattr(Gdk, 'KEY_' + keyName)
+                keySym = getattr(Gdk, "KEY_" + keyName)
             except AttributeError:
                 raise KeyError(keyName)
     return keySym

@@ -296,6 +296,8 @@ def parse():
                         help="""Do not kill session when script exits.""")
     parser.add_argument('--disable-a11y', action='store_true',
                         help="""Disable accessibility technologies on script(not session) exit.""")
+    parser.add_argument('--debug', action='store_true',
+                        help="""Set debug on on all dogtail actions.""")
     return parser.parse_args()
 
 
@@ -341,6 +343,10 @@ def main():
         os.environ = getSessionEnvironment(dm.session_binary)
         if term is not None:
             os.environ['TERM'] = term
+
+        if args.debug:
+            os.environ['DOGTAIL_DEBUG'] = "true"
+
     except Exception:
         print('dogtail-run-headless-next: Could not get the environment from %s process' % (dm.session_binary))
         dm.stop()

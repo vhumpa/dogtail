@@ -9,24 +9,25 @@ from time import sleep
 import os
 
 import gi
-gi.require_version('Gtk', '3.0')
-gi.require_version('Gdk', '3.0')
+gi.require_version("Gtk", "3.0")
+gi.require_version("Gdk", "3.0")
 from gi.repository import Gdk
 
-SESSION_TYPE = 'x11'
-if 'XDG_SESSION_TYPE' in os.environ and 'wayland' in os.environ['XDG_SESSION_TYPE']:
-    os.system('gsettings set org.gnome.shell introspect true')
-    os.system('gsettings set org.gnome.desktop.peripherals.keyboard delay 2000')
-    SESSION_TYPE = 'wayland'
+SESSION_TYPE = "x11"
+if "XDG_SESSION_TYPE" in os.environ and "wayland" in os.environ["XDG_SESSION_TYPE"]:
+    os.system("gsettings set org.gnome.shell introspect true")
+    os.system("gsettings set org.gnome.desktop.peripherals.keyboard delay 2000")
+    SESSION_TYPE = "wayland"
 
 ponytail = None
-if SESSION_TYPE == 'wayland':
+if SESSION_TYPE == "wayland":
     from ponytail.ponytail import Ponytail
     ponytail = Ponytail()
     ponytail.disconnect()
     sleep(1) # needed now to overcome fast reconnect issue in ponytail
 
 DEBUG = os.environ["DOGTAIL_DEBUG"] == "true"
+
 
 """
 Handles raw input using AT-SPI event generation.
@@ -37,6 +38,7 @@ __author__ = """
 David Malcolm <dmalcolm@redhat.com>,
 Zack Cerza <zcerza@redhat.com>
 """
+
 
 def debug_message(message):
     if DEBUG:

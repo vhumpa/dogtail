@@ -209,7 +209,14 @@ class ResultsLogger(Logger):
 
         Logger.log(self, self.stamper.entryStamp() + "      " + entry, force=True)
 
+
 debugLogger = Logger('debug', config.logDebugToFile)
+
+DEBUG = os.environ["DOGTAIL_DEBUG"] == "true"
+
+def debug_message(message):
+    if DEBUG:
+        debugLogger.log(message)
 
 
 def exceptionHook(exc, value, tb):  # pragma: no cover

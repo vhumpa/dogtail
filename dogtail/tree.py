@@ -5,7 +5,7 @@ from dogtail import path
 from dogtail import predicate
 from dogtail import rawinput
 from dogtail.rawinput import ponytail
-from dogtail.logging import debugLogger as logger
+from dogtail.logging import debug_message
 from dogtail.utils import doDelay, Blinker, Lock
 from dogtail.rawinput import SESSION_TYPE, ponytail_check_is_xwayland
 
@@ -16,13 +16,8 @@ from gi.repository import GLib
 import os
 import sys
 
-try:
-    import pyatspi
-    import Accessibility
-except ImportError:  # pragma: no cover
-    raise ImportError("Error importing the AT-SPI bindings")
-
-"""Makes some sense of the AT-SPI API
+"""
+Makes some sense of the AT-SPI API
 
 The tree API handles various things for you:
     - fixes most timing issues
@@ -78,40 +73,55 @@ correctly on their buttons (e.g. Epiphany on form buttons in a web page). The
 current workaround for this is to set config.ensureSensitivity=False, which
 disables the sensitivity testing.
 """
+
 __author__ = """Zack Cerza <zcerza@redhat.com>,
-David Malcolm <dmalcolm@redhat.com>
+                David Malcolm <dmalcolm@redhat.com>
 """
+
+try:
+    import pyatspi
+    import Accessibility
+except ImportError:
+    raise ImportError("Error importing the AT-SPI bindings")
+
 
 if config.checkForA11y:
     from dogtail.utils import checkForA11y
     checkForA11y()
 
+
 # We optionally import the bindings for libWnck.
 try:
-    gi.require_version('Wnck', '3.0')
+    gi.require_version("Wnck", "3.0")
     from gi.repository import Wnck
-    gotWnck = True  # pragma: no cover
+    gotWnck = True
 except (ImportError, ValueError):
     # Skip this warning, since the functionality is almost entirely nonworking anyway.
     # print "Warning: Dogtail could not import the Python bindings for
     # libwnck. Window-manager manipulation will not be available."
     gotWnck = False
 
+
 haveWarnedAboutChildrenLimit = False
 
 
 class SearchError(Exception):
-    pass
+    """
+    The widget was not found.
+    """
 
 
 class NotSensitiveError(Exception):
     """
     The widget is not sensitive.
     """
-    message = "Cannot %s %s. It is not sensitive."
 
     def __init__(self, action):
+        debug_message(message="Not Sensitive Error Exception")
+
+        self.message = "Cannot %s %s. It is not sensitive."
         self.action = action
+
 
     def __str__(self):
         return self.message % (self.action.name, self.action.node.getLogString())
@@ -121,11 +131,14 @@ class ActionNotSupported(Exception):
     """
     The widget does not support the requested action.
     """
-    message = "Cannot do '%s' action on %s"
 
     def __init__(self, actionName, node):
+        debug_message(message="Action Not Supported Exception")
+
+        self.message = "Cannot do '%s' action on %s"
         self.actionName = actionName
         self.node = node
+
 
     def __str__(self):
         return self.message % (self.actionName, self.node.getLogString())
@@ -133,56 +146,65 @@ class ActionNotSupported(Exception):
 
 class Action(object):
     """
-    Class representing an action that can be performed on a specific node
+    Class representing an action that can be performed on a specific node.
     """
-    # Valid types of actions we know about. Feel free to add any you see.
-    types = ('click',
-             'press',
-             'release',
-             'activate',
-             'jump',
-             'check',
-             'dock',
-             'undock',
-             'open',
-             'menu')
 
     def __init__(self, node, action, index):
+        self.types = ("click", "press", "release", "activate", \
+            "jump", "check", "dock", "undock", "open", "menu")
+            
+        global haveBeenWarnedAboutActionTypes
+        if not haveBeenWarnedAboutActionTypes:
+            debug_message(message="""
+                Valid types of actions we know about.\n'%s'.\n\
+                Feel free to add any you see.
+            """ % ",".join(self.types))
+        haveBeenWarnedAboutActionTypes = True
+
         self.node = node
         self.__action = action
         self.__index = index
+
 
     @property
     def name(self):
         return self.__action.getName(self.__index)
 
+
     @property
     def description(self):
         return self.__action.getDescription(self.__index)
+
 
     @property
     def keyBinding(self):
         return self.__action.getKeyBinding(self.__index)
 
+
     def __str__(self):
-        return "[action | %s | %s ]" % \
-            (self.name, self.keyBinding)
+        return "[action | %s | %s ]" % (self.name, self.keyBinding)
+
 
     def do(self):
         """
         Performs the given tree.Action, with appropriate delays and logging.
         """
-        logger.log(str("%s on %s") % (str(self.name), self.node.getLogString()))
+
+        debug_message(message="Performing action '%s' on '%s'" % \
+            (str(self.name), self.node.getLogString()))
+
         if not self.node.sensitive:
             if config.ensureSensitivity:
                 raise NotSensitiveError(self)
             else:
-                nSE = NotSensitiveError(self)
-                logger.log("Warning: " + str(nSE))
+                debug_message(message="Warning " + str(NotSensitiveError(self)))
+
         if config.blinkOnActions:
             self.node.blink()
+
         result = self.__action.doAction(self.__index)
         doDelay(config.actionDelay)
+
         return result
 
 
@@ -195,59 +217,79 @@ class Node(object):
     """
 
     def __setupUserData(self):
+        """
+        Setup user data dictionary.
+        """
         try:
             len(self.user_data)
         except (AttributeError, TypeError):
             self.user_data = {}
 
+
     @property
     def debugName(self):
-        """debug name assigned during search operations"""
+        """
+        Debug name assigned during search operations.
+        """
+
         self.__setupUserData()
-        return self.user_data.get('debugName', None)
+        return self.user_data.get("debugName", None)
+
 
     @debugName.setter
     def debugName(self, debugName):
-        self.__setupUserData()
-        self.user_data['debugName'] = debugName
+        """
+        Debug name setter.
+        """
 
-    #
-    # Accessible
-    #
+        self.__setupUserData()
+        self.user_data["debugName"] = debugName
+
+
     @property
     def dead(self):
         """
         Is the node dead (defunct)?
         """
+
+        debug_message(message="Checking if node is dead.")
+
         try:
-            if self.roleName == 'invalid':
+            if self.roleName == "invalid":
                 return True
-            self.role
-            self.name
+            assert self.role is not None
+            assert self.name is not None
             if len(self) > 0:
-                self[0]
-        except:
+                assert self.children[0] is not None
+        except Exception:
             return True
         return False
+
 
     @property
     def children(self):
         """
-        A list of this Accessible's children
+        A list of this Accessible's children.
         """
-        if self.parent and self.parent.roleName == 'hyper link':
-            print(self.parent.role)
+
+        debug_message(message="Node Children handling.")
+
+        if self.parent and self.parent.roleName == "hyper link":
+            debug_message(message=self.parent.role)
             return []
-        children = []
+
+        children_list = []
         childCount = self.childCount
         if childCount > config.childrenLimit:
             global haveWarnedAboutChildrenLimit
             if not haveWarnedAboutChildrenLimit:
-                logger.log("Only returning %s children. You may change "
-                           "config.childrenLimit if you wish. This message will only"
-                           " be printed once." % str(config.childrenLimit))
+                debug_message(message="""
+                    Only returning '%s' children. You may change config.childrenLimit if you wish. 
+                    This message will only be printed once.
+                """ % str(config.childrenLimit))
                 haveWarnedAboutChildrenLimit = True
                 childCount = config.childrenLimit
+
         for i in range(childCount):
             # Workaround for GNOME bug #465103
             # also solution for GNOME bug #321273
@@ -255,13 +297,16 @@ class Node(object):
                 child = self[i]
             except LookupError:
                 child = None
-            if child:
-                children.append(child)
 
-        invalidChildren = childCount - len(children)
+            if child:
+                children_list.append(child)
+
+        invalidChildren = childCount - len(children_list)
         if invalidChildren and config.debugSearching:
-            logger.log(str("Skipped %s invalid children of %s") %
-                       (invalidChildren, str(self)))
+            debug_message(message="""
+                Skipped '%s' children of '%s' as they are over config.childrenLimit
+            """ % (invalidChildren, str(self)))
+
         try:
             ht = self.queryHypertext()
             for li in range(ht.getNLinks()):
@@ -280,129 +325,163 @@ class Node(object):
         except (NotImplementedError, AttributeError):
             pass
 
-        return children
+        return children_list
+
 
     roleName = property(Accessibility.Accessible.getRoleName)
-
     role = property(Accessibility.Accessible.getRole)
-
+    name = property(Accessibility.Accessible.name)
+    parent = property(Accessibility.Accessible.parent)
     indexInParent = property(Accessibility.Accessible.getIndexInParent)
-
     __window_id = None
+
 
     @property
     def window_id(self):
-        if SESSION_TYPE == 'x11':
+        """
+        Return window id of a node.
+        """
+
+        debug_message(message="Return window id.")
+
+        if SESSION_TYPE == "x11":
             return None
+
         if self.__window_id is None:
-            print('window id event')
-            # remove the non-titled windows
+            debug_message(message="Window id event.")
+
             window_list = ponytail.window_list
             if len(window_list) == 0:
                 doDelay(config.actionDelay)
                 window_list = ponytail.window_list
-                # if len(window_list) == 0:
-                #     raise AttributeError("Cannot get window ID for Node. Window list is empty even after 1s retry!")
+
             for window in window_list:
-                if 'title' not in window.keys():
-                    window['title'] = ''
+                if "title" not in window.keys():
+                    window["title"] = ""
+
             node = self
             parent_list = [node]
             while node.parent is not None:
                 parent_list.append(node.parent)
                 node = node.parent
+
             for ancestor in parent_list:
-                #import ipdb; ipdb.set_trace()
                 if ancestor.parent is None:
-                    self.__window_id = [x['id'] for x in window_list if bool(x['has-focus']) is True][0]
-                    return [x['id'] for x in window_list if bool(x['has-focus']) is True][0]
-                elif ancestor.parent.roleName == 'application' and ancestor.parent.name == 'gnome-shell':
-                    return ''
-                elif ancestor.parent.roleName == 'application' and ancestor.roleName == 'window' and ancestor.name == '':
-                    self.__window_id = [x['id'] for x in window_list if bool(x['has-focus']) is True][0]
-                    return [x['id'] for x in window_list if bool(x['has-focus']) is True][0] # context menus
-                elif ancestor.parent.roleName == 'application' and ancestor.name in [x['title'] for x in window_list]:
-                    self.__window_id = [x['id'] for x in window_list if x['title'] == ancestor.name][0]
-                    return [x['id'] for x in window_list if x['title'] == ancestor.name][0]
-                elif ancestor.parent.roleName == 'application':
-                    self.__window_id = [x['id'] for x in window_list if bool(x['has-focus']) is True][0]
-                    return [x['id'] for x in window_list if bool(x['has-focus']) is True][0]
+                    self.__window_id = [x["id"] for x in window_list if bool(x["has-focus"]) is True][0]
+                    return [x["id"] for x in window_list if bool(x["has-focus"]) is True][0]
+                
+                elif ancestor.parent.roleName == "application" and ancestor.parent.name == "gnome-shell":
+                    return ""
+
+                elif ancestor.parent.roleName == "application" and ancestor.roleName == "window" and ancestor.name == "":
+                    self.__window_id = [x["id"] for x in window_list if bool(x["has-focus"]) is True][0]
+                    return [x["id"] for x in window_list if bool(x["has-focus"]) is True][0] # context menus
+                
+                elif ancestor.parent.roleName == "application" and ancestor.name in [x["title"] for x in window_list]:
+                    self.__window_id = [x["id"] for x in window_list if x["title"] == ancestor.name][0]
+                    return [x["id"] for x in window_list if x["title"] == ancestor.name][0]
+                
+                elif ancestor.parent.roleName == "application":
+                    self.__window_id = [x["id"] for x in window_list if bool(x["has-focus"]) is True][0]
+                    return [x["id"] for x in window_list if bool(x["has-focus"]) is True][0]
+        
         else:
             return self.__window_id
 
+
     @property
     def window_has_focus(self):
-        if SESSION_TYPE == 'wayland':
-            window_list = ponytail.window_list
+        """
+        Check if window is focused.
+        """
+
+        debug_message(message="Window has focus.")
+
+        if SESSION_TYPE == "wayland":
             window_id = self.window_id
+
+            window_list = ponytail.window_list
             for window in window_list:
-                if window['id'] == window_id and bool(window['has-focus']) is True:
+                if window["id"] == window_id and bool(window["has-focus"]) is True:
                     return True
+
             return False
+
         else:
             raise NotImplementedError
 
-    #
-    # Action
-    #
 
-    # Needed to be renamed from doAction due to conflicts
-    # with 'Accessibility.Accessible.doAction' in gtk3 branch
     def doActionNamed(self, name):
         """
         Perform the action with the specified name. For a list of actions
         supported by this instance, check the 'actions' property.
         """
+
+        debug_message(message="Do Action Named: " + name)
+
         actions = self.actions
         if name in actions:
             return actions[name].do()
+
         raise ActionNotSupported(name, self)
+
 
     @property
     def actions(self):
         """
         A dictionary of supported action names as keys, with Action objects as
         values. Common action names include:
-
-        'click' 'press' 'release' 'activate' 'jump' 'check' 'dock' 'undock'
-        'open' 'menu'
+            'click' 'press' 'release' 'activate' 'jump' 
+            'check' 'dock' 'undock' 'open' 'menu'
         """
+
+        debug_message(message="Return all actions available.")
+
         actions = {}
+
         try:
-            action = self.queryAction()
-            for i in range(action.nActions):
-                a = Action(self, action, i)
-                actions[action.getName(i)] = a
+            action_query = self.queryAction()
+            for index in range(action_query.nActions):
+                action_object = Action(self, action_query, index)
+                actions[action_query.getName(index)] = action_object
         finally:
+            debug_message(message="If actions are empty there could have been an exception.")
             return actions
+
 
     @property
     def combovalue(self):
         """
         The value (as a string) currently selected in the combo box.
         """
+
+        debug_message(message="Return string value currently selected in the combo box.")
+
         return self.name
+
 
     @combovalue.setter
     def combovalue(self, value):
-        logger.log(str("Setting combobox %s to '%s'") % (self.getLogString(), str(value)))
-        self.childNamed(childName=value).doActionNamed('click')
+        debug_message(message="Setting combo box '%s' to value '%s." % \
+            (self.getLogString(), str(value)))
+
+        self.childNamed(childName=value).doActionNamed("click")
         doDelay()
 
-    #
-    # Hypertext and Hyperlink
-    #
 
     @property
     def URI(self):
+        """
+        The value of user data linkAnchor.
+        """
+
+        debug_message(message="Return string value of user data linkAnchor.")
+
         try:
-            return self.user_data['linkAnchor'].URI
+            return self.user_data["linkAnchor"].URI
         except (KeyError, AttributeError):
             raise NotImplementedError
 
-    #
-    # Text and EditableText
-    #
 
     @property
     def text(self):
@@ -417,81 +496,120 @@ class Node(object):
         property instead.
         """
 
+        debug_message(message="Return string value of text attribute.")
+
         try:
             return self.queryText().getText(0, -1)
         except NotImplementedError:
             return None
 
+
     @text.setter
     def text(self, text):
         try:
             if config.debugSearching:
-                msg = "Setting text of %s to %s"
-                # Let's not get too crazy if 'text' is really large...
-                # FIXME: Sometimes the next line screws up Unicode strings.
+                setter_message = "Setting text of %s to '%s'"
+
+                debug_message(message="Maximum length is set at 140, cutting the text after.")
                 if len(text) > 140:
                     txt = text[:134] + " [...]"
                 else:
                     txt = text
-                logger.log(str(msg) % (self.getLogString(), str("'%s'") % str(txt)))
+
+                debug_message(message=str(setter_message) % (self.getLogString(), str(txt)))
+
             self.queryEditableText().setTextContents(text)
         except NotImplementedError:
             raise AttributeError("can't set attribute")
+
 
     @property
     def caretOffset(self):
         """
         For instances with an AccessibleText interface, the caret offset as an integer.
         """
+
+        debug_message(message="Return caret offset of an integer.")
+
         return self.queryText().caretOffset
+
 
     @caretOffset.setter
     def caretOffset(self, offset):
+        """
+        Caret offset setter.
+        """
+
+        debug_message(message="Caret offset setter.")
+
         return self.queryText().setCaretOffset(offset)
 
-    #
-    # Component
-    #
 
     @property
     def position(self):
         """
         A tuple containing the position of the Accessible: (x, y)
         """
+
+        debug_message(message="Return position of the Accessible.")
+
         return self.queryComponent().getPosition(pyatspi.DESKTOP_COORDS)
+
 
     @property
     def size(self):
         """
         A tuple containing the size of the Accessible: (w, h)
         """
-        if SESSION_TYPE == 'wayland':
-            if self.roleName == 'window' or self.roleName == 'dialog' or self.roleName == 'frame':
+
+        debug_message(message="Return size of the Accessible.")
+
+        if SESSION_TYPE == "wayland":
+            if self.roleName == "window" or self.roleName == "dialog" or self.roleName == "frame":
                 window_list = ponytail.window_list
                 window_id = self.window_id
                 for window in window_list:
-                    if window['id'] == window_id:
-                        return (int(window['width']), int(window['height']))
+                    if window["id"] == window_id:
+                        return (int(window["width"]), int(window["height"]))
+
         return self.queryComponent().getSize()
+
 
     @property
     def extents(self):
         """
         A tuple containing the location and size of the Accessible: (x, y, w, h)
         """
+
+        debug_message(message="Return a tuple containing position and size of the Accessible.")
+
         try:
             ex = self.queryComponent().getExtents(pyatspi.DESKTOP_COORDS)
             return (ex.x, ex.y, ex.width, ex.height)
         except NotImplementedError:
             return None
 
+
     def contains(self, x, y):
+        """
+        Can tell if and x and y coordinates are inside a desktop coordinates.
+        """
+
+        debug_message(message="Return a bool if the x and y are inside a desktop coords.")
+
         try:
             return self.queryComponent().contains(x, y, pyatspi.DESKTOP_COORDS)
         except NotImplementedError:
             return False
 
+
     def getChildAtPoint(self, x, y):
+        """
+        Get a child in coordinates x, y.
+        """
+
+        debug_message(message="Getting a child in x, y coordinates.")
+
         node = self
         while True:
             try:
@@ -502,10 +620,12 @@ class Node(object):
                     break
             except NotImplementedError:
                 break
+
         if node and node.contains(x, y):
             return node
         else:
             return None
+
 
     def grabFocus(self):
         """
@@ -513,19 +633,25 @@ class Node(object):
         Affected by rhbz 1656447 on Wayland! We do different actions based on type of the node
         to get it focused there as workaround. For some we can do nothing (push button)
         """
-        # print(self.window_id)
-        # print(self.window_has_focus)
-        if SESSION_TYPE == 'x11' or ponytail_check_is_xwayland(self.window_id) or self.window_has_focus:
+
+        debug_message(message="Grab focus of the Accessible object.")
+
+        if SESSION_TYPE == "x11" or ponytail_check_is_xwayland(self.window_id) or self.window_has_focus:
             return self.queryComponent().grabFocus()
+
         else:
-            if 'toggle' in self.roleName or 'check box' in self.roleName:
+            if "toggle" in self.roleName or "check box" in self.roleName:
                 self.doubleClick()
-            elif 'text' in self.roleName or 'table cell' in self.roleName:
+
+            elif "text" in self.roleName or "table cell" in self.roleName:
                 self.click()
-            elif 'menu item' in self.roleName and self.position[0] > 0:
+
+            elif "menu item" in self.roleName and self.position[0] > 0:
                 self.select()
-            elif 'menu item' in self.roleName and self.findAncestor(predicate.GenericPredicate(roleName='combo box')):
-                self.doActionNamed('click')
+
+            elif "menu item" in self.roleName and self.findAncestor(predicate.GenericPredicate(roleName="combo box")):
+                self.doActionNamed("click")
+
             else:
                 pass
 
@@ -537,68 +663,89 @@ class Node(object):
             - 2 is middle,
             - 3 is right.
         """
-        logger.log(str("Clicking on %s") % self.getLogString())
+
         clickX = self.position[0] + self.size[0] / 2
         clickY = self.position[1] + self.size[1] / 2
-        if config.debugSearching:
-            logger.log(str("raw click on %s %s at (%s,%s)") %
-                       (str(self.name), self.getLogString(), str(clickX), str(clickY)))
-        if ('menu item' in self.roleName or self.roleName == 'menu') and self.parent.roleName != 'menu bar' \
-        and 'click' in self.actions:
+
+        debug_message(message="""
+            Clicking on a11y named '%s' on '%s' with coordinates '(%s, %s)'
+        """ % (str(self.name), self.getLogString(), str(clickX), str(clickY)))
+
+        if ("menu item" in self.roleName or self.roleName == "menu") and \
+                self.parent.roleName != "menu bar" and \
+                "click" in self.actions:
             self.select()
+
             doDelay(config.typingDelay)
-            # if self.parent.roleName != 'menu bar':
             window_id = None
-            if self.name.lower() in ['quit', 'exit'] or 'close' in self.name.lower(): # when window exits in the middle of pressKey and cant release...
-                window_id = ''
-            rawinput.pressKey('enter', window_id)
+            if self.name.lower() in ["quit", "exit"] or "close" in self.name.lower():
+                window_id = ""
+
+            rawinput.pressKey("enter", window_id)
             doDelay(config.typingDelay)
+
         else:
             rawinput.click(clickX, clickY, button, window_id=self.window_id)
+
 
     def doubleClick(self, button=1):
         """
         Generates a raw mouse double-click event, using the specified button.
         """
+
         clickX = self.position[0] + self.size[0] / 2
         clickY = self.position[1] + self.size[1] / 2
-        if config.debugSearching:
-            logger.log(str("raw click on %s %s at (%s,%s)") %
-                       (str(self.name), self.getLogString(), str(clickX), str(clickY)))
+
+        debug_message(message="""
+            Double click on a11y named '%s' '%s' with coordinates '(%s, %s)'
+        """ % (str(self.name), self.getLogString(), str(clickX), str(clickY)))
+
         rawinput.doubleClick(clickX, clickY, button, window_id=self.window_id)
+
 
     def point(self, mouseDelay=None):
         """
         Move mouse cursor to the center of the widget.
         """
+
         pointX = self.position[0] + self.size[0] / 2
         pointY = self.position[1] + self.size[1] / 2
-        logger.log(str("Pointing on %s %s at (%s,%s)") %
-                   (str(self.name), self.getLogString(), str(pointX), str(pointY)))
-        if 'menu item' in self.roleName or self.roleName == 'menu':
-            self.select() # Local coords are OFF under wayland for menu/context menu 'windows'
+
+        debug_message(message="""
+            Pointing at a11y named '%s' '%s' with coordinates '(%s, %s)'
+        """ % (str(self.name), self.getLogString(), str(clickX), str(clickY)))
+
+        if "menu item" in self.roleName or self.roleName == "menu":
+            debug_message(message="Local coords are OFF under \
+                wayland for menu/context menu 'windows'.")
+            self.select()
         else:
             rawinput.point(pointX, pointY, window_id=self.window_id)
 
-    #
-    # RelationSet
-    #
+
     @property
     def labeler(self):
         """
         'labeller' (read-only list of Node instances):
         The node(s) that is/are a label for this node. Generated from 'relations'.
         """
+
+        debug_message(message="Return node(s) that is/are label for this node.")
+
         relationSet = self.getRelationSet()
         for relation in relationSet:
             if relation.getRelationType() == pyatspi.RELATION_LABELLED_BY:
                 if relation.getNTargets() == 1:
                     return relation.getTarget(0)
+
                 targets = []
                 for i in range(relation.getNTargets()):
                     targets.append(relation.getTarget(i))
+
                 return targets
+
     labeller = labeler
+
 
     @property
     def labelee(self):
@@ -606,61 +753,90 @@ class Node(object):
         'labellee' (read-only list of Node instances):
         The node(s) that this node is a label for. Generated from 'relations'.
         """
+
+        debug_message(message="Return node(s) that this node is label for.")
+
         relationSet = self.getRelationSet()
         for relation in relationSet:
             if relation.getRelationType() == pyatspi.RELATION_LABEL_FOR:
                 if relation.getNTargets() == 1:
                     return relation.getTarget(0)
+
                 targets = []
                 for i in range(relation.getNTargets()):
                     targets.append(relation.getTarget(i))
+
                 return targets
+
+
     labellee = labelee
 
-    #
-    # StateSet
-    #
+
     @property
     def sensitive(self):
         """
         Is the Accessible sensitive (i.e. not greyed out)?
         """
+
+        debug_message(message="Is the Accessible sensitive (i.e. not greyed out)?")
+
         return self.getState().contains(pyatspi.STATE_SENSITIVE)
+
 
     @property
     def showing(self):
         """
-        Is the Accessible really showing (rendered and visible) on the screen?
+        Is the Accessible showing (rendered and visible) on the screen?
         """
+
+        debug_message(message="Is the Accessible showing (rendered and visible) on the screen?")
+
         return self.getState().contains(pyatspi.STATE_SHOWING)
+
 
     @property
     def focusable(self):
         """
         Is the Accessible capable of having keyboard focus?
         """
+
+        debug_message(message="Is the Accessible capable of having keyboard focus?")
+
         return self.getState().contains(pyatspi.STATE_FOCUSABLE)
+
 
     @property
     def focused(self):
         """
         Does the Accessible have keyboard focus?
         """
+
+        debug_message(message="Does the Accessible have keyboard focus?")
+
         return self.getState().contains(pyatspi.STATE_FOCUSED)
+
 
     @property
     def checked(self):
         """
         Is the Accessible a checked checkbox?
         """
+
+        debug_message(message="Is the Accessible a checked checkbox?")
+
         return self.getState().contains(pyatspi.STATE_CHECKED)
+
 
     @property
     def isChecked(self):
         """
         Is the Accessible a checked checkbox? Compatibility property, same as Node.checked.
         """
+
+        debug_message(message="Compatibility property, same as Node.checked.")
+
         return self.checked
+
 
     @property
     def visible(self):
@@ -669,188 +845,257 @@ class Node(object):
         'visible' is supposed to be shown and doesn't need to be actually
         rendered. On the other hand, a widget with unset attribute 'visible'
         """
+
+        debug_message(message="Is the Accessible set to be visible?")
+
         return self.getState().contains(pyatspi.STATE_VISIBLE)
 
-    #
-    # Selection
-    #
 
     def selectAll(self):
         """
         Selects all children.
         """
+
+        debug_message(message="Selects all children.")
+
         result = self.querySelection().selectAll()
         doDelay()
         return result
+
 
     def deselectAll(self):
         """
         Deselects all selected children.
         """
+
+        debug_message(message="Deselects all selected children.")
+
         result = self.querySelection().clearSelection()
         doDelay()
         return result
+
 
     def select(self):
         """
         Selects the Accessible.
         """
+
+        debug_message(message="Selects the Accessible.")
+
         try:
             parent = self.parent
         except AttributeError:
             raise NotImplementedError
+
         result = parent.querySelection().selectChild(self.indexInParent)
         doDelay()
         return result
+
 
     def deselect(self):
         """
         Deselects the Accessible.
         """
+
+        debug_message(message="Deselects the Accessible.")
+
         try:
             parent = self.parent
         except AttributeError:
             raise NotImplementedError
+
         result = parent.querySelection().deselectChild(self.indexInParent)
         doDelay()
         return result
+
 
     @property
     def isSelected(self):
         """
         Is the Accessible selected? Compatibility property, same as Node.selected.
         """
+
+        debug_message(message="Compatibility property, same as Node.selected.")
+
         try:
             parent = self.parent
         except AttributeError:
             raise NotImplementedError
         return parent.querySelection().isChildSelected(self.indexInParent)
 
+
     @property
     def selected(self):
         """
         Is the Accessible selected?
         """
+
+        debug_message(message="Is the Accessible selected?")
+
         return self.isSelected
+
 
     @property
     def selectedChildren(self):
         """
         Returns a list of children that are selected.
         """
-        # TODO: hideChildren for Hyperlinks?
+
+        debug_message(message="Returns a list of children that are selected.")
+
         selection = self.querySelection()
+
         selectedChildren = []
         for i in range(selection.nSelectedChildren):
             selectedChildren.append(selection.getSelectedChild(i))
 
-    #
-    # Value
-    #
 
     @property
     def value(self):
         """
         The value contained by the AccessibleValue interface.
         """
+
+        debug_message(message="The value contained by the AccessibleValue interface.")
+
         try:
             return self.queryValue().currentValue
         except NotImplementedError:
             pass
+
 
     @value.setter
     def value(self, value):
         """
         Setter for the value contained by the AccessibleValue interface.
         """
+
+        debug_message(message="Setter for the value contained by the AccessibleValue interface.")
+
         self.queryValue().currentValue = value
+
 
     @property
     def minValue(self):
         """
-        The minimum value of self.value
+        The minimum value of Node.value
         """
+
+        debug_message(message="The minimum value of Node.value.")
+
         try:
             return self.queryValue().minimumValue
         except NotImplementedError:
             pass
 
+
     @property
     def minValueIncrement(self):
         """
-        The minimum value increment of self.value
+        The minimum value increment of the Node.value
         """
+
+        debug_message(message="The minimum value increment of the Node.value.")
+
         try:
             return self.queryValue().minimumIncrement
         except NotImplementedError:
             pass
+
 
     @property
     def maxValue(self):
         """
         The maximum value of self.value
         """
+
+        debug_message(message="The maximum value of Node.value.")
+
         try:
             return self.queryValue().maximumValue
         except NotImplementedError:
             pass
 
+
     def typeText(self, string):
         """
         Type the given text into the node, with appropriate delays and logging.
         """
-        logger.log(str("Typing text into %s: '%s'") % (self.getLogString(), str(string)))
+
+        debug_message(message="Typing text into '%s': '%s'" % (self.getLogString(), str(string)))
 
         if self.focusable:
             if not self.focused:
                 try:
                     self.grabFocus()
                 except Exception:
-                    logger.log("Node is focusable but I can't grabFocus!")
+                    debug_message(message="Node is focusable but I can't grabFocus!")
+
             rawinput.typeText(string)
+
         else:
-            logger.log("Node is not focusable; falling back to inserting text")
+            debug_message(message="Node is not focusable; falling back to inserting text.")
             et = self.queryEditableText()
             et.insertText(self.caretOffset, string, len(string))
             self.caretOffset += len(string)
             doDelay()
 
+
     def keyCombo(self, comboString):
-        if config.debugSearching:
-            logger.log(str("Pressing keys '%s' into %s") %
-                       (str(comboString), self.getLogString()))
+        """
+        Press keys in combination.
+        """
+
+        debug_message(message="Pressing keys: '%s' into '%s'" % (str(comboString), self.getLogString()))
+
         if self.focusable:
             if not self.focused:
                 try:
                     self.grabFocus()
                 except Exception:
-                    logger.log("Node is focusable but I can't grabFocus!")
+                    debug_message(message="Node is focusable but I can't grabFocus!")
         else:
-            logger.log("Node is not focusable; trying key combo anyway")
+            debug_message(message="Node is not focusable; trying key combo anyway.")
+
         rawinput.keyCombo(comboString)
+
 
     def getLogString(self):
         """
         Get a string describing this node for the logs,
         respecting the config.absoluteNodePaths boolean.
         """
+
+        debug_message(message="Get a string describing the node for the logs.")
+        
         if config.absoluteNodePaths:
             return self.getAbsoluteSearchPath()
         else:
             return str(self)
 
+
     def satisfies(self, pred):
         """
         Does this node satisfy the given predicate?
         """
-        # the logic is handled by the predicate:
+
+        debug_message(message="Does this node satisfy the given predicate? Logic handled by predicate.")
+
         assert isinstance(pred, predicate.Predicate)
         return pred.satisfiedByNode(self)
 
+
     def dump(self, type='plain', fileName=None):
+        """
+        Dumping a tree structure of the node.
+        """
+
+        debug_message(message="Dumping a tree structure of the node.")
+
         from dogtail import dump
         dumper = getattr(dump, type)
         dumper(self, fileName)
+
 
     def getAbsoluteSearchPath(self):
         """
@@ -983,6 +1228,9 @@ class Node(object):
         If requireResult is True (the default), an exception is raised after all
         attempts have failed. If it is false, the function simply returns None.
         """
+
+        debug_message(message="Find the child of an Accessible.")
+
         def describeSearch(parent, pred, recursive, debugName):
             """
             Internal helper function
@@ -1240,7 +1488,7 @@ class LinkAnchor(object):
         return self.link.getURI(self.anchorIndex)
 
 
-class Root (Node):
+class Roo (Node):
     """
     FIXME:
     """
@@ -1263,7 +1511,7 @@ class Root (Node):
         return root.findChild(predicate.IsAnApplicationNamed(appName), recursive=False, retry=retry, showingOnly=False)
 
 
-class Application (Node):
+class Application(Node):
     def dialog(self, dialogName, recursive=False, showingOnly=None):
         """
         Search below this node for a dialog with the given name,
@@ -1313,7 +1561,7 @@ class Application (Node):
             return wnckWindow.get_application()
 
 
-class Window (Node):
+class Window(Node):
 
     def getWnckWindow(self):  # pragma: no cover
         """
@@ -1345,7 +1593,7 @@ class Window (Node):
         wnckWindow.activate(0)
 
 
-class Wizard (Window):
+class Wizard(Window):
     """
     Note that the buttons of a GnomeDruid were not accessible until
     recent versions of libgnomeui.  This is

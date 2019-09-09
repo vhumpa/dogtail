@@ -2,7 +2,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 from dogtail.config import config
 from dogtail.utils import doDelay
-from dogtail.logging import debugLogger as logger
+from dogtail.logging import debug_message
 from pyatspi import Registry as registry
 from pyatspi import (KEY_SYM, KEY_PRESS, KEY_PRESSRELEASE, KEY_RELEASE)
 from time import sleep
@@ -26,9 +26,6 @@ if SESSION_TYPE == "wayland":
     ponytail.disconnect()
     sleep(1) # needed now to overcome fast reconnect issue in ponytail
 
-DEBUG = os.environ["DOGTAIL_DEBUG"] == "true"
-
-
 """
 Handles raw input using AT-SPI event generation.
 
@@ -38,11 +35,6 @@ __author__ = """
 David Malcolm <dmalcolm@redhat.com>,
 Zack Cerza <zcerza@redhat.com>
 """
-
-
-def debug_message(message):
-    if DEBUG:
-        logger.log(message)
 
 
 def update_coords(coords):
@@ -553,7 +545,7 @@ def pressKey(keyName, window_id=None):
     looked up by uniCharToKeySym().
     """
 
-    debug_message(message="Press key %s" % keyName)
+    debug_message(message="Press key '%s'" % keyName)
 
     if keyName.lower() in ("esc", "escape", "enter", "return"):
         window_id = "" # when this would quit a window, release event would be doomed
@@ -591,7 +583,7 @@ def keyCombo(comboString):
     for s in strings:
         if not hasattr(Gdk, s):
             if not hasattr(Gdk, "KEY_" + s):
-                raise ValueError("Cannot find key %s" % s)
+                raise ValueError("Cannot find key '%s'" % s)
 
     modifiers = strings[:-1]
     finalKey = strings[-1]

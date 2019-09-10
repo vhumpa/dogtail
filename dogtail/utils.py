@@ -113,14 +113,12 @@ def run(string, timeout=config.runTimeout, interval=config.runInterval, desktop=
         appName = args[0]
 
     if dumb:
-        debug_message(message="""Disable startup detection.
-        We're starting a non-AT-SPI-aware application.""")
+        debug_message(message="Disable startup detection. We're starting a non-AT-SPI-aware application.")
 
         doDelay(timeout)
 
     else:
-        debug_message(message="""Startup detection code.
-        The timing here is not totally precise, but it's good enough for now.""")
+        debug_message(message="Startup detection code. The timing here is not totally precise, but it's good enough for now.")
 
         time = 0
 
@@ -277,8 +275,7 @@ class Lock(object):
         atomic on POSIX compliant systems.
         """
 
-        debug_message(message="Create a lock directory. \
-            Raising the exception if the lock is already present.")
+        debug_message(message="Create a lock directory. Raising the exception if the lock is already present.")
 
         locked_msg = "Dogtail lock: Already locked with the same lock."
 
@@ -561,8 +558,8 @@ class GnomeShell:
 
     def clickApplicationMenuItem(self, app_name, item, search_by_item="Quit"):
         """
-        Executes the given menu item through opening the menu first followed by a click at the 
-        particular item. The menu search reference 'Quit' may be customized. Also attempts to 
+        Executes the given menu item through opening the menu first followed by a click at the
+        particular item. The menu search reference 'Quit' may be customized. Also attempts to
         use the given item for reference if search fails with the default/custom one.
         """
 

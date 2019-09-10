@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 from packaging import version
-from dogtail import __version__ as VERSION
 from dogtail.logging import debug_message
-
 
 """
 Handles versioning of software packages
@@ -19,7 +17,7 @@ class Version:
 
     def __init__(self, versionList):
         debug_message(message="Version class init.")
-        self.api_version = '.'.join(versionList) if isinstance(versionList, list) else VERSION
+        self.api_version = '.'.join(versionList) if isinstance(versionList, list) else versionList
 
 
     def fromString(self, versionString):

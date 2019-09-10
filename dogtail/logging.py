@@ -211,12 +211,16 @@ class ResultsLogger(Logger):
 
 
 debugLogger = Logger('debug', config.logDebugToFile)
+infoLogger = Logger('info', config.logDebugToFile)
 
 DEBUG = os.environ["DOGTAIL_DEBUG"] == "true"
 
 def debug_message(message):
     if DEBUG:
         debugLogger.log(message)
+
+def info_message(message):
+    infoLogger.log(message)
 
 
 def exceptionHook(exc, value, tb):  # pragma: no cover

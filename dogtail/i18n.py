@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
-from dogtail import config
 import os
 import re
 import gettext
+from dogtail import config
 from dogtail.logging import debugLogger as logger
 
 """
@@ -16,10 +16,12 @@ __author__ = """David Malcolm <dmalcolm@redhat.com>, Zack Cerza <zcerza@redhat.c
 Singleton list of TranslationDb instances, to be initialized by the script with
 whatever translation databases it wants.
 """
+
+
 translationDbs = []
 
 
-class TranslationDb(object):
+class TranslationDb:
     """
     Abstract base class representing a database of translations
     """

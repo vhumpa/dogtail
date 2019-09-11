@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
-from dogtail.logging import debugLogger as logger
+from dogtail.logging import debug_message
 import inspect
 
 """
@@ -13,16 +13,16 @@ def warn(message, caller=True):
     """
     Generate a warning, and pass it to the debug logger.
     """
+
     frameRec = inspect.stack()[-1]
     message = "Warning: %s:%s: %s" % (frameRec[1], frameRec[2], message)
     if caller and frameRec[1] != '<stdin>' and frameRec[1] != '<string>':
-        message = message + ':\n  ' + frameRec[4][0]
+        message = message + ":\n  " + frameRec[4][0]
     del frameRec
-    logger.log(message)
+    debug_message(message=message)
 
 
 class DependencyNotFoundError(Exception):
     """
     A dependency was not found.
     """
-    pass

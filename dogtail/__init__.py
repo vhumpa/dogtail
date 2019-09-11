@@ -15,4 +15,4 @@ __copyright__ = "Copyright © 2005-2017 Red Hat, Inc."
 __license__ = "GPL"
 
 __all__ = ("config", "distro", "dump", "errors", "i18n", "logging", "path", "predicate",
-           "procedural", "rawinput", "sessions", "tc", "tree", "utils", "version", "wrapped")
+           "procedural", "rawinput", "sessions", "tree", "utils", "version")

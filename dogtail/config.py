@@ -14,7 +14,7 @@ __author__ = "Zack Cerza <zcerza@redhat.com>, David Malcolm <dmalcolm@redhat.com
 def _userTmpDir(baseName):
     # i.e. /tmp/dogtail-foo
     logname = os.getenv("LOGNAME", default=pwd.getpwuid(os.getuid())[0])
-    return '-'.join(('/'.join(("/tmp", baseName)), logname))
+    return "-".join(("/".join(("/tmp", baseName)), logname))
 
 
 class _Config:
@@ -82,7 +82,7 @@ class _Config:
 
     absoluteNodePaths (boolean):
     Whether we should identify nodes in the logs with long 'abcolute paths', or
-    merely with a short 'relative path'. FIXME: give examples
+    merely with a short 'relative path'.
 
     ensureSensitivity (boolean):
     Should we check that ui nodes are sensitive (not 'greyed out') before
@@ -116,7 +116,7 @@ class _Config:
 
     @property
     def scriptName(self):
-        return os.path.basename(sys.argv[0]).replace(".py", '')
+        return os.path.basename(sys.argv[0]).replace(".py", "")
 
 
     @property
@@ -126,9 +126,9 @@ class _Config:
 
     defaults = {
         # Storage
-        "scratchDir": '/'.join((_userTmpDir("dogtail"), '')),
-        "dataDir": '/'.join((_userTmpDir("dogtail"), "data", '')),
-        "logDir": '/'.join((_userTmpDir("dogtail"), "logs", '')),
+        "scratchDir": '/'.join((_userTmpDir("dogtail"), "")),
+        "dataDir": '/'.join((_userTmpDir("dogtail"), "data", "")),
+        "logDir": '/'.join((_userTmpDir("dogtail"), "logs", "")),
         "scriptName": scriptName.fget(None),
         "encoding": encoding.fget(None),
         "configFile": None,

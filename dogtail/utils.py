@@ -136,7 +136,7 @@ def run(string, timeout=config.runTimeout, interval=config.runInterval, desktop=
                                 doDelay(interval)
 
                                 return pid
-            except AttributeError:
+            except AttributeError:  # pragma: no cover
                 pass
 
             doDelay(interval)
@@ -159,7 +159,7 @@ def doDelay(delay=None):
     sleep(delay)
 
 
-class Highlight(Gtk.Window):
+class Highlight(Gtk.Window):  # pragma: no cover
     """
     Hightlight class used by Blinker. Display a red rectangle corresponding to the Accessibility
     node position and size via Gtk.Window class.
@@ -200,7 +200,7 @@ class Highlight(Gtk.Window):
         cr.stroke()
 
 
-class Blinker:
+class Blinker:  # pragma: no cover
     """
     Blinker class used to highlight the Accessibility node in graphical interface.
     This highlight will be seen for 1 second before it will disappear.
@@ -362,7 +362,7 @@ def isA11yEnabled():
     if os.environ.get("GTK_MODULES", "").find("gail:atk-bridge") == -1:
         envEnabled = False
     else:
-        envEnabled = True
+        envEnabled = True  # pragma: no cover
 
     return dconfEnabled or envEnabled
 
@@ -384,11 +384,11 @@ def bailBecauseA11yIsDisabled():
 
         if content.find("epydoc") != -1:
             debug_message(message="Execution was not ended. Proces content 'epydoc' exception.")
-            return
+            return   # pragma: no cover
         if content.find("sphinx") != -1:
             debug_message(message="Execution was not ended. Proces content 'sphinx' exception.")
-            return
-    except Exception:
+            return  # pragma: no cover
+    except Exception:  # pragma: no cover
         pass
 
     debug_message(message="""
@@ -413,7 +413,7 @@ def enableA11y(enable=True):
     InterfaceSettings.set_boolean("toolkit-accessibility", enable)
 
 
-def checkForA11y():
+def checkForA11y():  # pragma: no cover
     """
     Checks if accessibility is enabled, and halts execution if it is not.
     """
@@ -424,7 +424,7 @@ def checkForA11y():
         bailBecauseA11yIsDisabled()
 
 
-def checkForA11yInteractively():
+def checkForA11yInteractively():  # pragma: no cover
     """
     Checks if accessibility is enabled, and presents a dialog prompting the
     user if it should be enabled if it is not already, then halts execution.
@@ -480,7 +480,7 @@ def waitForWindow(name, timeout=30):
         return False
 
 
-class GnomeShell:
+class GnomeShell:  # pragma: no cover
     """
     Utility class to help working with certain atributes of gnome-shell.
     Currently that means handling the Application menu available for apps

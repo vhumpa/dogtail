@@ -2,7 +2,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 from dogtail.config import config
 from dogtail.i18n import TranslatableString
-from dogtail.logging import debugLogger as logger
+from dogtail.logging import debug_message
 from gi.repository import GLib
 import re
 from time import sleep
@@ -10,12 +10,11 @@ from time import sleep
 """
 Predicates that can be used when searching for nodes.
 """
-__author__ = 'David Malcolm <dmalcolm@redhat.com>'
+__author__ = "David Malcolm <dmalcolm@redhat.com>"
 
 
 def stringMatches(scriptName, reportedName):
     assert isinstance(scriptName, TranslatableString)
-
     return scriptName.matchedBy(reportedName)
 
 
@@ -30,17 +29,14 @@ def makeCamel(string):
     """
     Convert string to camelCaps
     """
-    string = str(string)
-    # FIXME: this function is probably really fragile, lots of difficult cases
-    # here
 
-    # Sanitize string, replacing bad characters with spaces:
+    result = ""
+    string = str(string)
     for char in ":;!@#$%^&*()-+=_~`\\/?|[]{}<>,.\t\n\r\"'":
         string = string.replace(char, " ")
+
     words = string.strip().split(" ")
-    for word in words:
-        word.strip
-    result = ""
+
     firstWord = True
     for word in words:
         lowercaseWord = word.lower()
@@ -49,32 +45,38 @@ def makeCamel(string):
             firstWord = False
         else:
             result += lowercaseWord.capitalize()
+
     return result
 
 
 class Predicate(object):
     """
     Abstract base class representing a predicate function on nodes.
-
     It's more than just a function in that it has data and can describe itself
     """
 
     def satisfiedByNode(self, node):
         """
-        Pure virtual method returning a boolean if the predicate is satisfied by the node
+        Pure virtual method returning a boolean if the predicate is satisfied by the node.
         """
         raise NotImplementedError
 
+
     def describeSearchResult(self, node):
+        """
+        Pure virtual method returning a string that describes the search result.
+        """
         raise NotImplementedError
+
 
     def makeScriptMethodCall(self, isRecursive):
         """
         Method to generate a string containing a (hopefully) readable search
         method call on a node (to be used when generating Python source code in
-        the event recorder)
+        the event recorder).
         """
         raise NotImplementedError
+
 
     def makeScriptVariableName(self):
         """
@@ -85,15 +87,12 @@ class Predicate(object):
         """
         raise NotImplementedError
 
+
     def __eq__(self, other):
         """
         Predicates are considered equal if they are of the same subclass and
         have the same data
         """
-        # print "predeq: self:%s"%self
-        # print "               other:%s"%other
-        # print "predeq: selfdict:%s"%self.__dict__
-        # print "               otherdict:%s"%other.__dict__
 
         if not isinstance(self, type(other)):
             return False
@@ -102,38 +101,48 @@ class Predicate(object):
 
 
 class IsAnApplicationNamed(Predicate):
-    """Search subclass that looks for an application by name"""
+    """
+    Search subclass that looks for an application by name
+    """
 
     def __init__(self, appName):
         self.appName = TranslatableString(appName)
         self.debugName = self.describeSearchResult()
         self.satisfiedByNode = self._genCompareFunc()
 
+
     def _genCompareFunc(self):
         def satisfiedByNode(node):
+            debug_message(message="IsAnApplicationNamed.satisfiedByNode")
+
             try:
-                return node.roleName == 'application' and stringMatches(self.appName, node.name)
-            except GLib.GError as e:
-                if re.match(r"name :[0-9]+\.[0-9]+ was not provided", e.message):
-                    logger.log("Dogtail: warning: omiting possibly broken at-spi application record")
+                return node.roleName == "application" and stringMatches(self.appName, node.name)
+            except GLib.GError as error:
+                if re.match(r"name :[0-9]+\.[0-9]+ was not provided", error):
+                    debug_message(message="Dogtail warning: omiting possibly broken at-spi application record")
                     return False
-                else:
-                    try:
-                        sleep(config.defaults['searchWarningThreshold'])
-                        return node.roleName == 'application' and stringMatches(self.appName, node.name)
-                    except GLib.GError:
-                        logger.log("Dogtail: warning: application may be hanging")
-                        return False
+
+                try:
+                    sleep(config.defaults["searchWarningThreshold"])
+                    return node.roleName == "application" and stringMatches(self.appName, node.name)
+                except GLib.GError:
+                    debug_message(message="Dogtail warning: application may be hanging")
+                    return False
         return satisfiedByNode
 
+
     def describeSearchResult(self):
-        return '%s application' % self.appName
+        debug_message(message="IsAnApplicationNamed.describeSearchResult")
+        return self.appName + " application"
+
 
     def makeScriptMethodCall(self, isRecursive):
-        # ignores the isRecursive parameter
+        debug_message(message="IsAnApplicationNamed.makeScriptMethodCall")
         return "application(%s)" % self.appName
 
+
     def makeScriptVariableName(self):
+        debug_message(message="IsAnApplicationNamed.makeScriptVariableName")
         return makeCamel(self.appName) + "App"
 
 
@@ -147,8 +156,10 @@ class GenericPredicate(Predicate):
             self.name = TranslatableString(name)
         else:
             self.name = None
+
         self.roleName = roleName
         self.description = description
+
         if label:
             self.label = TranslatableString(label)
         else:
@@ -161,52 +172,59 @@ class GenericPredicate(Predicate):
                 self.debugName = "labelled '%s'" % self.label
             else:
                 self.debugName = "child with"
+
             if name:
                 self.debugName = str(self.debugName) + str(" name=%s") % str(self.name)
+
             if roleName:
                 self.debugName = str(self.debugName) + str(" roleName='%s'") % str(roleName)
+
             if description:
                 self.debugName = str(self.debugName) + str(" description='%s'") % str(description)
-        assert self.debugName
 
+        assert self.debugName
         self.satisfiedByNode = self._genCompareFunc()
+
 
     def _genCompareFunc(self):
         def satisfiedByNode(node):
-            # labelled nodes are handled specially:
+            debug_message(message="GenericPredicate.satisfiedByNode")
+
             if self.label:
-                # this reverses the search; we're looking for a node with LABELLED_BY
-                # and then checking the label, rather than looking for a label and
-                # then returning whatever LABEL_FOR targets
                 if node.labeller:
                     return stringMatches(self.label, node.labeller.name)
-                else:
-                    return False
-            else:
-                # Ensure the node matches any criteria that were set:
-                try:
-                    if self.name:
-                        if not stringMatches(self.name, node.name):
-                            return False
-                    if self.roleName:
-                        if self.roleName != node.roleName:
-                            return False
-                    if self.description:
-                        if self.description != node.description:
-                            return False
-                except GLib.GError as e:
-                    if re.match(r"name :[0-9]+\.[0-9]+ was not provided", e.message):
-                        logger.log("Dogtail: warning: omiting possibly broken at-spi application record")
+                return False
+
+            try:
+                if self.name:
+                    if not stringMatches(self.name, node.name):
                         return False
-                    else:
-                        raise e
-                return True
+
+                if self.roleName:
+                    if self.roleName != node.roleName:
+                        return False
+
+                if self.description:
+                    if self.description != node.description:
+                        return False
+            except GLib.GError as error:
+                if re.match(r"name :[0-9]+\.[0-9]+ was not provided", error):
+                    debug_message(message="Dogtail warning: omiting possibly broken at-spi application record")
+                    return False
+
+                raise error
+            return True
         return satisfiedByNode
 
+
     def describeSearchResult(self):
+        debug_message(message="GenericPredicate.describeSearchResult")
         return self.debugName
 
+
     def makeScriptMethodCall(self, isRecursive):
+        debug_message(message="GenericPredicate.makeScriptMethodCall")
+
         if self.label:
             args = "label=%s" % self.label
         else:
@@ -214,44 +232,63 @@ class GenericPredicate(Predicate):
             if self.name:
                 print(self.name)
                 args += " name=%s" % self.name
+
             if self.roleName:
                 args += " roleName='%s'" % self.roleName
+
             if self.description:
                 args += " description='%s'" % self.description
         return "child(%s%s)" % (args, makeScriptRecursiveArgument(isRecursive, True))
 
+
     def makeScriptVariableName(self):
+        debug_message(message="GenericPredicate.makeScriptVariableName")
+
         if self.label:
             return makeCamel(self.label) + "Node"
-        else:
-            if self.name:
-                return makeCamel(self.name) + "Node"
-            if self.roleName:
-                return makeCamel(self.roleName) + "Node"
-            if self.description:
-                return makeCamel(self.description) + "Node"
+
+        if self.name:
+            return makeCamel(self.name) + "Node"
+
+        if self.roleName:
+            return makeCamel(self.roleName) + "Node"
+
+        if self.description:
+            return makeCamel(self.description) + "Node"
+
+        return
 
 
 class IsNamed(Predicate):
-    """Predicate subclass that looks simply by name"""
+    """
+    Predicate subclass that looks simply by name
+    """
 
     def __init__(self, name):
         self.name = TranslatableString(name)
         self.debugName = self.describeSearchResult()
         self.satisfiedByNode = self._genCompareFunc()
 
+
     def _genCompareFunc(self):
         def satisfiedByNode(node):
+            debug_message(message="IsNamed.satisfiedByNode")
             return stringMatches(self.name, node.name)
         return satisfiedByNode
 
+
     def describeSearchResult(self):
+        debug_message(message="IsNamed.describeSearchResult")
         return "named %s" % self.name
 
+
     def makeScriptMethodCall(self, isRecursive):
+        debug_message(message="IsNamed.makeScriptMethodCall")
         return "child(name=%s%s)" % (self.name, makeScriptRecursiveArgument(isRecursive, True))
 
+
     def makeScriptVariableName(self):
+        debug_message(message="IsNamed.makeScriptVariableName")
         return makeCamel(self.name) + "Node"
 
 
@@ -265,18 +302,25 @@ class IsAWindowNamed(Predicate):
         self.debugName = self.describeSearchResult()
         self.satisfiedByNode = self._genCompareFunc()
 
+
     def _genCompareFunc(self):
         def satisfiedByNode(node):
-            return node.roleName == 'frame' and stringMatches(self.windowName, node.name)
+            debug_message(message="IsAWindowNamed.satisfiedByNode")
+            return node.roleName == "frame" and stringMatches(self.windowName, node.name)
         return satisfiedByNode
 
     def describeSearchResult(self):
+        debug_message(message="IsAWindowNamed.describeSearchResult")
         return "%s window" % self.windowName
 
+
     def makeScriptMethodCall(self, isRecursive):
+        debug_message(message="IsAWindowNamed.makeScriptMethodCall")
         return "window(%s%s)" % (self.windowName, makeScriptRecursiveArgument(isRecursive, False))
 
+
     def makeScriptVariableName(self):
+        debug_message(message="IsAWindowNamed.makeScriptVariableName")
         return makeCamel(self.windowName) + "Win"
 
 
@@ -286,9 +330,11 @@ class IsAWindow(Predicate):
     """
 
     def __init__(self):
-        self.satisfiedByNode = lambda node: node.roleName == 'frame'
+        self.satisfiedByNode = lambda node: node.roleName == "frame"
+
 
     def describeSearchResult(self):
+        debug_message(message="IsAWindow.describeSearchResult")
         return "window"
 
 
@@ -302,18 +348,26 @@ class IsADialogNamed(Predicate):
         self.debugName = self.describeSearchResult()
         self.satisfiedByNode = self._genCompareFunc()
 
+
     def _genCompareFunc(self):
         def satisfiedByNode(node):
-            return node.roleName == 'dialog' and stringMatches(self.dialogName, node.name)
+            debug_message(message="IsADialogNamed.satisfiedByNode")
+            return node.roleName == "dialog" and stringMatches(self.dialogName, node.name)
         return satisfiedByNode
 
+
     def describeSearchResult(self):
-        return '%s dialog' % self.dialogName
+        debug_message(message="IsADialogNamed.describeSearchResult")
+        return "%s dialog" % self.dialogName
+
 
     def makeScriptMethodCall(self, isRecursive):
+        debug_message(message="IsADialogNamed.makeScriptMethodCall")
         return "dialog(%s%s)" % (self.dialogName, makeScriptRecursiveArgument(isRecursive, False))
 
+
     def makeScriptVariableName(self):
+        debug_message(message="IsADialogNamed.makeScriptVariableName")
         return makeCamel(self.dialogName) + "Dlg"
 
 
@@ -321,7 +375,6 @@ class IsLabelledBy(Predicate):
     """
     Predicate: is this node labelled by another node
     """
-    pass
 
 
 class IsLabelledAs(Predicate):
@@ -334,22 +387,28 @@ class IsLabelledAs(Predicate):
         self.debugName = self.describeSearchResult()
         self.satisfiedByNode = self._genCompareFunc()
 
+
     def _genCompareFunc(self):
         def satisfiedByNode(node):
-            # FIXME
+            debug_message(message="IsLabelledAs.satisfiedByNode")
             if node.labeller:
                 return stringMatches(self.labelText, node.labeller.name)
-            else:
-                return False
+            return False
         return satisfiedByNode
 
+
     def describeSearchResult(self):
-        return 'labelled %s' % self.labelText
+        debug_message(message="IsLabelledAs.describeSearchResult")
+        return "labelled %s" % self.labelText
+
 
     def makeScriptMethodCall(self, isRecursive):
+        debug_message(message="IsLabelledAs.makeScriptMethodCall")
         return "child(label=%s%s)" % (self.labelText, makeScriptRecursiveArgument(isRecursive, True))
 
+
     def makeScriptVariableName(self):
+        debug_message(message="IsLabelledAs.makeScriptVariableName")
         return makeCamel(self.labelText) + "Node"
 
 
@@ -361,15 +420,21 @@ class IsAMenuNamed(Predicate):
     def __init__(self, menuName):
         self.menuName = TranslatableString(menuName)
         self.debugName = self.describeSearchResult()
-        self.satisfiedByNode = lambda node: node.roleName == 'menu' and stringMatches(self.menuName, node.name)
+        self.satisfiedByNode = lambda node: node.roleName == "menu" and stringMatches(self.menuName, node.name)
+
 
     def describeSearchResult(self):
-        return '%s menu' % (self.menuName)
+        debug_message(message="IsAMenuNamed.describeSearchResult")
+        return "%s menu" % (self.menuName)
+
 
     def makeScriptMethodCall(self, isRecursive):
+        debug_message(message="IsAMenuNamed.makeScriptMethodCall")
         return "menu(%s%s)" % (self.menuName, makeScriptRecursiveArgument(isRecursive, True))
 
+
     def makeScriptVariableName(self):
+        debug_message(message="IsAMenuNamed.makeScriptVariableName")
         return makeCamel(self.menuName) + "Menu"
 
 
@@ -382,15 +447,21 @@ class IsAMenuItemNamed(Predicate):
         self.menuItemName = TranslatableString(menuItemName)
         self.debugName = self.describeSearchResult()
         self.satisfiedByNode = lambda node: \
-            node.roleName.endswith('menu item') and stringMatches(self.menuItemName, node.name)
+            node.roleName.endswith("menu item") and stringMatches(self.menuItemName, node.name)
+
 
     def describeSearchResult(self):
-        return '%s menuitem' % (self.menuItemName)
+        debug_message(message="IsAMenuItemNamed.describeSearchResult")
+        return "%s menuitem" % (self.menuItemName)
+
 
     def makeScriptMethodCall(self, isRecursive):
+        debug_message(message="IsAMenuItemNamed.makeScriptMethodCall")
         return "menuItem(%s%s)" % (self.menuItemName, makeScriptRecursiveArgument(isRecursive, True))
 
+
     def makeScriptVariableName(self):
+        debug_message(message="IsAMenuItemNamed.makeScriptVariableName")
         return makeCamel(self.menuItemName) + "MenuItem"
 
 
@@ -402,15 +473,21 @@ class IsATextEntryNamed(Predicate):
     def __init__(self, textEntryName):
         self.textEntryName = TranslatableString(textEntryName)
         self.debugName = self.describeSearchResult()
-        self.satisfiedByNode = lambda node: node.roleName == 'text' and stringMatches(self.textEntryName, node.name)
+        self.satisfiedByNode = lambda node: node.roleName == "text" and stringMatches(self.textEntryName, node.name)
+
 
     def describeSearchResult(self):
-        return '%s textentry' % (self.textEntryName)
+        debug_message(message="IsATextEntryNamed.describeSearchResult")
+        return "%s textentry" % (self.textEntryName)
+
 
     def makeScriptMethodCall(self, isRecursive):
+        debug_message(message="IsATextEntryNamed.makeScriptMethodCall")
         return "textentry(%s%s)" % (self.textEntryName, makeScriptRecursiveArgument(isRecursive, True))
 
+
     def makeScriptVariableName(self):
+        debug_message(message="IsATextEntryNamed.makeScriptVariableName")
         return makeCamel(self.textEntryName) + "Entry"
 
 
@@ -422,15 +499,21 @@ class IsAButtonNamed(Predicate):
     def __init__(self, buttonName):
         self.buttonName = TranslatableString(buttonName)
         self.debugName = self.describeSearchResult()
-        self.satisfiedByNode = lambda node: node.roleName == 'push button' and stringMatches(self.buttonName, node.name)
+        self.satisfiedByNode = lambda node: node.roleName == "push button "and stringMatches(self.buttonName, node.name)
+
 
     def describeSearchResult(self):
-        return '%s button' % (self.buttonName)
+        debug_message(message="IsAButtonNamed.describeSearchResult")
+        return "%s button" % (self.buttonName)
+
 
     def makeScriptMethodCall(self, isRecursive):
+        debug_message(message="IsAButtonNamed.makeScriptMethodCall")
         return "button(%s%s)" % (self.buttonName, makeScriptRecursiveArgument(isRecursive, True))
 
+
     def makeScriptVariableName(self):
+        debug_message(message="IsAButtonNamed.makeScriptVariableName")
         return makeCamel(self.buttonName) + "Button"
 
 
@@ -442,13 +525,19 @@ class IsATabNamed(Predicate):
     def __init__(self, tabName):
         self.tabName = TranslatableString(tabName)
         self.debugName = self.describeSearchResult()
-        self.satisfiedByNode = lambda node: node.roleName == 'page tab' and stringMatches(self.tabName, node.name)
+        self.satisfiedByNode = lambda node: node.roleName == "page tab" and stringMatches(self.tabName, node.name)
+
 
     def describeSearchResult(self):
-        return '%s tab' % (self.tabName)
+        debug_message(message="IsATabNamed.describeSearchResult")
+        return "%s tab" % (self.tabName)
+
 
     def makeScriptMethodCall(self, isRecursive):
+        debug_message(message="IsATabNamed.makeScriptMethodCall")
         return "tab(%s%s)" % (self.tabName, makeScriptRecursiveArgument(isRecursive, True))
 
+
     def makeScriptVariableName(self):
+        debug_message(message="IsATabNamed.makeScriptVariableName")
         return makeCamel(self.tabName) + "Tab"

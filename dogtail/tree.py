@@ -81,7 +81,7 @@ __author__ = """Zack Cerza <zcerza@redhat.com>,
 try:
     import pyatspi
     import Accessibility
-except ImportError:
+except ImportError:  # pragma: no cover
     raise ImportError("Error importing the AT-SPI bindings")
 
 
@@ -94,7 +94,7 @@ if config.checkForA11y:
 try:
     gi.require_version("Wnck", "3.0")
     from gi.repository import Wnck
-    gotWnck = True
+    gotWnck = True  # pragma: no cover
 except (ImportError, ValueError):
     # Skip this warning, since the functionality is almost entirely nonworking anyway.
     # print "Warning: Dogtail could not import the Python bindings for
@@ -1067,7 +1067,7 @@ class Node(object):
         """
 
         debug_message(message="Node.getLogString - returns a string describing the node for the logs.")
-        
+
         if config.absoluteNodePaths:
             return self.getAbsoluteSearchPath()
         else:
@@ -1085,7 +1085,7 @@ class Node(object):
         return pred.satisfiedByNode(self)
 
 
-    def dump(self, type='plain', fileName=None):
+    def dump(self, type="plain", fileName=None):
         """
         Dumping a tree structure of the node.
         """
@@ -1139,7 +1139,7 @@ class Node(object):
 
     def getRelativeSearch(self):
         """
-        Get a (ancestorNode, predicate, isRecursive) triple that 
+        Get a (ancestorNode, predicate, isRecursive) triple that
         identifies the best way to find this Node uniquely.
         """
 
@@ -1341,7 +1341,7 @@ class Node(object):
                 else:
                     results = list(filter(compare_function, self.children))
                 break
-            
+
             except (GLib.GError, TypeError):
                 number_of_attempts += 1
                 if number_of_attempts == config.searchCutoffCount:
@@ -1578,7 +1578,7 @@ class Root(Node):
     """
     Root class used to get data from Accessible.
     """
-    
+
     def applications(self):
         """
         Get all applications.
@@ -1640,7 +1640,7 @@ class Application(Node):
         return result
 
 
-    def getWnckApplication(self, showingOnly=None):
+    def getWnckApplication(self, showingOnly=None):  # pragma: no cover
         """
         Get the wnck.Application instance for this application, or None
 
@@ -1663,7 +1663,7 @@ class Window(Node):
     Window class used to get data from Accessible.
     """
 
-    def getWnckWindow(self):
+    def getWnckWindow(self):  # pragma: no cover
         """
         Get the wnck.Window instance for this window, or None
         """
@@ -1677,7 +1677,7 @@ class Window(Node):
                 return wnckWindow
 
 
-    def activate(self):
+    def activate(self):  # pragma: no cover
         """
         Activates the wnck.Window associated with this Window.
         """
@@ -1767,12 +1767,12 @@ Accessibility.Accessible.__bases__ = (
 try:
     root = pyatspi.Registry.getDesktop(0)
     root.debugName = "root"
-except Exception:
+except Exception:  # pragma: no cover
     info_message(message="Error: AT-SPI's desktop is not visible. Is accessibility enabled?")
 
 
 children = root.children
-if not children:
+if not children:  # pragma: no cover
     info_message(message="Warning: AT-SPI's desktop is visible but it has no children. \
         Are you running any AT-SPI-aware applications?")
 del children
@@ -1787,7 +1787,7 @@ if not os.path.exists("/tmp/sniff_running.lock") or not os.path.exists("/tmp/sni
     sniff_lock = Lock(lockname="sniff_refresh.lock", randomize=False, unlockOnExit=True)
     try:
         sniff_lock.lock()
-    except OSError:
+    except OSError:  # pragma: no cover
         pass
 
 elif "sniff" not in sys.argv[0]:

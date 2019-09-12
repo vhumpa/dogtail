@@ -1,6 +1,6 @@
-from dogtail.tree import *
+import sys
+from dogtail.tree import root, SearchError
 from dogtail.utils import run
-from sys import exit
 
 run('gedit')
 
@@ -17,4 +17,4 @@ while True:
         filechooser.childNamed('Cancel').click()
     except SearchError:
         print('File chooser did not open')
-        exit(1)
+        sys.exit(1)

@@ -1,6 +1,10 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
+import sys
+import os.path
+import optparse
+from dogtail import sessions
+
 """
 dogtail-run-headless
 
@@ -11,43 +15,45 @@ Scripts are run in the current directory. After they are finished, dogtail can
 optionally log out of the session, which will also termninate the X server.
 """
 
-import optparse
-from dogtail import sessions
-import sys
-import os.path
-
-
 def findXServers(path="/usr/bin"):
-    l = [os.path.join(path, f) for f in os.listdir(path) if f[0] == 'X']
-    s = set(os.path.realpath(p) for p in l)
-    return list(s)
+    list_of_x_servers = [os.path.join(path, f) for f in os.listdir(path) if f[0] == "X"]
+    set_of_x_servers = set(os.path.realpath(p) for p in list_of_x_servers)
+    return list(set_of_x_servers)
 
 
 def parse():
-    yesno = ('y', 'n')
-    sessions = ("GNOME", "KDE")
+    yesno = ("y", "n")
+    available_sessions = ("GNOME", "KDE")
+
     usage = "usage: %prog: [options] {script [args]}"
     parser = optparse.OptionParser(usage=usage)
 
-    parser.add_option("-s", "--session", type="choice",
+    parser.add_option("-s", "--session",
+                      type="choice",
                       dest="session",
                       choices=sessions,
                       help="which session to use")
-    parser.add_option("-x", "--x-server", type="choice",
+
+    parser.add_option("-x", "--x-server",
+                      type="choice",
                       dest="xserver",
-                      choices=findXServers(), help="which X server to use")
-    parser.add_option("-l", "--logout", type="choice",
+                      choices=findXServers(),
+                      help="which X server to use")
+
+    parser.add_option("-l", "--logout",
+                      type="choice",
                       dest="logout",
                       choices=yesno,
-                      help="attempt to log out of the session gracefully after" +
-                      "script completion")
-    parser.add_option("-t", "--terminate", type="choice",
+                      help="attempt to log out of the session gracefully after script completion")
+
+    parser.add_option("-t", "--terminate",
+                      type="choice",
                       dest="terminate",
                       choices=yesno,
-                      help="after script completion, and after any attempt to log" +
-                      "out, terminate the session")
+                      help="after script completion, terminate the session")
 
-    parser.set_defaults(session=sessions[0], logout='y', terminate='y')
+    parser.set_defaults(session=available_sessions[0], logout="y", terminate="y")
+
     options, args = parser.parse_args()
     if not args:
         parser.print_usage()
@@ -57,25 +63,34 @@ def parse():
 
 def main():
     options, args = parse()
-    if 'XDG_RUNTIME_DIR' in os.environ:
-        del os.environ['XDG_RUNTIME_DIR']
+    if "XDG_RUNTIME_DIR" in os.environ:
+        del os.environ["XDG_RUNTIME_DIR"]
+
     if options.session == "GNOME":
-        session = sessions.Session(sessionBinary='/usr/bin/gnome-session',
-                                   scriptCmdList=args, scriptDelay=10)
+        session = sessions.Session(sessionBinary="/usr/bin/gnome-session",
+                                   scriptCmdList=args,
+                                   scriptDelay=10)
+
     if options.session == "KDE":
-        session = sessions.Session(sessionBinary='/usr/bin/startkde',
-                                   scriptCmdList=args, scriptDelay=25)
+        session = sessions.Session(sessionBinary="/usr/bin/startkde",
+                                   scriptCmdList=args,
+                                   scriptDelay=25)
+
     if options.xserver:
         session.xserver.server = options.xserver
+
     pid = session.start()
-    scriptExitCode = session.script.exitCode
-    if options.logout == 'y':
+
+    script_exit_code = session.script.exitCode
+
+    if options.logout == "y":
         session.attemptLogout()
-    if options.terminate == 'y':
+    if options.terminate == "y":
         session.stop()
     else:
         session.wait()
-    sys.exit(scriptExitCode)
+
+    sys.exit(script_exit_code)
 
 if __name__ == "__main__":
     main()

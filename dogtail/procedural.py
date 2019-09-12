@@ -13,6 +13,7 @@ from dogtail.utils import Lock
 Dogtail's procedural UI
 All the classes here are intended to be single-instance, except for Action.
 """
+
 __author__ = "Zack Cerza <zcerza@redhat.com>"
 
 # WARNING: Here There Be Dragons (TM)                                        #

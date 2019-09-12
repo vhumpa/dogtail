@@ -198,7 +198,7 @@ class ResultsLogger(Logger):
         Logger.log(self, self.stamper.entryStamp() + "      " + entry, force=True)
 
 debugLogger = Logger("debug", config.logDebugToFile)
-infoLogger = Logger("info", config.logDebugToFile)
+infoLogger = Logger("info", file=False)
 
 DEBUG = os.environ["DOGTAIL_DEBUG"] == "true"
 

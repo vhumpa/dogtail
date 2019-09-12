@@ -8,6 +8,7 @@ import pwd
 """
 The configuration module.
 """
+
 __author__ = "Zack Cerza <zcerza@redhat.com>, David Malcolm <dmalcolm@redhat.com>"
 
 

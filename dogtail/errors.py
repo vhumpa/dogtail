@@ -6,6 +6,7 @@ import inspect
 """
 General exceptions; not overly module-specific
 """
+
 __author__ = "Zack Cerza <zcerza@redhat.com>"
 
 
@@ -16,7 +17,7 @@ def warn(message, caller=True):
 
     frameRec = inspect.stack()[-1]
     message = "Warning: %s:%s: %s" % (frameRec[1], frameRec[2], message)
-    if caller and frameRec[1] != '<stdin>' and frameRec[1] != '<string>':
+    if caller and frameRec[1] != "<stdin>" and frameRec[1] != "<string>":
         message = message + ":\n  " + frameRec[4][0]
     del frameRec
     debug_message(message=message)

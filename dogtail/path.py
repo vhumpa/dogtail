@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 from dogtail.logging import debug_message
+
 __author__ = """David Malcolm <dmalcolm@redhat.com>"""
 
 

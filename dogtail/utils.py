@@ -22,6 +22,7 @@ gi.require_version("Gdk", "3.0")
 """
 Various utilities
 """
+
 __author__ = """Ed Rousseau <rousseau@redhat.com>,
                 Zack Cerza <zcerza@redhat.com,
                 David Malcolm <dmalcolm@redhat.com>

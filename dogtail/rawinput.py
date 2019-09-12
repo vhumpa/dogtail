@@ -31,6 +31,7 @@ Handles raw input using AT-SPI event generation.
 
 Note: Think of keyvals as keysyms, and keynames as keystrings.
 """
+
 __author__ = """
 David Malcolm <dmalcolm@redhat.com>,
 Zack Cerza <zcerza@redhat.com>

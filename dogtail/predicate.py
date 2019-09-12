@@ -10,6 +10,7 @@ from time import sleep
 """
 Predicates that can be used when searching for nodes.
 """
+
 __author__ = "David Malcolm <dmalcolm@redhat.com>"
 
 

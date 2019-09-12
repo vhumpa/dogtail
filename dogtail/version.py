@@ -6,6 +6,7 @@ from dogtail.logging import debug_message
 """
 Handles versioning of software packages
 """
+
 __author__ = "Dave Malcolm <dmalcolm@redhat.com>"
 
 class Version:

@@ -1,70 +1,52 @@
-# Dogtail demo script using tree.py
-# FIXME: Use TC.
-__author__ = 'Zack Cerza <zcerza@redhat.com'
-
+# -*- coding: utf-8 -*-
+import os
 from dogtail import tree
 from dogtail.utils import run
 from dogtail.predicate import GenericPredicate
-from time import sleep
-from os import environ, path, remove
-environ['LANG']='en_US.UTF-8'
 
-# Remove the output file, if it's still there from a previous run
-if path.isfile(path.join(path.expandvars("$HOME"), "Desktop", "UTF8demo.txt")):
-    remove(path.join(path.expandvars("$HOME"), "Desktop", "UTF8demo.txt"))
 
-# Start gedit.
-run("gedit")
+def gedit_text_tree_api_demo():
+    os.environ["LANG"] = "en_US.UTF-8"
 
-# Get a handle to gedit's application object.
-gedit = tree.root.application('gedit')
+    # Remove the output file, if it's still there from a previous run
+    if os.path.isfile(os.path.join("/tmp", "UTF8demo.txt")):
+        os.remove(os.path.join("/tmp", "UTF8demo.txt"))
 
-# Get a handle to gedit's text object.
-# Last text object is the gedit's text field
-textbuffer = gedit.findChildren(GenericPredicate(roleName='text'))[-1]
+    # Start gedit.
+    # Get a handle to gedit's application object.
+    os.system("killall gedit") # preventing the undesired result if the sript is started multiple times in a row
+    run("gedit")
+    gedit = tree.root.application("gedit")
 
-# This will work only if 'File Browser panel' plugin is disabled
-#textbuffer = gedit.child(roleName = 'text')
+    # Get a handle to gedit's text object.
+    text_buffer = gedit.findChildren(GenericPredicate(roleName="text"))[1]
+    # is equal to
+    # text_buffer = gedit.findChild(lambda x: x.roleName=="text" and x.showing) # we can specify search by another attribute - showing
+    # Load the UTF-8 demo file.
+    # Set the attribute to the given text object
+    with open(os.path.abspath(".") + "/data/UTF-8-demo.txt", "r") as open_file:
+        text_buffer.text = open_file.read()
 
-# Load the UTF-8 demo file.
-from sys import path
-utfdemo = open(path[0] + '/data/UTF-8-demo.txt', 'r')
 
-# Load the UTF-8 demo file into gedit's text buffer.
-textbuffer.text = utfdemo.read()
+    # Get a handle to gedit's Save button and click.
+    save_button = gedit.child("Save", "push button")
+    save_button.click()
 
-# Get a handle to gedit's File menu.
-filemenu = gedit.menu('File')
 
-# Get a handle to gedit's Save button.
-savebutton = gedit.button('Save')
+    # We want to save to the file name 'UTF8demo.txt'.
+    dialog = gedit.findChild(lambda x: "Save As" in x.name and x.roleName == "file chooser")
+    dialog.child(roleName="text").text = "/tmp/UTF8demo.txt"
 
-# Click the button
-savebutton.click()
 
-# Get a handle to gedit's Save As... dialog.
-try:
-    saveas = gedit.child(roleName='file chooser')
-except tree.SearchError:
-    try:
-        saveas = gedit.dialog('Save As\\u2026')
-    except tree.SearchError:
-        saveas = gedit.dialog('Save as...')
+    # Get a handle to gedit's Save dialog and click.
+    save_as_button = gedit.findChildren(lambda x: "Save" in x.name)[-1]
+    save_as_button.click()
 
-# We want to save to the file name 'UTF8demo.txt'.
-saveas.child(roleName = 'text').text = 'UTF8demo.txt'
 
-# Save the file on the Desktop
+    # Let's quit now.
+    gedit.child("Menu", "toggle button").click()
+    # Sometimes the node is not unique so you need to specify another attribute to look for
+    gedit.findChild(lambda x: x.name == "Close" and x.showing).click()
 
-# Don't make the mistake of only searching by name, there are multiple
-# "Desktop" entires in the Save As dialog - you have to query for the
-# roleName too - see the on-line help for the Dogtail "tree" class for
-# details
-saveas.child('Desktop', roleName='table cell').click()
 
-#  Click the Save button.
-saveas.button('Save').click()
-
-# Let's quit now.
-filemenu.click()
-filemenu.menuItem('Quit').click()
+gedit_text_tree_api_demo()

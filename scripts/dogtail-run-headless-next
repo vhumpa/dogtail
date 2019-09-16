@@ -64,7 +64,8 @@ def getSessionEnvironment(sessionBinary):
 
         try:
             path_to_environment = open(file_name, "r").read()
-        except IOError:
+        except IOError as error:
+            print("dogtail exception: %s" % error)
             return {}
 
         environment_items = path_to_environment.split("\x00")
@@ -175,13 +176,15 @@ class DisplayManagerSession:
         config.optionxform = str
         config.read(self.tmp_file)
         if not restore:
-            config.set(self.options["section"], self.options["enable"], "true")
+            config.set(
+                self.options["section"], self.options["enable"], "true")
             config.set(
                 self.options["section"], self.options["user"], self.user)
         else:
             config.remove_option(
                 self.options["section"], self.options["enable"])
-            config.remove_option(self.options["section"], self.options["user"])
+            config.remove_option(
+                self.options["section"], self.options["user"])
 
         output = open(self.tmp_file, "w")
         config.write(output)
@@ -422,7 +425,8 @@ def main():
         if args.debug:
             os.environ["DOGTAIL_DEBUG"] = "true"
 
-    except Exception:
+    except Exception as error:
+        print("dogtail exception: %s" % error)
         print("dogtail-run-headless-next: Could not get the environment from %s process" % \
             (display_manager_session.session_binary))
         display_manager_session.stop()
@@ -433,8 +437,10 @@ def main():
         display_manager_session.set_accessibility_to(True)
 
     script = Script(script_command_list)
+
     script_process_id = script.start()
     print("dogtail-run-headless-next: Started the script with PID %d" % (script_process_id))
+    
     exit_code = script.wait()
     print("dogtail-run-headless-next: The script has finished with return code %d" % (exit_code))
 

@@ -1,9 +1,8 @@
-# Dogtail demo script
-# Note that this script is outdated and may cause your session to lock up until
-# it is killed. It will most likely be deleted in the next release.
-__author__ = 'David Malcolm <dmalcolm@redhat.com>'
+# -*- coding: utf-8 -*-
 
-import dogtail.tree
+# Event listener demo.
+__author__ = "David Malcolm <dmalcolm@redhat.com>"
+
 import pyatspi
 import Accessibility
 
@@ -13,19 +12,16 @@ import Accessibility
 def callback(event):
     source = event.source
     if isinstance(source, Accessibility.Accessible):
-        sourceStr = " source:%s"% str(source)
+        source_description = "source:'%s'"% str(source)
     else:
-        sourceStr = ""
-    print(("Got event: %s%s"%(event.type, sourceStr)))
+        source_description = ""
 
-#listener = atspi.EventListener(callback, ["window:create"])
-#listener = atspi.EventListener(callback, ["focus:", "object:", "window:"])
-#listener = atspi.EventListener(callback, ["window:"])
-#listener = atspi.EventListener(callback, ["object:"])
-#listener = atspi.EventListener(callback, ["focus:"])
+    # Not printing any unnamed objects, which will flood the log.
+    if not "| ]" in source_description:
+        print(("Event: %s %s"%(event.type, source_description)))
 
 # explicit list of all events, taken from at-spi/test/event-listener-test.c:
-eventNames = [
+EVENT_NAMES = [
     "focus:",
     "mouse:rel",
     "mouse:button",
@@ -42,8 +38,8 @@ eventNames = [
     "object:active-descendant-changed",
     "object:visible-data-changed",
     "object:text-selection-changed",
-#    "object:text-caret-moved",
-#    "object:text-changed",
+    "object:text-caret-moved",
+    "object:text-changed",
     "object:column-inserted",
     "object:row-inserted",
     "object:column-reordered",
@@ -74,10 +70,13 @@ eventNames = [
     "object:test"
     ]
 
-listeners = []
-for eventName in eventNames:
-    #listener = atspi.EventListener(callback, [eventName])
-    listeners.append(pyatspi.Registry.registerEventListener(callback, eventName))
+EVENT_LISTENERS = []
+for event_name in EVENT_NAMES:
+    EVENT_LISTENERS.append(pyatspi.Registry.registerEventListener(callback, event_name))
 
-#listener = atspi.EventListener(callback, [""])
-pyatspi.Registry.start(False, False)
+try:
+    pyatspi.Registry.start(False, True)
+except KeyboardInterrupt as error:
+    import sys
+    print("Keyboard interupt caught. Exiting script.\n" + str(error))
+    sys.exit(0)

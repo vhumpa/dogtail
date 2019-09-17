@@ -10,8 +10,7 @@ import cairo
 
 from dogtail import predicate
 from dogtail.config import config
-from dogtail.tree import SearchError
-from dogtail.logging import debug_message
+from dogtail.logging import info_message, debug_message
 from dogtail.logging import TimeStamp
 
 import gi
@@ -155,7 +154,7 @@ def doDelay(delay=None):
         delay = config.defaultDelay
 
     if config.debugSleep:
-        debug_message(message="Do delay. Sleeping for '%f'." % delay)
+        info_message(message="Do delay. Sleeping for %f" % delay)
 
     sleep(delay)
 
@@ -392,12 +391,11 @@ def bailBecauseA11yIsDisabled():
     except Exception:  # pragma: no cover
         pass
 
-    debug_message(message="""
-        Dogtail requires that Assistive Technology support be enabled.\n
-        You can enable accessibility with sniff or by running:\n
-        'gsettings set org.gnome.desktop.interface toolkit-accessibility true'\n
-        Aborting...
-    """)
+    debug_message(message="\n".join((
+        "Dogtail requires that Assistive Technology support be enabled.",
+        "You can enable accessibility with sniff or by running:",
+        "'gsettings set org.gnome.desktop.interface toolkit-accessibility true'",
+        "Aborting...")))
 
     sys.exit(1)
 

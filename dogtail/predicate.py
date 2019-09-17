@@ -134,7 +134,7 @@ class IsAnApplicationNamed(Predicate):
 
     def describeSearchResult(self):
         debug_message(message="IsAnApplicationNamed.describeSearchResult")
-        return self.appName + " application"
+        return "%s application" % self.appName
 
 
     def makeScriptMethodCall(self, isRecursive):
@@ -500,7 +500,7 @@ class IsAButtonNamed(Predicate):
     def __init__(self, buttonName):
         self.buttonName = TranslatableString(buttonName)
         self.debugName = self.describeSearchResult()
-        self.satisfiedByNode = lambda node: node.roleName == "push button "and stringMatches(self.buttonName, node.name)
+        self.satisfiedByNode = lambda node: node.roleName == "push button" and stringMatches(self.buttonName, node.name)
 
 
     def describeSearchResult(self):

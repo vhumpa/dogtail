@@ -5,7 +5,7 @@ from dogtail import path
 from dogtail import predicate
 from dogtail import rawinput
 from dogtail.rawinput import ponytail
-from dogtail.logging import debug_message
+from dogtail.logging import debug_message, info_message
 from dogtail.utils import doDelay, Blinker, Lock
 from dogtail.rawinput import SESSION_TYPE, ponytail_check_is_xwayland
 
@@ -713,7 +713,7 @@ class Node(object):
 
         debug_message(message="""
             Node.point - pointing at a11y named '%s' '%s' with coordinates '(%s, %s)'
-        """ % (str(self.name), self.getLogString(), str(clickX), str(clickY)))
+        """ % (str(self.name), self.getLogString(), str(pointX), str(pointY)))
 
         if "menu item" in self.roleName or self.roleName == "menu":
             debug_message(message="Local coords are OFF under \
@@ -1793,4 +1793,4 @@ if not os.path.exists("/tmp/sniff_running.lock") or not os.path.exists("/tmp/sni
 elif "sniff" not in sys.argv[0]:
     info_message(message="Dogtail: Warning: Running sniff has been detected.")
     info_message(message="Please make sure sniff has the 'Auto Refresh' disabled.")
-    info_message(message="NOTE: Running scripts with sniff present is not recommended.")
+#    info_message(message="NOTE: Running scripts with sniff present is not recommended.")

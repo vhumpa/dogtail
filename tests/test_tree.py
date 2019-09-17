@@ -49,6 +49,7 @@ class TestNode(GtkDemoTest):
         """
         Node.name of the gtk-demo app should be "gtk-demo"
         """
+        print(self.app.name)
         self.assertEqual(self.app.name, 'gtk3-demo')
 
         self.assertEqual(dogtail.tree.root.name, 'main')
@@ -61,7 +62,7 @@ class TestNode(GtkDemoTest):
 
     # 'debugName' (string)
     def test_get_debugName(self):
-        self.assertEqual(self.app.debugName, '"gtk3-demo" application')
+        self.assertEqual(self.app.debugName, "'gtk3-demo' application")
         self.assertEqual(dogtail.tree.root.debugName, 'root')
 
     def test_set_debugName(self):
@@ -478,7 +479,9 @@ class TestNode(GtkDemoTest):
     def test_checked(self):
         self.runDemo("Application Class")
         wnd = dogtail.tree.root.application('gtk3-demo-application')
-        wnd.menu("Preferences").click()
+        wnd.menu("Preferences").select()
+        from time import sleep
+        sleep(3)
         checkbox = wnd.menu("Preferences").menuItem("Bold")
         status = checkbox.checked
         checkbox.click()
@@ -530,7 +533,7 @@ class TestNode(GtkDemoTest):
     def test_point(self):
         self.runDemo('Application Class')
         wnd = dogtail.tree.root.application('gtk3-demo-application')
-        wnd.menu("Preferences").click()
+        wnd.menu("Preferences").select()
         color = wnd.menu("Preferences").menu("Color")
         red = wnd.menu("Preferences").menu("Color").menuItem("Red")
         self.assertFalse(red.showing)
@@ -540,7 +543,7 @@ class TestNode(GtkDemoTest):
     def test_point_delay_explicit(self):
         self.runDemo('Application Class')
         wnd = dogtail.tree.root.application('gtk3-demo-application')
-        wnd.menu("Preferences").click()
+        wnd.menu("Preferences").select()
         color = wnd.menu("Preferences").menu("Color")
         red = wnd.menu("Preferences").menu("Color").menuItem("Red")
         self.assertFalse(red.showing)

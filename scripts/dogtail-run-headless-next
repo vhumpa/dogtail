@@ -151,7 +151,7 @@ class DisplayManagerSession:
         self.display_manager = display_manager
         self.session = session
         self.session_binary = session_binary
-        self.user = user
+        self.user = "test"
 
         self.accountfile = "/var/lib/AccountsService/users/%s" % self.user
 

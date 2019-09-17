@@ -124,7 +124,7 @@ def ponytail_check_connection(window_id=None, input_source="mouse"):
             debug_message(message="Connected window: %s." % ponytail.connected)
             debug_message(message="Reconnecting window: %s." % window_id)
             ponytail.connectWindow(window_id)
-            debug_message(message="Connected window: {ponytail.connected}." % ponytail.connected)
+            debug_message(message="Connected window: %s." % ponytail.connected)
 
         elif ponytail.connected != window_id and isinstance(window_id, str):
             debug_message(message="Disconnecting monitor.")

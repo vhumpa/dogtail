@@ -17,13 +17,16 @@ class Version:
     """
 
     def __init__(self, versionList):
-        debug_message(message="Version class init.")
-        self.api_version = '.'.join(versionList) if isinstance(versionList, list) else versionList
+        debug_message(message="Version class constructor: '%s':'%s'" % \
+            (type(versionList), str(versionList)))
+        self.api_version = ".".join(str(x) for x in versionList) if isinstance(versionList, list) else versionList
 
 
-    def fromString(self, versionString):
-        debug_message(message="Getting version from string.")
-        self.api_version = versionString
+    @classmethod
+    def fromString(cls, versionString):
+        debug_message(message="Getting version from Version.fromString deprecated, use constructor with string.")
+        instance = Version(versionString)
+        return instance
 
 
     def __str__(self):

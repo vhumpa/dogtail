@@ -14,9 +14,9 @@ from dogtail.logging import info_message, debug_message
 from dogtail.logging import TimeStamp
 
 import gi
-from gi.repository import Gtk, GLib
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
+from gi.repository import Gtk, GLib
 
 """
 Various utilities

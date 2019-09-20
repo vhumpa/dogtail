@@ -1162,26 +1162,25 @@ class Node(object):
         # I think this is useless, since only change is the debug string
 
         # Pick the most appropriate predicate for finding this node:
-        #if self.labellee:
-        #    if self.labellee.name:
-        #        return (ancestor, predicate.IsLabelledAs(self.labellee.name), isRecursive)
-        #
-        #if self.roleName == 'menu':
-        #    return (ancestor, predicate.IsAMenuNamed(self.name), isRecursive)
-        #elif self.roleName == 'menu item' or self.roleName == 'check menu item':
-        #    return (ancestor, predicate.IsAMenuItemNamed(self.name), isRecursive)
-        #elif self.roleName == 'text':
-        #    return (ancestor, predicate.IsATextEntryNamed(self.name), isRecursive)
-        #elif self.roleName == 'push button':
-        #    return (ancestor, predicate.IsAButtonNamed(self.name), isRecursive)
-        #elif self.roleName == 'frame':
-        #    return (ancestor, predicate.IsAWindowNamed(self.name), isRecursive)
-        #elif self.roleName == 'dialog':
-        #    return (ancestor, predicate.IsADialogNamed(self.name), isRecursive)
-        #else:
-
-        pred = predicate.GenericPredicate(name=self.name, roleName=self.roleName)
-        return (ancestor, pred, isRecursive)
+        if self.labellee:
+            if self.labellee.name:
+                return (ancestor, predicate.IsLabelledAs(self.labellee.name), isRecursive)
+        
+        if self.roleName == 'menu':
+            return (ancestor, predicate.IsAMenuNamed(self.name), isRecursive)
+        elif self.roleName == 'menu item' or self.roleName == 'check menu item':
+            return (ancestor, predicate.IsAMenuItemNamed(self.name), isRecursive)
+        elif self.roleName == 'text':
+            return (ancestor, predicate.IsATextEntryNamed(self.name), isRecursive)
+        elif self.roleName == 'push button':
+            return (ancestor, predicate.IsAButtonNamed(self.name), isRecursive)
+        elif self.roleName == 'frame':
+            return (ancestor, predicate.IsAWindowNamed(self.name), isRecursive)
+        elif self.roleName == 'dialog':
+            return (ancestor, predicate.IsADialogNamed(self.name), isRecursive)
+        else:
+            pred = predicate.GenericPredicate(name=self.name, roleName=self.roleName)
+            return (ancestor, pred, isRecursive)
 
 
     def __nodeIsIdentifiable(self, ancestor):

@@ -533,25 +533,13 @@ class TestNode(GtkDemoTest):
     def test_point(self):
         self.runDemo('Application Class')
         wnd = dogtail.tree.root.application('gtk3-demo-application')
-        wnd.menu("Preferences").select()
+        wnd.menu("Help").click() # workaround for wayland, first app focus
+        wnd.menu("Preferences").point()
         color = wnd.menu("Preferences").menu("Color")
         red = wnd.menu("Preferences").menu("Color").menuItem("Red")
         self.assertFalse(red.showing)
         color.point()
         self.assertTrue(red.showing)
-
-    def test_point_delay_explicit(self):
-        self.runDemo('Application Class')
-        wnd = dogtail.tree.root.application('gtk3-demo-application')
-        wnd.menu("Preferences").select()
-        color = wnd.menu("Preferences").menu("Color")
-        red = wnd.menu("Preferences").menu("Color").menuItem("Red")
-        self.assertFalse(red.showing)
-        start = time.time()
-        color.point(2.0)
-        end = time.time()
-        self.assertTrue(red.showing)
-        self.assertTrue(end - start >= 2.0)
 
     def test_typeText_nonfucable(self):
         """
@@ -742,12 +730,12 @@ class TestSearching(GtkDemoTest):
     def test_absoluteSearchPath(self):
         self.assertEqual(
             str(self.app.getAbsoluteSearchPath()),
-            '{/("gtk3-demo" application,False)}')
+            "{/('gtk3-demo' application,False)}")
         builder = self.app.child("Builder")
         self.assertEqual(
             str(builder.getAbsoluteSearchPath()),
-            '{/("gtk3-demo" application,False)/("Application Class" window,False)/(child with name="Builder" '
-            'roleName=\'table cell\',True)}')
+            "{/('gtk3-demo' application,False)/('Application Class' window,False)/(child with name='Builder' "
+            "roleName='table cell',True)}")
 
     def test_compare_equal_search_paths(self):
         builder = self.app.child("Builder")
@@ -785,7 +773,7 @@ class TestSearching(GtkDemoTest):
         # FIXME: dot in the beginning
         self.assertEqual(
             builder_sp.makeScriptMethodCall(),
-            '.application("gtk3-demo").window("Application Class").child( name="Builder" roleName=\'table cell\')')
+            ".application('gtk3-demo').window('Application Class').child( name='Builder' roleName='table cell')")
 
     def test_get_relative_search_path_for_path(self):
         builder = self.app.child("Builder")
@@ -800,14 +788,14 @@ class TestSearching(GtkDemoTest):
         builder_sp = builder.getAbsoluteSearchPath()
         self.assertEqual(
             str(builder_sp.getPrefix(1)),
-            '{/("gtk3-demo" application,False)}')
+            "{/('gtk3-demo' application,False)}")
 
     def test_get_predicate(self):
         builder = self.app.child("Builder")
         builder_sp = builder.getAbsoluteSearchPath()
         pred = builder_sp.getPredicate(0)
         self.assertEqual(type(pred), dogtail.predicate.IsAnApplicationNamed)
-        self.assertEqual(str(pred.appName), '"gtk3-demo"')
+        self.assertEqual(str(pred.appName), "'gtk3-demo'")
 
     def test_getRelativeSearch_app(self):
         relpath = self.app.getRelativeSearch()
@@ -819,7 +807,7 @@ class TestSearching(GtkDemoTest):
         builder = self.app.child("Builder")
         relpath = builder.getRelativeSearch()
         self.assertEqual(str(relpath[0]), '[frame | Application Class]')
-        self.assertEqual(relpath[1].describeSearchResult(), 'child with name="Builder" roleName=\'table cell\'')
+        self.assertEqual(relpath[1].describeSearchResult(), "child with name='Builder' roleName='table cell'")
         self.assertTrue(relpath[2])
 
     def test_findChildren_non_recursive(self):

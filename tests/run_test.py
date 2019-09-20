@@ -4,6 +4,7 @@ from test_utils import TestScreenshot, TestRun, TestDelay, TestA11Y, TestLock, T
 from dogtail.logging import info_message
 import dogtail
 
+#
 #info_message(message="====================================")
 #info_message(message="Executiong tests for dogtail.version")
 #info_message(message="====================================")
@@ -87,83 +88,105 @@ import dogtail
 #run_test1_5 = TestI18N()
 #info_message(message="TestI18N().test_load_all_translations_for_language")
 #run_test1_5.test_load_all_translations_for_language()
+#
+#
+#info_message(message="====================================")
+#info_message(message="Executiong tests for dogtail.tree")
+#info_message(message="====================================")
+#from test_tree import TestNode, TestSelection, TestValue, TestSearching, TestUnicodeNames, TestDump
+#list_of_tests = ["test_get_bogus","test_get_name","test_set_name","test_get_debugName",
+#"test_set_debugName","test_get_roleName","test_set_roleName","test_get_role","test_set_role",
+#"test_get_description","test_set_description","test_get_parent","test_set_parent",
+#"test_get_children","test_set_children","test_get_children_with_limit","test_get_combo_value",
+#"test_get_URI_not_implemented","test_set_text","test_text_set_error","test_caretOffset",
+#"test_comboValue","test_getStateSet","test_setStateSet","test_get_relations","test_get_labelee",
+#"test_set_labelee","test_get_labeler","test_set_labeller","test_get_sensitive","test_set_sensitive",
+#"test_get_showing","test_set_showing","test_get_visible","test_set_visible","test_get_actions",
+#"test_set_actions","test_get_extents","test_get_extens_wrong","test_set_extents","test_get_position",
+#"test_get_position_not_implemented","test_set_position","test_get_size_not_implemented",
+#"test_set_size","test_get_toolkit","test_set_toolkit","test_get_ID","test_set_ID","test_checked",
+#"test_dead","test_contains","test_childAtPoint","test_click","test_doubleClick","test_point",
+#"test_typeText_nonfucable"]
+#info_message(message="TestNode()")
+#for test in list_of_tests:
+#    info_message(message="TestNode().%s" % test)
+#    testing = TestNode()
+#    testing.setUp()
+#    getattr(testing, test)()
+#    testing.tearDown()
+#
+#
+#list_of_tests = ["test_tabs", "test_iconView"]
+#info_message(message="TestSelection()")
+#for test in list_of_tests:
+#    info_message(message="TestSelection().%s" % test)
+#    testing = TestSelection()
+#    testing.setUp()
+#    getattr(testing, test)()
+#    testing.tearDown()
+#
+#list_of_tests = ["test_get_value", "test_set_value", "test_min_value", "test_max_value", "test_min_value_increment"]
+#info_message(message="TestValue()")
+#for test in list_of_tests:
+#    info_message(message="TestValue().%s" % test)
+#    testing = TestValue()
+#    testing.setUp()
+#    getattr(testing, test)()
+#    testing.tearDown()
+#
+#
+#list_of_tests = ["test_findChildren", "test_findChild_lambda", "test_findChildren2", 
+#"test_findChildren2_lambda", "test_findChildren_lambdas", "test_findAncestor", "test_isChild", 
+#"test_getUserVisibleStrings", "test_satisfies", "test_absoluteSearchPath", 
+#"test_compare_equal_search_paths", "test_compare_unequal_search_paths_different_length", 
+#"test_compare_unequal_search_paths_same_length", "test_get_search_path_length", 
+#"test_iterate_search_path", "test_make_script_method_call_from_search_path", 
+#"test_get_relative_search_path_for_path", "test_get_prefix_for_search_path", "test_get_predicate", 
+#"test_getRelativeSearch_app", "test_getRelativeSearch_widget", "test_findChildren_non_recursive", 
+#"test_find_by_shortcut", "test_find_by_shortcut2"]
+#info_message(message="TestSearching()")
+#for test in list_of_tests:
+#    info_message(message="TestSearching().%s" % test)
+#    testing = TestSearching()
+#    testing.setUp()
+#    getattr(testing, test)()
+#    testing.tearDown()
+#
+#
+#list_of_tests = ["setUp", "test_unicode_char_in_name", "test_unicode_char_in_name_click", 
+#"test_unicode_logging_nocrash", "tearDown"]
+#info_message(message="TestUnicodeNames()")
+#for test in list_of_tests:
+#    info_message(message="TestUnicodeNames().%s" % test)
+#    testing = TestUnicodeNames()
+#    testing.setUp()
+#    getattr(testing, test)()
+#    testing.tearDown()
+#
+#
+#list_of_tests = ["test_dump_to_stdout", "test_dump_with_actions"]
+#info_message(message="TestDump()")
+#for test in list_of_tests:
+#    info_message(message="TestDump().%s" % test)
+#    testing = TestDump()
+#    testing.setUp()
+#    getattr(testing, test)()
+#    testing.tearDown()
 
 
 info_message(message="====================================")
-info_message(message="Executiong tests for dogtail.tree")
+info_message(message="Executiong tests for dogtail.rawinput")
 info_message(message="====================================")
-from test_tree import TestNode, TestSelection, TestValue, TestSearching, TestUnicodeNames, TestDump
-list_of_tests = ["test_get_bogus","test_get_name","test_set_name","test_get_debugName",
-"test_set_debugName","test_get_roleName","test_set_roleName","test_get_role","test_set_role",
-"test_get_description","test_set_description","test_get_parent","test_set_parent",
-"test_get_children","test_set_children","test_get_children_with_limit","test_get_combo_value",
-"test_get_URI_not_implemented","test_set_text","test_text_set_error","test_caretOffset",
-"test_comboValue","test_getStateSet","test_setStateSet","test_get_relations","test_get_labelee",
-"test_set_labelee","test_get_labeler","test_set_labeller","test_get_sensitive","test_set_sensitive",
-"test_get_showing","test_set_showing","test_get_visible","test_set_visible","test_get_actions",
-"test_set_actions","test_get_extents","test_get_extens_wrong","test_set_extents","test_get_position",
-"test_get_position_not_implemented","test_set_position","test_get_size_not_implemented",
-"test_set_size","test_get_toolkit","test_set_toolkit","test_get_ID","test_set_ID","test_checked",
-"test_dead","test_contains","test_childAtPoint","test_click","test_doubleClick","test_point",
-"test_point_delay_explicit","test_typeText_nonfucable"]
-
-
-#testing = TestNode()
-#testing.setUp()
-#testing.test_checked()
-#testing.tearDown()
-#exit(0)
-
-
-info_message(message="TestNode()")
+from test_rawinput import TestRawinput
+list_of_tests = ["test_motion", "test_motion_with_trajectory",
+"test_check_coordinates_direct", "test_check_coordinates_builtin",
+"test_doubleClick", "test_click", "test_press_release", "test_drag",
+"test_drag_with_trajectory", "test_pressKey_no_such_key", "test_keyCombo_simple",
+"test_keyCombo_multi", "test_keyCombo_wrong_key", "test_typeText"]
+info_message(message="TestRawinput()")
 for test in list_of_tests:
-    info_message(message="TestNode().%s" % test)
-    testing = TestNode()
+    info_message(message="TestRawinput().%s" % test)
+    testing = TestRawinput()
     testing.setUp()
     getattr(testing, test)()
     testing.tearDown()
-
-exit(0)
-info_message(message="TestSelection()")
-info_message(message="TestSelection().test_tabs")
-info_message(message="TestSelection().test_iconView")
-info_message(message="TestValue()")
-info_message(message="TestValue().test_get_value")
-info_message(message="TestValue().test_set_value")
-info_message(message="TestValue().test_min_value")
-info_message(message="TestValue().test_max_value")
-info_message(message="TestValue().test_min_value_increment")
-info_message(message="TestSearching()")
-info_message(message="TestSearching().test_findChildren")
-info_message(message="TestSearching().test_findChild_lambda")
-info_message(message="TestSearching().test_findChildren2")
-info_message(message="TestSearching().test_findChildren2_lambda")
-info_message(message="TestSearching().test_findChildren_lambdas")
-info_message(message="TestSearching().test_findAncestor")
-info_message(message="TestSearching().test_isChild")
-info_message(message="TestSearching().test_getUserVisibleStrings")
-info_message(message="TestSearching().test_satisfies")
-info_message(message="TestSearching().test_absoluteSearchPath")
-info_message(message="TestSearching().test_compare_equal_search_paths")
-info_message(message="TestSearching().test_compare_unequal_search_paths_different_length")
-info_message(message="TestSearching().test_compare_unequal_search_paths_same_length")
-info_message(message="TestSearching().test_get_search_path_length")
-info_message(message="TestSearching().test_iterate_search_path")
-info_message(message="TestSearching().test_make_script_method_call_from_search_path")
-info_message(message="TestSearching().test_get_relative_search_path_for_path")
-info_message(message="TestSearching().test_get_prefix_for_search_path")
-info_message(message="TestSearching().test_get_predicate")
-info_message(message="TestSearching().test_getRelativeSearch_app")
-info_message(message="TestSearching().test_getRelativeSearch_widget")
-info_message(message="TestSearching().test_findChildren_non_recursive")
-info_message(message="TestSearching().test_find_by_shortcut")
-info_message(message="TestSearching().test_find_by_shortcut2")
-info_message(message="TestUnicodeNames()")
-info_message(message="TestUnicodeNames().setUp")
-info_message(message="TestUnicodeNames().test_unicode_char_in_name")
-info_message(message="TestUnicodeNames().test_unicode_char_in_name_click")
-info_message(message="TestUnicodeNames().test_unicode_logging_nocrash")
-info_message(message="TestUnicodeNames().tearDown")
-info_message(message="TestDump()")
-info_message(message="TestDump().test_dump_to_stdout")
-info_message(message="TestDump().test_dump_with_actions()")

@@ -413,25 +413,30 @@ def main():
         (display_manager_session.session_binary))
 
     try:
-        term = None
-        if "TERM" in os.environ:
-            term = os.environ["TERM"]
-
         os.environ = getSessionEnvironment(display_manager_session.session_binary)
+    except RuntimeError:
+        if display_manager_session.session_binary == "/usr/bin/gnome-shell":
+            try:
+                os.environ = getSessionEnvironment("/usr/libexec/gvfsd")
+                print("dogtail-run-headless-next: Could not get the environment from %s process" % \
+                    (display_manager_session.session_binary))
+                print("dogtail-run-headless-next: Trying to workaround with /usr/libexec/gvfsd")
+            except RuntimeError:
+                print("dogtail-run-headless-next: Could not get the environment from %s process" % \
+                    ("/usr/libexec/gvfsd"))
+                display_manager_session.stop()
+                display_manager_session.setup(restore=True)
+                sys.exit(1)
+        else:
+            print("dogtail-run-headless-next: Could not get the environment from %s process" % \
+                (display_manager_session.session_binary))
+            display_manager_session.stop()
+            display_manager_session.setup(restore=True)
+            sys.exit(1)
 
-        if term is not None:
-            os.environ["TERM"] = term
 
-        if args.debug:
-            os.environ["DOGTAIL_DEBUG"] = "true"
-
-    except Exception as error:
-        print("dogtail exception: %s" % error)
-        print("dogtail-run-headless-next: Could not get the environment from %s process" % \
-            (display_manager_session.session_binary))
-        display_manager_session.stop()
-        display_manager_session.setup(restore=True)
-        sys.exit(1)
+    if args.debug:
+        os.environ["DOGTAIL_DEBUG"] = "true"
 
     if display_manager_name == "gdm":
         display_manager_session.set_accessibility_to(True)
@@ -440,7 +445,7 @@ def main():
 
     script_process_id = script.start()
     print("dogtail-run-headless-next: Started the script with PID %d" % (script_process_id))
-    
+
     exit_code = script.wait()
     print("dogtail-run-headless-next: The script has finished with return code %d" % (exit_code))
 

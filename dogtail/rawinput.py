@@ -297,7 +297,7 @@ def absoluteMotionWithTrajectory(source_x, source_y, dest_x, dest_y, mouseDelay=
         checkCoordinates(source_x, source_y)
         checkCoordinates(dest_x, dest_y)
 
-    debug_message(message="Mouse absolute motion with trajectory to (%s,%s)" % (x, y))
+    debug_message(message="Mouse absolute motion with trajectory to (%s,%s)" % (dest_x, dest_y))
 
     if SESSION_TYPE == "wayland":
         ponytail_check_connection(window_id)

@@ -82,9 +82,8 @@ class FocusApplication(FocusBase):
         except tree.SearchError:
             if config.fatalErrors:
                 raise FocusError(name)
-            else:
-                focusFailed(pred)
-                return False
+            focusFailed(pred)
+            return False
 
         if app:
             FocusApplication.node = app

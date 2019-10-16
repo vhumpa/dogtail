@@ -141,7 +141,6 @@ class TestNode(GtkDemoTest):
 
     def test_get_children_with_limit(self):
         haveWarnedAboutChildrenLimit = False
-        print(haveWarnedAboutChildrenLimit)  # make pyflakes happy about it
         dogtail.config.config.childrenLimit = 1
         widget = self.app.child(roleName='tree table')
         self.assertEqual(len(widget.children), 1)
@@ -770,7 +769,6 @@ class TestSearching(GtkDemoTest):
     def test_make_script_method_call_from_search_path(self):
         builder = self.app.child("Builder")
         builder_sp = builder.getAbsoluteSearchPath()
-        # FIXME: dot in the beginning
         self.assertEqual(
             builder_sp.makeScriptMethodCall(),
             ".application('gtk3-demo').window('Application Class').child( name='Builder' roleName='table cell')")
@@ -853,17 +851,16 @@ class TestSearching(GtkDemoTest):
 # A painful point of collision between strings in python2 and python3!
 @unittest.skipIf(os.system('ls /usr/bin/gedit') != 0, "Skipping, need gedit")
 class TestUnicodeNames(unittest.TestCase):
-
     def setUp(self):
         import dogtail.config
         dogtail.config.config.logDebugToStdOut = True
         dogtail.config.config.logDebugToFile = True
         dogtail.config.config.logDebugToStdOut = True
-        dogtail.config.config.debugSearching = True
+        dogtail.config.config.debugSearching = False
         dogtail.config.config.searchCutoffCount = 3
         import dogtail.utils
         self.pid = dogtail.utils.run('gedit')
-        self.app = dogtail.tree.root.application('gedit')
+        self.app = dogtail.tree.root.application('org.gnome.gedit')
 
     def test_unicode_char_in_name(self):
         self.app.child('Open', roleName='toggle button').click()

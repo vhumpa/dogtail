@@ -44,57 +44,57 @@ class TestPredicate(unittest.TestCase):
         self.assertNotEqual(predicate, self)
 
     def test_predicates_application(self):
-        dummyApp = self.DummyNode('dummy', 'application')
+        dummyApp = self.DummyNode("dummy", 'application')
         appPredicate = dogtail.predicate.IsAnApplicationNamed(dummyApp.name)
         self.assertTrue(appPredicate.satisfiedByNode(dummyApp))
-        self.assertEqual(appPredicate.makeScriptMethodCall(True), 'application("dummy")')
+        self.assertEqual(appPredicate.makeScriptMethodCall(True), "application('dummy')")
         self.assertEqual(appPredicate.makeScriptVariableName(), 'dummyApp')
 
     def test_predicates_window(self):
-        dummyWin = self.DummyNode('dummy', 'frame')
+        dummyWin = self.DummyNode("dummy", 'frame')
         self.assertTrue(dogtail.predicate.IsAWindow().satisfiedByNode(dummyWin))
         self.assertEqual(dogtail.predicate.IsAWindow().describeSearchResult(), 'window')
 
     def test_predicates_window_named(self):
-        dummyWin = self.DummyNode('dummy', 'frame')
+        dummyWin = self.DummyNode("dummy", 'frame')
         frameNamedPredicate = dogtail.predicate.IsAWindowNamed(dummyWin.name)
         self.assertTrue(frameNamedPredicate.satisfiedByNode(dummyWin))
-        self.assertEqual(frameNamedPredicate.makeScriptMethodCall(False), 'window("dummy")')
+        self.assertEqual(frameNamedPredicate.makeScriptMethodCall(False), "window('dummy')")
         self.assertEqual(frameNamedPredicate.makeScriptVariableName(), 'dummyWin')
 
     def test_predicates_menu_named(self):
-        dummyMenu = self.DummyNode('dummy', 'menu')
+        dummyMenu = self.DummyNode("dummy", 'menu')
         menuNamedPredicate = dogtail.predicate.IsAMenuNamed(dummyMenu.name)
         self.assertTrue(menuNamedPredicate.satisfiedByNode(dummyMenu))
-        self.assertEqual(menuNamedPredicate.makeScriptMethodCall(False), 'menu("dummy", recursive=False)')
+        self.assertEqual(menuNamedPredicate.makeScriptMethodCall(False), "menu('dummy', recursive=False)")
         self.assertEqual(menuNamedPredicate.makeScriptVariableName(), 'dummyMenu')
 
     def test_predicates_menu_item_named(self):
-        dummyMenuItem = self.DummyNode('dummy', 'menu item')
+        dummyMenuItem = self.DummyNode("dummy", 'menu item')
         menuItemNamedPredicate = dogtail.predicate.IsAMenuItemNamed(dummyMenuItem.name)
         self.assertTrue(menuItemNamedPredicate.satisfiedByNode(dummyMenuItem))
-        self.assertEqual(menuItemNamedPredicate.makeScriptMethodCall(False), 'menuItem("dummy", recursive=False)')
+        self.assertEqual(menuItemNamedPredicate.makeScriptMethodCall(False), "menuItem('dummy', recursive=False)")
         self.assertEqual(menuItemNamedPredicate.makeScriptVariableName(), 'dummyMenuItem')
 
     def test_predicates_text_entry_named(self):
-        dummyText = self.DummyNode('dummy', 'text')
+        dummyText = self.DummyNode("dummy", 'text')
         textNamedPredicate = dogtail.predicate.IsATextEntryNamed(dummyText.name)
         self.assertTrue(textNamedPredicate.satisfiedByNode(dummyText))
-        self.assertEqual(textNamedPredicate.makeScriptMethodCall(False), 'textentry("dummy", recursive=False)')
+        self.assertEqual(textNamedPredicate.makeScriptMethodCall(False), "textentry('dummy', recursive=False)")
         self.assertEqual(textNamedPredicate.makeScriptVariableName(), 'dummyEntry')
 
     def test_predicates_button_named(self):
-        dummyButton = self.DummyNode('dummy', 'push button')
+        dummyButton = self.DummyNode("dummy", 'push button')
         buttonNamedPredicate = dogtail.predicate.IsAButtonNamed(dummyButton.name)
         self.assertTrue(buttonNamedPredicate.satisfiedByNode(dummyButton))
-        self.assertEqual(buttonNamedPredicate.makeScriptMethodCall(False), 'button("dummy", recursive=False)')
+        self.assertEqual(buttonNamedPredicate.makeScriptMethodCall(False), "button('dummy', recursive=False)")
         self.assertEqual(buttonNamedPredicate.makeScriptVariableName(), 'dummyButton')
 
     def test_predicates_page_tab_named(self):
-        dummyTab = self.DummyNode('dummy', 'page tab')
+        dummyTab = self.DummyNode("dummy", 'page tab')
         pageTabNamedPredicate = dogtail.predicate.IsATabNamed(dummyTab.name)
         self.assertTrue(pageTabNamedPredicate.satisfiedByNode(dummyTab))
-        self.assertEqual(pageTabNamedPredicate.makeScriptMethodCall(False), 'tab("dummy", recursive=False)')
+        self.assertEqual(pageTabNamedPredicate.makeScriptMethodCall(False), "tab('dummy', recursive=False)")
         self.assertEqual(pageTabNamedPredicate.makeScriptVariableName(), 'dummyTab')
 
     def test_predicates_generic_by_name(self):
@@ -102,7 +102,7 @@ class TestPredicate(unittest.TestCase):
         genericPredicateByName = dogtail.predicate.GenericPredicate(name=dn1.name)
         self.assertTrue(genericPredicateByName.satisfiedByNode(dn1))
         self.assertEqual(genericPredicateByName.makeScriptMethodCall(
-            False), 'child( name="dummy name 1", recursive=False)')
+            False), "child( name='dummy name 1', recursive=False)")
         self.assertEqual(genericPredicateByName.makeScriptVariableName(), 'dummyName1Node')
 
     def test_predicates_generic_by_roleName(self):
@@ -128,7 +128,7 @@ class TestPredicate(unittest.TestCase):
         genericPredicateByLabel = dogtail.predicate.GenericPredicate(label=dn1.name)
         self.assertTrue(genericPredicateByLabel.satisfiedByNode(dn2))
         self.assertEqual(genericPredicateByLabel.makeScriptMethodCall(
-            False), 'child(label="dummy name 1", recursive=False)')
+            False), "child(label='dummy name 1', recursive=False)")
         self.assertEqual(genericPredicateByLabel.makeScriptVariableName(), 'dummyName1Node')
 
     def test_predicates_named(self):
@@ -136,7 +136,7 @@ class TestPredicate(unittest.TestCase):
         genericNamedPredicate = dogtail.predicate.IsNamed(dn1.name)
         self.assertTrue(genericNamedPredicate.satisfiedByNode(dn1))
         self.assertEqual(genericNamedPredicate.makeScriptMethodCall(
-            False), 'child(name="dummy name 1", recursive=False)')
+            False), "child(name='dummy name 1', recursive=False)")
         self.assertEqual(genericNamedPredicate.makeScriptVariableName(), 'dummyName1Node')
 
     def test_predicates_labelled_as(self):
@@ -147,12 +147,12 @@ class TestPredicate(unittest.TestCase):
         self.assertTrue(genericLabelledPredicate.satisfiedByNode(dn2))
         self.assertFalse(genericLabelledPredicate.satisfiedByNode(dn1))
         self.assertEqual(genericLabelledPredicate.makeScriptMethodCall(
-            False), 'child(label="dummy name 1", recursive=False)')
+            False), "child(label='dummy name 1', recursive=False)")
         self.assertEqual(genericLabelledPredicate.makeScriptVariableName(), 'dummyName1Node')
 
     def test_predicates_dialog_named(self):
         dn1 = self.DummyNode('dummy name 1', 'dialog', 'dummy desc 1')
         genericNamedPredicate = dogtail.predicate.IsADialogNamed(dn1.name)
         self.assertTrue(genericNamedPredicate.satisfiedByNode(dn1))
-        self.assertEqual(genericNamedPredicate.makeScriptMethodCall(False), 'dialog("dummy name 1")')
+        self.assertEqual(genericNamedPredicate.makeScriptMethodCall(False), "dialog('dummy name 1')")
         self.assertEqual(genericNamedPredicate.makeScriptVariableName(), 'dummyName1Dlg')

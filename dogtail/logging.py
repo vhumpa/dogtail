@@ -198,7 +198,6 @@ class ResultsLogger(Logger):
         Logger.log(self, self.stamper.entryStamp() + "      " + entry, force=True)
 
 debugLogger = Logger("debug", config.logDebugToFile)
-infoLogger = Logger("info", file=False)
 
 try:
     DEBUG = os.environ["DOGTAIL_DEBUG"] == "true"
@@ -210,7 +209,7 @@ def debug_message(message):
         debugLogger.log("DEBUG: " + message)
 
 def info_message(message):
-    infoLogger.log("INFO: "+ message)
+    debugLogger.log(message)
 
 
 def exceptionHook(exc, value, tb):  # pragma: no cover

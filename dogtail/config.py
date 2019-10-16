@@ -183,7 +183,7 @@ class _Config:
                 self.options.get(name, self.invalidValue) != value:
             if "Dir" in name:
                 self.__createDir(value)
-                value = value.strip("/") + os.path.sep
+                value = value.rstrip("/") + os.path.sep
 
             elif name == "logDebugToFile":
                 from dogtail import logging
@@ -232,7 +232,7 @@ class _Config:
         Resets all settings to their defaults.
         """
 
-        self.options = {}
+        _Config.options = {}
 
 
 config = _Config()

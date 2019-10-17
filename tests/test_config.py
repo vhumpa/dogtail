@@ -18,7 +18,8 @@ class TestConfiguration(unittest.TestCase):
             if 'Dir' in option:
                 value = '/tmp/dogtail/'  # Special value for dir-related properties
             dogtail.config.config.__setattr__(option, value)
-            self.assertEqual(dogtail.config.config.__getattr__(option).strip("\n"), value)
+            self.assertEqual(dogtail.config.config.__getattr__(option), value)
+            dogtail.config.config.reset()
 
     def test_default_directories_created(self):
         import os.path

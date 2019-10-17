@@ -339,15 +339,15 @@ info_message(message="====================================")
 info_message(message="Executiong tests for dogtail.config")
 info_message(message="====================================")
 from test_config import TestConfiguration
-list_of_tests = ["test_default_directories_created",
+list_of_tests = ["test_get_set_all_properties",
+                 "test_default_directories_created",
                  "test_set",
                  "test_get",
                  "test_create_scratch_directory",
                  "test_create_data_directory",
                  "test_create_log_directory",
                  "test_load",
-                 "test_reset",
-                 "test_get_set_all_properties"]
+                 "test_reset"]
 
 info_message(message="TestConfiguration()")
 for test in list_of_tests:
@@ -380,4 +380,3 @@ for test in list_of_tests:
 
 print("exiting with 0")
 exit(0)
-#import qeproc procqe proqe qepro qeif qeint qebox

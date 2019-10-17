@@ -152,6 +152,7 @@ class Logger:
 
         If force is True, log to a file irrespective of config.logDebugToFile.
         """
+        
 
         if isinstance(self.filee, bool) and (force or config.logDebugToFile):
             self.createFile()
@@ -168,7 +169,6 @@ class Logger:
                 print(message)
             except TypeError:
                 print(message.decode("utf-8", "replace"))
-
 
 class ResultsLogger(Logger):
     """

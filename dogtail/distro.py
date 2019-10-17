@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import re
 from dogtail.version import Version
-from dogtail.logging import debug_message
+from dogtail.logging import DEBUG_DOGTAIL, LOGGER
 from subprocess import check_output
 
 """
@@ -76,7 +76,7 @@ class PackageDb:
         specific locale.
         """
 
-        debug_message(message="PackageDb.getMoFiles")
+        if DEBUG_DOGTAIL: LOGGER.info("getMoFiles(self, locale=%s)" % str(locale))
 
         moFiles = {}
 
@@ -269,7 +269,7 @@ class JhBuildPackageDb(PackageDb):  # pragma: no cover
 
 
     def getDependencies(self, packageName):
-        debug_message(message="JhBuildPackageDb.getDependencies")
+        if DEBUG_DOGTAIL: LOGGER.info("getDependencies(self, packageName=%s)" % str(packageName))
 
         result = {}
         lines = os.popen("jhbuild list " + packageName).readlines()
@@ -365,7 +365,7 @@ class GnomeContinuous(Distro):  # pragma: no cover
 
 
 def detectDistro():  # pragma: no cover
-    debug_message(message="Detecting distribution:")
+    if DEBUG_DOGTAIL: LOGGER.info("detectDistro()")
 
     if os.environ.get("CERTIFIED_GNOMIE", "no") == "yes":
         distro = JHBuild()
@@ -394,7 +394,7 @@ def detectDistro():  # pragma: no cover
     else:
         raise DistributionNotSupportedError("Unknown")
 
-    debug_message(message=distro.__class__.__name__)
+    if DEBUG_DOGTAIL: LOGGER.info(distro.__class__.__name__)
     return distro
 
 distro = detectDistro()

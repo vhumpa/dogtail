@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import sys
 import time
+import logging
 import traceback
 from dogtail.config import config
 
@@ -200,17 +201,14 @@ class ResultsLogger(Logger):
 debugLogger = Logger("debug", config.logDebugToFile)
 
 try:
-    DEBUG = os.environ["DOGTAIL_DEBUG"] == "true"
+    DEBUG_DOGTAIL = os.environ["DOGTAIL_DEBUG"] == "true"
 except KeyError:
-    DEBUG = False
-
-def debug_message(message):
-    if DEBUG:
-        debugLogger.log("DEBUG: " + message)
-
-def info_message(message):
-    debugLogger.log(message)
-
+    DEBUG_DOGTAIL = False
+    
+LOGGER = logging.getLogger("dogtail")
+FORMAT = "[%(filename)s:%(lineno)3s] %(message)s"
+logging.basicConfig(format=FORMAT)
+LOGGER.setLevel(logging.DEBUG)
 
 def exceptionHook(exc, value, tb):  # pragma: no cover
     tbStringList = traceback.format_exception(exc, value, tb)

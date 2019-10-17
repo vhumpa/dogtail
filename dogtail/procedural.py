@@ -6,7 +6,7 @@ from dogtail import predicate
 from dogtail import rawinput
 from dogtail import tree
 from dogtail.config import config
-from dogtail.logging import debug_message
+from dogtail.logging import DEBUG_DOGTAIL, LOGGER
 from dogtail.utils import Lock
 
 """
@@ -170,7 +170,7 @@ class FocusWidget(FocusBase):
     """
 
     def findByPredicate(self, pred):
-        debug_message(message="FocusWidget.findByPredicate")
+        if DEBUG_DOGTAIL: LOGGER.info("findByPredicate(self, pred=%s)" % str(pred))
 
         result = None
 
@@ -262,7 +262,7 @@ class Focus(FocusBase):
         A shortcut to self.widget.findByPredicate(predicate.IsAButtonNamed(name))
         """
 
-        debug_message(message="Focus.button")
+        if DEBUG_DOGTAIL: LOGGER.info("button(self, name=%s)" % str(name))
 
         return self.widget.findByPredicate(predicate.IsAButtonNamed(name))
 
@@ -272,7 +272,7 @@ class Focus(FocusBase):
         A shortcut to self.widget(name, roleName = 'icon')
         """
 
-        debug_message(message="Focus.icon")
+        if DEBUG_DOGTAIL: LOGGER.info("icon(self, name=%s)" % str(name))
 
         return self.widget(name=name, roleName="icon")
 
@@ -282,7 +282,7 @@ class Focus(FocusBase):
         A shortcut to self.widget.findByPredicate(predicate.IsAMenuNamed(name))
         """
 
-        debug_message(message="Focus.menu")
+        if DEBUG_DOGTAIL: LOGGER.info("menu(self, name=%s)" % str(name))
 
         return self.widget.findByPredicate(predicate.IsAMenuNamed(name))
 
@@ -292,7 +292,7 @@ class Focus(FocusBase):
         A shortcut to self.widget.findByPredicate(predicate.IsAMenuItemNamed(name))
         """
 
-        debug_message(message="Focus.menuItem")
+        if DEBUG_DOGTAIL: LOGGER.info("menuItem(self, name=%s)" % str(name))
 
         return self.widget.findByPredicate(predicate.IsAMenuItemNamed(name))
 
@@ -302,7 +302,7 @@ class Focus(FocusBase):
         A shortcut to self.widget(name, roleName 'table')
         """
 
-        debug_message(message="Focus.table")
+        if DEBUG_DOGTAIL: LOGGER.info("table(self, name=%s)" % str(name))
 
         return self.widget(name=name, roleName="table")
 
@@ -312,7 +312,7 @@ class Focus(FocusBase):
         A shortcut to self.widget(name, roleName 'table cell')
         """
 
-        debug_message(message="Focus.tableCell")
+        if DEBUG_DOGTAIL: LOGGER.info("tableCell(self, name=%s)" % str(name))
 
         return self.widget(name=name, roleName="table cell")
 
@@ -322,7 +322,7 @@ class Focus(FocusBase):
         A shortcut to self.widget.findByPredicate(IsATextEntryNamed(name))
         """
 
-        debug_message(message="Focus.text")
+        if DEBUG_DOGTAIL: LOGGER.info("text(self, name=%s)" % str(name))
 
         return self.widget.findByPredicate(predicate.IsATextEntryNamed(name))
 
@@ -368,7 +368,7 @@ class Action(FocusWidget):
         A shortcut to self(name, roleName = 'push button')
         """
 
-        debug_message(message="Action.button")
+        if DEBUG_DOGTAIL: LOGGER.info("button(self, name=%s)" % str(name))
 
         self.__call__(name=name, roleName="push button")
 
@@ -378,7 +378,7 @@ class Action(FocusWidget):
         A shortcut to self(name, roleName = 'menu')
         """
 
-        debug_message(message="Action.menu")
+        if DEBUG_DOGTAIL: LOGGER.info("menu(self, name=%s)" % str(name))
 
         self.__call__(name=name, roleName="menu")
 
@@ -388,7 +388,7 @@ class Action(FocusWidget):
         A shortcut to self(name, roleName = 'menu item')
         """
 
-        debug_message(message="Action.menuItem")
+        if DEBUG_DOGTAIL: LOGGER.info("menuItem(self, name=%s)" % str(name))
 
         self.__call__(name=name, roleName="menu item")
 
@@ -398,7 +398,7 @@ class Action(FocusWidget):
         A shortcut to self(name, roleName 'table')
         """
 
-        debug_message(message="Action.table")
+        if DEBUG_DOGTAIL: LOGGER.info("table(self, name=%s)" % str(name))
 
         self.__call__(name=name, roleName="table")
 
@@ -408,7 +408,7 @@ class Action(FocusWidget):
         A shortcut to self(name, roleName 'table cell')
         """
 
-        debug_message(message="Action.tableCell")
+        if DEBUG_DOGTAIL: LOGGER.info("tableCell(self, name=%s)" % str(name))
 
         self.__call__(name=name, roleName="table cell")
 
@@ -418,7 +418,7 @@ class Action(FocusWidget):
         A shortcut to self(name, roleName = 'text')
         """
 
-        debug_message(message="Action.text")
+        if DEBUG_DOGTAIL: LOGGER.info("text(self, name=%s)" % str(name))
 
         self.__call__(name=name, roleName="text")
 

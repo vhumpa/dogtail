@@ -10,7 +10,7 @@ import tempfile
 import random
 import glob
 from dogtail.config import config
-from dogtail.logging import debug_message, info_message
+from dogtail.logging import DEBUG_DOGTAIL, LOGGER
 
 
 def scratchFile(label):  # pragma: no cover
@@ -19,7 +19,7 @@ def scratchFile(label):  # pragma: no cover
     with a filename like: dogtail-headless-<label>.<random junk>
     """
 
-    debug_message(message="Creating a unique scratch file.")
+    if DEBUG_DOGTAIL: LOGGER.info("scratchFile(label=%s)" % label)
 
     prefix = "dogtail-headless-%s." % label
     return tempfile.NamedTemporaryFile(prefix=prefix, dir=config.scratchDir, mode="w")
@@ -30,7 +30,7 @@ def testBinary(path):  # pragma: no cover
     Test if given binary file exists.
     """
 
-    debug_message(message="Does binary file exist?")
+    if DEBUG_DOGTAIL: LOGGER.info("testBinary(path=%s)" % str(path))
 
     if (path.startswith(os.path.sep) or
             path.startswith(os.path.join(".", "")) or
@@ -49,7 +49,7 @@ def get_username():  # pragma: no cover
     Returns a user name.
     """
 
-    debug_message(message="Returns user name.")
+    if DEBUG_DOGTAIL: LOGGER.info("get_username()")
 
     return pwd.getpwuid(os.getuid())[0]
 
@@ -67,7 +67,7 @@ class Subprocess:  # pragma: no cover
 
 
     def start(self):
-        debug_message(message="Subprocess.start - execute the command through Popen.")
+        if DEBUG_DOGTAIL: LOGGER.info("Subprocess.start - execute the command through Popen.")
 
         if self.environ is None:
             self.environ = os.environ
@@ -78,20 +78,20 @@ class Subprocess:  # pragma: no cover
 
 
     def wait(self):
-        debug_message(message="Subprocess.wait - wait until Popen execution is done.")
+        if DEBUG_DOGTAIL: LOGGER.info("Subprocess.wait - wait until Popen execution is done.")
 
         return self.popen.wait()
 
 
     def stop(self):
-        debug_message(message="Subprocess.stop - terminate Popen object.")
+        if DEBUG_DOGTAIL: LOGGER.info("Subprocess.stop - terminate Popen object.")
 
         self.popen.terminate()
 
 
     @property
     def exitCode(self):
-        debug_message(message="Subprocess.exitCode - returning exit code.")
+        if DEBUG_DOGTAIL: LOGGER.info("Subprocess.exitCode - returning exit code.")
 
         if self._exitCode is None:
             self._exitCode = self.wait()
@@ -117,7 +117,7 @@ class XServer(Subprocess):  # pragma: no cover
 
     @staticmethod
     def findFreeDisplay():
-        debug_message(message="XServer.findFreeDisplay - returns a free display number.")
+        if DEBUG_DOGTAIL: LOGGER.info("findFreeDisplay()")
 
         tmp = os.listdir("/tmp")
         pattern = re.compile(".X([0-9]+)-lock")
@@ -134,7 +134,7 @@ class XServer(Subprocess):  # pragma: no cover
 
     @property
     def cmdList(self):
-        debug_message(message="XServer.cmdList - returns a full command to start xserver.")
+        if DEBUG_DOGTAIL: LOGGER.info("cmdList(self)")
 
         self.display = self.findFreeDisplay()
 
@@ -157,9 +157,9 @@ class XServer(Subprocess):  # pragma: no cover
 
 
     def start(self):
-        debug_message(message="XServer.start - starts process with command from XServer.cmdList.")
+        if DEBUG_DOGTAIL: LOGGER.info("XServer.start - starts process with command from XServer.cmdList.")
 
-        info_message(message=" ".join(self.cmdList))
+        LOGGER.info(" ".join(self.cmdList))
         self.popen = subprocess.Popen(self.cmdList)
         return self.popen.pid
 
@@ -187,7 +187,7 @@ class Session:  # pragma: no cover
 
 
     def start(self):
-        debug_message(message="Session.start - starts a process via XServer.start")
+        if DEBUG_DOGTAIL: LOGGER.info("Session.start - starts a process via XServer.start")
 
         self.xinitrcFileObj = scratchFile("xinitrc")
         self.xserver.xinitrc = self.xinitrcFileObj.name
@@ -202,19 +202,16 @@ class Session:  # pragma: no cover
 
     @property
     def environment(self):
-        debug_message(message="Session.environment - returns an environment")
+        if DEBUG_DOGTAIL: LOGGER.info("Session.environment - returns an environment")
 
         def isSessionProcess(fileName):
-            debug_message(message="Session.environment.isSessionProcess")
+            if DEBUG_DOGTAIL: LOGGER.info("isSessionProcess(fileName=%s)" % str(fileName))
 
             try:
                 if self.sessionBinary.split("/")[-1] == "startkde":
                     path_to_compare = "/usr/bin/plasma-desktop"
                 else:
                     path_to_compare = self.sessionBinary
-
-                if os.path.realpath(path + "exe") != path_to_compare:
-                    return False
 
             except OSError:
                 return False
@@ -227,7 +224,7 @@ class Session:  # pragma: no cover
 
 
         def getEnvDict(fileName):
-            debug_message(message="Session.environment.getEnvDict")
+            if DEBUG_DOGTAIL: LOGGER.info("getEnvDict(fileName=%s)" % str(fileName))
 
             try:
                 with open(fileName, "r") as f:
@@ -248,7 +245,7 @@ class Session:  # pragma: no cover
 
 
         def isSessionEnv(envDict):
-            debug_message(message="Session.environment.isSessionEnv")
+            if DEBUG_DOGTAIL: LOGGER.info("isSessionEnv(envDict=%s)" % str(envDict))
             if not envDict:
                 return False
 
@@ -274,14 +271,14 @@ class Session:  # pragma: no cover
 
 
     def wait(self):
-        debug_message(message="Session.stop - executes the XServer.wait method.")
+        if DEBUG_DOGTAIL: LOGGER.info("Session.stop - executes the XServer.wait method.")
 
         self.script.wait()
         return self.xserver.wait()
 
 
     def stop(self):
-        debug_message(message="Session.stop - executes the XServer.stop method.")
+        if DEBUG_DOGTAIL: LOGGER.info("Session.stop - executes the XServer.stop method.")
 
         try:
             self.script.stop()
@@ -292,7 +289,7 @@ class Session:  # pragma: no cover
 
 
     def attemptLogout(self):
-        debug_message(message="Session.attemptLogout - attempts to logout from session.")
+        if DEBUG_DOGTAIL: LOGGER.info("Session.attemptLogout - attempts to logout from session.")
 
         logoutScript = Script("dogtail-logout", environ=self.environment)
         logoutScript.start()
@@ -301,7 +298,7 @@ class Session:  # pragma: no cover
 
     @property
     def cookie(self):
-        debug_message(message="Session.cookie - returns a cookie attribute.")
+        if DEBUG_DOGTAIL: LOGGER.info("Session.cookie - returns a cookie attribute.")
 
         if not self._cookie:
             self._cookie = "%X" % random.getrandbits(16)

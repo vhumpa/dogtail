@@ -310,24 +310,6 @@ class TestActions(GtkDemoTest):
         self.assertTrue(isinstance(focus.widget.node, tree.Node))
         self.assertEqual(focus.widget.node.role, pyatspi.ROLE_TEXT)
 
-    def test_custom_actions_text_with_debug(self):
-        self.runDemo('Builder')
-        try:
-            wnd = self.app.child('GtkBuilder demo', roleName='frame', recursive=False, retry=False)
-        except SearchError:
-            wnd = self.app.child('Builder', roleName='frame', recursive=False, retry=False)
-        focus.window(wnd.name)
-        config.debugSearching = True
-        output = trap_stdout(click.text, '')
-        wanted_string = "Searching for 'descendant of [frame | %s]: child with roleName='text''" % wnd.name
-        print(repr("1:" + wanted_string))
-        print(repr("2:" + output))
-        assert wanted_string in output
-        self.assertTrue(wanted_string in output)
-
-        self.assertTrue(isinstance(focus.widget.node, tree.Node))
-        self.assertEqual(focus.widget.node.role, pyatspi.ROLE_TEXT)
-
     def test_custom_actions_table_cell(self):
         activate.tableCell("Combo Boxes")
         self.assertTrue(isinstance(focus.widget.node, tree.Node))

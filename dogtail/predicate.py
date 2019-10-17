@@ -2,7 +2,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 from dogtail.config import config
 from dogtail.i18n import TranslatableString
-from dogtail.logging import debug_message
+from dogtail.logging import DEBUG_DOGTAIL, LOGGER
 from gi.repository import GLib
 import re
 from time import sleep
@@ -114,36 +114,36 @@ class IsAnApplicationNamed(Predicate):
 
     def _genCompareFunc(self):
         def satisfiedByNode(node):
-            debug_message(message="IsAnApplicationNamed.satisfiedByNode")
+            if DEBUG_DOGTAIL: LOGGER.info("satisfiedByNode(node=%s)" % str(node))
 
             try:
                 return node.roleName == "application" and stringMatches(self.appName, node.name)
             except GLib.GError as error:
                 if re.match(r"name :[0-9]+\.[0-9]+ was not provided", error):
-                    debug_message(message="Dogtail warning: omiting possibly broken at-spi application record")
+                    if DEBUG_DOGTAIL: LOGGER.info("Dogtail warning: omiting possibly broken at-spi application record")
                     return False
 
                 try:
                     sleep(config.defaults["searchWarningThreshold"])
                     return node.roleName == "application" and stringMatches(self.appName, node.name)
                 except GLib.GError:
-                    debug_message(message="Dogtail warning: application may be hanging")
+                    if DEBUG_DOGTAIL: LOGGER.info("Dogtail warning: application may be hanging")
                     return False
         return satisfiedByNode
 
 
     def describeSearchResult(self):
-        debug_message(message="IsAnApplicationNamed.describeSearchResult")
+        if DEBUG_DOGTAIL: LOGGER.info("describeSearchResult(self)")
         return "%s application" % self.appName
 
 
     def makeScriptMethodCall(self, isRecursive):
-        debug_message(message="IsAnApplicationNamed.makeScriptMethodCall")
+        if DEBUG_DOGTAIL: LOGGER.info("makeScriptMethodCall(self, isRecursive=%s)" % str(isRecursive))
         return "application(%s)" % self.appName
 
 
     def makeScriptVariableName(self):
-        debug_message(message="IsAnApplicationNamed.makeScriptVariableName")
+        if DEBUG_DOGTAIL: LOGGER.info("makeScriptVariableName(self)")
         return makeCamel(self.appName) + "App"
 
 
@@ -189,7 +189,7 @@ class GenericPredicate(Predicate):
 
     def _genCompareFunc(self):
         def satisfiedByNode(node):
-            debug_message(message="GenericPredicate.satisfiedByNode")
+            if DEBUG_DOGTAIL: LOGGER.info("satisfiedByNode(node=%s)" % str(node))
 
             if self.label:
                 if node.labeller:
@@ -210,7 +210,7 @@ class GenericPredicate(Predicate):
                         return False
             except GLib.GError as error:
                 if re.match(r"name :[0-9]+\.[0-9]+ was not provided", error):
-                    debug_message(message="Dogtail warning: omiting possibly broken at-spi application record")
+                    if DEBUG_DOGTAIL: LOGGER.info("Dogtail warning: omiting possibly broken at-spi application record")
                     return False
 
                 raise error
@@ -219,12 +219,12 @@ class GenericPredicate(Predicate):
 
 
     def describeSearchResult(self):
-        debug_message(message="GenericPredicate.describeSearchResult")
+        if DEBUG_DOGTAIL: LOGGER.info("describeSearchResult(self)")
         return self.debugName
 
 
     def makeScriptMethodCall(self, isRecursive):
-        debug_message(message="GenericPredicate.makeScriptMethodCall")
+        if DEBUG_DOGTAIL: LOGGER.info("makeScriptMethodCall(self, isRecursive=%s)" % str(isRecursive))
 
         if self.label:
             args = "label=%s" % self.label
@@ -243,7 +243,7 @@ class GenericPredicate(Predicate):
 
 
     def makeScriptVariableName(self):
-        debug_message(message="GenericPredicate.makeScriptVariableName")
+        if DEBUG_DOGTAIL: LOGGER.info("makeScriptVariableName(self)")
 
         if self.label:
             return makeCamel(self.label) + "Node"
@@ -273,23 +273,23 @@ class IsNamed(Predicate):
 
     def _genCompareFunc(self):
         def satisfiedByNode(node):
-            debug_message(message="IsNamed.satisfiedByNode")
+            if DEBUG_DOGTAIL: LOGGER.info("satisfiedByNode(node=%s)" % str(node))
             return stringMatches(self.name, node.name)
         return satisfiedByNode
 
 
     def describeSearchResult(self):
-        debug_message(message="IsNamed.describeSearchResult")
+        if DEBUG_DOGTAIL: LOGGER.info("describeSearchResult(self)")
         return "named %s" % self.name
 
 
     def makeScriptMethodCall(self, isRecursive):
-        debug_message(message="IsNamed.makeScriptMethodCall")
+        if DEBUG_DOGTAIL: LOGGER.info("makeScriptMethodCall(self, isRecursive=%s)" % str(isRecursive))
         return "child(name=%s%s)" % (self.name, makeScriptRecursiveArgument(isRecursive, True))
 
 
     def makeScriptVariableName(self):
-        debug_message(message="IsNamed.makeScriptVariableName")
+        if DEBUG_DOGTAIL: LOGGER.info("makeScriptVariableName(self)")
         return makeCamel(self.name) + "Node"
 
 
@@ -306,22 +306,22 @@ class IsAWindowNamed(Predicate):
 
     def _genCompareFunc(self):
         def satisfiedByNode(node):
-            debug_message(message="IsAWindowNamed.satisfiedByNode")
+            if DEBUG_DOGTAIL: LOGGER.info("satisfiedByNode(node=%s)" % str(node))
             return node.roleName == "frame" and stringMatches(self.windowName, node.name)
         return satisfiedByNode
 
     def describeSearchResult(self):
-        debug_message(message="IsAWindowNamed.describeSearchResult")
+        if DEBUG_DOGTAIL: LOGGER.info("describeSearchResult(self)")
         return "%s window" % self.windowName
 
 
     def makeScriptMethodCall(self, isRecursive):
-        debug_message(message="IsAWindowNamed.makeScriptMethodCall")
+        if DEBUG_DOGTAIL: LOGGER.info("makeScriptMethodCall(self, isRecursive=%s)" % str(isRecursive))
         return "window(%s%s)" % (self.windowName, makeScriptRecursiveArgument(isRecursive, False))
 
 
     def makeScriptVariableName(self):
-        debug_message(message="IsAWindowNamed.makeScriptVariableName")
+        if DEBUG_DOGTAIL: LOGGER.info("makeScriptVariableName(self)")
         return makeCamel(self.windowName) + "Win"
 
 
@@ -335,7 +335,7 @@ class IsAWindow(Predicate):
 
 
     def describeSearchResult(self):
-        debug_message(message="IsAWindow.describeSearchResult")
+        if DEBUG_DOGTAIL: LOGGER.info("describeSearchResult(self)")
         return "window"
 
 
@@ -352,23 +352,23 @@ class IsADialogNamed(Predicate):
 
     def _genCompareFunc(self):
         def satisfiedByNode(node):
-            debug_message(message="IsADialogNamed.satisfiedByNode")
+            if DEBUG_DOGTAIL: LOGGER.info("satisfiedByNode(node=%s)" % str(node))
             return node.roleName == "dialog" and stringMatches(self.dialogName, node.name)
         return satisfiedByNode
 
 
     def describeSearchResult(self):
-        debug_message(message="IsADialogNamed.describeSearchResult")
+        if DEBUG_DOGTAIL: LOGGER.info("describeSearchResult(self)")
         return "%s dialog" % self.dialogName
 
 
     def makeScriptMethodCall(self, isRecursive):
-        debug_message(message="IsADialogNamed.makeScriptMethodCall")
+        if DEBUG_DOGTAIL: LOGGER.info("makeScriptMethodCall(self, isRecursive=%s)" % str(isRecursive))
         return "dialog(%s%s)" % (self.dialogName, makeScriptRecursiveArgument(isRecursive, False))
 
 
     def makeScriptVariableName(self):
-        debug_message(message="IsADialogNamed.makeScriptVariableName")
+        if DEBUG_DOGTAIL: LOGGER.info("makeScriptVariableName(self)")
         return makeCamel(self.dialogName) + "Dlg"
 
 
@@ -391,7 +391,7 @@ class IsLabelledAs(Predicate):
 
     def _genCompareFunc(self):
         def satisfiedByNode(node):
-            debug_message(message="IsLabelledAs.satisfiedByNode")
+            if DEBUG_DOGTAIL: LOGGER.info("satisfiedByNode(node=%s)" % str(node))
             if node.labeller:
                 return stringMatches(self.labelText, node.labeller.name)
             return False
@@ -399,17 +399,17 @@ class IsLabelledAs(Predicate):
 
 
     def describeSearchResult(self):
-        debug_message(message="IsLabelledAs.describeSearchResult")
+        if DEBUG_DOGTAIL: LOGGER.info("describeSearchResult(self)")
         return "labelled %s" % self.labelText
 
 
     def makeScriptMethodCall(self, isRecursive):
-        debug_message(message="IsLabelledAs.makeScriptMethodCall")
+        if DEBUG_DOGTAIL: LOGGER.info("makeScriptMethodCall(self, isRecursive=%s)" % str(isRecursive))
         return "child(label=%s%s)" % (self.labelText, makeScriptRecursiveArgument(isRecursive, True))
 
 
     def makeScriptVariableName(self):
-        debug_message(message="IsLabelledAs.makeScriptVariableName")
+        if DEBUG_DOGTAIL: LOGGER.info("makeScriptVariableName(self)")
         return makeCamel(self.labelText) + "Node"
 
 
@@ -425,17 +425,17 @@ class IsAMenuNamed(Predicate):
 
 
     def describeSearchResult(self):
-        debug_message(message="IsAMenuNamed.describeSearchResult")
+        if DEBUG_DOGTAIL: LOGGER.info("describeSearchResult(self)")
         return "%s menu" % (self.menuName)
 
 
     def makeScriptMethodCall(self, isRecursive):
-        debug_message(message="IsAMenuNamed.makeScriptMethodCall")
+        if DEBUG_DOGTAIL: LOGGER.info("makeScriptMethodCall(self, isRecursive=%s)" % str(isRecursive))
         return "menu(%s%s)" % (self.menuName, makeScriptRecursiveArgument(isRecursive, True))
 
 
     def makeScriptVariableName(self):
-        debug_message(message="IsAMenuNamed.makeScriptVariableName")
+        if DEBUG_DOGTAIL: LOGGER.info("makeScriptVariableName(self)")
         return makeCamel(self.menuName) + "Menu"
 
 
@@ -452,17 +452,17 @@ class IsAMenuItemNamed(Predicate):
 
 
     def describeSearchResult(self):
-        debug_message(message="IsAMenuItemNamed.describeSearchResult")
+        if DEBUG_DOGTAIL: LOGGER.info("describeSearchResult(self)")
         return "%s menuitem" % (self.menuItemName)
 
 
     def makeScriptMethodCall(self, isRecursive):
-        debug_message(message="IsAMenuItemNamed.makeScriptMethodCall")
+        if DEBUG_DOGTAIL: LOGGER.info("makeScriptMethodCall(self, isRecursive=%s)" % str(isRecursive))
         return "menuItem(%s%s)" % (self.menuItemName, makeScriptRecursiveArgument(isRecursive, True))
 
 
     def makeScriptVariableName(self):
-        debug_message(message="IsAMenuItemNamed.makeScriptVariableName")
+        if DEBUG_DOGTAIL: LOGGER.info("makeScriptVariableName(self)")
         return makeCamel(self.menuItemName) + "MenuItem"
 
 
@@ -478,17 +478,17 @@ class IsATextEntryNamed(Predicate):
 
 
     def describeSearchResult(self):
-        debug_message(message="IsATextEntryNamed.describeSearchResult")
+        if DEBUG_DOGTAIL: LOGGER.info("describeSearchResult(self)")
         return "%s textentry" % (self.textEntryName)
 
 
     def makeScriptMethodCall(self, isRecursive):
-        debug_message(message="IsATextEntryNamed.makeScriptMethodCall")
+        if DEBUG_DOGTAIL: LOGGER.info("makeScriptMethodCall(self, isRecursive=%s)" % str(isRecursive))
         return "textentry(%s%s)" % (self.textEntryName, makeScriptRecursiveArgument(isRecursive, True))
 
 
     def makeScriptVariableName(self):
-        debug_message(message="IsATextEntryNamed.makeScriptVariableName")
+        if DEBUG_DOGTAIL: LOGGER.info("makeScriptVariableName(self)")
         return makeCamel(self.textEntryName) + "Entry"
 
 
@@ -504,17 +504,17 @@ class IsAButtonNamed(Predicate):
 
 
     def describeSearchResult(self):
-        debug_message(message="IsAButtonNamed.describeSearchResult")
+        if DEBUG_DOGTAIL: LOGGER.info("describeSearchResult(self)")
         return "%s button" % (self.buttonName)
 
 
     def makeScriptMethodCall(self, isRecursive):
-        debug_message(message="IsAButtonNamed.makeScriptMethodCall")
+        if DEBUG_DOGTAIL: LOGGER.info("makeScriptMethodCall(self, isRecursive=%s)" % str(isRecursive))
         return "button(%s%s)" % (self.buttonName, makeScriptRecursiveArgument(isRecursive, True))
 
 
     def makeScriptVariableName(self):
-        debug_message(message="IsAButtonNamed.makeScriptVariableName")
+        if DEBUG_DOGTAIL: LOGGER.info("makeScriptVariableName(self)")
         return makeCamel(self.buttonName) + "Button"
 
 
@@ -530,15 +530,15 @@ class IsATabNamed(Predicate):
 
 
     def describeSearchResult(self):
-        debug_message(message="IsATabNamed.describeSearchResult")
+        if DEBUG_DOGTAIL: LOGGER.info("describeSearchResult(self)")
         return "%s tab" % (self.tabName)
 
 
     def makeScriptMethodCall(self, isRecursive):
-        debug_message(message="IsATabNamed.makeScriptMethodCall")
+        if DEBUG_DOGTAIL: LOGGER.info("makeScriptMethodCall(self, isRecursive=%s)" % str(isRecursive))
         return "tab(%s%s)" % (self.tabName, makeScriptRecursiveArgument(isRecursive, True))
 
 
     def makeScriptVariableName(self):
-        debug_message(message="IsATabNamed.makeScriptVariableName")
+        if DEBUG_DOGTAIL: LOGGER.info("makeScriptVariableName(self)")
         return makeCamel(self.tabName) + "Tab"

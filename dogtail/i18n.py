@@ -4,7 +4,7 @@ import os
 import re
 import gettext
 from dogtail import config
-from dogtail.logging import debug_message
+from dogtail.logging import DEBUG_DOGTAIL, LOGGER
 
 """
 Internationalization facilities
@@ -54,7 +54,8 @@ class GettextTranslationDb(TranslationDb):
 
 
     def getTranslationsOf(self, srcName):
-        debug_message(message="GettextTranslationDb.getTranslationsOf")
+        if DEBUG:
+            if DEBUG_DOGTAIL: LOGGER.info("getTranslationsOf(self, srcName=%s)"%str(srcName))
 
         # print "searching for translations of %s"%srcName
         # Use a dict to get uniqueness:
@@ -91,7 +92,7 @@ def translate(srcString):
     a list of all matches found (potentially the empty list)
     """
 
-    debug_message(message="Translate - returning list of all matches, can be empty.")
+    if DEBUG_DOGTAIL: LOGGER.info("translate(srcString=%s)" % str(translate))
 
     results = {}
     for translationDb in translationDbs:
@@ -100,7 +101,7 @@ def translate(srcString):
 
     if len(results) == 0:
         if config.config.debugTranslation:
-            debug_message(message="Translation not found for '%s'" % srcString)
+            if DEBUG_DOGTAIL: LOGGER.info("Translation not found for '%s'" % srcString)
 
     return list(results.keys())
 
@@ -131,7 +132,7 @@ class TranslatableString(object):
         string (or simply the original string, if no translation was found).
         """
 
-        debug_message(message="TranslatableString.matchedBy")
+        if DEBUG_DOGTAIL: LOGGER.info("matchedBy(self, string=%s)" % str(string))
 
         def stringsMatch(inS, outS):
             """
@@ -141,7 +142,7 @@ class TranslatableString(object):
             outS: the normal string to be compared against
             """
 
-            debug_message(message="TranslatableString.matchedBy.stringsMatch")
+            if DEBUG_DOGTAIL: LOGGER.info("stringsMatch(inS=%s, outS=%s)" % (str(inS), str(outS)))
 
             inString = str(inS)
             outString = outS
@@ -190,7 +191,7 @@ def isMoFile(filename, language=""):
     Optionally: Does the file also contain translations for a certain language, for example 'ja'?
     """
 
-    debug_message(message="isMoFile")
+    if DEBUG_DOGTAIL: LOGGER.info("isMoFile(filename=%s, language=%s)" % (filename, language))
 
     if re.match("(.*)\\.mo$", filename):
         if not language:
@@ -204,7 +205,7 @@ def isMoFile(filename, language=""):
 
 
 def loadAllTranslationsForLanguage(language):
-    debug_message(message="loadAllTranslationsForLanguage")
+    if DEBUG_DOGTAIL: LOGGER.info("loadAllTranslationsForLanguage(language=%s)" % str(language))
 
     from dogtail import distro
     for moFile in distro.packageDb.getMoFiles(language):
@@ -218,7 +219,8 @@ def getMoFilesForPackage(packageName, language='', getDependencies=True):
     language, for example 'ja'.
     """
 
-    debug_message(message="getMoFilesForPackage")
+    if DEBUG_DOGTAIL: LOGGER.info("getMoFilesForPackage(packageName=%s, language=%s, getDependencies=%s)" %
+                  (str(packageName), str(language), str(getDependencies)))
 
     from dogtail import distro
 
@@ -240,7 +242,8 @@ def loadTranslationsFromPackageMoFiles(packageName, getDependencies=True):
     the package (and its dependencies) to the translation database list.
     """
 
-    debug_message(message="loadTranslationsFromPackageMoFiles")
+    if DEBUG_DOGTAIL: LOGGER.info("loadTranslationsFromPackageMoFiles(packageName=%s, getDependencies=%s)" %
+                  (str(packageName), str(getDependencies)))
 
     moFiles = {}
 
@@ -255,7 +258,7 @@ def loadTranslationsFromPackageMoFiles(packageName, getDependencies=True):
                     moFiles[moFile] = None
                 except (AttributeError, IndexError):
                     if config.config.debugTranslation:
-                        debug_message(message="Warning: Failed to load mo-file for translation: %s"\
+                        if DEBUG_DOGTAIL: LOGGER.info("Warning: Failed to load mo-file for translation: %s"\
                             % moFile)
 
     # Hack alert:

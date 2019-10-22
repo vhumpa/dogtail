@@ -54,7 +54,7 @@ class GettextTranslationDb(TranslationDb):
 
 
     def getTranslationsOf(self, srcName):
-        if DEBUG:
+        if DEBUG_DOGTAIL:
             if DEBUG_DOGTAIL: LOGGER.info("getTranslationsOf(self, srcName=%s)"%str(srcName))
 
         # print "searching for translations of %s"%srcName

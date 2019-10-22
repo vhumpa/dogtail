@@ -1271,7 +1271,7 @@ class Node(object):
         number_of_attempts = 0
         while number_of_attempts < config.searchCutoffCount:
             if number_of_attempts >= config.searchWarningThreshold or config.debugSearching:
-                LOGGER.info("Searching for '%s' (attempt number: %i)" % \
+                print("Searching for '%s' (attempt number: %i)" % \
                     (describeSearch(self, pred, recursive, debugName), number_of_attempts))
 
             result = self._fastFindChild(compare_function, recursive, showingOnly=showingOnly)

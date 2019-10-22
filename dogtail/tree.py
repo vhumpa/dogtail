@@ -1327,7 +1327,7 @@ class Node(object):
         number_of_attempts = 0
         while number_of_attempts < config.searchCutoffCount:
             if number_of_attempts >= config.searchWarningThreshold or config.debugSearching:
-                LOGGER.info("Accessibility errors caught, making attempt number: '%'" % \
+                print("Accessibility errors caught, making attempt number: '%'" % \
                     number_of_attempts)
 
             try:
@@ -1340,7 +1340,7 @@ class Node(object):
             except (GLib.GError, TypeError):
                 number_of_attempts += 1
                 if number_of_attempts == config.searchCutoffCount:
-                    LOGGER.info("Warning: Accessibility errors caught, giving up search.")
+                    print("Warning: Accessibility errors caught, giving up search.")
                 else:
                     sleep(config.searchBackoffDuration)
                 continue

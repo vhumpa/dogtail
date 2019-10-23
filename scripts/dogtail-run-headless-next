@@ -244,9 +244,9 @@ class DisplayManagerSession:
                     output.flush()
                     subprocess.Popen("sudo mv -f %s %s" % (tempfile, self.accountfile), shell=True).wait()
                     time.sleep(1)
-                    subprocess.Popen("sudo service accounts-daemon restart", shell=True).wait()
+                    subprocess.Popen("sudo systemctl restart accounts-daemon", shell=True).wait()
                     time.sleep(1)
-                    subprocess.Popen("sudo service systemd-logind restart", shell=True).wait()
+                    subprocess.Popen("sudo systemctl restart systemd-logind", shell=True).wait()
                     time.sleep(1)
 
                 else:
@@ -259,7 +259,7 @@ class DisplayManagerSession:
 
 
     def start(self, restart=False):
-        subprocess.Popen(("sudo service %s stop" % (self.display_manager)).split())
+        subprocess.Popen(("sudo systemctl stop %s" % (self.display_manager)).split())
         time.sleep(0.5)
 
         if os.system("sudo loginctl |grep test |grep seat0") == 0:
@@ -276,7 +276,7 @@ class DisplayManagerSession:
                 time.sleep(5)
                 os.system("sudo loginctl")
 
-        subprocess.Popen(("sudo service %s start" % (self.display_manager)).split())
+        subprocess.Popen(("sudo systemctl start %s" % (self.display_manager)).split())
         self.waitForProcess(self.session_binary.split("/")[-1])
 
         if self.display_manager == "kdm":
@@ -291,7 +291,7 @@ class DisplayManagerSession:
 
 
     def stop(self):
-        subprocess.Popen(("sudo service %s stop" % (self.display_manager)).split()).wait()
+        subprocess.Popen(("sudo systemctl stop %s" % (self.display_manager)).split()).wait()
         self.waitForProcess("/usr/bin/%s" % self.display_manager, invert=True)
         time.sleep(3)
 

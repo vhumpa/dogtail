@@ -1327,7 +1327,7 @@ class Node(object):
         number_of_attempts = 0
         while number_of_attempts < config.searchCutoffCount:
             if number_of_attempts >= config.searchWarningThreshold or config.debugSearching:
-                print("Accessibility errors caught, making attempt number: '%'" % \
+                print("Accessibility errors caught, making attempt number: '%s'" % \
                     number_of_attempts)
 
             try:

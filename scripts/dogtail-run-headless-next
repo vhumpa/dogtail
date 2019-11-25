@@ -176,12 +176,12 @@ class DisplayManagerSession:
         config.optionxform = str
         config.read(self.tmp_file)
         if not restore:
-            config.set(self.options['section'], self.options['enable'], 'true')
-            config.set(self.options['section'], self.options['user'], self.user)
+            config.set(self.options["section"], self.options["enable"], "true")
+            config.set(self.options["section"], self.options["user"], self.user)
             if force_xorg:
-                config.set(self.options['section'], 'WaylandEnable', 'false')
+                config.set(self.options["section"], "WaylandEnable", "false")
             else:
-                config.set(self.options['section'], 'WaylandEnable', 'true')
+                config.set(self.options["section"], "WaylandEnable", "true")
         else:
             config.remove_option(
                 self.options["section"], self.options["enable"])
@@ -371,8 +371,8 @@ def parse():
                         action="store_true",
                         help="Will print debug messages to the file.")
 
-    parser.add_argument('--force-xorg', action='store_true',
-                        help="""Force Xorg session by making sure WaylandEnable=false in gdm config.""")
+    parser.add_argument("--force-xorg", action="store_true",
+                        help="Force Xorg session by making sure WaylandEnable=false in gdm config.")
 
     return parser.parse_args()
 

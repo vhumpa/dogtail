@@ -38,11 +38,12 @@ BuildRequires: python3-devel
 BuildRequires: python3-setuptools
 BuildRequires: desktop-file-utils
 Requires: python3-pyatspi
-#Requires: gnome-ponytail-daemon
+Requires: gnome-ponytail-daemon
 Requires: python3-gobject
 Requires: python3-cairo
 Requires: xorg-x11-xinit
 Requires: hicolor-icon-theme
+Requires: packaging
 
 %description -n python3-dogtail
 GUI test tool and automation framework that uses assistive technologies to
@@ -59,7 +60,7 @@ Requires: python3-cairo
 Requires: xorg-x11-xinit
 Requires: hicolor-icon-theme
 Requires: python3-dogtail >= 0.10.0
-#Requires: packaging
+Requires: packaging
 
 %description -n python3-dogtail-scripts
 GUI test tool and automation framework that uses assistive technologies to

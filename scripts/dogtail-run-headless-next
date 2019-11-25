@@ -166,7 +166,7 @@ class DisplayManagerSession:
             self.config = self.kdm_config
 
 
-    def setup(self, restore=False):
+    def setup(self, restore=False, force_xorg=False):
         shutil.copy(self.config, self.tmp_file)
         if sys.version < "3.2":
             config = configparser.SafeConfigParser()
@@ -176,10 +176,12 @@ class DisplayManagerSession:
         config.optionxform = str
         config.read(self.tmp_file)
         if not restore:
-            config.set(
-                self.options["section"], self.options["enable"], "true")
-            config.set(
-                self.options["section"], self.options["user"], self.user)
+            config.set(self.options["section"], self.options["enable"], "true")
+            config.set(self.options["section"], self.options["user"], self.user)
+            if force_xorg:
+                config.set(self.options["section"], "WaylandEnable", "false")
+            else:
+                config.set(self.options["section"], "WaylandEnable", "true")
         else:
             config.remove_option(
                 self.options["section"], self.options["enable"])
@@ -369,6 +371,9 @@ def parse():
                         action="store_true",
                         help="Will print debug messages to the file.")
 
+    parser.add_argument("--force-xorg", action="store_true",
+                        help="Force Xorg session by making sure WaylandEnable=false in gdm config.")
+
     return parser.parse_args()
 
 
@@ -406,7 +411,7 @@ def main():
     display_manager_session = DisplayManagerSession(display_manager_name, args.session, args.session_binary)
 
     if args.dont_start is not True:
-        display_manager_session.setup()
+        display_manager_session.setup(force_xorg=args.force_xorg)
         display_manager_session.start(restart=args.restart)
 
     print("dogtail-run-headless-next: Using %s to bind to the session" % \

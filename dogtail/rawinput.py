@@ -65,7 +65,8 @@ def ponytail_check_is_xwayland(window_id=None, window_list=None):
 def ponytail_check_connection(window_id=None, input_source="mouse"):
     window_list = ponytail.window_list
 
-    if window_id not in [x['id'] for x in window_list]:
+    if (not isinstance(window_id, str)) and (window_list != []) and\
+        window_id not in [x["id"] for x in window_list]:
         window_id = None
 
     if DEBUG_DOGTAIL: LOGGER.info("Checking if possibly connected window still exists.")

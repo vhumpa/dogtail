@@ -860,7 +860,10 @@ class TestUnicodeNames(unittest.TestCase):
         dogtail.config.config.searchCutoffCount = 3
         import dogtail.utils
         self.pid = dogtail.utils.run('gedit')
-        self.app = dogtail.tree.root.application('org.gnome.gedit')
+        try:
+            self.app = dogtail.tree.root.application('org.gnome.gedit')
+        except Exception:
+            self.app = dogtail.tree.root.application('gedit')
 
     def test_unicode_char_in_name(self):
         self.app.child('Open', roleName='toggle button').click()

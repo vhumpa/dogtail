@@ -335,4 +335,5 @@ class TestActions(GtkDemoTest):
             output1 = trap_stdout(child.actions['click'].do())
         config.ensureSensitivity = False
         output2 = trap_stdout(child.actions['click'].do)
-        self.assertEqual(output2.strip("\n"), "")
+        #self.assertEqual(output2.strip("\n"), "")
+        self.assertNotEqual(output2.strip("\n"), "") # we want the log

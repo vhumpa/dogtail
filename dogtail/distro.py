@@ -2,16 +2,18 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import os
 import re
-from dogtail.version import Version
-from dogtail.logging import DEBUG_DOGTAIL, LOGGER
 from subprocess import check_output
+from dogtail.version import Version
+from dogtail.logging import debugLogger as logger
+from dogtail.logging import debug_log
 
 """
 Handles differences between different distributions
 """
 
-__author__ = """Dave Malcolm <dmalcolm@redhat.com>,
-                Zack Cerza <zcerza@redhat.com>
+__author__ = """
+Dave Malcolm <dmalcolm@redhat.com>,
+Zack Cerza <zcerza@redhat.com>
 """
 
 
@@ -76,7 +78,7 @@ class PackageDb:
         specific locale.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("getMoFiles(self, locale=%s)" % str(locale))
+        debug_log("getMoFiles(self, locale=%s)" % str(locale))
 
         moFiles = {}
 
@@ -112,7 +114,7 @@ class _RpmPackageDb(PackageDb):  # pragma: no cover
         ts = rpm.TransactionSet()
         for header in ts.dbMatch("name", packageName):
             return Version.fromString(header["version"])
-        
+
         raise PackageNotFoundError(packageName)
 
 
@@ -121,7 +123,7 @@ class _RpmPackageDb(PackageDb):  # pragma: no cover
         ts = rpm.TransactionSet()
         for header in ts.dbMatch("name", packageName):
             return header["filenames"]
-        
+
         raise PackageNotFoundError(packageName)
 
 
@@ -158,7 +160,7 @@ class _AptPackageDb(PackageDb):
         packages = self.cache.packages
         for package in packages:
             if package.name == packageName:
-                verString = re.match(".*Ver:\'(.*)-.*\' Section:", str(package.current_ver)).group(1)
+                verString = re.match(".*Ver:'(.*)-.*' Section:", str(package.current_ver)).group(1)
                 return Version.fromString(verString)
 
         raise PackageNotFoundError(packageName)
@@ -269,7 +271,7 @@ class JhBuildPackageDb(PackageDb):  # pragma: no cover
 
 
     def getDependencies(self, packageName):
-        if DEBUG_DOGTAIL: LOGGER.info("getDependencies(self, packageName=%s)" % str(packageName))
+        debug_log("getDependencies(self, packageName=%s)" % str(packageName))
 
         result = {}
         lines = os.popen("jhbuild list " + packageName).readlines()
@@ -365,7 +367,8 @@ class GnomeContinuous(Distro):  # pragma: no cover
 
 
 def detectDistro():  # pragma: no cover
-    if DEBUG_DOGTAIL: LOGGER.info("detectDistro()")
+    logger.log("Detecting distribution:", newline=False)
+    debug_log("detectDistro()")
 
     if os.environ.get("CERTIFIED_GNOMIE", "no") == "yes":
         distro = JHBuild()
@@ -393,8 +396,10 @@ def detectDistro():  # pragma: no cover
         distro = GnomeContinuous()
     else:
         raise DistributionNotSupportedError("Unknown")
-
-    if DEBUG_DOGTAIL: LOGGER.info(distro.__class__.__name__)
+    
+    logger.log(distro.__class__.__name__)
+    debug_log(distro.__class__.__name__)
+    
     return distro
 
 distro = detectDistro()

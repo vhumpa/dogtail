@@ -3,18 +3,19 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import sys
 import time
-import logging
 import traceback
 from dogtail.config import config
+
+import logging
+import inspect
 
 """
 Logging facilities
 """
 
 __author__ = """Ed Rousseau <rousseau@redhat.com>,
-                Zack Cerza <zcerza@redhat.com,
-                David Malcolm <dmalcolm@redhat.com>
-"""
+Zack Cerza <zcerza@redhat.com,
+David Malcolm <dmalcolm@redhat.com>"""
 
 
 class TimeStamp:
@@ -69,11 +70,11 @@ class TimeStamp:
         self.timetup = time.localtime()
 
         for i in range(6):
-            if i == 0:
+            if i == 0: # year
                 self.now = str(self.timetup[i])
-            elif i in (1, 2):
+            elif i in (1, 2): # month day
                 self.now = self.now + "." + self.zeroPad(self.timetup[i])
-            else:
+            else: # hour minutes seconds
                 if i == 3:
                     self.now = self.now + " " + self.zeroPad(self.timetup[i])
                 else:
@@ -200,15 +201,6 @@ class ResultsLogger(Logger):
 
 debugLogger = Logger("debug", config.logDebugToFile)
 
-try:
-    DEBUG_DOGTAIL = os.environ["DOGTAIL_DEBUG"] == "true"
-except KeyError:
-    DEBUG_DOGTAIL = False
-    
-LOGGER = logging.getLogger("dogtail")
-FORMAT = "[%(filename)s:%(lineno)3s] %(message)s"
-logging.basicConfig(format=FORMAT)
-LOGGER.setLevel(logging.DEBUG)
 
 def exceptionHook(exc, value, tb):  # pragma: no cover
     tbStringList = traceback.format_exception(exc, value, tb)
@@ -216,3 +208,52 @@ def exceptionHook(exc, value, tb):  # pragma: no cover
     debugLogger.log(tbString)
 
 sys.excepthook = exceptionHook
+
+
+### Logging definition for debugging dogtail itself.
+### Can be used in other parts, but we cannot break the api.
+
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
+class DebugLogger(metaclass=Singleton):
+    logger = None
+
+    def __init__(self):
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(message)s",
+            handlers=[logging.StreamHandler()])
+
+        self.logger = logging.getLogger("debug")
+
+
+    @staticmethod
+    def __get_call_info():
+        stack = inspect.stack()
+
+        file_name = stack[3][1].split("/")[-1]
+        line_length = stack[3][2]
+
+        return file_name, line_length
+
+
+    def info(self, message, *args):
+        message = "[{}:{:3}] {}".format(*self.__get_call_info(), message)
+        self.logger.info(message, *args)
+
+try:
+    DEBUG_DOGTAIL = os.environ["DOGTAIL_DEBUG"] == "true"
+except KeyError:
+    DEBUG_DOGTAIL = False
+
+_log = DebugLogger()
+def debug_log(message):
+    if DEBUG_DOGTAIL:
+        _log.info(message)

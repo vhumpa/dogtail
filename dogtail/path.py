@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
-from dogtail.logging import DEBUG_DOGTAIL, LOGGER
+from dogtail.logging import debug_log
 
-__author__ = """David Malcolm <dmalcolm@redhat.com>"""
+__author__ = """
+David Malcolm <dmalcolm@redhat.com>
+"""
 
 
 class SearchPath:
@@ -62,7 +64,7 @@ class SearchPath:
         Generate the Python source code that will carry out this search.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("makeScriptMethodCall(self)")
+        debug_log("makeScriptMethodCall(self)")
 
         result = ""
         for (predicate, isRecursive) in self.lst:
@@ -79,7 +81,7 @@ class SearchPath:
         return None.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("getRelativePath(self, other=%s)" % str(other))
+        debug_log("getRelativePath(self, other=%s)" % str(other))
 
         i = 0
         for i in range(len(self.lst)):
@@ -98,7 +100,7 @@ class SearchPath:
         Get the first n components of this instance as a new instance.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("getPrefix(self, n=%s)" % str(n))
+        debug_log("getPrefix(self, n=%s)" % str(n))
 
         result = SearchPath()
         for i in range(n):
@@ -111,7 +113,7 @@ class SearchPath:
         Get the predicate.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("getPredicate(self, i=%s)" % str(i))
+        debug_log("getPredicate(self, i=%s)" % str(i))
 
         (predicate, _) = self.lst[i]
         return predicate

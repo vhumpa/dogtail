@@ -7,10 +7,12 @@ with desktop applications.
 """
 
 __author__ = """Zack Cerza <zcerza@redhat.com>,
-                Ed Rousseau <rousseau@redhat.com>,
-                David Malcolm <dmalcolm@redhat.com>,
-                Vita Humpa <vhumpa@redhat.com>
+Ed Rousseau <rousseau@redhat.com>,
+David Malcolm <dmalcolm@redhat.com>,
+Vita Humpa <vhumpa@redhat.com>
 """
+
+
 __version__ = "1.0.0"
 __copyright__ = "Copyright © 2005-2017 Red Hat, Inc."
 __license__ = "GPL"

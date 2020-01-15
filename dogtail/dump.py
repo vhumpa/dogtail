@@ -6,8 +6,10 @@ from io import StringIO
 Utility functions for 'dumping' trees of Node objects.
 """
 
-__author__ = """Zack Cerza <zcerza@redhat.com>,
-                Matěj Cepl <mcepl@redhat.com>"""
+__author__ = """
+Zack Cerza <zcerza@redhat.com>,
+Matěj Cepl <mcepl@redhat.com>
+"""
 
 spacer = u" "
 

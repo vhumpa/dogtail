@@ -5,7 +5,8 @@ from dogtail import path
 from dogtail import predicate
 from dogtail import rawinput
 from dogtail.rawinput import ponytail
-from dogtail.logging import LOGGER, DEBUG_DOGTAIL
+from dogtail.logging import debug_log
+from dogtail.logging import debugLogger as logger
 from dogtail.utils import doDelay, Blinker, Lock
 from dogtail.rawinput import SESSION_TYPE, ponytail_check_is_xwayland
 
@@ -74,8 +75,9 @@ current workaround for this is to set config.ensureSensitivity=False, which
 disables the sensitivity testing.
 """
 
-__author__ = """Zack Cerza <zcerza@redhat.com>,
-                David Malcolm <dmalcolm@redhat.com>
+__author__ = """
+Zack Cerza <zcerza@redhat.com>,
+David Malcolm <dmalcolm@redhat.com>
 """
 
 try:
@@ -118,7 +120,7 @@ class NotSensitiveError(Exception):
     """
 
     def __init__(self, action):
-        if DEBUG_DOGTAIL: LOGGER.info("Not Sensitive Error Exception")
+        debug_log("Not Sensitive Error Exception")
 
         self.message = "Cannot %s %s. It is not sensitive."
         self.action = action
@@ -134,7 +136,7 @@ class ActionNotSupported(Exception):
     """
 
     def __init__(self, actionName, node):
-        if DEBUG_DOGTAIL: LOGGER.info("Action Not Supported Exception")
+        debug_log("Action Not Supported Exception")
 
         self.message = "Cannot do '%s' action on %s"
         self.actionName = actionName
@@ -156,8 +158,8 @@ class Action(object):
 
         global haveBeenWarnedAboutActionTypes
         if not haveBeenWarnedAboutActionTypes:
-            if DEBUG_DOGTAIL: LOGGER.info("Valid types of actions we know about.\n'%s'.\n" % ",".join(self.types))
-            if DEBUG_DOGTAIL: LOGGER.info("Feel free to add any you see.")
+            debug_log("Valid types of actions we know about.\n'%s'.\n" % ",".join(self.types))
+            debug_log("Feel free to add any you see.")
             haveBeenWarnedAboutActionTypes = True
 
         self.node = node
@@ -189,14 +191,13 @@ class Action(object):
         Performs the given tree.Action, with appropriate delays and logging.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("Performing action '%s' on '%s'" % \
-            (str(self.name), self.node.getLogString()))
+        logger.log(str("%s on %s") % (str(self.name), self.node.getLogString()))
 
         if not self.node.sensitive:
             if config.ensureSensitivity:
                 raise NotSensitiveError(self)
             else:
-                if DEBUG_DOGTAIL: LOGGER.info("Warning " + str(NotSensitiveError(self)))
+                logger.log("Warning " + str(NotSensitiveError(self)))
 
         if config.blinkOnActions:
             self.node.blink()
@@ -251,7 +252,7 @@ class Node(object):
         Is the node dead (defunct)?
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("dead(self)")
+        debug_log("dead(self)")
 
         try:
             if self.roleName == "invalid":
@@ -271,10 +272,10 @@ class Node(object):
         A list of this Accessible's children.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("children(self)")
+        debug_log("children(self)")
 
         if self.parent and self.parent.roleName == "hyper link":
-            if DEBUG_DOGTAIL: LOGGER.info(self.parent.role)
+            debug_log(self.parent.role)
             return []
 
         children_list = []
@@ -282,9 +283,9 @@ class Node(object):
         if childCount > config.childrenLimit:
             global haveWarnedAboutChildrenLimit
             if not haveWarnedAboutChildrenLimit:
-                if DEBUG_DOGTAIL: LOGGER.info("Only returning '%s' children." % str(config.childrenLimit))
-                if DEBUG_DOGTAIL: LOGGER.info("You may change config.childrenLimit if you wish.")
-                if DEBUG_DOGTAIL: LOGGER.info("This message will only be printed once.")
+                logger.log("Only returning %s children. You may change "
+                           "config.childrenLimit if you wish. This message will only"
+                           " be printed once." % str(config.childrenLimit))
                 haveWarnedAboutChildrenLimit = True
                 childCount = config.childrenLimit
 
@@ -304,8 +305,8 @@ class Node(object):
 
         invalidChildren = childCount - len(children_list)
         if invalidChildren and config.debugSearching:
-            if DEBUG_DOGTAIL: LOGGER.info("Skipped '%s' children of '%s' as they are over config.childrenLimit" % \
-                (invalidChildren, str(self)))
+            logger.log(str("Skipped %s invalid children of %s") %
+                       (invalidChildren, str(self)))
 
         try:
             ht = self.queryHypertext()
@@ -342,13 +343,13 @@ class Node(object):
         Return window id of a node.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("window_id(self)")
+        debug_log("window_id(self)")
 
         if SESSION_TYPE == "x11":
             return None
 
         if self.__window_id is None:
-            if DEBUG_DOGTAIL: LOGGER.info("Window id event.")
+            debug_log("Window id event.")
 
             window_list = ponytail.window_list
             if len(window_list) == 0:
@@ -395,7 +396,7 @@ class Node(object):
         Check if window is focused.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("window_has_focus(self)")
+        debug_log("window_has_focus(self)")
 
         if SESSION_TYPE == "wayland":
             window_id = self.window_id
@@ -417,7 +418,7 @@ class Node(object):
         supported by this instance, check the 'actions' property.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("doActionNamed(self, name=%s)" % str(name))
+        debug_log("doActionNamed(self, name=%s)" % str(name))
 
         actions = self.actions
         if name in actions:
@@ -435,7 +436,7 @@ class Node(object):
             'check' 'dock' 'undock' 'open' 'menu'
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("actions(self)")
+        debug_log("actions(self)")
 
         actions = {}
 
@@ -445,7 +446,7 @@ class Node(object):
                 action_object = Action(self, action_query, index)
                 actions[action_query.getName(index)] = action_object
         finally:
-            if DEBUG_DOGTAIL: LOGGER.info("If actions are empty there could have been an exception.")
+            debug_log("If actions are empty there could have been an exception.")
             return actions
 
 
@@ -455,14 +456,14 @@ class Node(object):
         The value (as a string) currently selected in the combo box.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("combovalue(self)")
+        debug_log("combovalue(self)")
 
         return self.name
 
 
     @combovalue.setter
     def combovalue(self, value):
-        if DEBUG_DOGTAIL: LOGGER.info("combovalue(self, value=%s)" % str(value))
+        logger.log(str("Setting combobox %s to '%s'") % (self.getLogString(), str(value)))
 
         self.childNamed(childName=value).doActionNamed("click")
         doDelay()
@@ -474,7 +475,7 @@ class Node(object):
         The value of user data linkAnchor.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("URI(self)")
+        debug_log("URI(self)")
 
         try:
             return self.user_data["linkAnchor"].URI
@@ -495,7 +496,7 @@ class Node(object):
         property instead.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("text(self)")
+        debug_log("text(self)")
 
         try:
             return self.queryText().getText(0, -1)
@@ -509,13 +510,13 @@ class Node(object):
             if config.debugSearching:
                 setter_message = "Setting text of %s to '%s'"
 
-                if DEBUG_DOGTAIL: LOGGER.info("Maximum length is set at 140, cutting the text after.")
+                debug_log("Maximum length is set at 140, cutting the text after.")
                 if len(text) > 140:
                     txt = text[:134] + " [...]"
                 else:
                     txt = text
 
-                if DEBUG_DOGTAIL: LOGGER.info(str(setter_message) % (self.getLogString(), str(txt)))
+                logger.log(str(setter_message) % (self.getLogString(), str("'%s'") % str(txt)))
 
             self.queryEditableText().setTextContents(text)
         except NotImplementedError:
@@ -528,7 +529,7 @@ class Node(object):
         For instances with an AccessibleText interface, the caret offset as an integer.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("caretOffset(self)")
+        debug_log("caretOffset(self)")
 
         return self.queryText().caretOffset
 
@@ -539,7 +540,7 @@ class Node(object):
         Caret offset setter.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("caretOffset(self, offset=%s)" % str(offset))
+        debug_log("caretOffset(self, offset=%s)" % str(offset))
 
         return self.queryText().setCaretOffset(offset)
 
@@ -550,7 +551,7 @@ class Node(object):
         A tuple containing the position of the Accessible: (x, y)
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("position(self)")
+        debug_log("position(self)")
 
         return self.queryComponent().getPosition(pyatspi.DESKTOP_COORDS)
 
@@ -561,7 +562,7 @@ class Node(object):
         A tuple containing the size of the Accessible: (w, h)
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("size(self)")
+        debug_log("size(self)")
 
         if SESSION_TYPE == "wayland":
             if self.roleName == "window" or self.roleName == "dialog" or self.roleName == "frame":
@@ -580,7 +581,7 @@ class Node(object):
         A tuple containing the location and size of the Accessible: (x, y, w, h)
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("extents(self)")
+        debug_log("extents(self)")
 
         try:
             ex = self.queryComponent().getExtents(pyatspi.DESKTOP_COORDS)
@@ -594,7 +595,7 @@ class Node(object):
         Can tell if and x and y coordinates are inside a desktop coordinates.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("contains(self, x=%s, y=%s)" % (str(x), str(y)))
+        debug_log("contains(self, x=%s, y=%s)" % (str(x), str(y)))
 
         try:
             return self.queryComponent().contains(x, y, pyatspi.DESKTOP_COORDS)
@@ -607,7 +608,7 @@ class Node(object):
         Get a child in coordinates x, y.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("getChildAtPoint(self, x=%s, y=%s)" % (str(x), str(y)))
+        debug_log("getChildAtPoint(self, x=%s, y=%s)" % (str(x), str(y)))
 
         node = self
         while True:
@@ -633,7 +634,7 @@ class Node(object):
         to get it focused there as workaround. For some we can do nothing (push button)
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("grabFocus(self)")
+        debug_log("grabFocus(self)")
 
         if SESSION_TYPE == "x11" or ponytail_check_is_xwayland(self.window_id) or self.window_has_focus:
             return self.queryComponent().grabFocus()
@@ -663,10 +664,11 @@ class Node(object):
             - 3 is right.
         """
 
+        logger.log(str("Clicking on %s") % self.getLogString())
+
         clickX = self.position[0] + self.size[0] / 2
         clickY = self.position[1] + self.size[1] / 2
 
-        if DEBUG_DOGTAIL: LOGGER.info("click(self, button=%s)" % str(button))
 
         if ("menu item" in self.roleName or self.roleName == "menu") and \
                 self.parent.roleName != "menu bar" and \
@@ -682,6 +684,11 @@ class Node(object):
             doDelay(config.typingDelay)
 
         else:
+            if config.debugSearching:
+                logger.log(str("raw click on %s %s at (%s,%s)") %
+                    (str(self.name), self.getLogString(), str(clickX), str(clickY)))
+            debug_log("click(self, button=%s)" % str(button))
+
             rawinput.click(clickX, clickY, button, window_id=self.window_id)
 
 
@@ -692,8 +699,11 @@ class Node(object):
 
         clickX = self.position[0] + self.size[0] / 2
         clickY = self.position[1] + self.size[1] / 2
-
-        if DEBUG_DOGTAIL: LOGGER.info("doubleClick(self, button=%s)" % str(button))
+        
+        if config.debugSearching:
+            logger.log(str("raw click on %s %s at (%s,%s)") %
+                       (str(self.name), self.getLogString(), str(clickX), str(clickY)))
+        debug_log("doubleClick(self, button=%s)" % str(button))
 
         rawinput.doubleClick(clickX, clickY, button, window_id=self.window_id)
 
@@ -705,11 +715,13 @@ class Node(object):
 
         pointX = self.position[0] + self.size[0] / 2
         pointY = self.position[1] + self.size[1] / 2
-
-        if DEBUG_DOGTAIL: LOGGER.info("point(self, mouseDelay=%s)" % str(mouseDelay))
+        
+        logger.log(str("Pointing on %s %s at (%s,%s)") %
+                   (str(self.name), self.getLogString(), str(pointX), str(pointY)))
+        debug_log("point(self, mouseDelay=%s)" % str(mouseDelay))
 
         if "menu item" in self.roleName or self.roleName == "menu":
-            if DEBUG_DOGTAIL: LOGGER.info("Local coords are OFF under \
+            debug_log("Local coords are OFF under \
                 wayland for menu/context menu 'windows'.")
             self.select()
         else:
@@ -723,7 +735,7 @@ class Node(object):
         The node(s) that is/are a label for this node. Generated from 'relations'.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("labeler(self)")
+        debug_log("labeler(self)")
 
         relationSet = self.getRelationSet()
         for relation in relationSet:
@@ -747,7 +759,7 @@ class Node(object):
         The node(s) that this node is a label for. Generated from 'relations'.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("labelee(self)")
+        debug_log("labelee(self)")
 
         relationSet = self.getRelationSet()
         for relation in relationSet:
@@ -771,7 +783,7 @@ class Node(object):
         Is the Accessible sensitive (i.e. not greyed out)?
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("sensitive(self)")
+        debug_log("sensitive(self)")
 
         return self.getState().contains(pyatspi.STATE_SENSITIVE)
 
@@ -782,7 +794,7 @@ class Node(object):
         Is the Accessible showing (rendered and visible) on the screen?
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("showing(self)")
+        debug_log("showing(self)")
 
         return self.getState().contains(pyatspi.STATE_SHOWING)
 
@@ -793,7 +805,7 @@ class Node(object):
         Is the Accessible capable of having keyboard focus?
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("focusable(self)")
+        debug_log("focusable(self)")
 
         return self.getState().contains(pyatspi.STATE_FOCUSABLE)
 
@@ -804,7 +816,7 @@ class Node(object):
         Does the Accessible have keyboard focus?
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("focused(self)")
+        debug_log("focused(self)")
 
         return self.getState().contains(pyatspi.STATE_FOCUSED)
 
@@ -815,7 +827,7 @@ class Node(object):
         Is the Accessible a checked checkbox?
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("Node.checked - is the Accessible a checked checkbox?")
+        debug_log("Node.checked - is the Accessible a checked checkbox?")
 
         return self.getState().contains(pyatspi.STATE_CHECKED)
 
@@ -826,7 +838,7 @@ class Node(object):
         Is the Accessible a checked checkbox? Compatibility property, same as Node.checked.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("isChecked(self)")
+        debug_log("isChecked(self)")
 
         return self.checked
 
@@ -839,7 +851,7 @@ class Node(object):
         rendered. On the other hand, a widget with unset attribute 'visible'
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("visible(self)")
+        debug_log("visible(self)")
 
         return self.getState().contains(pyatspi.STATE_VISIBLE)
 
@@ -849,7 +861,7 @@ class Node(object):
         Selects all children.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("selectAll(self)")
+        debug_log("selectAll(self)")
 
         result = self.querySelection().selectAll()
         doDelay()
@@ -861,7 +873,7 @@ class Node(object):
         Deselects all selected children.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("deselectAll(self)")
+        debug_log("deselectAll(self)")
 
         result = self.querySelection().clearSelection()
         doDelay()
@@ -873,7 +885,7 @@ class Node(object):
         Selects the Accessible.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("select(self)")
+        debug_log("select(self)")
 
         try:
             parent = self.parent
@@ -890,7 +902,7 @@ class Node(object):
         Deselects the Accessible.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("deselect(self)")
+        debug_log("deselect(self)")
 
         try:
             parent = self.parent
@@ -908,7 +920,7 @@ class Node(object):
         Is the Accessible selected? Compatibility property, same as Node.selected.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("isSelected(self)")
+        debug_log("isSelected(self)")
 
         try:
             parent = self.parent
@@ -923,7 +935,7 @@ class Node(object):
         Is the Accessible selected?
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("selected(self)")
+        debug_log("selected(self)")
 
         return self.isSelected
 
@@ -934,7 +946,7 @@ class Node(object):
         Returns a list of children that are selected.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("selectedChildren(self)")
+        debug_log("selectedChildren(self)")
 
         selection = self.querySelection()
 
@@ -949,7 +961,7 @@ class Node(object):
         The value contained by the AccessibleValue interface.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("value(self)")
+        debug_log("value(self)")
 
         try:
             return self.queryValue().currentValue
@@ -963,7 +975,7 @@ class Node(object):
         Setter for the value contained by the AccessibleValue interface.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("value(self, value=%s)" % str(value))
+        debug_log("value(self, value=%s)" % str(value))
 
         self.queryValue().currentValue = value
 
@@ -974,7 +986,7 @@ class Node(object):
         The minimum value of Node.value
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("minValue(self)")
+        debug_log("minValue(self)")
 
         try:
             return self.queryValue().minimumValue
@@ -988,7 +1000,7 @@ class Node(object):
         The minimum value increment of the Node.value
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("minValueIncrement(self)")
+        debug_log("minValueIncrement(self)")
 
         try:
             return self.queryValue().minimumIncrement
@@ -1002,7 +1014,7 @@ class Node(object):
         The maximum value of self.value
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("maxValue(self)")
+        debug_log("maxValue(self)")
 
         try:
             return self.queryValue().maximumValue
@@ -1014,20 +1026,21 @@ class Node(object):
         """
         Type the given text into the node, with appropriate delays and logging.
         """
-
-        if DEBUG_DOGTAIL: LOGGER.info("typeText(self, string=%s)" % string)
+        
+        logger.log(str("Typing text into %s: '%s'") % (self.getLogString(), str(string)))
+        debug_log("typeText(self, string=%s)" % string)
 
         if self.focusable:
             if not self.focused:
                 try:
                     self.grabFocus()
                 except Exception:
-                    if DEBUG_DOGTAIL: LOGGER.info("Node is focusable but I can't grabFocus!")
+                    logger.log("Node is focusable but I can't grabFocus!")
 
             rawinput.typeText(string)
 
         else:
-            if DEBUG_DOGTAIL: LOGGER.info("Node is not focusable; falling back to inserting text.")
+            logger.log("Node is not focusable; falling back to inserting text")
             et = self.queryEditableText()
             et.insertText(self.caretOffset, string, len(string))
             self.caretOffset += len(string)
@@ -1039,16 +1052,20 @@ class Node(object):
         Press keys in combination.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("keyCombo(self, comboString=%s)" % str(comboString))
+        if config.debugSearching:
+            logger.log(str("Pressing keys '%s' into %s") %
+                       (str(comboString), self.getLogString()))
+
+        debug_log("keyCombo(self, comboString=%s)" % str(comboString))
 
         if self.focusable:
             if not self.focused:
                 try:
                     self.grabFocus()
                 except Exception:
-                    if DEBUG_DOGTAIL: LOGGER.info("Node is focusable but I can't grabFocus!")
+                    logger.log("Node is focusable but I can't grabFocus!")
         else:
-            if DEBUG_DOGTAIL: LOGGER.info("Node is not focusable; trying key combo anyway.")
+            logger.log("Node is not focusable; trying key combo anyway")
 
         rawinput.keyCombo(comboString)
 
@@ -1059,7 +1076,7 @@ class Node(object):
         respecting the config.absoluteNodePaths boolean.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("getLogString(self)")
+        debug_log("getLogString(self)")
 
         if config.absoluteNodePaths:
             return self.getAbsoluteSearchPath()
@@ -1072,7 +1089,7 @@ class Node(object):
         Does this node satisfy the given predicate?
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("satisfies(self, pred=%s)" % (str(pred)))
+        debug_log("satisfies(self, pred=%s)" % (str(pred)))
 
         assert isinstance(pred, predicate.Predicate)
         return pred.satisfiedByNode(self)
@@ -1083,7 +1100,7 @@ class Node(object):
         Dumping a tree structure of the node.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("dump(self, type=%s, fileName=%s)" % (str(type), str(fileName)))
+        debug_log("dump(self, type=%s, fileName=%s)" % (str(type), str(fileName)))
 
         from dogtail import dump
         dumper = getattr(dump, type)
@@ -1105,10 +1122,10 @@ class Node(object):
         written.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("getAbsoluteSearchPath(self)")
+        debug_log("getAbsoluteSearchPath(self)")
 
         if config.debugSearchPaths:
-            LOGGER.info("getAbsoluteSearchPath(%s)" % self)
+            logger.log("getAbsoluteSearchPath(%s)" % self)
 
         if self.roleName == "application":
             result = path.SearchPath()
@@ -1119,7 +1136,7 @@ class Node(object):
             if self.parent:
                 (ancestor, pred, isRecursive) = self.getRelativeSearch()
                 if config.debugSearchPaths:
-                    if DEBUG_DOGTAIL: LOGGER.info("Found ancestor: %s" % ancestor)
+                    debug_log("Found ancestor: %s" % ancestor)
 
                 ancestorPath = ancestor.getAbsoluteSearchPath()
                 ancestorPath.append(pred, isRecursive)
@@ -1136,10 +1153,10 @@ class Node(object):
         identifies the best way to find this Node uniquely.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("getRelativeSearch(self)")
+        debug_log("getRelativeSearch(self)")
 
         if config.debugSearchPaths:
-            LOGGER.info("getRelativeSearchPath(%s)" % self)
+            logger.log("getRelativeSearchPath(%s)" % self)
 
         assert self
         assert self.parent
@@ -1148,7 +1165,7 @@ class Node(object):
         ancestor = self.parent
 
         while not self.__nodeIsIdentifiable(ancestor):
-            if DEBUG_DOGTAIL: LOGGER.info("Node is not identifiable, setting isRecursive as True.")
+            debug_log("Node is not identifiable, setting isRecursive as True.")
             ancestor = ancestor.parent
             isRecursive = True
 
@@ -1158,18 +1175,18 @@ class Node(object):
         if self.labellee:
             if self.labellee.name:
                 return (ancestor, predicate.IsLabelledAs(self.labellee.name), isRecursive)
-        
-        if self.roleName == 'menu':
+
+        if self.roleName == "menu":
             return (ancestor, predicate.IsAMenuNamed(self.name), isRecursive)
-        elif self.roleName == 'menu item' or self.roleName == 'check menu item':
+        elif self.roleName == "menu item" or self.roleName == "check menu item":
             return (ancestor, predicate.IsAMenuItemNamed(self.name), isRecursive)
-        elif self.roleName == 'text':
+        elif self.roleName == "text":
             return (ancestor, predicate.IsATextEntryNamed(self.name), isRecursive)
-        elif self.roleName == 'push button':
+        elif self.roleName == "push button":
             return (ancestor, predicate.IsAButtonNamed(self.name), isRecursive)
-        elif self.roleName == 'frame':
+        elif self.roleName == "frame":
             return (ancestor, predicate.IsAWindowNamed(self.name), isRecursive)
-        elif self.roleName == 'dialog':
+        elif self.roleName == "dialog":
             return (ancestor, predicate.IsADialogNamed(self.name), isRecursive)
         else:
             pred = predicate.GenericPredicate(name=self.name, roleName=self.roleName)
@@ -1181,7 +1198,7 @@ class Node(object):
         Checks if given node can be identified by labellee, name or parent.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("__nodeIsIdentifiable(self, ancestor=%s)" % str(ancestor))
+        debug_log("__nodeIsIdentifiable(self, ancestor=%s)" % str(ancestor))
 
         if ancestor.labellee:
             return True
@@ -1201,7 +1218,7 @@ class Node(object):
         Searches for an Accessible using methods from pyatspi.utils
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("_fastFindChild(self, pred=%s, recursive=%s, recursive=%s)" % 
+        debug_log("_fastFindChild(self, pred=%s, recursive=%s, recursive=%s)" % 
                       (str(pred), str(recursive), str(recursive)))
 
         if isinstance(pred, predicate.Predicate):
@@ -1242,7 +1259,7 @@ class Node(object):
         attempts have failed. If it is false, the function simply returns None.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("findChild(self, pred=%s, recursive=%s, debugName=%s, retry=%s, requireResult=%s, showingOnly=%s)" % 
+        debug_log("findChild(self, pred=%s, recursive=%s, debugName=%s, retry=%s, requireResult=%s, showingOnly=%s)" % 
                       (str(pred), str(recursive), str(debugName), str(retry), str(requireResult), str(showingOnly)))
 
         def describeSearch(parent, pred, recursive, debugName):
@@ -1271,8 +1288,8 @@ class Node(object):
         number_of_attempts = 0
         while number_of_attempts < config.searchCutoffCount:
             if number_of_attempts >= config.searchWarningThreshold or config.debugSearching:
-                print("Searching for '%s' (attempt number: %i)" % \
-                    (describeSearch(self, pred, recursive, debugName), number_of_attempts))
+                logger.log(str("Searching for %s (attempt %i)") %
+                           (describeSearch(self, pred, recursive, debugName), number_of_attempts))
 
             result = self._fastFindChild(compare_function, recursive, showingOnly=showingOnly)
 
@@ -1289,7 +1306,7 @@ class Node(object):
                     break
                 number_of_attempts += 1
                 if config.debugSearching or config.debugSleep:
-                    LOGGER.info("sleeping for '%f'" % config.searchBackoffDuration)
+                    logger.log("sleeping for '%f'" % config.searchBackoffDuration)
                 sleep(config.searchBackoffDuration)
 
         if requireResult:
@@ -1304,7 +1321,7 @@ class Node(object):
         isLambda does not have to be set, it's kept only for api compatibility.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("findChildren(self, pred=%s, recursive=%s, isLambda=%s, showingOnly=%s)" %
+        debug_log("findChildren(self, pred=%s, recursive=%s, isLambda=%s, showingOnly=%s)" %
                       (str(pred), str(recursive), str(isLambda), str(showingOnly)))
 
         compare_function = None
@@ -1327,8 +1344,7 @@ class Node(object):
         number_of_attempts = 0
         while number_of_attempts < config.searchCutoffCount:
             if number_of_attempts >= config.searchWarningThreshold or config.debugSearching:
-                print("Accessibility errors caught, making attempt number: '%s'" % \
-                    number_of_attempts)
+                logger.log("Warning: a11y errors caught, making attempt %i" % number_of_attempts)
 
             try:
                 if recursive:
@@ -1340,7 +1356,7 @@ class Node(object):
             except (GLib.GError, TypeError):
                 number_of_attempts += 1
                 if number_of_attempts == config.searchCutoffCount:
-                    print("Warning: Accessibility errors caught, giving up search.")
+                    logger.log("Warning: errors caught from the a11y tree, giving up search")
                 else:
                     sleep(config.searchBackoffDuration)
                 continue
@@ -1354,7 +1370,7 @@ class Node(object):
         satisfying the predicate, or None.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("findAncestor(self, pred=%s, showingOnly=%s)" %
+        debug_log("findAncestor(self, pred=%s, showingOnly=%s)" %
                       (str(pred), str(showingOnly)))
 
         assert isinstance(pred, predicate.Predicate)
@@ -1378,7 +1394,7 @@ class Node(object):
         also logs the search.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("child(self, name=%s, roleName=%s, description=%s, label=%s, recursive=%s, retry=%s, debugName=%s, showingOnly=%s)" %
+        debug_log("child(self, name=%s, roleName=%s, description=%s, label=%s, recursive=%s, retry=%s, debugName=%s, showingOnly=%s)" %
                       (str(name), str(roleName), str(description), str(label), str(recursive), str(retry), str(debugName), str(showingOnly)))
 
         return self.findChild(predicate.GenericPredicate(name=name, roleName=roleName, description=description, label=label),
@@ -1396,7 +1412,7 @@ class Node(object):
         any other exceptions. It also logs the search.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("isChild(self, name=%s, roleName=%s, description=%s, label=%s, recursive=%s, retry=%s, debugName=%s, showingOnly=%s)" %
+        debug_log("isChild(self, name=%s, roleName=%s, description=%s, label=%s, recursive=%s, retry=%s, debugName=%s, showingOnly=%s)" %
                       (str(name), str(roleName), str(description), str(label), str(recursive), str(retry), str(debugName), str(showingOnly)))
 
         try:
@@ -1416,7 +1432,7 @@ class Node(object):
         also logs the search.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("menu(self, nameName=%s, recursive=%s, showingOnly=%s)" %
+        debug_log("menu(self, nameName=%s, recursive=%s, showingOnly=%s)" %
                       (str(menuName), str(recursive), str(showingOnly)))
 
         return self.findChild(predicate.IsAMenuNamed(menuName=menuName), recursive, showingOnly=showingOnly)
@@ -1431,7 +1447,7 @@ class Node(object):
         also logs the search.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("menuItem(self, menuItemName=%s, recursive=%s, showingOnly=%s)" %
+        debug_log("menuItem(self, menuItemName=%s, recursive=%s, showingOnly=%s)" %
                       (str(menuItemName), str(recursive), str(showingOnly)))
 
         return self.findChild(predicate.IsAMenuItemNamed(menuItemName=menuItemName), recursive, showingOnly=showingOnly)
@@ -1446,7 +1462,7 @@ class Node(object):
         also logs the search.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("textentry(self, textEntryName=%s, recursive=%s, showingOnly=%s)" %
+        debug_log("textentry(self, textEntryName=%s, recursive=%s, showingOnly=%s)" %
                       (str(textEntryName), str(recursive), str(showingOnly)))
 
         return self.findChild(predicate.IsATextEntryNamed(textEntryName=textEntryName), recursive, showingOnly=showingOnly)
@@ -1461,7 +1477,7 @@ class Node(object):
         also logs the search.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("button(self, buttonName=%s, recursive=%s, showingOnly=%s)" %
+        debug_log("button(self, buttonName=%s, recursive=%s, showingOnly=%s)" %
                       (str(buttonName), str(recursive), str(showingOnly)))
 
         return self.findChild(predicate.IsAButtonNamed(buttonName=buttonName), recursive, showingOnly=showingOnly)
@@ -1476,7 +1492,7 @@ class Node(object):
         also logs the search.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("childLabelled(self, labelText=%s, recursive=%s, showingOnly=%s)" %
+        debug_log("childLabelled(self, labelText=%s, recursive=%s, showingOnly=%s)" %
                       (str(labelText), str(recursive), str(showingOnly)))
 
         return self.findChild(predicate.IsLabelledAs(labelText), recursive, showingOnly=showingOnly)
@@ -1491,7 +1507,7 @@ class Node(object):
         also logs the search.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("childNamed(self, childName=%s, recursive=%s, showingOnly=%s)" %
+        debug_log("childNamed(self, childName=%s, recursive=%s, showingOnly=%s)" %
                       (str(childName), str(recursive), str(showingOnly)))
 
         return self.findChild(predicate.IsNamed(childName), recursive, showingOnly=showingOnly)
@@ -1506,7 +1522,7 @@ class Node(object):
         also logs the search.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("tab(self, tabName=%s, recursive=%s, showingOnly=%s)" %
+        debug_log("tab(self, tabName=%s, recursive=%s, showingOnly=%s)" %
                       (str(tabName), str(recursive), str(showingOnly)))
 
         return self.findChild(predicate.IsATabNamed(tabName=tabName), recursive, showingOnly=showingOnly)
@@ -1519,7 +1535,7 @@ class Node(object):
         (Could be implemented as an attribute)
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("getUserVisibleStrings(self)")
+        debug_log("getUserVisibleStrings(self)")
 
         result = []
         if self.name:
@@ -1544,7 +1560,7 @@ class Node(object):
         Blink will hightlight the current node on the screen. Using Blinker from utility.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("blink(self)")
+        debug_log("blink(self)")
 
         if not self.extents:
             return False
@@ -1587,7 +1603,7 @@ class Root(Node):
         Get all applications.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("applications(self)")
+        debug_log("applications(self)")
 
         return root.findChildren(predicate.GenericPredicate(roleName="application"), recursive=False, showingOnly=False)
 
@@ -1602,7 +1618,7 @@ class Root(Node):
         also logs the search.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("applications(self, appName=%s, retry=%s)" % (appName, str(retry)))
+        debug_log("applications(self, appName=%s, retry=%s)" % (appName, str(retry)))
 
         return root.findChild(predicate.IsAnApplicationNamed(appName), recursive=False, retry=retry, showingOnly=False)
 
@@ -1622,7 +1638,7 @@ class Application(Node):
         also logs the search.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("dialog(self, dialogName=%s, recursive=%s, showingOnly=%s)" % 
+        debug_log("dialog(self, dialogName=%s, recursive=%s, showingOnly=%s)" % 
                       (str(dialogName), str(recursive), str(showingOnly)))
 
         return self.findChild(predicate.IsADialogNamed(dialogName=dialogName), recursive, showingOnly=showingOnly)
@@ -1638,7 +1654,7 @@ class Application(Node):
         also logs the search.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("window(self, windowName=%s, recursive=%s, showingOnly=%s)" % 
+        debug_log("window(self, windowName=%s, recursive=%s, showingOnly=%s)" %
                       (str(windowName), str(recursive), str(showingOnly)))
 
         result = self.findChild(predicate.IsAWindowNamed(windowName=windowName), recursive, showingOnly=showingOnly)
@@ -1655,7 +1671,7 @@ class Application(Node):
         wnck.Application can give you the pid, the icon, etc
         """
 
-        LOGGER.info("getWnckApplication(self, showingOnly=%s) - untested" % str(showingOnly))
+        debug_log("getWnckApplication(self, showingOnly=%s) - untested" % str(showingOnly))
 
         window = self.child(roleName="frame", showingOnly=showingOnly)
         if window:
@@ -1673,7 +1689,7 @@ class Window(Node):
         Get the wnck.Window instance for this window, or None
         """
 
-        LOGGER.info("getWnckWindow(self) - untested")
+        debug_log("getWnckWindow(self) - untested")
 
         screen = Wnck.screen_get_default()
         screen.force_update()
@@ -1687,7 +1703,7 @@ class Window(Node):
         Activates the wnck.Window associated with this Window.
         """
 
-        LOGGER.info("activate(self) - untested")
+        debug_log("activate(self) - untested")
 
         wnckWindow = self.getWnckWindow()
         wnckWindow.activate(0)
@@ -1706,7 +1722,7 @@ class Wizard(Window):
         if debugName:
             self.debugName = debugName
 
-        LOGGER.info("%s is on '%s' page" % (self, self.getPageTitle()))
+        logger.log("%s is on '%s' page" % (self, self.getPageTitle()))
 
 
     def currentPage(self):
@@ -1715,7 +1731,7 @@ class Wizard(Window):
         This is currently a hack, supporting only GnomeDruid
         """
 
-        LOGGER.info("currentPage(self) - untested")
+        debug_log("currentPage(self) - untested")
 
         pageHolder = self.child(roleName="panel")
         for child in pageHolder.children:
@@ -1731,7 +1747,7 @@ class Wizard(Window):
         This is currently a total hack, supporting only GnomeDruid
         """
 
-        LOGGER.info("getPageTitle(self) - untested")
+        debug_log("getPageTitle(self) - untested")
 
         currentPage = self.currentPage()
         return currentPage.child(roleName="panel").child(roleName="panel").child(roleName="label", recursive=False).text
@@ -1744,12 +1760,12 @@ class Wizard(Window):
         This will only work if your libgnomeui has accessible buttons see above.
         """
 
-        LOGGER.info("clickForward(self) - untested")
+        debug_log("clickForward(self) - untested")
 
         fwd = self.child("Forward")
         fwd.click()
 
-        LOGGER.info("%s is now on '%s' page"% (self, self.getPageTitle()))
+        logger.log("%s is now on '%s' page"% (self, self.getPageTitle()))
 
 
     def clickApply(self):
@@ -1759,7 +1775,7 @@ class Wizard(Window):
         This will only work if your libgnomeui has accessible buttons see above.
         """
 
-        LOGGER.info("clickApply(self) - untested")
+        debug_log("clickApply(self) - untested")
 
         fwd = self.child("Apply")
         fwd.click()
@@ -1773,12 +1789,12 @@ try:
     root = pyatspi.Registry.getDesktop(0)
     root.debugName = "root"
 except Exception:  # pragma: no cover
-    LOGGER.info("Error: AT-SPI's desktop is not visible. Is accessibility enabled?")
+    logger.log("Error: AT-SPI's desktop is not visible. Is accessibility enabled?")
 
 
 children = root.children
 if not children:  # pragma: no cover
-    LOGGER.info("Warning: AT-SPI's desktop is visible but it has no children. \
+    logger.log("Warning: AT-SPI's desktop is visible but it has no children. \
 Are you running any AT-SPI-aware applications?")
 del children
 
@@ -1796,6 +1812,6 @@ if not os.path.exists("/tmp/sniff_running.lock") or not os.path.exists("/tmp/sni
         pass
 
 elif "sniff" not in sys.argv[0]:
-    LOGGER.info("Dogtail: Warning: Running sniff has been detected.")
-    LOGGER.info("Please make sure sniff has the 'Auto Refresh' disabled.")
-    LOGGER.info("NOTE: Running scripts with sniff present is not recommended.")
+    print("Dogtail: Warning: Running sniff has been detected.")
+    print("Please make sure sniff has the 'Auto Refresh' disabled.")
+    print("NOTE: Running scripts with sniff present is not recommended.")

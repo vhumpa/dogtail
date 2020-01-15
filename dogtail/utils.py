@@ -10,7 +10,8 @@ import cairo
 
 from dogtail import predicate
 from dogtail.config import config
-from dogtail.logging import DEBUG_DOGTAIL, LOGGER
+from dogtail.logging import debug_log
+from dogtail.logging import debugLogger as logger
 from dogtail.logging import TimeStamp
 
 import gi
@@ -22,9 +23,10 @@ from gi.repository import Gtk, GLib
 Various utilities
 """
 
-__author__ = """Ed Rousseau <rousseau@redhat.com>,
-                Zack Cerza <zcerza@redhat.com,
-                David Malcolm <dmalcolm@redhat.com>
+__author__ = """
+Ed Rousseau <rousseau@redhat.com>,
+Zack Cerza <zcerza@redhat.com,
+David Malcolm <dmalcolm@redhat.com>
 """
 
 
@@ -39,7 +41,7 @@ def screenshot(file="screenshot.png", timeStamp=True):
     The timeStamp argument may be set to False to name the file foo.png.
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("screenshot(file=%s, timeStamp=%s)" % (str(file), str(timeStamp)))
+    debug_log("screenshot(file=%s, timeStamp=%s)" % (str(file), str(timeStamp)))
 
     if not isinstance(timeStamp, bool):
         raise TypeError("timeStampt must be True or False")
@@ -75,7 +77,7 @@ def screenshot(file="screenshot.png", timeStamp=True):
     pixbuf = Gdk.pixbuf_get_from_window(rootWindow, 0, 0, geometry[2], geometry[3])
 
     if fileExt == "jpg":
-        if DEBUG_DOGTAIL: LOGGER.info("GdkPixbuf.Pixbuf.save() needs 'jpeg' and not 'jpg'")
+        debug_log("GdkPixbuf.Pixbuf.save() needs 'jpeg' and not 'jpg'")
         fileExt = "jpeg"
 
     try:
@@ -83,9 +85,9 @@ def screenshot(file="screenshot.png", timeStamp=True):
     except GLib.GError:
         raise ValueError("Failed to save screenshot in '%s' format" % fileExt)
 
-    assert os.path.exists(path), LOGGER.info("Directory for screenshot does not exist.")
+    assert os.path.exists(path), logger.log("Directory for screenshot does not exist.")
 
-    if DEBUG_DOGTAIL: LOGGER.info("Screenshot taken: " + path)
+    debug_log("Screenshot taken: " + path)
 
     return path
 
@@ -98,7 +100,7 @@ def run(string, timeout=config.runTimeout, interval=config.runInterval, desktop=
     starting, or until timeout is reached. If dumb is True, returns when timeout is reached.
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("run(string=%s, timeout=%s, interval=%s, desktop=%s, dumb=%s, appName=%s)" % 
+    debug_log("run(string=%s, timeout=%s, interval=%s, desktop=%s, dumb=%s, appName=%s)" % 
                   (str(string), str(timeout), str(interval), str(desktop), str(dumb), str(appName)))
 
     if not desktop:
@@ -112,12 +114,12 @@ def run(string, timeout=config.runTimeout, interval=config.runInterval, desktop=
         appName = args[0]
 
     if dumb:
-        if DEBUG_DOGTAIL: LOGGER.info("Disable startup detection. We're starting a non-AT-SPI-aware application.")
+        debug_log("Disable startup detection. We're starting a non-AT-SPI-aware application.")
 
         doDelay(timeout)
 
     else:
-        if DEBUG_DOGTAIL: LOGGER.info("Startup detection code. The timing here is not totally precise, but it's good enough for now.")
+        debug_log("Startup detection code. The timing here is not totally precise, but it's good enough for now.")
 
         time = 0
 
@@ -153,7 +155,7 @@ def doDelay(delay=None):
         delay = config.defaultDelay
 
     if config.debugSleep:
-        LOGGER.info("Do delay. Sleeping for %f" % delay)
+        logger.log("Do delay. Sleeping for %f" % delay)
 
     sleep(delay)
 
@@ -187,7 +189,7 @@ class Highlight(Gtk.Window):  # pragma: no cover
         Draw a rectangle on the screen.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("Drawing the node on the screen.")
+        debug_log("Drawing the node on the screen.")
 
         cr.set_source_rgba(.0, .0, .0, 0.0)
         cr.set_operator(cairo.OPERATOR_SOURCE)
@@ -223,7 +225,7 @@ class Blinker:  # pragma: no cover
         Remove the highlight.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("Blinker destroy highlight.")
+        debug_log("Blinker destroy highlight.")
 
         self.highlight_window.destroy()
         self.main_loop.quit()
@@ -258,7 +260,7 @@ class Lock(object):
         Removes the lock upon exiting headless.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("Remove the lock. Raising the exception if the lock is not present.")
+        debug_log("Remove the lock. Raising the exception if the lock is not present.")
 
         if os.path.exists(self.lockdir):
             try:
@@ -274,7 +276,7 @@ class Lock(object):
         atomic on POSIX compliant systems.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("Create a lock directory. Raising the exception if the lock is already present.")
+        debug_log("Create a lock directory. Raising the exception if the lock is already present.")
 
         locked_msg = "Dogtail lock: Already locked with the same lock."
 
@@ -301,7 +303,7 @@ class Lock(object):
         Should be atomic on POSIX compliant systems.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("Remove the lock. Raising the exception if the lock is not present.")
+        debug_log("Remove the lock. Raising the exception if the lock is not present.")
 
         #if self.unlockOnExit:
         #    raise Exception('Cannot unlock with unlockOnExit set to True!')
@@ -321,7 +323,7 @@ class Lock(object):
         Check if locked directory exists.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("Checking if locked directory exists.")
+        debug_log("Checking if locked directory exists.")
 
         return os.path.exists(self.lockdir)
 
@@ -334,7 +336,7 @@ class Lock(object):
         import random
         import string
 
-        if DEBUG_DOGTAIL: LOGGER.info("Get random file suffix of length 5.")
+        debug_log("Get random file suffix of length 5.")
 
         return "".join(random.choice(string.ascii_letters + string.digits) for x in range(5))
 
@@ -347,7 +349,7 @@ def isA11yEnabled():
     Checks if accessibility is enabled via DConf.
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("isA11yEnabled()")
+    debug_log("isA11yEnabled()")
 
     from gi.repository.Gio import Settings
 
@@ -371,10 +373,10 @@ def bailBecauseA11yIsDisabled():
     Accessibility is detected as enabled. End the execution if there are no exceptions.
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("bailBecauseA11yIsDisabled()")
+    debug_log("bailBecauseA11yIsDisabled()")
 
     if sys.argv[0].endswith("pydoc"):
-        if DEBUG_DOGTAIL: LOGGER.info("Execution was not ended. Script name with 'pydoc' exception.")
+        debug_log("Execution was not ended. Script name with 'pydoc' exception.")
         return
 
     try:
@@ -382,15 +384,15 @@ def bailBecauseA11yIsDisabled():
             content = f.read()
 
         if content.find("epydoc") != -1:
-            if DEBUG_DOGTAIL: LOGGER.info("Execution was not ended. Proces content 'epydoc' exception.")
+            debug_log("Execution was not ended. Proces content 'epydoc' exception.")
             return   # pragma: no cover
         if content.find("sphinx") != -1:
-            if DEBUG_DOGTAIL: LOGGER.info("Execution was not ended. Proces content 'sphinx' exception.")
+            debug_log("Execution was not ended. Proces content 'sphinx' exception.")
             return  # pragma: no cover
     except Exception:  # pragma: no cover
         pass
 
-    if DEBUG_DOGTAIL: LOGGER.info("\n".join((
+    logger.log("\n".join((
         "Dogtail requires that Assistive Technology support be enabled.",
         "You can enable accessibility with sniff or by running:",
         "'gsettings set org.gnome.desktop.interface toolkit-accessibility true'",
@@ -404,7 +406,7 @@ def enableA11y(enable=True):
     Enables accessibility via DConf.
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("enableA11y(enable=%s)" % str(enable))
+    debug_log("enableA11y(enable=%s)" % str(enable))
 
     from gi.repository.Gio import Settings
     InterfaceSettings = Settings(schema_id=a11yDConfKey)
@@ -416,7 +418,7 @@ def checkForA11y():  # pragma: no cover
     Checks if accessibility is enabled, and halts execution if it is not.
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("checkForA11y()")
+    debug_log("checkForA11y()")
 
     if not isA11yEnabled():
         bailBecauseA11yIsDisabled()
@@ -428,7 +430,7 @@ def checkForA11yInteractively():  # pragma: no cover
     user if it should be enabled if it is not already, then halts execution.
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("checkForA11yInteractively()")
+    debug_log("checkForA11yInteractively()")
 
     if isA11yEnabled():
         return
@@ -454,6 +456,7 @@ def checkForA11yInteractively():  # pragma: no cover
     result = dialog.run()
 
     if result == Gtk.ResponseType.ACCEPT:
+        logger.log("Enabling accessibility...")
         enableA11y()
     elif result == Gtk.ResponseType.CLOSE:
         bailBecauseA11yIsDisabled()
@@ -468,7 +471,7 @@ def waitForWindow(name, timeout=30):
     Returns true on success, false on x11.
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("waitForWindow(name=%s, timeout=%s)" % (name, str(timeout)))
+    debug_log("waitForWindow(name=%s, timeout=%s)" % (name, str(timeout)))
 
     from dogtail.rawinput import ponytail, SESSION_TYPE
     if SESSION_TYPE == "wayland":
@@ -502,7 +505,7 @@ class GnomeShell:  # pragma: no cover
         present elsewhere, like 'Lock' or 'Power Off' present under the user menu.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("getApplicationMenuList(self, search_by_item=%s)" % str(search_by_item))
+        debug_log("getApplicationMenuList(self, search_by_item=%s)" % str(search_by_item))
 
         matches = self.shell.findChildren(
             predicate.GenericPredicate(name=search_by_item, roleName="label"))
@@ -522,7 +525,7 @@ class GnomeShell:  # pragma: no cover
         Returns the application menu 'button' node as present on the gnome-shell top panel.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("getApplicationMenuButton(self, app_name=%s)" % str(app_name))
+        debug_log("getApplicationMenuButton(self, app_name=%s)" % str(app_name))
 
         try:
             return self.shell[0][0][3].child(app_name, roleName="label")
@@ -537,7 +540,7 @@ class GnomeShell:  # pragma: no cover
         reference, but also attempts to use the given item if the general reference fails.
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("getApplicationMenuItem(item=%s, search_by_item=%s)" %
+        debug_log("getApplicationMenuItem(item=%s, search_by_item=%s)" %
                       (str(item), str(search_by_item)))
 
         try:
@@ -561,10 +564,8 @@ class GnomeShell:  # pragma: no cover
         particular item. The menu search reference 'Quit' may be customized. Also attempts to
         use the given item for reference if search fails with the default/custom one.
         """
-
-    def clickApplicationMenuItem(self, app_name, item, search_by_item="Quit"):
-        if DEBUG_DOGTAIL: LOGGER.info("clickApplicationMenuItem(app_name=%s, item=%s, search_by_item=%s)" %
-                      (str(app_name), str(item), str(search_by_item)))
+        debug_log("clickApplicationMenuItem(app_name=%s, item=%s, search_by_item=%s)" %
+                  (str(app_name), str(item), str(search_by_item)))
 
         self.getApplicationMenuButton(app_name).click()
         self.getApplicationMenuItem(item, search_by_item).click()

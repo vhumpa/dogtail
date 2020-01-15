@@ -4,14 +4,16 @@ import os
 import re
 import gettext
 from dogtail import config
-from dogtail.logging import DEBUG_DOGTAIL, LOGGER
+from dogtail.logging import debug_log
+from dogtail.logging import debugLogger as logger
 
 """
 Internationalization facilities
 """
 
-__author__ = """David Malcolm <dmalcolm@redhat.com>,
-                Zack Cerza <zcerza@redhat.com>
+__author__ = """
+David Malcolm <dmalcolm@redhat.com>,
+Zack Cerza <zcerza@redhat.com>
 """
 
 """
@@ -54,8 +56,7 @@ class GettextTranslationDb(TranslationDb):
 
 
     def getTranslationsOf(self, srcName):
-        if DEBUG_DOGTAIL:
-            if DEBUG_DOGTAIL: LOGGER.info("getTranslationsOf(self, srcName=%s)"%str(srcName))
+        debug_log("getTranslationsOf(self, srcName=%s)"%str(srcName))
 
         # print "searching for translations of %s"%srcName
         # Use a dict to get uniqueness:
@@ -92,7 +93,7 @@ def translate(srcString):
     a list of all matches found (potentially the empty list)
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("translate(srcString=%s)" % str(translate))
+    debug_log("translate(srcString=%s)" % str(translate))
 
     results = {}
     for translationDb in translationDbs:
@@ -101,7 +102,8 @@ def translate(srcString):
 
     if len(results) == 0:
         if config.config.debugTranslation:
-            if DEBUG_DOGTAIL: LOGGER.info("Translation not found for '%s'" % srcString)
+            debug_log("translate(srcString=%s)" % str(srcString))
+            logger.log('Translation not found for "%s"' % srcString)
 
     return list(results.keys())
 
@@ -132,8 +134,6 @@ class TranslatableString(object):
         string (or simply the original string, if no translation was found).
         """
 
-        if DEBUG_DOGTAIL: LOGGER.info("matchedBy(self, string=%s)" % str(string))
-
         def stringsMatch(inS, outS):
             """
             Compares a regular expression to a string
@@ -141,8 +141,6 @@ class TranslatableString(object):
             inS: the regular expression (or normal string)
             outS: the normal string to be compared against
             """
-
-            if DEBUG_DOGTAIL: LOGGER.info("stringsMatch(inS=%s, outS=%s)" % (str(inS), str(outS)))
 
             inString = str(inS)
             outString = outS
@@ -191,7 +189,7 @@ def isMoFile(filename, language=""):
     Optionally: Does the file also contain translations for a certain language, for example 'ja'?
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("isMoFile(filename=%s, language=%s)" % (filename, language))
+    debug_log("isMoFile(filename=%s, language=%s)" % (filename, language))
 
     if re.match("(.*)\\.mo$", filename):
         if not language:
@@ -205,7 +203,7 @@ def isMoFile(filename, language=""):
 
 
 def loadAllTranslationsForLanguage(language):
-    if DEBUG_DOGTAIL: LOGGER.info("loadAllTranslationsForLanguage(language=%s)" % str(language))
+    debug_log("loadAllTranslationsForLanguage(language=%s)" % str(language))
 
     from dogtail import distro
     for moFile in distro.packageDb.getMoFiles(language):
@@ -219,8 +217,8 @@ def getMoFilesForPackage(packageName, language='', getDependencies=True):
     language, for example 'ja'.
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("getMoFilesForPackage(packageName=%s, language=%s, getDependencies=%s)" %
-                  (str(packageName), str(language), str(getDependencies)))
+    debug_log("getMoFilesForPackage(packageName=%s, language=%s, getDependencies=%s)" %
+              (str(packageName), str(language), str(getDependencies)))
 
     from dogtail import distro
 
@@ -242,7 +240,7 @@ def loadTranslationsFromPackageMoFiles(packageName, getDependencies=True):
     the package (and its dependencies) to the translation database list.
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("loadTranslationsFromPackageMoFiles(packageName=%s, getDependencies=%s)" %
+    debug_log("loadTranslationsFromPackageMoFiles(packageName=%s, getDependencies=%s)" %
                   (str(packageName), str(getDependencies)))
 
     moFiles = {}
@@ -258,8 +256,7 @@ def loadTranslationsFromPackageMoFiles(packageName, getDependencies=True):
                     moFiles[moFile] = None
                 except (AttributeError, IndexError):
                     if config.config.debugTranslation:
-                        if DEBUG_DOGTAIL: LOGGER.info("Warning: Failed to load mo-file for translation: %s"\
-                            % moFile)
+                        logger.log("Warning: Failed to load mo-file for translation: " + moFile)
 
     # Hack alert:
     #

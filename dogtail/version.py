@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 from packaging import version
-from dogtail.logging import DEBUG_DOGTAIL, LOGGER
+from dogtail.logging import debug_log
 
 """
 Handles versioning of software packages
 """
 
-__author__ = "Dave Malcolm <dmalcolm@redhat.com>"
+__author__ = """
+Dave Malcolm <dmalcolm@redhat.com>
+"""
 
 class Version:
     """
@@ -17,14 +19,14 @@ class Version:
     """
 
     def __init__(self, versionList):
-        if DEBUG_DOGTAIL: LOGGER.info("Version class constructor: '%s':'%s'" % \
+        debug_log("Version class constructor: '%s':'%s'" % \
             (type(versionList), str(versionList)))
         self.api_version = ".".join(str(x) for x in versionList) if isinstance(versionList, list) else versionList
 
 
     @classmethod
     def fromString(cls, versionString):
-        if DEBUG_DOGTAIL: LOGGER.info("Getting version from Version.fromString deprecated, use constructor with string.")
+        debug_log("Getting version from Version.fromString deprecated, use constructor with string.")
         instance = Version(versionString)
         return instance
 

@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
-from dogtail.logging import DEBUG_DOGTAIL, LOGGER
 import inspect
+from dogtail.logging import debug_log
+from dogtail.logging import debugLogger as logger
 
 """
 General exceptions; not overly module-specific
 """
 
-__author__ = "Zack Cerza <zcerza@redhat.com>"
+__author__ = """
+Zack Cerza <zcerza@redhat.com>
+"""
 
 
 def warn(message, caller=True):
@@ -20,7 +23,8 @@ def warn(message, caller=True):
     if caller and frameRec[1] != "<stdin>" and frameRec[1] != "<string>":
         message = message + ":\n  " + frameRec[4][0]
     del frameRec
-    if DEBUG_DOGTAIL: LOGGER.info("warn(message, caller=%s)" % str(caller))
+    debug_log("warn(message, caller=%s)" % str(caller))
+    logger.log(message)
 
 
 class DependencyNotFoundError(Exception):

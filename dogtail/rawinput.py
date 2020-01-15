@@ -2,7 +2,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 from dogtail.config import config
 from dogtail.utils import doDelay
-from dogtail.logging import DEBUG_DOGTAIL, LOGGER
+from dogtail.logging import debug_log
+from dogtail.logging import debugLogger as logger
 from pyatspi import Registry as registry
 from pyatspi import (KEY_SYM, KEY_PRESS, KEY_PRESSRELEASE, KEY_RELEASE)
 from time import sleep
@@ -49,16 +50,16 @@ def ponytail_check_is_xwayland(window_id=None, window_list=None):
         window_list = ponytail.window_list
 
     if isinstance(window_id, int):
-        if DEBUG_DOGTAIL: LOGGER.info("Return wanted window_id.")
+        debug_log("Return wanted window_id.")
         return int([x["client-type"] for x in window_list if x["id"] == window_id][0])
 
     if window_id is None:
-        if DEBUG_DOGTAIL: LOGGER.info("Return focused window if no window_id was provided.")
+        debug_log("Return focused window if no window_id was provided.")
         for window in window_list:
             if bool(window["has-focus"]) is True:
                 return int(window["client-type"])
 
-    if DEBUG_DOGTAIL: LOGGER.info("Return window_id 0 which is gnome-shell if no id is found.")
+    debug_log("Return window_id 0 which is gnome-shell if no id is found.")
     return 0
 
 
@@ -69,30 +70,30 @@ def ponytail_check_connection(window_id=None, input_source="mouse"):
         window_id not in [x["id"] for x in window_list]:
         window_id = None
 
-    if DEBUG_DOGTAIL: LOGGER.info("Checking if possibly connected window still exists.")
+    debug_log("Checking if possibly connected window still exists.")
 
     if ponytail.connected and isinstance(ponytail.connected, int):
         if ponytail.connected not in [x["id"] for x in window_list]:
-            if DEBUG_DOGTAIL: LOGGER.info("Disconnecting no longer open window.")
+            debug_log("Disconnecting no longer open window.")
             ponytail.disconnect()
             sleep(1)
-            if DEBUG_DOGTAIL: LOGGER.info("Done.")
+            debug_log("Done.")
 
     if input_source == "keyboard" and ponytail.connected is None:
-        if DEBUG_DOGTAIL: LOGGER.info("Keyboard event, connecting monitor.")
+        debug_log("Keyboard event, connecting monitor.")
         ponytail.connectMonitor()
 
     elif input_source == "keyboard" and ponytail.connected is not None:
         if window_id == "" and isinstance(ponytail.connected, int):
-            if DEBUG_DOGTAIL: LOGGER.info("Keyboard event, monitor request, forcing monitor.")
+            debug_log("Keyboard event, monitor request, forcing monitor.")
             ponytail.disconnect()
             sleep(1)
             ponytail.connectMonitor()
         else:
-            if DEBUG_DOGTAIL: LOGGER.info("Any window/monitor already connected for keyboard event.")
+            debug_log("Any window/monitor already connected for keyboard event.")
 
     else:
-        if DEBUG_DOGTAIL: LOGGER.info("Mouse input event.")
+        debug_log("Mouse input event.")
         if ponytail_check_is_xwayland(window_id, window_list):
             window_id = ""
 
@@ -100,46 +101,46 @@ def ponytail_check_connection(window_id=None, input_source="mouse"):
             for window in window_list:
                 if bool(window["has-focus"]) is True:
                     ponytail.connectWindow(window["id"])
-                    if DEBUG_DOGTAIL: LOGGER.info("Connected active window.")
+                    debug_log("Connected active window.")
 
         elif ponytail.connected is not None and window_id is None:
-            if DEBUG_DOGTAIL: LOGGER.info("Re-connected active window.")
+            debug_log("Re-connected active window.")
             for window in window_list:
                 if bool(window["has-focus"]) is True:
                     if ponytail.connected != window["id"]:
                         ponytail.disconnect()
                         sleep(1)
                         ponytail.connectWindow(window["id"])
-                        if DEBUG_DOGTAIL: LOGGER.info("Re-connected active window.")
+                        debug_log("Re-connected active window.")
 
         elif ponytail.connected is None:
             if isinstance(window_id, int):
                 ponytail.connectWindow(window_id)
-                if DEBUG_DOGTAIL: LOGGER.info("Connected window by window_id.")
+                debug_log("Connected window by window_id.")
 
             elif isinstance(window_id, str):
                 ponytail.connectMonitor(window_id)
-                if DEBUG_DOGTAIL: LOGGER.info("Connected monitor (Xwayand?) by window_id.")
+                debug_log("Connected monitor (Xwayand?) by window_id.")
 
         elif ponytail.connected != window_id and isinstance(window_id, int):
-            if DEBUG_DOGTAIL: LOGGER.info("Disconnecting window.")
+            debug_log("Disconnecting window.")
             ponytail.disconnect()
             sleep(1.5)
-            if DEBUG_DOGTAIL: LOGGER.info("Connected window: %s." % ponytail.connected)
-            if DEBUG_DOGTAIL: LOGGER.info("Reconnecting window: %s." % window_id)
+            debug_log("Connected window: %s." % ponytail.connected)
+            debug_log("Reconnecting window: %s." % window_id)
             ponytail.connectWindow(window_id)
-            if DEBUG_DOGTAIL: LOGGER.info("Connected window: %s." % ponytail.connected)
+            debug_log("Connected window: %s." % ponytail.connected)
 
         elif ponytail.connected != window_id and isinstance(window_id, str):
-            if DEBUG_DOGTAIL: LOGGER.info("Disconnecting monitor.")
+            debug_log("Disconnecting monitor.")
             ponytail.disconnect()
             sleep(1)
-            if DEBUG_DOGTAIL: LOGGER.info("Reconnecting monitor.")
+            debug_log("Reconnecting monitor.")
             ponytail.connectMonitor()
-            if DEBUG_DOGTAIL: LOGGER.info("Connected monitor.")
+            debug_log("Connected monitor.")
 
         elif ponytail.connected == window_id:
-            if DEBUG_DOGTAIL: LOGGER.info("Window or monitor is already connected.")
+            debug_log("Window or monitor is already connected.")
 
 
 def doTypingDelay():
@@ -161,8 +162,7 @@ def click(x, y, button=1, check=True, window_id=None):
     if check:
         checkCoordinates(x, y)
 
-    if DEBUG_DOGTAIL: LOGGER.info("click(x=%s, y=%s, button=%s, check=%s, window_id=%s)" %
-                  (str(x), str(y), str(button), str(check), str(window_id)))
+    logger.log("Mouse button %s click at (%s,%s)" % (button, x, y))
 
     if SESSION_TYPE == "x11":
         registry.generateMouseEvent(x, y, name="b%sc" % button)
@@ -184,8 +184,7 @@ def point(x, y, check=True, window_id=None):
     if check:
         checkCoordinates(x, y)
 
-    if DEBUG_DOGTAIL: LOGGER.info("point(x=%s, y=%s, check=%s, window_id=%s)" %
-                  (str(x), str(y), str(check), str(window_id)))
+    logger.log("Pointing mouse cursor at (%s,%s)" % (x, y))
 
     if SESSION_TYPE == "x11":
         registry.generateMouseEvent(x, y, "abs")
@@ -207,8 +206,7 @@ def doubleClick(x, y, button=1, check=True, window_id=None):
     if check:
         checkCoordinates(x, y)
 
-    if DEBUG_DOGTAIL: LOGGER.info("doubleClick(x=%s, y=%s, button=%s, check=%s, window_id=%s)" %
-                  (str(x), str(y), str(button), str(check), str(window_id)))
+    logger.log("Mouse button %s doubleclick at (%s,%s)" % (button, x, y))
 
     if SESSION_TYPE == "x11":
         registry.generateMouseEvent(x, y, name="b%sd" % button)
@@ -232,8 +230,7 @@ def press(x, y, button=1, check=True, window_id=None, delay=config.defaultDelay)
     if check:
         checkCoordinates(x, y)
 
-    if DEBUG_DOGTAIL: LOGGER.info("press(x=%s, y=%s, button=%s, check=%s, window_id=%s, delay=%s)" %
-                  (str(x), str(y), str(button), str(check), str(window_id), str(delay)))
+    logger.log("Mouse button %s press at (%s,%s)" % (button, x, y))
 
     if SESSION_TYPE == "x11":
         registry.generateMouseEvent(x, y, name="b%sp" % button)
@@ -256,8 +253,7 @@ def release(x, y, button=1, check=True, window_id=None):
     if check:
         checkCoordinates(x, y)
 
-    if DEBUG_DOGTAIL: LOGGER.info("release(x=%s, y=%s, button=%s, check=%s, window_id=%s)" %
-                  (str(x), str(y), str(button), str(check), str(window_id)))
+    logger.log("Mouse button %s release at (%s,%s)" % (button, x, y))
 
     if SESSION_TYPE == "x11":
         registry.generateMouseEvent(x, y, name="b%sr" % button)
@@ -281,8 +277,7 @@ def absoluteMotion(x, y, mouseDelay=None, check=True, window_id=None):
     if check:
         checkCoordinates(x, y)
 
-    if DEBUG_DOGTAIL: LOGGER.info("absoluteMotion(x=%s, y=%s, mouseDelay=%s, check=%s, window_id=%s)" %
-                  (str(x), str(y), str(mouseDelay), str(check), str(window_id)))
+    logger.log("Mouse absolute motion to (%s,%s)" % (x, y))
 
     if SESSION_TYPE == "x11":
         registry.generateMouseEvent(x, y, name="abs")
@@ -307,8 +302,7 @@ def absoluteMotionWithTrajectory(source_x, source_y, dest_x, dest_y, mouseDelay=
         checkCoordinates(source_x, source_y)
         checkCoordinates(dest_x, dest_y)
 
-    if DEBUG_DOGTAIL: LOGGER.info("absoluteMotionWithTrajectory(source_x=%s, source_y=%s, dest_x=%s, dest_y=%s, mouseDelay=%s, check=%s, window_id=%s)" %
-                  (str(source_x), str(source_y), str(dest_x), str(dest_y), str(mouseDelay), str(check), str(window_id)))
+    logger.log("Mouse absolute motion with trajectory to (%s,%s)" % (dest_x, dest_y))
 
     if SESSION_TYPE == "wayland":
         ponytail_check_connection(window_id)
@@ -349,11 +343,10 @@ def relativeMotion(x, y, mouseDelay=None):
     Note: Does not check if the end coordinates are positive.
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("relativeMotion(x=%s, y=%s, mouseDelay=%s)" %
-                  (str(x), str(y), str(mouseDelay)))
+    logger.log("Mouse relative motion of (%s,%s)" % (x, y))
 
     if SESSION_TYPE == "wayland":
-        if DEBUG_DOGTAIL: LOGGER.info("Relative motion unavailable under wayland not available.")
+        logger.log("Relative motion unavailable under wayland not available.")
         return
 
     registry.generateMouseEvent(x, y, name="rel")
@@ -369,8 +362,7 @@ def drag(fromXY, toXY, button=1, check=True):
     Synthesize a mouse press, drag, and release on the screen.
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("drag(fromXY=%s, toXY=%s, button=%s, check=%s)" %
-                  (str(fromXY), str(toXY), str(button), str(check)))
+    logger.log("Mouse button %s drag with trajectory from %s to %s" % (button, fromXY, toXY))
 
     (x, y) = fromXY
     press(x, y, button, check)
@@ -389,7 +381,7 @@ def dragNodeToNode(source_node, dest_node, button=1, check=True):
     of these Nodes directly, so you don't have to calculate end enter them directly.
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("dragNodeToNode(source_node=%s, dest_node=%s, button=%s, check=%s)" %
+    logger.log("Drag node to node source_node=%s, dest_node=%s, button=%s, check=%s" %
                   (str(source_node), str(dest_node), str(button), str(check)))
 
     x = source_node.position[0] + source_node.size[0] / 2
@@ -416,7 +408,7 @@ def dragWithTrajectoryGlobal(fromXY, toXY, button=1):
     or just 'drag' on X sessions like in pre-wayland version of dogtail.
     """
     
-    if DEBUG_DOGTAIL: LOGGER.info("dragWithTrajectoryGlobal(fromXY=%s, toXY=%s, button=%s)" %
+    logger.log("Drag with trajectory global fromXY=%s, toXY=%s, button=%s" %
                   (str(fromXY), str(toXY), str(button)))
 
     if SESSION_TYPE == "wayland":
@@ -447,7 +439,7 @@ def dragWithTrajectory(fromXY, toXY, button=1, check=True, press_delay=config.de
     On X this function works with global coords and equals dragWithTrajectoryGlobal
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("dragWithTrajectory(fromXY=%s, toXY=%s, button=%s, check=%s, press_delay=%s, mouse_delay=%s)" %
+    logger.log("Drag with trajectory fromXY=%s, toXY=%s, button=%s, check=%s, press_delay=%s, mouse_delay=%s" %
                   (str(fromXY), str(toXY), str(button), str(check), str(press_delay), str(mouse_delay)))
 
     (x, y) = fromXY
@@ -469,7 +461,7 @@ def typeText(string):
     Needed sometimes on slow setups/VMs typing non-ASCII utf8 chars.
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("typeText(string=%s)" % string)
+    debug_log("typeText(string=%s)" % string)
 
     for char in string:
         pressKey(char)
@@ -504,7 +496,7 @@ def uniCharToKeySym(uniChar):
     Use GDK to get the key symbol for a given unicode character.
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("uniCharToKeySym(uniChar=%s)" % uniChar)
+    debug_log("uniCharToKeySym(uniChar=%s)" % uniChar)
 
     i = ord(uniChar)
     keySym = Gdk.unicode_to_keyval(i)
@@ -516,7 +508,7 @@ def keyNameToKeySym(keyName):
     Use GDK to get the key symbol for a key name.
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("keyNameToKeySym(keyName=%s)" % keyName)
+    debug_log("keyNameToKeySym(keyName=%s)" % keyName)
 
     keyName = keyNameAliases.get(keyName.lower(), keyName)
     keySym = Gdk.keyval_from_name(keyName)
@@ -543,7 +535,7 @@ def keyNameToKeyCode(keyName):
     function for nonprintable keys anyway.
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("keyNameToKeyCode(keyName=%s)" % keyName)
+    debug_log("keyNameToKeyCode(keyName=%s)" % keyName)
 
     keymap = Gdk.Keymap.get_for_display(Gdk.Display.get_default())
     entries = keymap.get_entries_for_keyval(Gdk.keyval_from_name(keyName))
@@ -562,7 +554,7 @@ def pressKey(keyName, window_id=None):
     looked up by uniCharToKeySym().
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("pressKey(keyName=%s, window_id=%s)" % (keyName, str(window_id)))
+    debug_log("pressKey(keyName=%s, window_id=%s)" % (keyName, str(window_id)))
 
     if keyName.lower() in ("esc", "escape", "enter", "return"):
         window_id = "" # when this would quit a window, release event would be doomed
@@ -587,7 +579,7 @@ def keyCombo(comboString):
     e.g. '<Control><Alt>p' or '<Control><Shift>PageUp' or '<Control>q'
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("keyCombo(comboString=%s)" % comboString)
+    debug_log("keyCombo(comboString=%s)" % comboString)
 
     strings = []
     for s in comboString.split('<'):
@@ -641,7 +633,7 @@ def holdKey(keyName):
     Press and hold the key specified by keyName.
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("holdKey(keyName=%s)" % keyName)
+    debug_log("holdKey(keyName=%s)" % keyName)
 
     keyName = keyNameAliases.get(keyName.lower(), keyName)
     code = keyNameToKeyCode(keyName)
@@ -661,7 +653,7 @@ def releaseKey(keyName):
     Releases the holded key specified by keyName.
     """
 
-    if DEBUG_DOGTAIL: LOGGER.info("releaseKey(keyName=%s)" % keyName)
+    debug_log("releaseKey(keyName=%s)" % keyName)
 
     keyName = keyNameAliases.get(keyName.lower(), keyName)
     code = keyNameToKeyCode(keyName)

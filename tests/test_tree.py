@@ -33,7 +33,6 @@ dogtail.config.config.logDebugToFile = False
 
 
 class TestNode(GtkDemoTest):
-
     """
     Unit tests for the the various synthesized attributes of a Node
     """
@@ -52,9 +51,9 @@ class TestNode(GtkDemoTest):
         Node.name of the gtk-demo app should be "gtk-demo"
         """
         print(self.app.name)
-        self.assertEqual(self.app.name, 'gtk3-demo')
+        self.assertEqual(self.app.name, "gtk3-demo")
 
-        self.assertEqual(dogtail.tree.root.name, 'main')
+        self.assertEqual(dogtail.tree.root.name, "main")
 
     def test_set_name(self):
         """
@@ -65,26 +64,28 @@ class TestNode(GtkDemoTest):
     # 'debugName' (string)
     def test_get_debugName(self):
         self.assertEqual(self.app.debugName, "'gtk3-demo' application")
-        self.assertEqual(dogtail.tree.root.debugName, 'root')
+        self.assertEqual(dogtail.tree.root.debugName, "root")
 
     def test_set_debugName(self):
         self.app.debugName = "my application"
-        self.assertEqual(self.app.debugName, 'my application')
+        self.assertEqual(self.app.debugName, "my application")
         dogtail.tree.root.debugName = "my root"
-        self.assertEqual(dogtail.tree.root.debugName, 'my root')
+        self.assertEqual(dogtail.tree.root.debugName, "my root")
 
     # 'roleName' (read-only string):
     def test_get_roleName(self):
         """
         roleName of the gtk3-demo app should be "application"
         """
-        self.assertEqual(self.app.roleName, 'application')
+        self.assertEqual(self.app.roleName, "application")
 
     def test_set_roleName(self):
         """
         Node.roleName should be read-only
         """
-        self.assertRaises(AttributeError, self.app.__setattr__, "roleName", "hello world")
+        self.assertRaises(
+            AttributeError, self.app.__setattr__, "roleName", "hello world"
+        )
 
     # 'role' (read-only atspi role enum):
     def test_get_role(self):
@@ -98,7 +99,9 @@ class TestNode(GtkDemoTest):
         Node.role should be read-only
         """
         # FIXME should be AttributeError?
-        self.assertRaises(RuntimeError, self.app.__setattr__, "role", pyatspi.Atspi.Role(1))
+        self.assertRaises(
+            RuntimeError, self.app.__setattr__, "role", pyatspi.Atspi.Role(1)
+        )
 
     # 'description' (read-only string):
     def test_get_description(self):
@@ -109,13 +112,15 @@ class TestNode(GtkDemoTest):
         """
         Node.description should be read-only
         """
-        self.assertRaises(AttributeError, self.app.__setattr__, "description", "hello world")
+        self.assertRaises(
+            AttributeError, self.app.__setattr__, "description", "hello world"
+        )
 
     # 'parent' (read-only Node instance):
     def test_get_parent(self):
         # the app has a parent if gnome-shell is used, so parent.parent is a
         # safe choice
-        if [x for x in self.app.applications() if x.name == 'gnome-shell']:
+        if [x for x in self.app.applications() if x.name == "gnome-shell"]:
             self.assertEqual(self.app.parent.parent, None)
         self.assertEqual(self.app.children[0].parent, self.app)
 
@@ -144,18 +149,18 @@ class TestNode(GtkDemoTest):
     def test_get_children_with_limit(self):
         haveWarnedAboutChildrenLimit = False
         dogtail.config.config.childrenLimit = 1
-        widget = self.app.child(roleName='tree table')
+        widget = self.app.child(roleName="tree table")
         self.assertEqual(len(widget.children), 1)
 
     #  combovalue (string):
     def test_get_combo_value(self):
-        self.runDemo('Combo Boxes')
+        self.runDemo("Combo Boxes")
         try:
-            wnd = self.app.child('Combo boxes', roleName='frame', retry=False)
+            wnd = self.app.child("Combo boxes", roleName="frame", retry=False)
         except dogtail.tree.SearchError:
-            wnd = self.app.child('Combo Boxes', roleName='frame', retry=False)
-        combo = wnd.child(roleName='combo box')
-        self.assertEqual(combo.combovalue, 'dialog-warning')
+            wnd = self.app.child("Combo Boxes", roleName="frame", retry=False)
+        combo = wnd.child(roleName="combo box")
+        self.assertEqual(combo.combovalue, "dialog-warning")
 
     def test_get_URI_not_implemented(self):
         with self.assertRaises(NotImplementedError):
@@ -168,15 +173,17 @@ class TestNode(GtkDemoTest):
         Node.text works as expected
         """
         try:
-            self.runDemo('Dialog and Message Boxes', retry=False)
-            wnd = self.app.child('Dialogs', roleName='frame', retry=False)
+            self.runDemo("Dialog and Message Boxes", retry=False)
+            wnd = self.app.child("Dialogs", roleName="frame", retry=False)
         except dogtail.tree.SearchError:
-            self.runDemo('Dialogs and Message Boxes', retry=False)
-            wnd = self.app.child('Dialogs and Message Boxes', roleName='frame', retry=False)
-        wnd.button('Interactive Dialog').click()
-        dlg = self.app.dialog('Interactive Dialog')
-        entry1 = dlg.child(label='Entry 1')
-        entry2 = dlg.child(roleName='text')
+            self.runDemo("Dialogs and Message Boxes", retry=False)
+            wnd = self.app.child(
+                "Dialogs and Message Boxes", roleName="frame", retry=False
+            )
+        wnd.button("Interactive Dialog").click()
+        dlg = self.app.dialog("Interactive Dialog")
+        entry1 = dlg.child(label="Entry 1")
+        entry2 = dlg.child(roleName="text")
 
         # Try reading the entries:
         self.assertEqual(entry1.text, "")
@@ -192,8 +199,8 @@ class TestNode(GtkDemoTest):
 
         # and try again, searching for them again, to ensure it actually
         # affected the UI:
-        self.assertEqual(dlg.child(label='Entry 1').text, "hello")
-        self.assertEqual(dlg.child(label='Entry 2').text, "world")
+        self.assertEqual(dlg.child(label="Entry 1").text, "hello")
+        self.assertEqual(dlg.child(label="Entry 2").text, "world")
 
         # Ensure app.text is None
         self.assertEqual(self.app.text, None)
@@ -209,24 +216,26 @@ class TestNode(GtkDemoTest):
 
     def test_text_set_error(self):
         with self.assertRaises(AttributeError):
-            self.app.text = 'something'
+            self.app.text = "something"
 
     def test_caretOffset(self):
         """
         Make sure the caret offset works as expected
         """
         try:
-            self.runDemo('Dialog and Message Boxes', retry=False)
-            wnd = self.app.child('Dialogs', roleName='frame', retry=False)
+            self.runDemo("Dialog and Message Boxes", retry=False)
+            wnd = self.app.child("Dialogs", roleName="frame", retry=False)
         except dogtail.tree.SearchError:
-            self.runDemo('Dialogs and Message Boxes', retry=False)
-            wnd = self.app.child('Dialogs and Message Boxes', roleName='frame', retry=False)
-        entry1 = wnd.child(label='Entry 1')
-        entry2 = wnd.child(roleName='text')
+            self.runDemo("Dialogs and Message Boxes", retry=False)
+            wnd = self.app.child(
+                "Dialogs and Message Boxes", roleName="frame", retry=False
+            )
+        entry1 = wnd.child(label="Entry 1")
+        entry2 = wnd.child(roleName="text")
 
         # Try reading the entries:
-        self.assertEqual(entry1.text, '')
-        self.assertEqual(entry2.text, '')
+        self.assertEqual(entry1.text, "")
+        self.assertEqual(entry2.text, "")
 
         # Set them...
         s1 = "I just need a sentence"
@@ -255,7 +264,8 @@ class TestNode(GtkDemoTest):
             startOffset = 0
             while startOffset != len(string):
                 (text, startOffset, endOffset) = textIface.getTextAtOffset(
-                    startOffset, pyatspi.TEXT_BOUNDARY_WORD_START)
+                    startOffset, pyatspi.TEXT_BOUNDARY_WORD_START
+                )
                 self.assertEqual(startOffset, string.find(text, startOffset, endOffset))
                 startOffset = endOffset
 
@@ -264,14 +274,14 @@ class TestNode(GtkDemoTest):
 
     # 'combovalue' (read/write string):
     def test_comboValue(self):
-        self.runDemo('Combo Boxes')
+        self.runDemo("Combo Boxes")
         try:
-            wnd = self.app.child('Combo boxes', roleName='frame', retry=False)
+            wnd = self.app.child("Combo boxes", roleName="frame", retry=False)
         except dogtail.tree.SearchError:
-            wnd = self.app.child('Combo Boxes', roleName='frame', retry=False)
-        combo1 = wnd.child('Items with icons').child(roleName='combo box')
-        combo1.combovalue = 'Clear'
-        self.assertEqual(combo1.combovalue, 'edit-clear')
+            wnd = self.app.child("Combo Boxes", roleName="frame", retry=False)
+        combo1 = wnd.child("Items with icons").child(roleName="combo box")
+        combo1.combovalue = "Clear"
+        self.assertEqual(combo1.combovalue, "edit-clear")
 
     # 'stateSet' (read-only StateSet instance):
     def test_getStateSet(self):
@@ -285,7 +295,9 @@ class TestNode(GtkDemoTest):
         Node.stateSet should be read-only
         """
         # FIXME should be AttributeError?
-        self.assertRaises(RuntimeError, self.app.__setattr__, "states", pyatspi.StateSet())
+        self.assertRaises(
+            RuntimeError, self.app.__setattr__, "states", pyatspi.StateSet()
+        )
 
     # 'relations' (read-only list of atspi.Relation instances):
     def test_get_relations(self):
@@ -298,14 +310,16 @@ class TestNode(GtkDemoTest):
         Entry1/2's labelee should be a text widget
         """
         try:
-            self.runDemo('Dialog and Message Boxes', retry=False)
-            wnd = self.app.child('Dialogs', roleName='frame', retry=False)
+            self.runDemo("Dialog and Message Boxes", retry=False)
+            wnd = self.app.child("Dialogs", roleName="frame", retry=False)
         except dogtail.tree.SearchError:
-            self.runDemo('Dialogs and Message Boxes', retry=False)
-            wnd = self.app.child('Dialogs and Message Boxes', roleName='frame', retry=False)
-        label = wnd.child(roleName='label', name='Entry 1')
-        self.assertEqual(label.labelee.roleName, 'text')
-        self.assertEqual(label.labellee.roleName, 'text')
+            self.runDemo("Dialogs and Message Boxes", retry=False)
+            wnd = self.app.child(
+                "Dialogs and Message Boxes", roleName="frame", retry=False
+            )
+        label = wnd.child(roleName="label", name="Entry 1")
+        self.assertEqual(label.labelee.roleName, "text")
+        self.assertEqual(label.labellee.roleName, "text")
 
     def test_set_labelee(self):
         """
@@ -315,14 +329,16 @@ class TestNode(GtkDemoTest):
 
     def test_get_labeler(self):
         try:
-            self.runDemo('Dialog and Message Boxes', retry=False)
-            wnd = self.app.child('Dialogs', roleName='frame', retry=False)
+            self.runDemo("Dialog and Message Boxes", retry=False)
+            wnd = self.app.child("Dialogs", roleName="frame", retry=False)
         except dogtail.tree.SearchError:
-            self.runDemo('Dialogs and Message Boxes', retry=False)
-            wnd = self.app.child('Dialogs and Message Boxes', roleName='frame', retry=False)
-        text = wnd.findChildren(dogtail.predicate.GenericPredicate(roleName='text'))[1]
-        self.assertEqual(text.labeler.name, 'Entry 1')
-        self.assertEqual(text.labeller.name, 'Entry 1')
+            self.runDemo("Dialogs and Message Boxes", retry=False)
+            wnd = self.app.child(
+                "Dialogs and Message Boxes", roleName="frame", retry=False
+            )
+        text = wnd.findChildren(dogtail.predicate.GenericPredicate(roleName="text"))[1]
+        self.assertEqual(text.labeler.name, "Entry 1")
+        self.assertEqual(text.labeller.name, "Entry 1")
 
     def test_set_labeller(self):
         """
@@ -364,8 +380,8 @@ class TestNode(GtkDemoTest):
         """
         Node.visible reflects a node property if is should be render or not
         """
-        self.assertTrue(self.app.child(roleName='frame').visible)
-        self.assertFalse(self.app.child(roleName='table column header').visible)
+        self.assertTrue(self.app.child(roleName="frame").visible)
+        self.assertFalse(self.app.child(roleName="table column header").visible)
 
     def test_set_visible(self):
         """
@@ -405,7 +421,9 @@ class TestNode(GtkDemoTest):
         """
         Node.extents should be read-only
         """
-        self.assertRaises(AttributeError, self.app.__setattr__, "extents", (0, 0, 640, 480))
+        self.assertRaises(
+            AttributeError, self.app.__setattr__, "extents", (0, 0, 640, 480)
+        )
 
     # 'position' (readonly tuple):
     def test_get_position(self):
@@ -479,9 +497,10 @@ class TestNode(GtkDemoTest):
 
     def test_checked(self):
         self.runDemo("Application Class")
-        wnd = dogtail.tree.root.application('gtk3-demo-application')
+        wnd = dogtail.tree.root.application("gtk3-demo-application")
         wnd.menu("Preferences").select()
         from time import sleep
+
         sleep(3)
         checkbox = wnd.menu("Preferences").menuItem("Bold")
         status = checkbox.checked
@@ -493,6 +512,7 @@ class TestNode(GtkDemoTest):
         self.assertFalse(self.app.dead)
         import os
         import signal
+
         os.kill(self.pid, signal.SIGKILL)
         dogtail.utils.doDelay(5)
         self.assertTrue(self.app.dead)
@@ -506,7 +526,7 @@ class TestNode(GtkDemoTest):
     def test_contains(self):
         child = self.app.children[0]
         position = child.position
-        self.assertTrue(child.contains(position[0]+1, position[1]+1))
+        self.assertTrue(child.contains(position[0] + 1, position[1] + 1))
 
     def test_childAtPoint(self):
         top = self.app.children[0]
@@ -517,24 +537,44 @@ class TestNode(GtkDemoTest):
 
     def test_click(self):
         try:
-            self.runDemo('Dialog and Message Boxes', retry=False)
-            wnd = self.app.child('Dialogs', roleName='frame', retry=False)
+            self.runDemo("Dialog and Message Boxes", retry=False)
+            wnd = self.app.child("Dialogs", roleName="frame", retry=False)
         except dogtail.tree.SearchError:
-            self.runDemo('Dialogs and Message Boxes', retry=False)
-            wnd = self.app.child('Dialogs and Message Boxes', roleName='frame', retry=False)
-        wnd.button('Interactive Dialog').click()
+            self.runDemo("Dialogs and Message Boxes", retry=False)
+            wnd = self.app.child(
+                "Dialogs and Message Boxes", roleName="frame", retry=False
+            )
+        wnd.button("Interactive Dialog").click()
         self.assertTrue(self.app.dialog("Interactive Dialog").showing)
 
     def test_doubleClick(self):
         builder = self.app.child("Builder")
-        self.assertEqual(len([x for x in self.app.children if x.name in ['GtkBuilder demo', 'Builder']]), 0)
+        self.assertEqual(
+            len(
+                [
+                    x
+                    for x in self.app.children
+                    if x.name in ["GtkBuilder demo", "Builder"]
+                ]
+            ),
+            0,
+        )
         builder.doubleClick()
-        self.assertEqual(len([x for x in self.app.children if x.name in ['GtkBuilder demo', 'Builder']]), 2)
+        self.assertEqual(
+            len(
+                [
+                    x
+                    for x in self.app.children
+                    if x.name in ["GtkBuilder demo", "Builder"]
+                ]
+            ),
+            2,
+        )
 
     def test_point(self):
-        self.runDemo('Application Class')
-        wnd = dogtail.tree.root.application('gtk3-demo-application')
-        wnd.menu("Help").click() # workaround for wayland, first app focus
+        self.runDemo("Application Class")
+        wnd = dogtail.tree.root.application("gtk3-demo-application")
+        wnd.menu("Help").click()  # workaround for wayland, first app focus
         wnd.menu("Preferences").point()
         color = wnd.menu("Preferences").menu("Color")
         red = wnd.menu("Preferences").menu("Color").menuItem("Red")
@@ -547,7 +587,7 @@ class TestNode(GtkDemoTest):
         Node.typeText on non-focusable node which is not input-friendly should end in an error
         """
         with self.assertRaises(NotImplementedError):
-            self.app.typeText('Something')
+            self.app.typeText("Something")
 
 
 class TestSelection(GtkDemoTest):
@@ -558,8 +598,8 @@ class TestSelection(GtkDemoTest):
         "isSelected", and the results should change as they are selected.
         """
         # Use the Info/Source tabs of gtk-demo:
-        info = self.app.child('Info')
-        source = self.app.child('Source')
+        info = self.app.child("Info")
+        source = self.app.child("Source")
 
         # Check initial state:
         self.assertTrue(info.isSelected)
@@ -573,14 +613,18 @@ class TestSelection(GtkDemoTest):
         self.assertTrue(source.isSelected)
 
     def test_iconView(self):
-        self.app.child(roleName='tree table').typeText("Icon View")
-        self.app.child(roleName='tree table').child("Icon View").click()
-        self.app.child(roleName='tree table').child("Icon View").typeText("+")
-        self.runDemo('Icon View Basics')
+        self.app.child(roleName="tree table").typeText("Icon View")
+        self.app.child(roleName="tree table").child("Icon View").click()
+        self.app.child(roleName="tree table").child("Icon View").typeText("+")
+        self.runDemo("Icon View Basics")
         try:
-            wnd = self.app.child('GtkIconView demo', roleName='frame', recursive=False, retry=False)
+            wnd = self.app.child(
+                "GtkIconView demo", roleName="frame", recursive=False, retry=False
+            )
         except dogtail.tree.SearchError:
-            wnd = self.app.child('Icon View Basics', roleName='frame', recursive=False, retry=False)
+            wnd = self.app.child(
+                "Icon View Basics", roleName="frame", recursive=False, retry=False
+            )
 
         pane = wnd.child(roleName="layered pane")
         icons = pane.children
@@ -600,14 +644,16 @@ class TestValue(GtkDemoTest):
         """
         The scrollbar starts out at position zero.
         """
-        sb = self.app.child(roleName='scroll bar')
+        sb = self.app.child(roleName="scroll bar")
         self.assertEqual(sb.value, 0)
 
     def test_set_value(self):
         """
         Ensure that we can set the value of the scrollbar.
         """
-        sb = self.app.findChildren(dogtail.predicate.GenericPredicate(roleName='scroll bar'))[1]
+        sb = self.app.findChildren(
+            dogtail.predicate.GenericPredicate(roleName="scroll bar")
+        )[1]
         sb.value = 100
         self.assertEqual(sb.value, 100)
 
@@ -615,18 +661,24 @@ class TestValue(GtkDemoTest):
         """
         Ensure that the minimum value for the scrollbar is correct.
         """
-        sb = self.app.findChildren(dogtail.predicate.GenericPredicate(roleName='scroll bar'))[1]
+        sb = self.app.findChildren(
+            dogtail.predicate.GenericPredicate(roleName="scroll bar")
+        )[1]
         self.assertEqual(sb.minValue, 0)
 
     def test_max_value(self):
-        sb = self.app.findChildren(dogtail.predicate.GenericPredicate(roleName='scroll bar'))[1]
+        sb = self.app.findChildren(
+            dogtail.predicate.GenericPredicate(roleName="scroll bar")
+        )[1]
         self.assertTrue(sb.maxValue > 250)
 
     def test_min_value_increment(self):
         """
         Ensure that the minimum value increment of the scrollbar is an int.
         """
-        sb = self.app.findChildren(dogtail.predicate.GenericPredicate(roleName='scroll bar'))[1]
+        sb = self.app.findChildren(
+            dogtail.predicate.GenericPredicate(roleName="scroll bar")
+        )[1]
         self.assertEqual(sb.minValueIncrement, sb.minValueIncrement)
 
 
@@ -637,13 +689,13 @@ class TestSearching(GtkDemoTest):
         Ensure that there are the correct number of table cells in the list
         of demos.
         """
-        pred = dogtail.predicate.GenericPredicate(roleName='table cell')
+        pred = dogtail.predicate.GenericPredicate(roleName="table cell")
         tableCells = self.app.findChildren(pred)
 
         def get_table_cells_recursively(node):
             counter = 0
             for child in node.children:
-                if child.roleName == 'table cell':
+                if child.roleName == "table cell":
                     counter += 1
                 counter += get_table_cells_recursively(child)
             return counter
@@ -656,7 +708,7 @@ class TestSearching(GtkDemoTest):
         Ensure that the lambda usage works as expected with Node.findChild
         """
         try:
-            self.app.findChild(lambda x: x.roleName == 'page tab list')
+            self.app.findChild(lambda x: x.roleName == "page tab list")
         except dogtail.tree.SearchError:
             self.fail("Got a SearchError trying to find the page tab list")
 
@@ -664,9 +716,9 @@ class TestSearching(GtkDemoTest):
         """
         Ensure that there are two tabs in the second page tab list.
         """
-        pred = dogtail.predicate.GenericPredicate(roleName='page tab list')
+        pred = dogtail.predicate.GenericPredicate(roleName="page tab list")
         pageTabList = self.app.findChildren(pred)
-        pred = dogtail.predicate.GenericPredicate(roleName='page tab')
+        pred = dogtail.predicate.GenericPredicate(roleName="page tab")
         # only one page tab list present since gtk3-demo 3.14
         pageTabs = pageTabList[0].findChildren(pred)
         self.assertEqual(len(pageTabs), 5)
@@ -675,8 +727,8 @@ class TestSearching(GtkDemoTest):
         """
         Ensure that there ic correct number of tabs in the first page tab list, use lambdas
         """
-        pageTabList = self.app.findChildren(lambda x: x.roleName == 'page tab list')
-        pageTabs = pageTabList[0].findChildren(lambda x: x.roleName == 'page tab')
+        pageTabList = self.app.findChildren(lambda x: x.roleName == "page tab list")
+        pageTabs = pageTabList[0].findChildren(lambda x: x.roleName == "page tab")
         self.assertEqual(len(pageTabs), 5)
 
     def test_findChildren_lambdas(self):
@@ -684,59 +736,67 @@ class TestSearching(GtkDemoTest):
         Ensure that the lambda usage works as expected in Node.findChildren
         """
         try:
-            self.runDemo('Dialog and Message Boxes', retry=False)
-            wnd = self.app.child('Dialogs', roleName='frame', retry=False)
+            self.runDemo("Dialog and Message Boxes", retry=False)
+            wnd = self.app.child("Dialogs", roleName="frame", retry=False)
         except dogtail.tree.SearchError:
-            self.runDemo('Dialogs and Message Boxes', retry=False)
-            wnd = self.app.child('Dialogs and Message Boxes', roleName='frame', retry=False)
-        texts = wnd.findChildren(lambda x: x.roleName == 'text', isLambda=True)
+            self.runDemo("Dialogs and Message Boxes", retry=False)
+            wnd = self.app.child(
+                "Dialogs and Message Boxes", roleName="frame", retry=False
+            )
+        texts = wnd.findChildren(lambda x: x.roleName == "text", isLambda=True)
         self.assertEqual(len(texts), 2)
-        self.assertEqual(texts[0].roleName, 'text')
-        self.assertEqual(texts[1].roleName, 'text')
-        texts1 = wnd.findChildren(lambda x: x.roleName == 'text' and x.labeler.name == 'Entry 1', isLambda=True)
+        self.assertEqual(texts[0].roleName, "text")
+        self.assertEqual(texts[1].roleName, "text")
+        texts1 = wnd.findChildren(
+            lambda x: x.roleName == "text" and x.labeler.name == "Entry 1",
+            isLambda=True,
+        )
         self.assertEqual(len(texts1), 1)
-        self.assertEqual(texts1[0].roleName, 'text')
-        self.assertEqual(texts1[0].labeler.name, 'Entry 1')
-        texts2 = wnd.findChildren(lambda x: x.roleName == 'text' and x.showing, isLambda=True)
+        self.assertEqual(texts1[0].roleName, "text")
+        self.assertEqual(texts1[0].labeler.name, "Entry 1")
+        texts2 = wnd.findChildren(
+            lambda x: x.roleName == "text" and x.showing, isLambda=True
+        )
         self.assertEqual(len(texts2), 2)
-        self.assertEqual(texts2[0].roleName, 'text')
+        self.assertEqual(texts2[0].roleName, "text")
         self.assertTrue(texts2[0].showing)
-        self.assertEqual(texts2[1].roleName, 'text')
+        self.assertEqual(texts2[1].roleName, "text")
         self.assertTrue(texts2[1].showing)
 
     def test_findAncestor(self):
-        pred = dogtail.predicate.GenericPredicate(roleName='table cell')
+        pred = dogtail.predicate.GenericPredicate(roleName="table cell")
         child = self.app.child("Builder")
         parent = child.findAncestor(pred)
         self.assertIn(child, parent.children)
-        pred = dogtail.predicate.GenericPredicate(roleName='frame')
+        pred = dogtail.predicate.GenericPredicate(roleName="frame")
         parent = child.findAncestor(pred)
         self.assertIn(parent, self.app.children)
         # No ancestor found
         self.assertIsNone(parent.findAncestor(pred))
 
     def test_isChild(self):
-        parent = self.app.child(roleName='tree table')
+        parent = self.app.child(roleName="tree table")
         self.assertTrue(parent.isChild("Builder"))
 
     def test_getUserVisibleStrings(self):
         child = self.app.child("Builder")
-        self.assertEqual(child.getUserVisibleStrings(), ['Builder'])
+        self.assertEqual(child.getUserVisibleStrings(), ["Builder"])
 
     def test_satisfies(self):
-        pred = dogtail.predicate.GenericPredicate(roleName='table cell')
+        pred = dogtail.predicate.GenericPredicate(roleName="table cell")
         builder = self.app.child("Builder")
         self.assertTrue(builder.satisfies(pred))
 
     def test_absoluteSearchPath(self):
         self.assertEqual(
-            str(self.app.getAbsoluteSearchPath()),
-            "{/('gtk3-demo' application,False)}")
+            str(self.app.getAbsoluteSearchPath()), "{/('gtk3-demo' application,False)}"
+        )
         builder = self.app.child("Builder")
         self.assertEqual(
             str(builder.getAbsoluteSearchPath()),
             "{/('gtk3-demo' application,False)/('Application Class' window,False)/(child with name='Builder' "
-            "roleName='table cell',True)}")
+            "roleName='table cell',True)}",
+        )
 
     def test_compare_equal_search_paths(self):
         builder = self.app.child("Builder")
@@ -766,14 +826,16 @@ class TestSearching(GtkDemoTest):
         builder_sp = builder.getAbsoluteSearchPath()
         self.assertEqual(
             [x[0].makeScriptVariableName() for x in builder_sp],
-            ['gtk3DemoApp', 'applicationClassWin', 'builderNode'])
+            ["gtk3DemoApp", "applicationClassWin", "builderNode"],
+        )
 
     def test_make_script_method_call_from_search_path(self):
         builder = self.app.child("Builder")
         builder_sp = builder.getAbsoluteSearchPath()
         self.assertEqual(
             builder_sp.makeScriptMethodCall(),
-            ".application('gtk3-demo').window('Application Class').child( name='Builder' roleName='table cell')")
+            ".application('gtk3-demo').window('Application Class').child( name='Builder' roleName='table cell')",
+        )
 
     def test_get_relative_search_path_for_path(self):
         builder = self.app.child("Builder")
@@ -787,8 +849,8 @@ class TestSearching(GtkDemoTest):
         builder = self.app.child("Builder")
         builder_sp = builder.getAbsoluteSearchPath()
         self.assertEqual(
-            str(builder_sp.getPrefix(1)),
-            "{/('gtk3-demo' application,False)}")
+            str(builder_sp.getPrefix(1)), "{/('gtk3-demo' application,False)}"
+        )
 
     def test_get_predicate(self):
         builder = self.app.child("Builder")
@@ -799,39 +861,52 @@ class TestSearching(GtkDemoTest):
 
     def test_getRelativeSearch_app(self):
         relpath = self.app.getRelativeSearch()
-        self.assertEqual(str(relpath[0]), '[desktop frame | main]')
-        self.assertEqual(relpath[1].name.untranslatedString, 'gtk3-demo')
+        self.assertEqual(str(relpath[0]), "[desktop frame | main]")
+        self.assertEqual(relpath[1].name.untranslatedString, "gtk3-demo")
         self.assertFalse(relpath[2])
 
     def test_getRelativeSearch_widget(self):
         builder = self.app.child("Builder")
         relpath = builder.getRelativeSearch()
-        self.assertEqual(str(relpath[0]), '[frame | Application Class]')
-        self.assertEqual(relpath[1].describeSearchResult(), "child with name='Builder' roleName='table cell'")
+        self.assertEqual(str(relpath[0]), "[frame | Application Class]")
+        self.assertEqual(
+            relpath[1].describeSearchResult(),
+            "child with name='Builder' roleName='table cell'",
+        )
         self.assertTrue(relpath[2])
 
     def test_findChildren_non_recursive(self):
         dogtail.rawinput.keyCombo("<End>")
-        self.app.child(roleName='tree table').child("Tree View").click()
-        self.app.child(roleName='tree table').child("Tree View").typeText("+")
-        self.runDemo('Tree Store')
+        self.app.child(roleName="tree table").child("Tree View").click()
+        self.app.child(roleName="tree table").child("Tree View").typeText("+")
+        self.runDemo("Tree Store")
         try:
-            wnd = self.app.child('Card planning sheet', roleName='frame', retry=False, recursive=False)
+            wnd = self.app.child(
+                "Card planning sheet", roleName="frame", retry=False, recursive=False
+            )
         except dogtail.tree.SearchError:
-            wnd = self.app.child('Tree Store', roleName='frame', retry=False, recursive=False)
-        table = wnd.child(roleName='tree table')
-        pred = dogtail.predicate.GenericPredicate(roleName='table cell')
+            wnd = self.app.child(
+                "Tree Store", roleName="frame", retry=False, recursive=False
+            )
+        table = wnd.child(roleName="tree table")
+        pred = dogtail.predicate.GenericPredicate(roleName="table cell")
         dogtail.config.config.childrenLimit = 10000
         cells = table.findChildren(pred, recursive=False)
-        direct_cells = [cell for cell in table.children if cell.roleName == 'table cell']
+        direct_cells = [
+            cell for cell in table.children if cell.roleName == "table cell"
+        ]
         self.assertEqual(len(cells), len(direct_cells))
 
     def test_find_by_shortcut(self):
-        self.runDemo('Builder')
+        self.runDemo("Builder")
         try:
-            wnd = self.app.child('GtkBuilder demo', roleName='frame', recursive=False, retry=False)
+            wnd = self.app.child(
+                "GtkBuilder demo", roleName="frame", recursive=False, retry=False
+            )
         except dogtail.tree.SearchError:
-            wnd = self.app.child('Builder', roleName='frame', recursive=False, retry=False)
+            wnd = self.app.child(
+                "Builder", roleName="frame", recursive=False, retry=False
+            )
 
         self.assertIsNotNone(wnd.menu("File"))
         self.assertIsNotNone(wnd.menu("File").menuItem("New"))
@@ -841,71 +916,81 @@ class TestSearching(GtkDemoTest):
 
     def test_find_by_shortcut2(self):
         try:
-            self.runDemo('Dialog and Message Boxes', retry=False)
-            wnd = self.app.child('Dialogs', roleName='frame', retry=False)
+            self.runDemo("Dialog and Message Boxes", retry=False)
+            wnd = self.app.child("Dialogs", roleName="frame", retry=False)
         except dogtail.tree.SearchError:
-            self.runDemo('Dialogs and Message Boxes', retry=False)
-            wnd = self.app.child('Dialogs and Message Boxes', roleName='frame', retry=False)
+            self.runDemo("Dialogs and Message Boxes", retry=False)
+            wnd = self.app.child(
+                "Dialogs and Message Boxes", roleName="frame", retry=False
+            )
         self.assertIsNotNone(wnd.childLabelled("Entry 1"))
         self.assertIsNotNone(wnd.button("Message Dialog"))
 
 
 # A painful point of collision between strings in python2 and python3!
-@unittest.skipIf(os.system('ls /usr/bin/gedit') != 0, "Skipping, need gedit")
+@unittest.skipIf(os.system("ls /usr/bin/gedit") != 0, "Skipping, need gedit")
 class TestUnicodeNames(unittest.TestCase):
     def setUp(self):
         import dogtail.config
+
         dogtail.config.config.logDebugToStdOut = True
         dogtail.config.config.logDebugToFile = True
         dogtail.config.config.logDebugToStdOut = True
         dogtail.config.config.debugSearching = False
         dogtail.config.config.searchCutoffCount = 3
         import dogtail.utils
-        self.pid = dogtail.utils.run('gedit')
-        self.ver = os.popen('gedit -V').read().split()[-1]
+
+        self.pid = dogtail.utils.run("gedit")
+        self.ver = os.popen("gedit -V").read().split()[-1]
         try:
-            self.app = dogtail.tree.root.application('org.gnome.gedit')
+            self.app = dogtail.tree.root.application("org.gnome.gedit")
         except Exception:
-            self.app = dogtail.tree.root.application('gedit')
+            self.app = dogtail.tree.root.application("gedit")
 
     def test_unicode_char_in_name(self):
-        self.app.child('Open', roleName='toggle button').click()
+        self.app.child("Menu", roleName="toggle button").click()
         unicode_button = None
-        unicode_button = self.app.child(name=u'Other Documents…', roleName='push button')
+        unicode_button = self.app.child(
+            name="Find and Replace…", roleName="push button"
+        )
         assert unicode_button is not None
 
     def test_unicode_char_in_name_click(self):
-        self.app.child('Open', roleName='toggle button').click()
-        unicode_button = self.app.child(name=u'Other Documents…', roleName='push button')
+        self.app.child("Menu", roleName="toggle button").click()
+        unicode_button = self.app.child(
+            name="Find and Replace…", roleName="push button"
+        )
         unicode_button.click()
         dialog = None
         t_ver = tuple(map(int, (self.ver.split("."))))
-        chooser_name = u'Open' if t_ver < (40, 0) else u"Open Files"
+        chooser_name = "Open" if t_ver < (40, 0) else "Open Files"
         try:
-            dialog = self.app.child(name=chooser_name, roleName='file chooser')
+            dialog = self.app.child(name=chooser_name, roleName="file chooser")
         except dogtail.tree.SearchError:
             self.fail()
         assert dialog is not None
 
     def test_unicode_logging_nocrash(self):
         try:
-            self.app.child(name='…Other stuff…', roleName='push button')
+            self.app.child(name="…Other stuff…", roleName="push button")
             self.fail()
         except dogtail.tree.SearchError:
             pass
 
     def tearDown(self):
         import signal
+
         os.kill(self.pid, signal.SIGKILL)
-        os.system('killall gedit > /dev/null 2>&1')
+        os.system("killall gedit > /dev/null 2>&1")
         # Sleep just enough to let the app actually die.
         # AT-SPI doesn't like being hammered too fast.
         time.sleep(0.5)
 
+
 class TestDump(GtkDemoTest):
 
     def test_dump_to_stdout(self):
-        child = self.app.child('Source')
+        child = self.app.child("Source")
         output = trap_stdout(child.dump)
         self.assertEqual(
             output,
@@ -913,14 +998,16 @@ class TestDump(GtkDemoTest):
  [scroll pane | ]
   [text | ]
   [scroll bar | ]
-  [scroll bar | ]""")
+  [scroll bar | ]""",
+        )
 
     def test_dump_with_actions(self):
-        child = self.app.child('Builder', roleName='table cell')
+        child = self.app.child("Builder", roleName="table cell")
         output = trap_stdout(child.dump)
         self.assertEqual(
             output,
             """[table cell | Builder]
  [action | activate |  ]
  [action | edit |  ]
- [action | expand or contract |  ]""")
+ [action | expand or contract |  ]""",
+        )

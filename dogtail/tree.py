@@ -635,6 +635,14 @@ class Node(object):
         except NotImplementedError:
             return None
 
+    @property
+    def center(self):
+        """
+        A tuple containing the center position of the Accessible:(x, y)
+        """
+        centerX = self.position[0] + self.size[0] / 2
+        centerY = self.position[1] + self.size[1] / 2
+        return centerX, centerY
 
     def contains(self, x, y):
         """

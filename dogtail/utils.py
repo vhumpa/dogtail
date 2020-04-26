@@ -91,6 +91,7 @@ def run(string, timeout=config.runTimeout, interval=config.runInterval, desktop=
         from dogtail.tree import root as desktop
     args = shlex.split(string)
     os.environ['GTK_MODULES'] = 'gail:atk-bridge'
+    os.environ['QT_LINUX_ACCESSIBILITY_ALWAYS_ON'] = '1'
     pid = subprocess.Popen(args, env=os.environ).pid
 
     if not appName:

@@ -322,7 +322,7 @@ class Node(object):
                                    hypertext=ht,
                                    linkIndex=li,
                                    anchorIndex=ai)
-                    children.append(child)
+                    children_list.append(child)
         except (NotImplementedError, AttributeError):
             pass
 

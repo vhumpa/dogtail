@@ -79,16 +79,16 @@ Vitezslav Humpa <vhumpa@redhat.com>""",
     packages=['dogtail'],
     scripts=scripts(),
     data_files=[
-        ('share/doc/dogtail/examples',
+        ('EGG-INFO/share/doc/dogtail/examples',
         examples()),
-        ('share/doc/dogtail/examples/data',
+        ('EGG-INFO/share/doc/dogtail/examples/data',
         examples_data()),
-        ('share/doc/dogtail/tests',
+        ('EGG-INFO/share/doc/dogtail/tests',
         tests()),
-        ('share/dogtail/glade', ['sniff/sniff.ui']),
-        ('share/dogtail/icons', sniff_icons()),
-        ('share/applications', ['sniff/sniff.desktop']),
-        ('share/icons/hicolor/scalable/apps', icons('svg'))
+        ('EGG-INFO/share/dogtail/glade', ['sniff/sniff.ui']),
+        ('EGG-INFO/share/dogtail/icons', sniff_icons()),
+        ('EGG-INFO/share/applications', ['sniff/sniff.desktop']),
+        ('EGG-INFO/share/icons/hicolor/scalable/apps', icons('svg'))
     ],
     options = {
     'build_scripts': {

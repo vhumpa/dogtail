@@ -104,15 +104,19 @@ class Predicate(object):
 class IsAnApplicationNamed(Predicate):
     """Search subclass that looks for an application by name"""
 
-    def __init__(self, appName):
+    def __init__(self, appName, description=None):
         self.appName = TranslatableString(appName)
         self.debugName = self.describeSearchResult()
         self.satisfiedByNode = self._genCompareFunc()
+        self.description = TranslatableString(description)
 
     def _genCompareFunc(self):
         def satisfiedByNode(node):
             try:
-                return node.roleName == 'application' and stringMatches(self.appName, node.name)
+                if self.description == None:
+                    return node.roleName == 'application' and stringMatches(self.appName, node.name)
+                else:
+                    return node.roleName == 'application' and stringMatches(self.appName, node.name) and stringMatches(self.description, node.description)
             except GLib.GError as e:
                 if re.match(r"name :[0-9]+\.[0-9]+ was not provided", e.message):
                     logger.log("Dogtail: warning: omiting possibly broken at-spi application record")

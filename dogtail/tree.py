@@ -699,7 +699,7 @@ class Node(object):
 
         clickX = self.position[0] + self.size[0] / 2
         clickY = self.position[1] + self.size[1] / 2
-        
+
         if config.debugSearching:
             logger.log(str("raw click on %s %s at (%s,%s)") %
                        (str(self.name), self.getLogString(), str(clickX), str(clickY)))
@@ -715,7 +715,7 @@ class Node(object):
 
         pointX = self.position[0] + self.size[0] / 2
         pointY = self.position[1] + self.size[1] / 2
-        
+
         logger.log(str("Pointing on %s %s at (%s,%s)") %
                    (str(self.name), self.getLogString(), str(pointX), str(pointY)))
         debug_log("point(self, mouseDelay=%s)" % str(mouseDelay))
@@ -1026,7 +1026,7 @@ class Node(object):
         """
         Type the given text into the node, with appropriate delays and logging.
         """
-        
+
         logger.log(str("Typing text into %s: '%s'") % (self.getLogString(), str(string)))
         debug_log("typeText(self, string=%s)" % string)
 
@@ -1218,7 +1218,7 @@ class Node(object):
         Searches for an Accessible using methods from pyatspi.utils
         """
 
-        debug_log("_fastFindChild(self, pred=%s, recursive=%s, recursive=%s)" % 
+        debug_log("_fastFindChild(self, pred=%s, recursive=%s, recursive=%s)" %
                       (str(pred), str(recursive), str(recursive)))
 
         if isinstance(pred, predicate.Predicate):
@@ -1259,7 +1259,7 @@ class Node(object):
         attempts have failed. If it is false, the function simply returns None.
         """
 
-        debug_log("findChild(self, pred=%s, recursive=%s, debugName=%s, retry=%s, requireResult=%s, showingOnly=%s)" % 
+        debug_log("findChild(self, pred=%s, recursive=%s, debugName=%s, retry=%s, requireResult=%s, showingOnly=%s)" %
                       (str(pred), str(recursive), str(debugName), str(retry), str(requireResult), str(showingOnly)))
 
         def describeSearch(parent, pred, recursive, debugName):
@@ -1638,7 +1638,7 @@ class Application(Node):
         also logs the search.
         """
 
-        debug_log("dialog(self, dialogName=%s, recursive=%s, showingOnly=%s)" % 
+        debug_log("dialog(self, dialogName=%s, recursive=%s, showingOnly=%s)" %
                       (str(dialogName), str(recursive), str(showingOnly)))
 
         return self.findChild(predicate.IsADialogNamed(dialogName=dialogName), recursive, showingOnly=showingOnly)

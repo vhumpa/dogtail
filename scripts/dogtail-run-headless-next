@@ -181,7 +181,8 @@ class DisplayManagerSession:
             if force_xorg:
                 config.set(self.options["section"], "WaylandEnable", "false")
             else:
-                config.set(self.options["section"], "WaylandEnable", "true")
+                pass
+                #config.set(self.options["section"], "WaylandEnable", "true")
         else:
             config.remove_option(
                 self.options["section"], self.options["enable"])
@@ -201,7 +202,7 @@ class DisplayManagerSession:
                 except Exception:
                     pass
 
-                subprocess.Popen("echo 'export QT_ACCESSIBILITY=1' > ~/.kde/env/qt-at-spi.sh", 
+                subprocess.Popen("echo 'export QT_ACCESSIBILITY=1' > ~/.kde/env/qt-at-spi.sh",
                                  shell=True).wait()
 
             if self.display_manager == "gdm":
@@ -447,6 +448,13 @@ def main():
         display_manager_session.set_accessibility_to(True)
 
     script = Script(script_command_list)
+
+    if os.path.isfile('/tmp/headless_enable_fatal_criticals'):
+        os.environ['G_DEBUG'] = 'fatal-criticals'
+
+    # fatal_wanings has bigger priority than criticals, so will ovewrite the variable should both be set
+    if os.path.isfile('/tmp/headless_enable_fatal_warnings'):
+        os.environ['G_DEBUG'] = 'fatal-warnings'
 
     script_process_id = script.start()
     print("dogtail-run-headless-next: Started the script with PID %d" % (script_process_id))

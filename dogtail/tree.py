@@ -1849,7 +1849,7 @@ class Extension:
 
 
 Accessibility.Accessible.__bases__ = (
-    Application, Root, Node, Extension) + Accessibility.Accessible.__bases__
+    Application, Root, Node, Extension, ) + Accessibility.Accessible.__bases__
 
 
 try:

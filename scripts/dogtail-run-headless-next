@@ -112,6 +112,97 @@ def execCodeWithEnv(code, env=None):
                      env=(os.environ if env is None else env)).wait()
 
 
+### qecore headless code to quickfix el9 #####################
+
+ENVIRONMENT_DICTIONARY = {}
+ENVIRONMENT_VARIABLES_TO_PRESERVE = ["PYTHONPATH", "TEST", "TERM"]
+
+def run(command, verbose=False):
+    """
+    Utility function to execute given command and return its output.
+    """
+
+    try:
+        output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT, encoding="utf-8")
+        return output if not verbose else (output, 0, None)
+    except subprocess.CalledProcessError as error:
+        return error.output if not verbose else (error.output, error.returncode, error)
+
+
+def _get_environment_as_dictionary(path_to_process):
+    """
+    Get environment variables from process and save to the global dictionary.
+    Return True or False if the globel environment variable was successfuly modified.
+    """
+
+    def is_session_process(path_to_process):
+        pid = path_to_process.split("/")[2]
+        if pid == "self" or pid == str(os.getpid()):
+            return False
+        return True
+
+    # Verify path to process is indeed a process
+    if is_session_process(path_to_process):
+        file_name = path_to_process + "environ"
+    else:
+        return False
+
+    # Verify the environ file can be opened
+    try:
+        path_to_environment = open(file_name, "r").read()
+    except IOError:
+        return False
+
+    # Loading environment to dictionary
+    environment_items = path_to_environment.split("\x00")
+    for item in environment_items:
+        if "=" in item:
+            key, value = item.split("=", 1)
+            ENVIRONMENT_DICTIONARY[key] = value
+
+    # Preserving wanted environment variables
+    for env_variable in ENVIRONMENT_VARIABLES_TO_PRESERVE:
+        if env_variable in os.environ:
+            ENVIRONMENT_DICTIONARY[env_variable] = os.environ[env_variable]
+
+    return True
+
+
+def get_environment_dictionary(session_binary):
+    """
+    Iterates over the proc files and looks for environment to use.
+    Targetting the org.gnome.Shell process to get all environment variables.
+    Returns environment as dictionary.
+    """
+
+    def get_gs_pid():
+        out = run("ps o pid,command,user").split("\n")
+        for line in out:
+            if "gnome-session" in line and "test" in line:
+                pid = line.strip(" ").split(" ")[0]
+                return int(pid)
+
+    process_environ_to_use = get_gs_pid()
+    if process_environ_to_use:
+        _get_environment_as_dictionary(f"/proc/{process_environ_to_use}/")
+        print("headless: Setting environment variable TERM as 'xterm'")
+        ENVIRONMENT_DICTIONARY["TERM"] = "xterm"
+        return ENVIRONMENT_DICTIONARY
+
+    is_display_manager_active = run("systemctl is-active gdm").strip("\n")
+    print("\n".join((
+        f"headless: Display Manager Status is '{is_display_manager_active}'",
+        "headless: Can't find our environment!",
+        "headless: Stopping Display Manager"
+    )))
+    subprocess.Popen(("sudo systemctl stop gdm").split()).wait()
+    sys.exit(1)
+
+
+
+###################################3
+
+
 class DisplayManagerSession:
     gdm_config = "/etc/gdm/custom.conf"
     kdm_config = "/etc/kde/kdm/kdmrc"
@@ -384,7 +475,7 @@ def main():
 
     if args.session is None or "gnome" in args.session:
         if args.session_binary is None:
-            args.session_binary = "/usr/bin/gnome-shell"
+            args.session_binary = "/usr/bin/gnome-session"
 
     elif "kde" in args.session:
         if args.session_binary is None:
@@ -415,26 +506,36 @@ def main():
         display_manager_session.setup(force_xorg=args.force_xorg)
         display_manager_session.start(restart=args.restart)
 
-    print("dogtail-run-headless-next: Using %s to bind to the session" % \
+    print("dogtail-run-headless-next: Using %s to bind to the session" %
         (display_manager_session.session_binary))
 
     try:
-        os.environ = getSessionEnvironment(display_manager_session.session_binary)
+        os.environ = get_environment_dictionary(display_manager_session.session_binary)
     except RuntimeError:
+        print("Could not get environment from initial session binary " + display_manager_session.session_binary)
         if display_manager_session.session_binary == "/usr/bin/gnome-shell":
             try:
-                os.environ = getSessionEnvironment("/usr/libexec/gvfsd")
-                print("dogtail-run-headless-next: Could not get the environment from %s process" % \
+                binary = "/usr/libexec/gvfsd"
+                try:
+                    with open('/etc/redhat-release','r') as f:
+                        release = f.read()
+                    if "Linux release 9" in release:
+                        binary = "/usr/bin/gnome-session"
+                except Exception:
+                    pass
+                print("Try fallback binary: %s" % binary)
+                os.environ = getSessionEnvironment(binary)
+                print("dogtail-run-headless-next: Could not get the environment from %s process" %
                     (display_manager_session.session_binary))
-                print("dogtail-run-headless-next: Trying to workaround with /usr/libexec/gvfsd")
+                print("dogtail-run-headless-next: Trying to workaround with %s" % binary)
             except RuntimeError:
-                print("dogtail-run-headless-next: Could not get the environment from %s process" % \
+                print("dogtail-run-headless-next: Could not get the environment from %s process" %
                     ("/usr/libexec/gvfsd"))
                 display_manager_session.stop()
                 display_manager_session.setup(restore=True)
                 sys.exit(1)
         else:
-            print("dogtail-run-headless-next: Could not get the environment from %s process" % \
+            print("dogtail-run-headless-next: Could not get the environment from %s process" %
                 (display_manager_session.session_binary))
             display_manager_session.stop()
             display_manager_session.setup(restore=True)

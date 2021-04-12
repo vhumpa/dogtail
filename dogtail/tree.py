@@ -17,6 +17,9 @@ from gi.repository import GLib
 import os
 import sys
 
+import warnings
+warnings.filterwarnings("ignore", "g_object_unref")
+
 """
 Makes some sense of the AT-SPI API
 
@@ -1781,8 +1784,72 @@ class Wizard(Window):
         fwd.click()
 
 
+class Extension:
+    @property
+    def index_in_parent(self):
+        for index, child in enumerate(self.get_parent().children):
+            if child.get_parent().get_child_at_index(index) == self:
+                return index
+
+    @property
+    def last_child(self):
+        return not self.get_parent() or \
+            self.index_in_parent is None or \
+            self.index_in_parent == self.get_parent().get_child_count() - 1
+
+
+    def _tree_branching(self, parent_prefix, was_parent_last, node, current, cutoff):
+        if current == cutoff:
+            return
+        
+        prefix_spacer = "     "
+        prefix_extend = "  │  "
+        suffix_branch = "  ├──"
+        suffix_last =   "  └──"
+
+        new_prefix = parent_prefix
+        new_suffix = ""
+
+        if node != self:
+            if node.last_child:
+                new_suffix = suffix_last
+            else:
+                new_suffix = suffix_branch
+
+        if node != self and node.parent != self:
+            if was_parent_last:
+                current_prefix = prefix_spacer
+            else:
+                current_prefix = prefix_extend
+            new_prefix += current_prefix
+
+
+        node_data = "".join((
+            f"[{node.name}-",
+            f"{node.roleName}-",
+            f"{node.description}]"
+        ))     
+
+        print(f"{new_prefix+new_suffix} {node_data}")
+
+        for child in node.children:
+            self._tree_branching(new_prefix,
+                                 was_parent_last=node.last_child,
+                                 node=child,
+                                 current=current+1,
+                                 cutoff=cutoff)
+
+
+    def tree(self, cutoff=None):
+        return self._tree_branching(parent_prefix="",
+                                    was_parent_last=False,
+                                    node=self,
+                                    current=0,
+                                    cutoff=cutoff)
+
+
 Accessibility.Accessible.__bases__ = (
-    Application, Root, Node,) + Accessibility.Accessible.__bases__
+    Application, Root, Node, Extension) + Accessibility.Accessible.__bases__
 
 
 try:

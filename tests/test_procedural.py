@@ -19,6 +19,8 @@ class GtkDemoTest(GtkDemoTest):
 
     def setUp(self):
         self.pid = run('gtk3-demo')
+        # Turn off activities overview
+        keyCombo('Esc')
         self.app = focus.application.node
     
     def tearDown(self):

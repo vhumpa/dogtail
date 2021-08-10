@@ -877,7 +877,7 @@ class TestUnicodeNames(unittest.TestCase):
         unicode_button.click()
         dialog = None
         try:
-            dialog = self.app.child(name=u'Open', roleName='file chooser')
+            dialog = self.app.child(name=u'Open Files', roleName='file chooser')
         except dogtail.tree.SearchError:
             self.fail()
         assert dialog is not None

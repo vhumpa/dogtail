@@ -215,12 +215,14 @@ def doubleClick(x, y, button=1, check=True, window_id=None):
         ponytail_check_connection(window_id)
         ponytail.generateButtonEvent(button, x, y)
         doDelay(config.doubleClickDelay)
+
         # Prevent executing release event on closed application
         ponytail.generateButtonPress(button)
-        try:
+        if ponytail.connected:
             ponytail.generateButtonRelease(button)
-        except Exception:
-            pass
+        else: # not ponytail.connected:
+            ponytail.connectMonitor()
+            ponytail.generateButtonRelease(button)
 
     doDelay(config.actionDelay)
 

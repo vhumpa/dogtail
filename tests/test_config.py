@@ -14,11 +14,13 @@ class TestConfiguration(unittest.TestCase):
     def test_get_set_all_properties(self):
         for option in list(dogtail.config.config.defaults.keys()):
             print("Setting config.%s property" % str(option))
+            old_value = dogtail.config.config.__getattr__(option)
             value = ''
             if 'Dir' in option:
                 value = '/tmp/dogtail/'  # Special value for dir-related properties
             dogtail.config.config.__setattr__(option, value)
             self.assertEqual(dogtail.config.config.__getattr__(option), value)
+            dogtail.config.config.__setattr__(option, old_value)
 
     def test_default_directories_created(self):
         import os.path

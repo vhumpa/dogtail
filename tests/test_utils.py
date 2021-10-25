@@ -113,6 +113,7 @@ class TestDelay(unittest.TestCase):
         output = trap_stdout(dogtail.utils.doDelay).split()
         self.assertEqual(len(output), 3)
         self.assertEqual(float(output[2]), 2.0)
+        dogtail.utils.config.debugSleep = False
 
 
 class TestA11Y(unittest.TestCase):

@@ -31,13 +31,13 @@ check:
 	pep8 --max-line-length=120 dogtail/*.py tests/*.py scripts/* sniff/sniff
 
 test:
-	LC_ALL=C nosetests tests/
+	LC_ALL=C nose2 tests/
 
 test2:
-	LC_ALL=C nosetests2 tests/
+	LC_ALL=C nose2-2 tests/
 
 test3:
-	LC_ALL=C nosetests3 tests/
+	LC_ALL=C nose2-3 tests/
 
 tarball:
 	python setup.py sdist

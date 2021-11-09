@@ -872,21 +872,24 @@ class TestUnicodeNames(unittest.TestCase):
         dogtail.config.config.searchCutoffCount = 3
         import dogtail.utils
         self.pid = dogtail.utils.run('gedit')
-        self.app = dogtail.tree.root.application('gedit')
+        try:
+            self.app = dogtail.tree.root.application('org.gnome.gedit')
+        except:
+            self.app = dogtail.tree.root.application('gedit')
 
     def test_unicode_char_in_name(self):
-        self.app.child('Open', roleName='toggle button').click()
+        self.app.child('Menu', roleName='toggle button').click()
         unicode_button = None
-        unicode_button = self.app.child(name=u'Other Documents…', roleName='push button')
+        unicode_button = self.app.child(name=u'Find and Replace…', roleName='push button')
         assert unicode_button is not None
 
     def test_unicode_char_in_name_click(self):
-        self.app.child('Open', roleName='toggle button').click()
-        unicode_button = self.app.child(name=u'Other Documents…', roleName='push button')
+        self.app.child('Menu', roleName='toggle button').click()
+        unicode_button = self.app.child(name=u'Find and Replace…', roleName='push button')
         unicode_button.click()
         dialog = None
         try:
-            dialog = self.app.child(name=u'Open', roleName='file chooser')
+            dialog = self.app.child(name=u'Find and Replace', roleName='dialog')
         except dogtail.tree.SearchError:
             self.fail()
         assert dialog is not None

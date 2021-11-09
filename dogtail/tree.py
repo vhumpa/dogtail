@@ -422,6 +422,15 @@ class Node(object):
         except NotImplementedError:
             return None
 
+    @property
+    def center(self):
+        """
+        A tuple containing the center position of the Accessible:(x, y)
+        """
+        centerX = self.position[0] + self.size[0] / 2
+        centerY = self.position[1] + self.size[1] / 2
+        return centerX, centerY
+
     def contains(self, x, y):
         try:
             return self.queryComponent().contains(x, y, pyatspi.DESKTOP_COORDS)
@@ -1161,7 +1170,7 @@ class Root (Node):
         """
         return root.findChildren(predicate.GenericPredicate(roleName="application"), recursive=False, showingOnly=False)
 
-    def application(self, appName, retry=True):
+    def application(self, appName, description='', retry=True):
         """
         Gets an application by name, returning an Application instance
         or raising an exception.
@@ -1170,7 +1179,7 @@ class Root (Node):
         if no such child is found, and will eventually raise an exception. It
         also logs the search.
         """
-        return root.findChild(predicate.IsAnApplicationNamed(appName), recursive=False, retry=retry, showingOnly=False)
+        return root.findChild(predicate.IsAnApplicationNamed(appName, description), recursive=False, retry=retry, showingOnly=False)
 
 
 class Application (Node):

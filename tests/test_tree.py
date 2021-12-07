@@ -5,11 +5,14 @@ import dogtail.config
 import dogtail.predicate
 import dogtail.tree
 import dogtail.rawinput
-from gtkdemotest import GtkDemoTest, trap_stdout
 import pyatspi
 import time
 import unittest
 import os
+
+from packaging import version
+from gtkdemotest import GtkDemoTest, trap_stdout
+
 
 """
 Unit tests for the dogtail.Node class
@@ -860,6 +863,7 @@ class TestUnicodeNames(unittest.TestCase):
         dogtail.config.config.searchCutoffCount = 3
         import dogtail.utils
         self.pid = dogtail.utils.run('gedit')
+        self.ver = os.popen('gedit -V').read().split()[-1]
         try:
             self.app = dogtail.tree.root.application('org.gnome.gedit')
         except Exception:
@@ -876,8 +880,9 @@ class TestUnicodeNames(unittest.TestCase):
         unicode_button = self.app.child(name=u'Other Documents…', roleName='push button')
         unicode_button.click()
         dialog = None
+        chooser_name = u'Open' if version.parse(self.ver) < version.parse("40.0") else u"Open Files"
         try:
-            dialog = self.app.child(name=u'Open Files', roleName='file chooser')
+            dialog = self.app.child(name=chooser_name, roleName='file chooser')
         except dogtail.tree.SearchError:
             self.fail()
         assert dialog is not None

@@ -10,7 +10,6 @@ import time
 import unittest
 import os
 
-from packaging import version
 from gtkdemotest import GtkDemoTest, trap_stdout
 
 
@@ -880,7 +879,8 @@ class TestUnicodeNames(unittest.TestCase):
         unicode_button = self.app.child(name=u'Other Documents…', roleName='push button')
         unicode_button.click()
         dialog = None
-        chooser_name = u'Open' if version.parse(self.ver) < version.parse("40.0") else u"Open Files"
+        t_ver = tuple(map(int, (self.ver.split("."))))
+        chooser_name = u'Open' if t_ver < (40, 0) else u"Open Files"
         try:
             dialog = self.app.child(name=chooser_name, roleName='file chooser')
         except dogtail.tree.SearchError:

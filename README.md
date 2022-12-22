@@ -1,6 +1,6 @@
 dogtail is a GUI test tool and UI automation framework written in Python. It uses Accessibility (a11y) technologies to communicate with desktop applications. dogtail scripts are written in Python and executed like any other Python program.
 
-Dogtails works great in combination with behave and qecore (based on behave and dogtail) (not only) if you're interested in using it with modern wayland-based GNOME. Please see this article for more details on how we mainly use it: https://fedoramagazine.org/automation-through-accessibility/ 
+Dogtails works great in combination with behave and qecore (based on behave and dogtail) (not only) if you're interested in using it with modern wayland-based GNOME. Please see this article for more details on how we mainly use it: https://fedoramagazine.org/automation-through-accessibility/
 
 Other than that, dogtail should work with any desktop environment that still runs atspi with Xorg.
 
@@ -72,21 +72,21 @@ Applications to test, e.g. from the GNOME desktop:
 Using
 =====
 
-Currently GNOME and GTK+ applications are supported. Both Xorg and Wayland sessions.
-See examples for direct dogtail use or check: https://fedoramagazine.org/automation-through-accessibility/
+Currently GNOME and GTK+ applications are supported, as well as KDE and QT applications.
 
-Thanks to qt-at-spi KDE4 and QT applications are now available too,
-feel free to try, but it's no longer supported from us, might be better to check
-KDE's native solutions.
-
-First, enable accessibility support in your GNOME session with:
+For GNOME/GTK, enable accessibility support in your GNOME session with:
   gsettings set org.gnome.desktop.interface toolkit-accessibility true
 This only affects newly-started applications, so you may want to log out and
 log back in again.
 
-Should you run "sniff" first, or be using 'dogtail-run-headless-next' or 'qecore-headless'
-scripts to handle your sessions, the accessibility will be auto enabled for you.
+Then, look at some of the example scripts. Run them, tweak them, write your own.
 
+I suggest starting with gedit-test-utf8-procedural-api.py, as it's updated the
+most often.
+
+If you are using KDE instead, set QT_LINUX_ACCESSIBILITY_ALWAYS_ON=1 when launching the respective program. (You can put 'export QT_LINUX_ACCESSIBILITY_ALWAYS_ON=1' to your profile file). Depending on the version, QT_ACCESSIBILITY=1 may be needed instead.
+
+For very old KDE/QT versions (approximately 4.8.3 to 5.0), you have to install the 'qt-at-spi' QT plugin and set the environment variable QT_ACCESSIBILITY to 1.
 
 Bugs
 ====

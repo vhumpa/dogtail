@@ -31,10 +31,9 @@ Xvfb and xinit:
 Using
 =====
 
-Currently GNOME and GTK+ applications are supported. Thanks to qt-at-spi
-KDE4 and QT applications are now available too.
+Currently GNOME and GTK+ applications are supported, as well as KDE and QT applications.
 
-First, enable accessibility support in your GNOME session with:
+For GNOME/GTK, enable accessibility support in your GNOME session with:
   gsettings set org.gnome.desktop.interface toolkit-accessibility true
 This only affects newly-started applications, so you may want to log out and
 log back in again.
@@ -44,10 +43,9 @@ Then, look at some of the example scripts. Run them, tweak them, write your own.
 I suggest starting with gedit-test-utf8-procedural-api.py, as it's updated the
 most often.
 
-If you are using KDE instead, install the 'qt-at-spi' QT plugin and make sure
-you QT_ACCESSIBILITY set to 1 throughout your environment (you can put
-'export QT_ACCESSIBILITY=1' to your profile file). QT accessibility should
-be stable from QT 4.8.3 onward.
+If you are using KDE instead, set QT_LINUX_ACCESSIBILITY_ALWAYS_ON=1 when launching the respective program. (You can put 'export QT_LINUX_ACCESSIBILITY_ALWAYS_ON=1' to your profile file). Depending on the version, QT_ACCESSIBILITY=1 may be needed instead.
+
+For very old KDE/QT versions (approximately 4.8.3 to 5.0), you have to install the 'qt-at-spi' QT plugin and set the environment variable QT_ACCESSIBILITY to 1.
 
 Bugs
 ====

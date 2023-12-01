@@ -427,8 +427,9 @@ class Node(object):
         """
         A tuple containing the center position of the Accessible:(x, y)
         """
-        centerX = self.position[0] + self.size[0] / 2
-        centerY = self.position[1] + self.size[1] / 2
+        x, y, w, h = self.extents
+        centerX = x + w / 2
+        centerY = y + h / 2
         return centerX, centerY
 
     def contains(self, x, y):

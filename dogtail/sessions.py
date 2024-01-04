@@ -81,7 +81,7 @@ class XServer(Subprocess):  # pragma: no cover
     @staticmethod
     def findFreeDisplay():
         tmp = os.listdir('/tmp')
-        pattern = re.compile('\.X([0-9]+)-lock')
+        pattern = re.compile(r'\.X([0-9]+)-lock')
         usedDisplays = []
         for file in tmp:
             match = re.match(pattern, file)

@@ -572,7 +572,7 @@ def pressKey(keyName, window_id=None):
 
     else:
         ponytail_check_connection(window_id, input_source="keyboard")
-        ponytail.generateKeysymEvent(keySym, delay=0.15)
+        ponytail.generateKeysymEvent(keySym)
 
     doTypingDelay()
 

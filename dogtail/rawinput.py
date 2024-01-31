@@ -414,7 +414,7 @@ def dragWithTrajectoryGlobal(fromXY, toXY, button=1):
     Having 'trajectory' appears to be necessary on Wayland for any drags. Use 'dragWithTrajectory'
     or just 'drag' on X sessions like in pre-wayland version of dogtail.
     """
-    
+
     logger.log("Drag with trajectory global fromXY=%s, toXY=%s, button=%s" %
                   (str(fromXY), str(toXY), str(button)))
 
@@ -569,12 +569,12 @@ def pressKey(keyName, window_id=None):
     keySym = keyNameToKeySym(keyName)
     if SESSION_TYPE == "x11":
         registry.generateKeyboardEvent(keySym, None, KEY_SYM)
+        doTypingDelay()
 
     else:
         ponytail_check_connection(window_id, input_source="keyboard")
-        ponytail.generateKeysymEvent(keySym)
+        ponytail.generateKeysymEvent(keySym, delay=config.typingDelay/2)
 
-    doTypingDelay()
 
 
 def keyCombo(comboString):

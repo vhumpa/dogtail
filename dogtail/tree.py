@@ -556,7 +556,10 @@ class Node(object):
 
         debug_log("position(self)")
 
-        return self.queryComponent().getPosition(pyatspi.DESKTOP_COORDS)
+        pos = self.queryComponent().getPosition(pyatspi.DESKTOP_COORDS)
+        if pos == (0,0):
+            pos = self.queryComponent().getPosition(pyatspi.WINDOW_COORDS)
+        return pos
 
 
     @property
@@ -588,6 +591,8 @@ class Node(object):
 
         try:
             ex = self.queryComponent().getExtents(pyatspi.DESKTOP_COORDS)
+            if (ex.x, ex.y) == (0,0):
+                ex = self.queryComponent().getExtents(pyatspi.WINDOW_COORDS)
             return (ex.x, ex.y, ex.width, ex.height)
         except NotImplementedError:
             return None

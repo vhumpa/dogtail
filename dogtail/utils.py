@@ -209,14 +209,13 @@ class Blinker:  # pragma: no cover
     """
 
     INTERVAL_MS = 1000
-    main_loop = GLib.MainLoop()
 
     def __init__(self, x, y, w, h):
         self.highlight_window = Highlight(x, y, w, h)
         if self.highlight_window.screen.is_composited() is not False:
             self.timeout_handler_id = GLib.timeout_add(
                 Blinker.INTERVAL_MS, self.destroyHighlight)
-            self.main_loop.run()
+            Gtk.main()
         else:
             self.highlight_window.destroy()
 
@@ -229,7 +228,7 @@ class Blinker:  # pragma: no cover
         debug_log("Blinker destroy highlight.")
 
         self.highlight_window.destroy()
-        self.main_loop.quit()
+        Gtk.main_quit()
 
         return False
 

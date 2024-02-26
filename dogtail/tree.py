@@ -557,7 +557,15 @@ class Node(object):
         debug_log("position(self)")
 
         pos = self.queryComponent().getPosition(pyatspi.DESKTOP_COORDS)
-        if pos == (0,0):
+        if pos == (0,0) and SESSION_TYPE == "x11":
+            pos = self.queryComponent().getPosition(pyatspi.WINDOW_COORDS)
+            if pos != (0,0):
+                from dogtail.utils import get_current_x_window_position
+                base_x, base_y = get_current_x_window_position()
+                return (pos[0]+base_x, pos[1]+base_y)
+            else:
+                return (0,0)
+        elif pos == (0,0):
             pos = self.queryComponent().getPosition(pyatspi.WINDOW_COORDS)
         return pos
 

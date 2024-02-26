@@ -169,9 +169,11 @@ class Highlight(Gtk.Window):  # pragma: no cover
     def __init__(self, x, y, w, h):
         super(Highlight, self).__init__()
 
+        self.x = x; self.y = y;
+        self.w = w; self.h = h;
         self.set_decorated(False)
         self.set_has_resize_grip(False)
-        self.set_default_size(w, h)
+        self.maximize()
         self.screen = self.get_screen()
         self.visual = self.screen.get_rgba_visual()
 
@@ -181,7 +183,6 @@ class Highlight(Gtk.Window):  # pragma: no cover
         self.set_app_paintable(True)
         self.connect("draw", self.area_draw)
         self.show_all()
-        self.move(x, y)
 
 
     def area_draw(self, widget, cr):
@@ -197,7 +198,7 @@ class Highlight(Gtk.Window):  # pragma: no cover
         cr.set_operator(cairo.OPERATOR_OVER)
         cr.set_source_rgb(0.9, 0.1, 0.1)
         cr.set_line_width(6)
-        cr.rectangle(0, 0, self.get_size()[0], self.get_size()[1])
+        cr.rectangle(self.x, self.y, self.w, self.h)
         cr.stroke()
 
 

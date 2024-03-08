@@ -150,6 +150,7 @@ class _Config:
         "searchShowingOnly": False,
         "defaultDelay": 0.5,
         "childrenLimit": 100,
+        "gtk4Offset": (12, 12), # offset to add to ui element position with shadows DISABLED (bigger and variable offset present otherwise, disable shadows!)
 
         # Debug
         "debugSearching": False,

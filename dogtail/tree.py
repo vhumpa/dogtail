@@ -556,17 +556,25 @@ class Node(object):
 
         debug_log("position(self)")
 
+        # Always start with DESKTOP_COORDS to detect GTK4 app
         pos = self.queryComponent().getPosition(pyatspi.DESKTOP_COORDS)
-        if pos == (0,0) and SESSION_TYPE == "x11":
-            pos = self.queryComponent().getPosition(pyatspi.WINDOW_COORDS)
-            if pos != (0,0):
+
+        # Check if it's a GTK4 app by detecting the initial position as (0,0)
+        if pos == (0,0):
+            gtk4Offset = config.gtk4Offset
+            # For x11 session, calculate position using WINDOW_COORDS and adjust for gtk4Offset
+            if SESSION_TYPE == "x11":
+                pos = self.queryComponent().getPosition(pyatspi.WINDOW_COORDS)
                 from dogtail.utils import get_current_x_window_position
                 base_x, base_y = get_current_x_window_position()
-                return (pos[0]+base_x, pos[1]+base_y)
+                # Add both gtk4Offset and the current x window position
+                pos = (pos[0] + base_x + gtk4Offset[0], pos[1] + base_y + gtk4Offset[1])
             else:
-                return (0,0)
-        elif pos == (0,0):
-            pos = self.queryComponent().getPosition(pyatspi.WINDOW_COORDS)
+                # For wayland, if it's still (0,0) after checking DESKTOP_COORDS, adjust using gtk4Offset directly
+                pos = self.queryComponent().getPosition(pyatspi.WINDOW_COORDS)
+                pos = (pos[0] + gtk4Offset[0], pos[1] + gtk4Offset[1])
+
+        # Return the position as determined above
         return pos
 
 
@@ -601,6 +609,8 @@ class Node(object):
             ex = self.queryComponent().getExtents(pyatspi.DESKTOP_COORDS)
             if (ex.x, ex.y) == (0,0):
                 ex = self.queryComponent().getExtents(pyatspi.WINDOW_COORDS)
+                pos = self.position
+                return (pos[0], pos[1], ex.width, ex.height)
             return (ex.x, ex.y, ex.width, ex.height)
         except NotImplementedError:
             return None

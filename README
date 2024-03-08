@@ -39,6 +39,19 @@ First, enable accessibility support in your GNOME session with:
 This only affects newly-started applications, so you may want to log out and
 log back in again.
 
+Newly for GTK4 apps, disable shadows for dogtail positioning to work!
+Disabling shadows, we still have offset to work with, but it seems stable
+and is preconfigured in dogtail.config.gtk4Offset
+Without shadows disabled, the real offset varies per app/window/scaling factor
+and more... To disable shadows do this:
+
+In ~/.config/gtk-4.0/gtk.css put:
+
+window, .popover, .tooltip {
+    box-shadow: none;
+}
+
+
 Then, look at some of the example scripts. Run them, tweak them, write your own.
 
 I suggest starting with gedit-test-utf8-procedural-api.py, as it's updated the

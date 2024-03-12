@@ -514,6 +514,26 @@ def get_current_x_window_position():
         print(f"Error getting current window position: {e}")
         return None, None
 
+
+def get_screen_resolution():
+    """ Additional helper function with similar reasoning as the get_current_x_window_position needed
+    to work with GTK4 apps - even on wayland! (needs Xwayland running for xlib to get this info).
+    We need this to detect whether the frame is in fullscreen mode in order to either use the config.gtk4Offset
+    or not. There is no offset when window is full-screen. Se README for more info on this and shadows.
+    """
+    try:
+        from Xlib import X, display
+        from Xlib.error import XError
+    except ModuleNotFoundError as e:
+        raise ImportError("python-xlib is required for this script to run. Please install it i.e. using 'pip install python-xlib'.") from e
+
+    d = display.Display()
+    screen = d.screen()
+    width = screen.width_in_pixels
+    height = screen.height_in_pixels
+    return width, height
+
+
 class GnomeShell:  # pragma: no cover
     """
     Utility class to help working with certain atributes of gnome-shell.

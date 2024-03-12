@@ -562,7 +562,20 @@ class Node(object):
         # Check if it's a GTK4 app by detecting the initial position as (0,0)
         if pos == (0,0):
             gtk4Offset = config.gtk4Offset
-            # For x11 session, calculate position using WINDOW_COORDS and adjust for gtk4Offset
+            # Determine if *this* node is a part of a full-screen frame
+            fullscreen_offset = (0, 0) # No offset fullscreen, shadows or not!
+            node = self  # Assuming 'self' is the current node
+            from dogtail.utils import get_screen_resolution
+            screen_width, _ = get_screen_resolution()
+            while node:
+                if node.roleName == "frame":
+                    frame_width, frame_height = node.size
+                    if frame_width == screen_width:
+                        gtk4Offset = fullscreen_offset
+                    break
+                node = node.parent  # Traverse up to check for frame ancestors
+            # For x11 session, calculate position using WINDOW_COORDS, add up with window possition
+            # and finally apply offset if not fullscreen
             if SESSION_TYPE == "x11":
                 pos = self.queryComponent().getPosition(pyatspi.WINDOW_COORDS)
                 from dogtail.utils import get_current_x_window_position
@@ -570,9 +583,10 @@ class Node(object):
                 # Add both gtk4Offset and the current x window position
                 pos = (pos[0] + base_x + gtk4Offset[0], pos[1] + base_y + gtk4Offset[1])
             else:
-                # For wayland, if it's still (0,0) after checking DESKTOP_COORDS, adjust using gtk4Offset directly
+                # For wayland, if it's still (0,0) return that, otherwise adjust offset directly
                 pos = self.queryComponent().getPosition(pyatspi.WINDOW_COORDS)
-                pos = (pos[0] + gtk4Offset[0], pos[1] + gtk4Offset[1])
+                if pos != (0,0):
+                    pos = (pos[0] + gtk4Offset[0], pos[1] + gtk4Offset[1])
 
         # Return the position as determined above
         return pos

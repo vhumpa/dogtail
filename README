@@ -39,9 +39,6 @@ First, enable accessibility support in your GNOME session with:
 This only affects newly-started applications, so you may want to log out and
 log back in again.
 
-Your README update captures the essence of the workaround for handling shadows in GTK4 applications with dogtail. I've refined it for clarity, conciseness, and a bit of technical accuracy. Here's an updated version:
-
----
 Important: Handling GTK4 Application Windows in Dogtail
 
 For GTK4 applications, disabling window shadows is essential to ensure accurate positioning by Dogtail. With shadows disabled, we encounters a consistent coordinate offset, which we've preconfigured as `dogtail.config.gtk4Offset`. In case of working with fullscreen windows, the offset is 0, and we manage to detect that
@@ -56,8 +53,6 @@ To disable window shadows, add the following CSS to your GTK4 configuration (`~/
 window, .popover, .tooltip {
     box-shadow: none;
 }
-
----
 
 Then, look at some of the example scripts. Run them, tweak them, write your own.
 

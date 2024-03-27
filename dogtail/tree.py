@@ -561,6 +561,9 @@ class Node(object):
 
         # Check if it's a GTK4 app by detecting the initial position as (0,0)
         if pos == (0,0):
+            if self.name == "Activities" and self.roleName == "label":
+                # specil case of the Activities in the corner... will not be gtk4
+                return pos
             gtk4Offset = config.gtk4Offset
             # Determine if *this* node is a part of a full-screen frame
             fullscreen_offset = (0, 0) # No offset fullscreen, shadows or not!

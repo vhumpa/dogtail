@@ -512,7 +512,7 @@ def get_current_x_window_position():
         return geom.x, geom.y
     except XError as e:
         print(f"Error getting current window position: {e}")
-        return None, None
+        return 0, 0
 
 
 def get_screen_resolution():

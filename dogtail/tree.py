@@ -561,7 +561,7 @@ class Node(object):
 
         # Check if it's a GTK4 app by detecting the initial position as (0,0)
         if pos == (0,0):
-            if self.name == "Activities" and self.roleName == "label":
+            if self.name == "Activities" and (self.roleName == "label" or self.roleName == "toggle button"):
                 # specil case of the Activities in the corner... will not be gtk4
                 return pos
             gtk4Offset = config.gtk4Offset
@@ -716,14 +716,17 @@ class Node(object):
         if ("menu item" in self.roleName or self.roleName == "menu") and \
                 self.parent.roleName != "menu bar" and \
                 "click" in self.actions:
-            self.select()
+            # self.select()
 
-            doDelay(config.typingDelay)
-            window_id = None
+            # doDelay(config.typingDelay)
+            # window_id = None
             if self.name.lower() in ["quit", "exit"] or "close" in self.name.lower():
                 window_id = ""
 
-            rawinput.pressKey("enter", window_id)
+            ### this old workaround with select and enter was needed due to click action
+            ### crashing app on these items... that is no longer an issue
+            self.doActionNamed('click')
+            # rawinput.pressKey("enter", window_id)
             doDelay(config.typingDelay)
 
         else:

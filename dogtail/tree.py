@@ -568,15 +568,18 @@ class Node(object):
             # Determine if *this* node is a part of a full-screen frame
             fullscreen_offset = (0, 0) # No offset fullscreen, shadows or not!
             node = self  # Assuming 'self' is the current node
-            from dogtail.utils import get_screen_resolution
-            screen_width, _ = get_screen_resolution()
-            while node:
-                if node.roleName == "frame":
-                    frame_width, frame_height = node.size
-                    if frame_width == screen_width:
-                        gtk4Offset = fullscreen_offset
-                    break
-                node = node.parent  # Traverse up to check for frame ancestors
+            try:
+                from dogtail.utils import get_screen_resolution
+                screen_width, _ = get_screen_resolution()
+                while node:
+                    if node.roleName == "frame":
+                        frame_width, frame_height = node.size
+                        if frame_width == screen_width:
+                            gtk4Offset = fullscreen_offset
+                        break
+                    node = node.parent  # Traverse up to check for frame ancestors
+            except Exception:
+                pass
             # For x11 session, calculate position using WINDOW_COORDS, add up with window possition
             # and finally apply offset if not fullscreen
             if SESSION_TYPE == "x11":

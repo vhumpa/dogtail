@@ -769,12 +769,7 @@ class Node(object):
                    (str(self.name), self.getLogString(), str(pointX), str(pointY)))
         debug_log("point(self, mouseDelay=%s)" % str(mouseDelay))
 
-        if "menu item" in self.roleName or self.roleName == "menu":
-            debug_log("Local coords are OFF under \
-                wayland for menu/context menu 'windows'.")
-            self.select()
-        else:
-            rawinput.point(pointX, pointY, window_id=self.window_id)
+        rawinput.point(pointX, pointY, window_id=self.window_id)
 
 
     @property
@@ -1847,7 +1842,7 @@ class Extension:
     def _tree_branching(self, parent_prefix, was_parent_last, node, current, cutoff):
         if current == cutoff:
             return
-        
+
         prefix_spacer = "     "
         prefix_extend = "  │  "
         suffix_branch = "  ├──"
@@ -1874,7 +1869,7 @@ class Extension:
             f"[{node.name}-",
             f"{node.roleName}-",
             f"{node.description}]"
-        ))     
+        ))
 
         print(f"{new_prefix+new_suffix} {node_data}")
 

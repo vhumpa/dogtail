@@ -259,7 +259,11 @@ class DisplayManagerSession:
 
     def setup(self, restore=False, force_xorg=False):
         shutil.copy(self.config, self.tmp_file)
-        config = configparser.ConfigParser()
+        if hasattr(configparser, "SafeConfigParser"):
+            config = configparser.SafeConfigParser()
+        else:
+            config = configparser.ConfigParser()
+
 
         config.optionxform = str
         config.read(self.tmp_file)

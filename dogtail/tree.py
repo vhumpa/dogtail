@@ -502,7 +502,7 @@ class Node(object):
         debug_log("text(self)")
 
         try:
-            return self.queryText().getText(0, -1)
+            return self.queryText().getText(0, self.get_character_count())
         except NotImplementedError:
             return None
 

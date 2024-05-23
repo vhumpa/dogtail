@@ -1,0 +1,7 @@
+summary: A test that reboots the machine first
+
+# A low order number ensures this test runs before others.
+order: 10
+
+# Point to the reboot script.
+test: ./initial_reboot.sh

@@ -1,177 +1,96 @@
-# -*- coding: utf-8 -*-
+#/usr/bin/python3
+"""
+Experimental dogtail changes for 1.0 release. raw input.
+"""
+
+# pylint: disable=broad-exception-caught
+# pylint: disable=wrong-import-position
+# pylint: disable=wrong-import-order
+# pylint: disable=import-error
+# ruff: noqa: E402
+
+
 from __future__ import absolute_import, division, print_function, unicode_literals
 from dogtail.config import config
-from dogtail.utils import doDelay
-from dogtail.logging import debug_log
-from dogtail.logging import debugLogger as logger
-from pyatspi import Registry as registry
-from pyatspi import (KEY_SYM, KEY_PRESS, KEY_PRESSRELEASE, KEY_RELEASE)
-from time import sleep
-import os
 
 import gi
+
+gi.require_version("Atspi", "2.0")
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
+
 from gi.repository import Gdk
+from gi.repository import Atspi
 
-SESSION_TYPE = "x11"
-if "XDG_SESSION_TYPE" in os.environ and "wayland" in os.environ["XDG_SESSION_TYPE"]:
-    os.system("gsettings set org.gnome.shell introspect true")
-    os.system("gsettings set org.gnome.desktop.peripherals.keyboard delay 2000")
-    SESSION_TYPE = "wayland"
+import warnings
+warnings.filterwarnings("ignore", "g_object_unref")
 
-ponytail = None
-if SESSION_TYPE == "wayland":
-    from ponytail.ponytail import Ponytail
-    ponytail = Ponytail()
-    ponytail.disconnect()
-    sleep(1) # needed now to overcome fast reconnect issue in ponytail
+from time import sleep
 
-"""
-Handles raw input using AT-SPI event generation.
+from _constants import SESSION_TYPE, MOUSE_BUTTON_EVENTS
 
-Note: Think of keyvals as keysyms, and keynames as keystrings.
-"""
-
-__author__ = """
-David Malcolm <dmalcolm@redhat.com>,
-Zack Cerza <zcerza@redhat.com>
-"""
+from _ponytail_connection import PonytailWrapper, ponytail_check_connection
+from qecore.logger import Logging  # noqa: E402
+logging_class = Logging()
+LOGGER = logging_class.logger
 
 
+# TODO Complete rewrite and improvement.
+
+
+# There is a better way to do this since I am already rewriting it.
 def update_coords(coords):
+    """
+    Lets fo this better that this.
+    """
+
     # Reserved for wrong coordinates reporting.
     return coords
 
 
-# Detect Xwayland windows in order to use globals and recordMonitor
-def ponytail_check_is_xwayland(window_id=None, window_list=None):
-    if window_list is None:
-        window_list = ponytail.window_list
+# Coordinate check for a negative value.
+# Do this better
+def check_coordinates(x, y):
+    """
+    Simple coordination check for positive coordinates.
+    """
 
-    if isinstance(window_id, int):
-        debug_log("Return wanted window_id.")
-        return int([x["client-type"] for x in window_list if x["id"] == window_id][0])
+    message = f"Attempting to generate a mouse event at negative coordinates: ({x},{y})"
 
-    if window_id is None:
-        debug_log("Return focused window if no window_id was provided.")
-        for window in window_list:
-            if bool(window["has-focus"]) is True:
-                return int(window["client-type"])
+    # Lets not check against 0.
+    # There are shadows in effect that can go beyond the screen.
+    # Its not unusual for coordinate to be around -10 to -30.
+    if x < -50 or y < -50:
+        raise ValueError(message)
 
-    debug_log("Return window_id 0 which is gnome-shell if no id is found.")
-    return 0
-
-
-def ponytail_check_connection(window_id=None, input_source="mouse"):
-    window_list = ponytail.window_list
-
-    if (not isinstance(window_id, str)) and (window_list != []) and\
-        window_id not in [x["id"] for x in window_list]:
-        window_id = None
-
-    debug_log("Checking if possibly connected window still exists.")
-
-    if ponytail.connected and isinstance(ponytail.connected, int):
-        if ponytail.connected not in [x["id"] for x in window_list]:
-            debug_log("Disconnecting no longer open window.")
-            ponytail.disconnect()
-            sleep(1)
-            debug_log("Done.")
-
-    if input_source == "keyboard" and ponytail.connected is None:
-        debug_log("Keyboard event, connecting monitor.")
-        ponytail.connectMonitor()
-
-    elif input_source == "keyboard" and ponytail.connected is not None:
-        if window_id == "" and isinstance(ponytail.connected, int):
-            debug_log("Keyboard event, monitor request, forcing monitor.")
-            ponytail.disconnect()
-            sleep(1)
-            ponytail.connectMonitor()
-        else:
-            debug_log("Any window/monitor already connected for keyboard event.")
-
-    else:
-        debug_log("Mouse input event.")
-        if ponytail_check_is_xwayland(window_id, window_list):
-            window_id = ""
-
-        if ponytail.connected is None and window_id is None:
-            for window in window_list:
-                if bool(window["has-focus"]) is True:
-                    ponytail.connectWindow(window["id"])
-                    debug_log("Connected active window.")
-
-        elif ponytail.connected is not None and window_id is None:
-            debug_log("Re-connected active window.")
-            for window in window_list:
-                if bool(window["has-focus"]) is True:
-                    if ponytail.connected != window["id"]:
-                        ponytail.disconnect()
-                        sleep(1)
-                        ponytail.connectWindow(window["id"])
-                        debug_log("Re-connected active window.")
-
-        elif ponytail.connected is None:
-            if isinstance(window_id, int):
-                ponytail.connectWindow(window_id)
-                debug_log("Connected window by window_id.")
-
-            elif isinstance(window_id, str):
-                ponytail.connectMonitor(window_id)
-                debug_log("Connected monitor (Xwayand?) by window_id.")
-
-        elif ponytail.connected != window_id and isinstance(window_id, int):
-            debug_log("Disconnecting window.")
-            ponytail.disconnect()
-            sleep(1.5)
-            debug_log("Connected window: %s." % ponytail.connected)
-            debug_log("Reconnecting window: %s." % window_id)
-            ponytail.connectWindow(window_id)
-            debug_log("Connected window: %s." % ponytail.connected)
-
-        elif ponytail.connected != window_id and isinstance(window_id, str):
-            debug_log("Disconnecting monitor.")
-            ponytail.disconnect()
-            sleep(1)
-            debug_log("Reconnecting monitor.")
-            ponytail.connectMonitor()
-            debug_log("Connected monitor.")
-
-        elif ponytail.connected == window_id:
-            debug_log("Window or monitor is already connected.")
-
-
-def doTypingDelay():
-    doDelay(config.typingDelay)
-
-
-def checkCoordinates(x, y):
-    if x < 0 or y < 0:
-        raise ValueError("Attempting to generate a mouse event at negative coordinates: (%s,%s)" % (x, y))
 
 
 def click(x, y, button=1, check=True, window_id=None):
     """
-    Synthesize a mouse button click at (x,y)
+    Synthesize a mouse button click at coordinates (x, y).
     """
 
+    # Get ponytail only when required.
+    ponytail_wrapper = PonytailWrapper()
+    ponytail = ponytail_wrapper.get_ponytail_instance()
+
+    # TODO, remove and do it better.
     (x, y) = update_coords((x, y))
 
+    # Check if the coordinates are not
     if check:
-        checkCoordinates(x, y)
+        check_coordinates(x, y)
 
-    logger.log("Mouse button %s click at (%s,%s)" % (button, x, y))
+    LOGGER.debug(f"Mouse button '{button}' click at ({x}, {y})")
 
     if SESSION_TYPE == "x11":
-        registry.generateMouseEvent(x, y, name="b%sc" % button)
-
+        Atspi.generate_mouse_event (x, y, name=MOUSE_BUTTON_EVENTS[button]["click"])
     else:
         ponytail_check_connection(window_id)
         ponytail.generateButtonEvent(button, x, y)
 
-    doDelay(config.actionDelay)
+    # TODO change this to global config.
+    sleep(0.5)
 
 
 def point(x, y, check=True, window_id=None):
@@ -179,42 +98,56 @@ def point(x, y, check=True, window_id=None):
     Synthesize a button point at (x,y)
     """
 
+    # Get ponytail only when required.
+    ponytail_wrapper = PonytailWrapper()
+    ponytail = ponytail_wrapper.get_ponytail_instance()
+
+    # TODO, remove and do it better.
     (x, y) = update_coords((x, y))
 
+    # Check if the coordinates are not
     if check:
-        checkCoordinates(x, y)
+        check_coordinates(x, y)
 
-    logger.log("Pointing mouse cursor at (%s,%s)" % (x, y))
+    LOGGER.debug(f"Mouse over at ({x}, {y})")
 
     if SESSION_TYPE == "x11":
-        registry.generateMouseEvent(x, y, "abs")
-
+        Atspi.generate_mouse_event (x, y, name="abs")
     else:
         ponytail_check_connection(window_id)
         ponytail.generateMotionEvent(x, y)
 
-    doDelay(config.actionDelay)
+    # TODO change this to global config.
+    sleep(0.5)
 
 
-def doubleClick(x, y, button=1, check=True, window_id=None):
+
+def double_click(x, y, button=1, check=True, window_id=None):
     """
     Synthesize a mouse button double-click at (x,y)
     """
 
+    # Get ponytail only when required.
+    ponytail_wrapper = PonytailWrapper()
+    ponytail = ponytail_wrapper.get_ponytail_instance()
+
+    # TODO, remove and do it better.
     (x, y) = update_coords((x, y))
 
+    # Check if the coordinates are not
     if check:
-        checkCoordinates(x, y)
+        check_coordinates(x, y)
 
-    logger.log("Mouse button %s doubleclick at (%s,%s)" % (button, x, y))
+    LOGGER.debug(f"Mouse button '{button}' double-click at ({x}, {y})")
 
     if SESSION_TYPE == "x11":
-        registry.generateMouseEvent(x, y, name="b%sd" % button)
-
+        Atspi.generate_mouse_event (x, y, name=MOUSE_BUTTON_EVENTS[button]["double-click"])
     else:
         ponytail_check_connection(window_id)
         ponytail.generateButtonEvent(button, x, y)
-        doDelay(config.doubleClickDelay)
+
+        # TODO global config? is that needed?
+        sleep(0.1)
 
         # Prevent executing release event on closed application
         ponytail.generateButtonPress(button)
@@ -224,7 +157,23 @@ def doubleClick(x, y, button=1, check=True, window_id=None):
             ponytail.connectMonitor()
             ponytail.generateButtonRelease(button)
 
-    doDelay(config.actionDelay)
+    # TODO change this to global config.
+    sleep(0.5)
+
+
+
+
+
+
+
+
+
+
+# TODO continue here
+
+def doTypingDelay():
+    doDelay(config.typingDelay)
+
 
 
 def press(x, y, button=1, check=True, window_id=None, delay=config.defaultDelay):

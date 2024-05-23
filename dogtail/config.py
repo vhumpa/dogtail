@@ -198,8 +198,8 @@ class _Config:
                 value = value.rstrip("/") + os.path.sep
 
             elif name == "logDebugToFile":
-                from dogtail import logging
-                logging.debugLogger = logging.Logger("debug", value)
+                from dogtail import _logging
+                _logging.debugLogger = _logging.Logger("debug", value)
 
             self.options[name] = value
 

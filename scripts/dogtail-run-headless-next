@@ -170,7 +170,7 @@ class DisplayManagerSession(object):
                 tempfile = '/tmp/%s_headless' % self.user
                 if os.path.isfile(self.accountfile):
                     subprocess.Popen('cp -f %s %s' % (self.accountfile, tempfile), shell=True).wait()
-                if sys.version < '3.2':
+                if hasattr(configparser, "SafeConfigParser"):
                     account_config = configparser.SafeConfigParser()
                 else:
                     account_config = configparser.ConfigParser()

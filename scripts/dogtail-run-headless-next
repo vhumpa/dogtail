@@ -9,6 +9,7 @@ import subprocess
 import time
 import shutil
 import re
+
 try:
     import configparser
 except ImportError:
@@ -37,13 +38,18 @@ and less buggy compared to headless itself taking care of everything.
 
 PRESERVE_ENVS = ["PYTHONPATH", "TEST"]
 
+
 def getSessionEnvironment(sessionBinary):
     def isSessionProcess(file_name):
         """
         Verify that the given session binary is really a session binary.
         """
 
-        session_binary_path = "/usr/bin/plasma-desktop" if sessionBinary.split("/")[-1] == "startkde" else sessionBinary
+        session_binary_path = (
+            "/usr/bin/plasma-desktop"
+            if sessionBinary.split("/")[-1] == "startkde"
+            else sessionBinary
+        )
         try:
             if os.path.realpath(file_name + "exe") != session_binary_path:
                 return False
@@ -55,7 +61,6 @@ def getSessionEnvironment(sessionBinary):
             return False
 
         return True
-
 
     def get_environment_dictionary(file_name):
         """
@@ -77,7 +82,6 @@ def getSessionEnvironment(sessionBinary):
             environment_dictionary[key] = value
 
         return environment_dictionary
-
 
     def copy_environment_variables(environment_dictionary):
         """
@@ -108,8 +112,9 @@ def execCodeWithEnv(code, env=None):
     with open("/tmp/execcode.dogtail", "w") as text_file:
         text_file.write(code)
 
-    subprocess.Popen("python /tmp/execcode.dogtail".split(),
-                     env=(os.environ if env is None else env)).wait()
+    subprocess.Popen(
+        "python /tmp/execcode.dogtail".split(), env=(os.environ if env is None else env)
+    ).wait()
 
 
 ### qecore headless code to quickfix el9 #####################
@@ -117,13 +122,16 @@ def execCodeWithEnv(code, env=None):
 ENVIRONMENT_DICTIONARY = {}
 ENVIRONMENT_VARIABLES_TO_PRESERVE = ["PYTHONPATH", "TEST", "TERM"]
 
+
 def run(command, verbose=False):
     """
     Utility function to execute given command and return its output.
     """
 
     try:
-        output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT, encoding="utf-8")
+        output = subprocess.check_output(
+            command, shell=True, stderr=subprocess.STDOUT, encoding="utf-8"
+        )
         return output if not verbose else (output, 0, None)
     except subprocess.CalledProcessError as error:
         return error.output if not verbose else (error.output, error.returncode, error)
@@ -190,14 +198,17 @@ def get_environment_dictionary(session_binary):
         return ENVIRONMENT_DICTIONARY
 
     is_display_manager_active = run("systemctl is-active gdm").strip("\n")
-    print("\n".join((
-        f"headless: Display Manager Status is '{is_display_manager_active}'",
-        "headless: Can't find our environment!",
-        "headless: Stopping Display Manager"
-    )))
+    print(
+        "\n".join(
+            (
+                f"headless: Display Manager Status is '{is_display_manager_active}'",
+                "headless: Can't find our environment!",
+                "headless: Stopping Display Manager",
+            )
+        )
+    )
     subprocess.Popen(("sudo systemctl stop gdm").split()).wait()
     sys.exit(1)
-
 
 
 ###################################3
@@ -207,12 +218,16 @@ class DisplayManagerSession:
     gdm_config = "/etc/gdm/custom.conf"
     kdm_config = "/etc/kde/kdm/kdmrc"
 
-    gdm_options = {"section": "daemon",
-                   "enable": "AutomaticLoginEnable",
-                   "user": "AutomaticLogin"}
-    kdm_options = {"section": "X-:0-Core",
-                   "enable": "AutoLoginEnable",
-                   "user": "AutoLoginUser"}
+    gdm_options = {
+        "section": "daemon",
+        "enable": "AutomaticLoginEnable",
+        "user": "AutomaticLogin",
+    }
+    kdm_options = {
+        "section": "X-:0-Core",
+        "enable": "AutoLoginEnable",
+        "user": "AutoLoginUser",
+    }
 
     user = "test"
 
@@ -228,7 +243,6 @@ class DisplayManagerSession:
 
         return False
 
-
     def waitForProcess(self, process, invert=False):
         """
         Waits until a process appears.
@@ -237,8 +251,13 @@ class DisplayManagerSession:
         while self.isProcessRunning(process) is invert:
             time.sleep(1)
 
-
-    def __init__(self, display_manager="gdm", session="gnome", session_binary="gnome-shell", user=None):
+    def __init__(
+        self,
+        display_manager="gdm",
+        session="gnome",
+        session_binary="gnome-shell",
+        user=None,
+    ):
         self.display_manager = display_manager
         self.session = session
         self.session_binary = session_binary
@@ -256,14 +275,12 @@ class DisplayManagerSession:
             self.options = self.kdm_options
             self.config = self.kdm_config
 
-
     def setup(self, restore=False, force_xorg=False):
         shutil.copy(self.config, self.tmp_file)
         if hasattr(configparser, "SafeConfigParser"):
             config = configparser.SafeConfigParser()
         else:
             config = configparser.ConfigParser()
-
 
         config.optionxform = str
         config.read(self.tmp_file)
@@ -274,18 +291,18 @@ class DisplayManagerSession:
                 config.set(self.options["section"], "WaylandEnable", "false")
             else:
                 pass
-                #config.set(self.options["section"], "WaylandEnable", "true")
+                # config.set(self.options["section"], "WaylandEnable", "true")
         else:
-            config.remove_option(
-                self.options["section"], self.options["enable"])
-            config.remove_option(
-                self.options["section"], self.options["user"])
+            config.remove_option(self.options["section"], self.options["enable"])
+            config.remove_option(self.options["section"], self.options["user"])
 
         output = open(self.tmp_file, "w")
         config.write(output)
         output.flush()
 
-        subprocess.Popen("sudo mv -f %s %s" % (self.tmp_file, self.config), shell=True).wait()
+        subprocess.Popen(
+            "sudo mv -f %s %s" % (self.tmp_file, self.config), shell=True
+        ).wait()
 
         if not restore:
             if "kwin" in self.session_binary:
@@ -294,15 +311,19 @@ class DisplayManagerSession:
                 except Exception:
                     pass
 
-                subprocess.Popen("echo 'export QT_ACCESSIBILITY=1' > ~/.kde/env/qt-at-spi.sh",
-                                 shell=True).wait()
+                subprocess.Popen(
+                    "echo 'export QT_ACCESSIBILITY=1' > ~/.kde/env/qt-at-spi.sh",
+                    shell=True,
+                ).wait()
 
             if self.display_manager == "gdm":
                 need_restart = False
                 tempfile = "/tmp/%s_headless" % self.user
 
                 if os.path.isfile(self.accountfile):
-                    subprocess.Popen("cp -f %s %s" % (self.accountfile, tempfile), shell=True).wait()
+                    subprocess.Popen(
+                        "cp -f %s %s" % (self.accountfile, tempfile), shell=True
+                    ).wait()
 
                 if hasattr(configparser, "SafeConfigParser"):
                     account_config = configparser.SafeConfigParser()
@@ -314,7 +335,10 @@ class DisplayManagerSession:
                 try:
                     saved_session = account_config.get("User", "Session")
                     if self.session is None:
-                        if "kde" in saved_session and "gnome-shell" in self.session_binary:
+                        if (
+                            "kde" in saved_session
+                            and "gnome-shell" in self.session_binary
+                        ):
                             self.session_binary = "/usr/bin/kwin"
 
                         elif "gnome" in saved_session and "kwin" in self.session_binary:
@@ -337,11 +361,17 @@ class DisplayManagerSession:
                     output = open(tempfile, "w")
                     account_config.write(output)
                     output.flush()
-                    subprocess.Popen("sudo mv -f %s %s" % (tempfile, self.accountfile), shell=True).wait()
+                    subprocess.Popen(
+                        "sudo mv -f %s %s" % (tempfile, self.accountfile), shell=True
+                    ).wait()
                     time.sleep(1)
-                    subprocess.Popen("sudo systemctl restart accounts-daemon", shell=True).wait()
+                    subprocess.Popen(
+                        "sudo systemctl restart accounts-daemon", shell=True
+                    ).wait()
                     time.sleep(1)
-                    subprocess.Popen("sudo systemctl restart systemd-logind", shell=True).wait()
+                    subprocess.Popen(
+                        "sudo systemctl restart systemd-logind", shell=True
+                    ).wait()
                     time.sleep(1)
 
                 else:
@@ -349,9 +379,11 @@ class DisplayManagerSession:
 
             elif self.display_manager == "kdm":
                 if self.session is not None:
-                    subprocess.Popen("echo '[Desktop]\nSession=%s' > /home/%s/.dmrc" % \
-                        (self.session, self.user), shell=True).wait()
-
+                    subprocess.Popen(
+                        "echo '[Desktop]\nSession=%s' > /home/%s/.dmrc"
+                        % (self.session, self.user),
+                        shell=True,
+                    ).wait()
 
     def start(self, restart=False):
         subprocess.Popen(("sudo systemctl stop %s" % (self.display_manager)).split())
@@ -360,14 +392,20 @@ class DisplayManagerSession:
         if os.system("sudo loginctl |grep test |grep seat0") == 0:
             print("Found pre-existing sesssion! Loginctl:")
             os.system("sudo loginctl")
-            subprocess.Popen("sudo loginctl kill-session --signal=9 $(loginctl |grep test |grep seat0 |awk '{print $1}')", shell=True).wait()
+            subprocess.Popen(
+                "sudo loginctl kill-session --signal=9 $(loginctl |grep test |grep seat0 |awk '{print $1}')",
+                shell=True,
+            ).wait()
             time.sleep(5)
 
             print("Loginctl after kill-session")
             os.system("sudo loginctl")
             if os.system("sudo loginctl |grep test |grep seat0") == 0:
                 print("Found (another?) pre-existing sesssion!")
-                subprocess.Popen("sudo loginctl kill-session --signal=9 $(loginctl |grep test |grep seat0 |awk '{print $1}')", shell=True).wait()
+                subprocess.Popen(
+                    "sudo loginctl kill-session --signal=9 $(loginctl |grep test |grep seat0 |awk '{print $1}')",
+                    shell=True,
+                ).wait()
                 time.sleep(5)
                 os.system("sudo loginctl")
 
@@ -379,93 +417,134 @@ class DisplayManagerSession:
         else:
             time.sleep(4)  # GNOME shows stuff as it appears
 
-
     def set_accessibility_to(self, enable):
-        subprocess.Popen("/usr/bin/gsettings set org.gnome.desktop.interface toolkit-accessibility %s"
-                         % ("true" if enable else "false"), shell=True, env=os.environ)
-
+        subprocess.Popen(
+            "/usr/bin/gsettings set org.gnome.desktop.interface toolkit-accessibility %s"
+            % ("true" if enable else "false"),
+            shell=True,
+            env=os.environ,
+        )
 
     def stop(self):
-        subprocess.Popen(("sudo systemctl stop %s" % (self.display_manager)).split()).wait()
+        subprocess.Popen(
+            ("sudo systemctl stop %s" % (self.display_manager)).split()
+        ).wait()
         self.waitForProcess("/usr/bin/%s" % self.display_manager, invert=True)
         time.sleep(3)
 
-        if self.isProcessRunning(self.session_binary.split('/')[-1]):
+        if self.isProcessRunning(self.session_binary.split("/")[-1]):
             print(
-                "dogtail-run-headless-next: WARNING: %s still running, proceeding with loginctl terminate-session" %
-                (self.session_binary.split("/")[-1]))
+                "dogtail-run-headless-next: WARNING: %s still running, proceeding with loginctl terminate-session"
+                % (self.session_binary.split("/")[-1])
+            )
             print("loginctl before:")
             os.system("sudo loginctl")
 
-            subprocess.Popen("sudo loginctl terminate-session $(loginctl |grep test |grep seat0 |awk '{print $1}')", shell=True).wait()
+            subprocess.Popen(
+                "sudo loginctl terminate-session $(loginctl |grep test |grep seat0 |awk '{print $1}')",
+                shell=True,
+            ).wait()
             time.sleep(5)
 
             print("loginctl after:")
             os.system("sudo loginctl")
 
-        if self.isProcessRunning("Xorg") or self.isProcessRunning("gnome-shell") or self.isProcessRunning("Xwayland"):
-            print("dogtail-run-headless-next: WARNING: test seat0 still there? Doing loginctl kill-session -9")
+        if (
+            self.isProcessRunning("Xorg")
+            or self.isProcessRunning("gnome-shell")
+            or self.isProcessRunning("Xwayland")
+        ):
+            print(
+                "dogtail-run-headless-next: WARNING: test seat0 still there? Doing loginctl kill-session -9"
+            )
             print("loginctl:")
             os.system("sudo loginctl")
 
-            subprocess.Popen("sudo loginctl kill-session --signal=9 $(loginctl |grep test |grep seat0 |awk '{print $1}')", shell=True).wait()
-            #subprocess.Popen('sudo pkill --signal 9 Xorg'.split()).wait()
+            subprocess.Popen(
+                "sudo loginctl kill-session --signal=9 $(loginctl |grep test |grep seat0 |awk '{print $1}')",
+                shell=True,
+            ).wait()
+            # subprocess.Popen('sudo pkill --signal 9 Xorg'.split()).wait()
             time.sleep(3)
 
 
 def parse():
-    parser = argparse.ArgumentParser(prog="$ dogtail-run-headless-next",
-                                     description=SCRIPT_DESCRIPTION,
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        prog="$ dogtail-run-headless-next",
+        description=SCRIPT_DESCRIPTION,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
 
-    parser.add_argument("script",
-                        help="Command to execute the script")
+    parser.add_argument("script", help="Command to execute the script")
 
-    parser.add_argument("--session",
-                        required=False,
-                        help="\n".join((
-                            "What session to use. Not specifying will result in default value or last used session.",
-                            "You can set any session desktop file name here (i.e. 'gnome-classic', 'gnome', 'lxde', etc).",
-                            "Comes from either /usr/share/wayland-sessions/ or /usr/share/xsessions/.",
-                            "If you have Wayland disabled with /etc/gdm/custom.conf, choose from /usr/share/xsessions/ only."
-                        )))
+    parser.add_argument(
+        "--session",
+        required=False,
+        help="\n".join(
+            (
+                "What session to use. Not specifying will result in default value or last used session.",
+                "You can set any session desktop file name here (i.e. 'gnome-classic', 'gnome', 'lxde', etc).",
+                "Comes from either /usr/share/wayland-sessions/ or /usr/share/xsessions/.",
+                "If you have Wayland disabled with /etc/gdm/custom.conf, choose from /usr/share/xsessions/ only.",
+            )
+        ),
+    )
 
-    parser.add_argument("--session-binary",
-                        required=False,
-                        help="\n".join((
-                            "Specify an in-session ever-running binary (full path) to get the environment from.",
-                            "Only needed for non-gnome/kde sessions."
-                        )))
+    parser.add_argument(
+        "--session-binary",
+        required=False,
+        help="\n".join(
+            (
+                "Specify an in-session ever-running binary (full path) to get the environment from.",
+                "Only needed for non-gnome/kde sessions.",
+            )
+        ),
+    )
 
-    parser.add_argument("--dm",
-                        required=False,
-                        help="\n".join((
-                            "What display manager to use for spawning session.",
-                            "Supported are 'gdm' (default) and 'kdm'."
-                        )))
+    parser.add_argument(
+        "--dm",
+        required=False,
+        help="\n".join(
+            (
+                "What display manager to use for spawning session.",
+                "Supported are 'gdm' (default) and 'kdm'.",
+            )
+        ),
+    )
 
-    parser.add_argument("--restart",
-                        action="store_true",
-                        help="Restart previously running display manager session before script execution.")
+    parser.add_argument(
+        "--restart",
+        action="store_true",
+        help="Restart previously running display manager session before script execution.",
+    )
 
-    parser.add_argument("--dont-start",
-                        action="store_true",
-                        help="Use already running session (doesn't have to be under Display Manager)")
+    parser.add_argument(
+        "--dont-start",
+        action="store_true",
+        help="Use already running session (doesn't have to be under Display Manager)",
+    )
 
-    parser.add_argument("--dont-kill",
-                        action="store_true",
-                        help="Do not kill session when script exits.")
+    parser.add_argument(
+        "--dont-kill",
+        action="store_true",
+        help="Do not kill session when script exits.",
+    )
 
-    parser.add_argument("--disable-a11y",
-                        action="store_true",
-                        help="Disable accessibility technologies on script(not session) exit.")
+    parser.add_argument(
+        "--disable-a11y",
+        action="store_true",
+        help="Disable accessibility technologies on script(not session) exit.",
+    )
 
-    parser.add_argument("--debug",
-                        action="store_true",
-                        help="Will print debug messages to the file.")
+    parser.add_argument(
+        "--debug", action="store_true", help="Will print debug messages to the file."
+    )
 
-    parser.add_argument("--force-xorg", action="store_true",
-                        help="Force Xorg session by making sure WaylandEnable=false in gdm config.")
+    parser.add_argument(
+        "--force-xorg",
+        action="store_true",
+        help="Force Xorg session by making sure WaylandEnable=false in gdm config.",
+    )
 
     return parser.parse_args()
 
@@ -487,8 +566,10 @@ def main():
 
     else:
         if args.session_binary is None:
-            print("dogtail-run-headless-next:",
-                  "Need to specify a --session-binary to get env from in your choosen --session.")
+            print(
+                "dogtail-run-headless-next:",
+                "Need to specify a --session-binary to get env from in your choosen --session.",
+            )
             sys.exit(-1)
 
     if args.dm == "gdm" or args.dm is None:
@@ -499,26 +580,35 @@ def main():
         print("dogtail-run-headless-next: I do not recognize the display manager!")
         sys.exit(-1)
 
-    print("dogtail-run-headless-next: Using display manager: %s" % (display_manager_name))
+    print(
+        "dogtail-run-headless-next: Using display manager: %s" % (display_manager_name)
+    )
 
-    display_manager_session = DisplayManagerSession(display_manager_name, args.session, args.session_binary)
+    display_manager_session = DisplayManagerSession(
+        display_manager_name, args.session, args.session_binary
+    )
 
     if args.dont_start is not True:
         display_manager_session.setup(force_xorg=args.force_xorg)
         display_manager_session.start(restart=args.restart)
 
-    print("dogtail-run-headless-next: Using %s to bind to the session" %
-        (display_manager_session.session_binary))
+    print(
+        "dogtail-run-headless-next: Using %s to bind to the session"
+        % (display_manager_session.session_binary)
+    )
 
     try:
         os.environ = get_environment_dictionary(display_manager_session.session_binary)
     except RuntimeError:
-        print("Could not get environment from initial session binary " + display_manager_session.session_binary)
+        print(
+            "Could not get environment from initial session binary "
+            + display_manager_session.session_binary
+        )
         if display_manager_session.session_binary == "/usr/bin/gnome-shell":
             try:
                 binary = "/usr/libexec/gvfsd"
                 try:
-                    with open('/etc/redhat-release','r') as f:
+                    with open("/etc/redhat-release", "r") as f:
                         release = f.read()
                     if "Linux release 9" in release:
                         binary = "/usr/bin/gnome-session"
@@ -526,22 +616,29 @@ def main():
                     pass
                 print("Try fallback binary: %s" % binary)
                 os.environ = getSessionEnvironment(binary)
-                print("dogtail-run-headless-next: Could not get the environment from %s process" %
-                    (display_manager_session.session_binary))
-                print("dogtail-run-headless-next: Trying to workaround with %s" % binary)
+                print(
+                    "dogtail-run-headless-next: Could not get the environment from %s process"
+                    % (display_manager_session.session_binary)
+                )
+                print(
+                    "dogtail-run-headless-next: Trying to workaround with %s" % binary
+                )
             except RuntimeError:
-                print("dogtail-run-headless-next: Could not get the environment from %s process" %
-                    ("/usr/libexec/gvfsd"))
+                print(
+                    "dogtail-run-headless-next: Could not get the environment from %s process"
+                    % ("/usr/libexec/gvfsd")
+                )
                 display_manager_session.stop()
                 display_manager_session.setup(restore=True)
                 sys.exit(1)
         else:
-            print("dogtail-run-headless-next: Could not get the environment from %s process" %
-                (display_manager_session.session_binary))
+            print(
+                "dogtail-run-headless-next: Could not get the environment from %s process"
+                % (display_manager_session.session_binary)
+            )
             display_manager_session.stop()
             display_manager_session.setup(restore=True)
             sys.exit(1)
-
 
     if args.debug:
         os.environ["DOGTAIL_DEBUG"] = "true"
@@ -551,18 +648,24 @@ def main():
 
     script = Script(script_command_list)
 
-    if os.path.isfile('/tmp/headless_enable_fatal_criticals'):
-        os.environ['G_DEBUG'] = 'fatal-criticals'
+    if os.path.isfile("/tmp/headless_enable_fatal_criticals"):
+        os.environ["G_DEBUG"] = "fatal-criticals"
 
     # fatal_wanings has bigger priority than criticals, so will ovewrite the variable should both be set
-    if os.path.isfile('/tmp/headless_enable_fatal_warnings'):
-        os.environ['G_DEBUG'] = 'fatal-warnings'
+    if os.path.isfile("/tmp/headless_enable_fatal_warnings"):
+        os.environ["G_DEBUG"] = "fatal-warnings"
 
     script_process_id = script.start()
-    print("dogtail-run-headless-next: Started the script with PID %d" % (script_process_id))
+    print(
+        "dogtail-run-headless-next: Started the script with PID %d"
+        % (script_process_id)
+    )
 
     exit_code = script.wait()
-    print("dogtail-run-headless-next: The script has finished with return code %d" % (exit_code))
+    print(
+        "dogtail-run-headless-next: The script has finished with return code %d"
+        % (exit_code)
+    )
 
     if args.disable_a11y is True:
         display_manager_session.set_accessibility_to(False)

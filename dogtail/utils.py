@@ -15,7 +15,6 @@ from dogtail.logging import debugLogger as logger
 from dogtail.logging import TimeStamp
 
 import gi
-
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
 from gi.repository import Gtk, GLib
@@ -47,9 +46,7 @@ def screenshot(file="screenshot.png", timeStamp=True):
     if not isinstance(timeStamp, bool):
         raise TypeError("timeStampt must be True or False")
 
-    assert os.path.isdir(config.scratchDir), LOGGER.info(
-        "Directory for screenshot not found."
-    )
+    assert os.path.isdir(config.scratchDir), LOGGER.info("Directory for screenshot not found.")
 
     baseName = "".join(file.split(".")[0:-1])
     fileExt = file.split(".")[-1].lower()
@@ -69,16 +66,13 @@ def screenshot(file="screenshot.png", timeStamp=True):
 
     from gi.repository import Gdk
     from gi.repository import GdkPixbuf
-
     rootWindow = Gdk.get_default_root_window()
     geometry = rootWindow.get_geometry()
-    pixbuf = GdkPixbuf.Pixbuf(
-        colorspace=GdkPixbuf.Colorspace.RGB,
-        has_alpha=False,
-        bits_per_sample=8,
-        width=geometry[2],
-        height=geometry[3],
-    )
+    pixbuf = GdkPixbuf.Pixbuf(colorspace=GdkPixbuf.Colorspace.RGB,
+                              has_alpha=False,
+                              bits_per_sample=8,
+                              width=geometry[2],
+                              height=geometry[3])
 
     pixbuf = Gdk.pixbuf_get_from_window(rootWindow, 0, 0, geometry[2], geometry[3])
 
@@ -98,14 +92,7 @@ def screenshot(file="screenshot.png", timeStamp=True):
     return path
 
 
-def run(
-    string,
-    timeout=config.runTimeout,
-    interval=config.runInterval,
-    desktop=None,
-    dumb=False,
-    appName="",
-):
+def run(string, timeout=config.runTimeout, interval=config.runInterval, desktop=None, dumb=False, appName=""):
     """
     Runs an application.
     [For simple command execution such as 'rm *', use os.popen() or os.system()]
@@ -113,17 +100,8 @@ def run(
     starting, or until timeout is reached. If dumb is True, returns when timeout is reached.
     """
 
-    debug_log(
-        "run(string=%s, timeout=%s, interval=%s, desktop=%s, dumb=%s, appName=%s)"
-        % (
-            str(string),
-            str(timeout),
-            str(interval),
-            str(desktop),
-            str(dumb),
-            str(appName),
-        )
-    )
+    debug_log("run(string=%s, timeout=%s, interval=%s, desktop=%s, dumb=%s, appName=%s)" %
+                  (str(string), str(timeout), str(interval), str(desktop), str(dumb), str(appName)))
 
     if not desktop:
         from dogtail.tree import root as desktop
@@ -136,16 +114,12 @@ def run(
         appName = args[0]
 
     if dumb:
-        debug_log(
-            "Disable startup detection. We're starting a non-AT-SPI-aware application."
-        )
+        debug_log("Disable startup detection. We're starting a non-AT-SPI-aware application.")
 
         doDelay(timeout)
 
     else:
-        debug_log(
-            "Startup detection code. The timing here is not totally precise, but it's good enough for now."
-        )
+        debug_log("Startup detection code. The timing here is not totally precise, but it's good enough for now.")
 
         time = 0
 
@@ -195,10 +169,8 @@ class Highlight(Gtk.Window):  # pragma: no cover
     def __init__(self, x, y, w, h):
         super(Highlight, self).__init__()
 
-        self.x = x
-        self.y = y
-        self.w = w
-        self.h = h
+        self.x = x; self.y = y;
+        self.w = w; self.h = h;
         self.set_decorated(False)
         self.set_has_resize_grip(False)
         self.maximize()
@@ -212,6 +184,7 @@ class Highlight(Gtk.Window):  # pragma: no cover
         self.connect("draw", self.area_draw)
         self.show_all()
 
+
     def area_draw(self, widget, cr):
         """
         Draw a rectangle on the screen.
@@ -219,7 +192,7 @@ class Highlight(Gtk.Window):  # pragma: no cover
 
         debug_log("Drawing the node on the screen.")
 
-        cr.set_source_rgba(0.0, 0.0, 0.0, 0.0)
+        cr.set_source_rgba(.0, .0, .0, 0.0)
         cr.set_operator(cairo.OPERATOR_SOURCE)
         cr.paint()
         cr.set_operator(cairo.OPERATOR_OVER)
@@ -241,11 +214,11 @@ class Blinker:  # pragma: no cover
         self.highlight_window = Highlight(x, y, w, h)
         if self.highlight_window.screen.is_composited() is not False:
             self.timeout_handler_id = GLib.timeout_add(
-                Blinker.INTERVAL_MS, self.destroyHighlight
-            )
+                Blinker.INTERVAL_MS, self.destroyHighlight)
             Gtk.main()
         else:
             self.highlight_window.destroy()
+
 
     def destroyHighlight(self):
         """
@@ -269,13 +242,7 @@ class Lock(object):
     to True to enable automatic unlock when scipt process exits to avoid having to unlock manually.
     """
 
-    def __init__(
-        self,
-        location="/tmp",
-        lockname="dogtail_lockdir_",
-        randomize=True,
-        unlockOnExit=False,
-    ):
+    def __init__(self, location="/tmp", lockname="dogtail_lockdir_", randomize=True, unlockOnExit=False):
         """
         You can change the default lockdir location or name. Setting randomize to
         False will result in no random string being appened to the lockdir name.
@@ -286,6 +253,7 @@ class Lock(object):
             self.lockdir = "".join((self.lockdir, self.__getPostfix()))
 
         self.unlockOnExit = unlockOnExit
+
 
     def __exit_unlock(self):
         """
@@ -300,6 +268,7 @@ class Lock(object):
             except OSError:
                 pass  # already deleted (by .unlock()), we're exiting, it's fine
 
+
     def lock(self):
         """
         Creates a lockdir based on the settings on Lock() instance creation.
@@ -307,9 +276,7 @@ class Lock(object):
         atomic on POSIX compliant systems.
         """
 
-        debug_log(
-            "Create a lock directory. Raising the exception if the lock is already present."
-        )
+        debug_log("Create a lock directory. Raising the exception if the lock is already present.")
 
         locked_msg = "Dogtail lock: Already locked with the same lock."
 
@@ -323,12 +290,12 @@ class Lock(object):
             if os.path.exists(self.lockdir):
                 if self.unlockOnExit:
                     import atexit
-
                     atexit.register(self.__exit_unlock)
 
                 return self.lockdir
         else:
             raise OSError(locked_msg)
+
 
     def unlock(self):
         """
@@ -338,7 +305,7 @@ class Lock(object):
 
         debug_log("Remove the lock. Raising the exception if the lock is not present.")
 
-        # if self.unlockOnExit:
+        #if self.unlockOnExit:
         #    raise Exception('Cannot unlock with unlockOnExit set to True!')
 
         if os.path.exists(self.lockdir):
@@ -350,6 +317,7 @@ class Lock(object):
         else:
             raise OSError("Dogtail unlock: not locked")
 
+
     def locked(self):
         """
         Check if locked directory exists.
@@ -358,6 +326,7 @@ class Lock(object):
         debug_log("Checking if locked directory exists.")
 
         return os.path.exists(self.lockdir)
+
 
     def __getPostfix(self):
         """
@@ -369,9 +338,7 @@ class Lock(object):
 
         debug_log("Get random file suffix of length 5.")
 
-        return "".join(
-            random.choice(string.ascii_letters + string.digits) for x in range(5)
-        )
+        return "".join(random.choice(string.ascii_letters + string.digits) for x in range(5))
 
 
 a11yDConfKey = "org.gnome.desktop.interface"
@@ -413,28 +380,23 @@ def bailBecauseA11yIsDisabled():
         return
 
     try:
-        with open("/proc/%s/cmdline" % os.getpid(), "r") as f:
+        with open("/proc/%s/cmdline" % os.getpid(), 'r') as f:
             content = f.read()
 
         if content.find("epydoc") != -1:
             debug_log("Execution was not ended. Proces content 'epydoc' exception.")
-            return  # pragma: no cover
+            return   # pragma: no cover
         if content.find("sphinx") != -1:
             debug_log("Execution was not ended. Proces content 'sphinx' exception.")
             return  # pragma: no cover
     except Exception:  # pragma: no cover
         pass
 
-    logger.log(
-        "\n".join(
-            (
-                "Dogtail requires that Assistive Technology support be enabled.",
-                "You can enable accessibility with sniff or by running:",
-                "'gsettings set org.gnome.desktop.interface toolkit-accessibility true'",
-                "Aborting...",
-            )
-        )
-    )
+    logger.log("\n".join((
+        "Dogtail requires that Assistive Technology support be enabled.",
+        "You can enable accessibility with sniff or by running:",
+        "'gsettings set org.gnome.desktop.interface toolkit-accessibility true'",
+        "Aborting...")))
 
     sys.exit(1)
 
@@ -447,7 +409,6 @@ def enableA11y(enable=True):
     debug_log("enableA11y(enable=%s)" % str(enable))
 
     from gi.repository.Gio import Settings
-
     InterfaceSettings = Settings(schema_id=a11yDConfKey)
     InterfaceSettings.set_boolean("toolkit-accessibility", enable)
 
@@ -474,12 +435,11 @@ def checkForA11yInteractively():  # pragma: no cover
     if isA11yEnabled():
         return
 
-    dialog = Gtk.Dialog(
-        "Enable Assistive Technology Support?",
-        None,
-        Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
-        (Gtk.STOCK_QUIT, Gtk.ResponseType.CLOSE, "_Enable", Gtk.ResponseType.ACCEPT),
-    )
+    dialog = Gtk.Dialog("Enable Assistive Technology Support?",
+                        None,
+                        Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                        (Gtk.STOCK_QUIT, Gtk.ResponseType.CLOSE,
+                         "_Enable", Gtk.ResponseType.ACCEPT))
 
     question = """
         Dogtail requires that Assistive Technology Support be enabled for it to function. Would you like to
@@ -514,7 +474,6 @@ def waitForWindow(name, timeout=30):
     debug_log("waitForWindow(name=%s, timeout=%s)" % (name, str(timeout)))
 
     from dogtail.rawinput import ponytail, SESSION_TYPE
-
     if SESSION_TYPE == "wayland":
         ponytail.waitFor(name, timeout=timeout)
         return True
@@ -540,23 +499,39 @@ def get_current_x_window_position():
         from Xlib import X, display
         from Xlib.error import XError
     except ModuleNotFoundError as e:
-        raise ImportError(
-            "python-xlib is required for this script to run. Please install it i.e. using 'pip install python-xlib'."
-        ) from e
+        raise ImportError("python-xlib is required for this script to run. Please install it i.e. using 'pip install python-xlib'.") from e
+
 
     d = display.Display()
     root = d.screen().root
-    window_id = root.get_full_property(
-        d.intern_atom("_NET_ACTIVE_WINDOW"), X.AnyPropertyType
-    ).value[0]
-    window = d.create_resource_object("window", window_id)
+    window_id = root.get_full_property(d.intern_atom('_NET_ACTIVE_WINDOW'), X.AnyPropertyType).value[0]
+    window = d.create_resource_object('window', window_id)
 
     try:
         geom = window.get_geometry()
         return geom.x, geom.y
     except XError as e:
         print(f"Error getting current window position: {e}")
-        return None, None
+        return 0, 0
+
+
+def get_screen_resolution():
+    """ Additional helper function with similar reasoning as the get_current_x_window_position needed
+    to work with GTK4 apps - even on wayland! (needs Xwayland running for xlib to get this info).
+    We need this to detect whether the frame is in fullscreen mode in order to either use the config.gtk4Offset
+    or not. There is no offset when window is full-screen. Se README for more info on this and shadows.
+    """
+    try:
+        from Xlib import X, display
+        from Xlib.error import XError
+    except ModuleNotFoundError as e:
+        raise ImportError("python-xlib is required for this script to run. Please install it i.e. using 'pip install python-xlib'.") from e
+
+    d = display.Display()
+    screen = d.screen()
+    width = screen.width_in_pixels
+    height = screen.height_in_pixels
+    return width, height
 
 
 class GnomeShell:  # pragma: no cover
@@ -573,8 +548,8 @@ class GnomeShell:  # pragma: no cover
 
     def __init__(self, classic_mode=False):
         from dogtail.tree import root
-
         self.shell = root.application("gnome-shell")
+
 
     def getApplicationMenuList(self, search_by_item="Quit"):
         """
@@ -583,26 +558,20 @@ class GnomeShell:  # pragma: no cover
         present elsewhere, like 'Lock' or 'Power Off' present under the user menu.
         """
 
-        debug_log(
-            "getApplicationMenuList(self, search_by_item=%s)" % str(search_by_item)
-        )
+        debug_log("getApplicationMenuList(self, search_by_item=%s)" % str(search_by_item))
 
         matches = self.shell.findChildren(
-            predicate.GenericPredicate(name=search_by_item, roleName="label")
-        )
+            predicate.GenericPredicate(name=search_by_item, roleName="label"))
 
         for match in matches:
             ancestor = match.parent.parent.parent
             if ancestor.roleName == "panel":
-                return ancestor.findChildren(
-                    predicate.GenericPredicate(roleName="label")
-                )
+                return ancestor.findChildren(predicate.GenericPredicate(roleName="label"))
 
         raise SearchError(
             "Could not find the Application menu based on '%s' item. \
-            Please provide an existing reference item"
-            % search_by_item
-        )
+            Please provide an existing reference item" % search_by_item)
+
 
     def getApplicationMenuButton(self, app_name):
         """
@@ -615,9 +584,8 @@ class GnomeShell:  # pragma: no cover
             return self.shell[0][0][3].child(app_name, roleName="label")
         except Exception:
             raise SearchError(
-                "Application menu button '%s' could not be found within gnome-shell!"
-                % app_name
-            )
+                "Application menu button '%s' could not be found within gnome-shell!" % app_name)
+
 
     def getApplicationMenuItem(self, item, search_by_item="Quit"):
         """
@@ -625,10 +593,8 @@ class GnomeShell:  # pragma: no cover
         reference, but also attempts to use the given item if the general reference fails.
         """
 
-        debug_log(
-            "getApplicationMenuItem(item=%s, search_by_item=%s)"
-            % (str(item), str(search_by_item))
-        )
+        debug_log("getApplicationMenuItem(item=%s, search_by_item=%s)" %
+                      (str(item), str(search_by_item)))
 
         try:
             menu_items = self.getApplicationMenuList(search_by_item)
@@ -644,16 +610,15 @@ class GnomeShell:  # pragma: no cover
 
         raise Exception("Could not find the item, did application focus change?")
 
+
     def clickApplicationMenuItem(self, app_name, item, search_by_item="Quit"):
         """
         Executes the given menu item through opening the menu first followed by a click at the
         particular item. The menu search reference 'Quit' may be customized. Also attempts to
         use the given item for reference if search fails with the default/custom one.
         """
-        debug_log(
-            "clickApplicationMenuItem(app_name=%s, item=%s, search_by_item=%s)"
-            % (str(app_name), str(item), str(search_by_item))
-        )
+        debug_log("clickApplicationMenuItem(app_name=%s, item=%s, search_by_item=%s)" %
+                  (str(app_name), str(item), str(search_by_item)))
 
         self.getApplicationMenuButton(app_name).click()
         self.getApplicationMenuItem(item, search_by_item).click()

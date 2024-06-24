@@ -1,5 +1,18 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
+#/usr/bin/python3
+"""
+Experimental dogtail changes for 1.0 release.
+Various Utilities
+"""
+
+# pylint: disable=broad-exception-caught
+# pylint: disable=wrong-import-position
+# pylint: disable=wrong-import-order
+# pylint: disable=import-error
+# pylint: disable=import-outside-toplevel
+# ruff: noqa: E402
+# ruff: noqa: E501
+
+
 from time import sleep
 import os
 import sys
@@ -8,26 +21,53 @@ import shlex
 import subprocess
 import cairo
 
-from dogtail.config import config
-from dogtail._logging import debug_log
-from dogtail._logging import debugLogger as logger
-from dogtail._logging import TimeStamp
-
 import gi
 
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk
+from gi.repository import GLib
 
-"""
-Various utilities
-"""
+# TODO To be change to dogtail.logging before release.
+from _logging import Logging
+logging_class = Logging()
+LOGGER = logging_class.logger
 
-__author__ = """
-Ed Rousseau <rousseau@redhat.com>,
-Zack Cerza <zcerza@redhat.com,
-David Malcolm <dmalcolm@redhat.com>
-"""
+from .config import read_config
+configuration = read_config()
+
+
+def do_delay(delay=None):
+    """
+    Utility function to insert a delay (with logging and a configurable default delay).
+    """
+
+    if delay is None:
+        delay = configuration["default_delay"]
+        LOGGER.info(f"Default Delay: Sleeping for '{delay}'")
+
+    if configuration["debug_sleep"]:
+        LOGGER.info(f"Debug Sleep: Sleeping for '{delay}'")
+
+    sleep(delay)
+
+
+########################################
+# Backwards compatibility definitions. #
+########################################
+def doDelay(delay=None):  # pylint: disable=invalid-name
+    """
+    Do Delay.
+    """
+    do_delay(delay=delay)
+###############################################
+# End of backwards compatibility definitions. #
+###############################################
+
+
+# TODO refactor this all.
+
+
 
 # Image magic will not work anymore? TODO remove this util function
 def screenshot(file="screenshot.png", timeStamp=True):
@@ -175,19 +215,9 @@ def run(
     return pid
 
 
-def doDelay(delay=None):
-    """
-    Utility function to insert a delay (with logging and a configurable
-    default delay)
-    """
 
-    if delay is None:
-        delay = config.defaultDelay
 
-    if config.debugSleep:
-        logger.log("Do delay. Sleeping for %f" % delay)
 
-    sleep(delay)
 
 
 class Highlight(Gtk.Window):  # pragma: no cover

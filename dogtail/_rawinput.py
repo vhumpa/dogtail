@@ -456,19 +456,26 @@ def drag_with_trajectory_global(fromXY, toXY, button=1):  # pylint: disable=inva
     LOGGER.debug(f"Dragging with trajectory from '{fromXY}' to '{toXY}', button '{button}'.")
 
     if SESSION_TYPE == "wayland":
-        (x, y) = fromXY
+        (from_x, from_y) = fromXY
         ponytail_check_connection(window_id="")
 
-        ponytail.generateMotionEvent(x, y)
+        ponytail.generateMotionEvent(from_x, from_y)
         do_delay(configuration["default_delay"])
 
         ponytail.generateButtonPress(1)
         do_delay(configuration["default_delay"])
 
-        (x, y) = toXY
-        absoluteMotionWithTrajectory(fromXY[0], fromXY[1], x, y, mouseDelay=0.01, window_id="")
+        (to_x, to_y) = toXY
+        absolute_motion_with_trajectory(
+            from_x,
+            from_y,
+            to_x,
+            to_y,
+            mouse_delay=0.01,
+            window_id=""
+        )
 
-        ponytail.generateMotionEvent(x, y)
+        ponytail.generateMotionEvent(to_x, to_y)
         do_delay(configuration["default_delay"])
 
         ponytail.generateButtonRelease(1)

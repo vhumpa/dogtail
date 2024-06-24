@@ -15,7 +15,11 @@ import gi
 gi.require_version("Atspi", "2.0")
 from gi.repository import Atspi
 
-from qecore.logger import Logging
+from types import LambdaType
+from _simple_predicate import SimplePredicate
+
+# TODO To be change to dogtail.logging before release.
+from _logging import Logging
 logging_class = Logging()
 LOGGER = logging_class.logger
 
@@ -213,10 +217,21 @@ class AccessibleObject:
 
 
     @staticmethod
-    def find_all_descendants(acc_obj, predicate):
+    def find_all_descendants(acc_obj, given_predicate):
         """
         Returns all descendants that match a predicate.
         """
+
+        # User is using lambdas.
+        if isinstance(given_predicate, LambdaType):
+            predicate = given_predicate
+        # User is using a SimplePredicate.
+        elif isinstance(given_predicate, SimplePredicate):
+            predicate = given_predicate.satisfied_by_node
+        # Unknown/unsupported way to compare nodes.
+        else:
+            LOGGER.info("Unknown/unsupported way to compare nodes.")
+            return None
 
         matches = []
         AccessibleObject._find_all_descendants(acc_obj, predicate, matches)
@@ -224,15 +239,26 @@ class AccessibleObject:
 
 
     @staticmethod
-    def find_descendant(obj, pred, depth_first=True):
+    def find_descendant(acc_obj, given_predicate, depth_first=True):
         """
         Find a single descendant node satisfying the predicate.
         """
 
+        # User is using lambdas.
+        if isinstance(given_predicate, LambdaType):
+            predicate = given_predicate
+        # User is using a SimplePredicate.
+        elif isinstance(given_predicate, SimplePredicate):
+            predicate = given_predicate.satisfied_by_node
+        # Unknown/unsupported way to compare nodes.
+        else:
+            LOGGER.info("Unknown/unsupported way to compare nodes.")
+            return None
+
         if depth_first:
-            success_match = AccessibleObject._find_descendant_depth_first(obj, pred)
+            success_match = AccessibleObject._find_descendant_depth_first(acc_obj, predicate)
         else:  # breadth_first
-            success_match = AccessibleObject._find_descendant_breadth_first(obj, pred)
+            success_match = AccessibleObject._find_descendant_breadth_first(acc_obj, predicate)
 
         return success_match
 

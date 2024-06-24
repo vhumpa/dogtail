@@ -30,7 +30,8 @@ from time import sleep
 from _constants import SESSION_TYPE, MOUSE_BUTTON_EVENTS
 
 from _ponytail_connection import PonytailWrapper, ponytail_check_connection
-from qecore.logger import Logging  # noqa: E402
+# TODO To be change to dogtail.logging before release.
+from _logging import Logging
 logging_class = Logging()
 LOGGER = logging_class.logger
 
@@ -49,7 +50,6 @@ def update_coords(coords):
 
 
 # Coordinate check for a negative value.
-# Do this better
 def check_coordinates(x, y):
     """
     Simple coordination check for positive coordinates.
@@ -62,7 +62,6 @@ def check_coordinates(x, y):
     # Its not unusual for coordinate to be around -10 to -30.
     if x < -50 or y < -50:
         raise ValueError(message)
-
 
 
 def click(x, y, button=1, check=True, window_id=None):
@@ -84,7 +83,7 @@ def click(x, y, button=1, check=True, window_id=None):
     LOGGER.debug(f"Mouse button '{button}' click at ({x}, {y})")
 
     if SESSION_TYPE == "x11":
-        Atspi.generate_mouse_event (x, y, name=MOUSE_BUTTON_EVENTS[button]["click"])
+        Atspi.generate_mouse_event(x, y, name=MOUSE_BUTTON_EVENTS[button]["click"])
     else:
         ponytail_check_connection(window_id)
         ponytail.generateButtonEvent(button, x, y)
@@ -112,7 +111,7 @@ def point(x, y, check=True, window_id=None):
     LOGGER.debug(f"Mouse over at ({x}, {y})")
 
     if SESSION_TYPE == "x11":
-        Atspi.generate_mouse_event (x, y, name="abs")
+        Atspi.generate_mouse_event(x, y, name="abs")
     else:
         ponytail_check_connection(window_id)
         ponytail.generateMotionEvent(x, y)
@@ -141,7 +140,7 @@ def double_click(x, y, button=1, check=True, window_id=None):
     LOGGER.debug(f"Mouse button '{button}' double-click at ({x}, {y})")
 
     if SESSION_TYPE == "x11":
-        Atspi.generate_mouse_event (x, y, name=MOUSE_BUTTON_EVENTS[button]["double-click"])
+        Atspi.generate_mouse_event(x, y, name=MOUSE_BUTTON_EVENTS[button]["double-click"])
     else:
         ponytail_check_connection(window_id)
         ponytail.generateButtonEvent(button, x, y)

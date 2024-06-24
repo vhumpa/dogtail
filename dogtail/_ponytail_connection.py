@@ -4,6 +4,7 @@ Experimental dogtail changes for 1.0 release. Ponytail handling.
 """
 
 # pylint: disable=broad-exception-caught
+# pylint: disable=import-outside-toplevel
 # pylint: disable=wrong-import-position
 # pylint: disable=wrong-import-order
 # pylint: disable=import-error
@@ -13,7 +14,8 @@ from time import sleep
 
 from _constants import SESSION_TYPE
 
-from qecore.logger import Logging  # noqa: E402
+# TODO To be change to dogtail.logging before release.
+from _logging import Logging
 logging_class = Logging()
 LOGGER = logging_class.logger
 

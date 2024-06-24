@@ -9,7 +9,8 @@ Experimental dogtail changes for 1.0 release. Simple Predicate
 # pylint: disable=import-error
 # ruff: noqa: E402
 
-from qecore.logger import Logging  # noqa: E402
+# TODO To be change to dogtail.logging before release.
+from _logging import Logging
 logging_class = Logging()
 LOGGER = logging_class.logger
 

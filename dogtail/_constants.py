@@ -5,7 +5,9 @@ Experimental dogtail changes for 1.0 release. Constants.
 
 import os
 
-# Maybe do a configs as global variables?
+# TODO Maybe do a configs as global variables?
+# do it in .ini files like formatter?
+# yaml files?
 
 SESSION_TYPE = "x11"
 if "XDG_SESSION_TYPE" in os.environ and "wayland" in os.environ["XDG_SESSION_TYPE"]:

@@ -13,7 +13,6 @@ Experimental dogtail changes for 1.0 release.
 
 
 import gi
-from types import LambdaType
 from time import sleep
 
 gi.require_version("Atspi", "2.0")
@@ -23,7 +22,8 @@ import warnings
 
 warnings.filterwarnings("ignore", "g_object_unref")
 
-from qecore.logger import Logging
+# TODO To be change to dogtail.logging before release.
+from _logging import Logging
 logging_class = Logging()
 LOGGER = logging_class.logger
 
@@ -36,6 +36,7 @@ from accessible_selection import AccessibleSelection
 from accessible_state import AccessibleState
 from accessible_text import AccessibleText
 from accessible_utilities import AccessibleUtilities
+from accessible_value import AccessibleValue
 
 
 from _constants import SESSION_TYPE
@@ -56,6 +57,7 @@ class DogtailAPI:
 
     ponytail_wrapper = PonytailWrapper()
     ponytail = ponytail_wrapper.get_ponytail_instance()
+
 
     @property
     def get_toolkit(self):
@@ -407,11 +409,8 @@ class DogtailAPI:
         Gets the current value for an Atspi.Value
         """
 
-        if not AccessibleObject.is_value(self):
-            LOGGER.info("Accessible object does not have a Value interface.")
-            return False
+        return AccessibleValue.get_current_value(self)
 
-        return Atspi.Value.get_current_value(self)
 
     @value.setter
     def value(self, new_value):
@@ -419,11 +418,7 @@ class DogtailAPI:
         Gets the current value for an Atspi.Value
         """
 
-        if not AccessibleObject.is_value(self):
-            LOGGER.info("Accessible object does not have a Value interface.")
-            return False
-
-        return Atspi.Value.set_current_value(new_value)
+        return AccessibleValue.set_current_value(self, new_value)
 
 
     @property
@@ -432,12 +427,7 @@ class DogtailAPI:
         Gets the minimum allowed value for an Atspi.Value.
         """
 
-        if not AccessibleObject.is_value(self):
-            LOGGER.info("Accessible object does not have a Value interface.")
-            return False
-
-        return Atspi.Value.get_minimum_value()
-
+        return AccessibleValue.get_minimum_value(self)
 
     @property
     def max_value(self):
@@ -445,11 +435,7 @@ class DogtailAPI:
         Gets the maximum allowed value for an Atspi.Value.
         """
 
-        if not AccessibleObject.is_value(self):
-            LOGGER.info("Accessible object does not have a Value interface.")
-            return False
-
-        return Atspi.Value.get_maximum_value()
+        return AccessibleValue.get_maximum_value(self)
 
 
     @property
@@ -458,21 +444,25 @@ class DogtailAPI:
         Gets the minimum increment by which an Atspi.Value can be adjusted.
         """
 
-        if not AccessibleObject.is_value(self):
-            LOGGER.info("Accessible object does not have a Value interface.")
-            return False
-
-        return Atspi.Value.get_minimum_increment()
+        return AccessibleValue.get_minimum_increment(self)
 
 
-    def child(self, name=None, role_name=None, description=None, label=None):
+    def child(self, name=None, role_name=None, description=None, label=None, **kwargs):
         """
         Find a single child satisfying the name role_name or description.
         """
 
+        # === Backward compatibility for 'roleName' usage ===
+        using_role_name = role_name
+
+        for key, val in kwargs.items():
+            if "roleName" in str(key).lower():
+                using_role_name = val
+        # =================================================
+
         predicate = SimplePredicate(
             name=name,
-            role_name=role_name,
+            role_name=using_role_name,
             description=description,
             label=label
         )
@@ -480,25 +470,14 @@ class DogtailAPI:
         return AccessibleObject.find_descendant(self, predicate.satisfied_by_node)
 
 
-    def find_child(self, pred):
+    def find_child(self, predicate):
         """
         Find a single child satisfying th predicate
         """
 
-        # User is using lambdas.
-        if isinstance(pred, LambdaType):
-            predicate = pred
-        # User is using a SimplePredicate.
-        elif isinstance(pred, SimplePredicate):
-            predicate = pred.satisfied_by_node
-        # Unknown/unsupported way to compare nodes.
-        else:
-            LOGGER.info("Unknown/unsupported way to compare nodes.")
-            return None
-
         result = None
 
-        for _ in range(50): # CHANGE TO CONFIG NUMBER
+        for _ in range(50): # CHANGE TO CONFIG NUMBER TODO
             result = AccessibleObject.find_descendant(self, predicate)
 
             if result:
@@ -507,21 +486,10 @@ class DogtailAPI:
         return result
 
 
-    def find_children(self, pred):
+    def find_children(self, predicate):
         """
         Find a all children satisfying th predicate
         """
-
-        # User is using lambdas.
-        if isinstance(pred, LambdaType):
-            predicate = pred
-        # User is using a SimplePredicate.
-        elif isinstance(pred, SimplePredicate):
-            predicate = pred.satisfied_by_node
-        # Unknown/unsupported way to compare nodes.
-        else:
-            LOGGER.info("Unknown/unsupported way to compare nodes.")
-            return None
 
         return AccessibleObject.find_all_descendants(self, predicate)
 
@@ -675,6 +643,23 @@ class DogtailAPI:
         return True
 
 
+    def application(self, application_name):
+        """
+        Gets an application by name, returning an Application instance or raising an
+        exception.
+        """
+
+        return AccessibleRoot.application(application_name)
+
+
+    def applications(self):
+        """
+        Get all applications.
+        """
+
+        return AccessibleRoot.applications()
+
+
     ########################################
     # Backwards compatibility definitions. #
     ########################################
@@ -749,11 +734,9 @@ class DogtailAPI:
         """
 
         return self.double_click(button=button)
-
     ###############################################
     # End of backwards compatibility definitions. #
     ###############################################
-
 
 
     def __len__(self):
@@ -789,10 +772,6 @@ class DogtailAPI:
 
 Atspi.Accessible.__bases__ = (
     DogtailAPI,
-    AccessibleRoot,
-    AccessibleActions,
-    AccessibleObject,
-    AccessibleUtilities,
 ) + Atspi.Accessible.__bases__
 
 

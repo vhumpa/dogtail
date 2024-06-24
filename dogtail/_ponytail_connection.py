@@ -10,9 +10,9 @@ Experimental dogtail changes for 1.0 release. Ponytail handling.
 # pylint: disable=import-error
 # ruff: noqa: E402
 
-from time import sleep
+import os
 
-from _constants import SESSION_TYPE
+from time import sleep
 
 # TODO To be change to dogtail.logging before release.
 from _logging import Logging
@@ -53,9 +53,16 @@ class PonytailWrapper(metaclass=Singleton):
     __ponytail = None
     __already_initiated = False
 
+    # Keep session as a variable.
+    session_type = "x11"
+    if "XDG_SESSION_TYPE" in os.environ and "wayland" in os.environ["XDG_SESSION_TYPE"]:
+        os.system("gsettings set org.gnome.shell introspect true")
+        session_type = "wayland"
+
+
     def __init__(self):
         # Only makes sense when running under Wayland.
-        if SESSION_TYPE != "wayland":
+        if self.session_type != "wayland":
             pass
 
         # Do not initiate it if already done.

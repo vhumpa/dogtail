@@ -11,6 +11,7 @@ Experimental dogtail changes for 1.0 release.
 # ruff: noqa: E402
 # ruff: noqa: E501
 
+import os
 
 import gi
 from time import sleep
@@ -38,8 +39,6 @@ from accessible_text import AccessibleText
 from accessible_utilities import AccessibleUtilities
 from accessible_value import AccessibleValue
 
-
-from _constants import SESSION_TYPE
 from _simple_predicate import SimplePredicate
 from _ponytail_connection import PonytailWrapper
 from _rawinput import click, point, doubleClick
@@ -62,6 +61,12 @@ class DogtailAPI(object):
     configuration = read_config()
 
     event_listeners = {}
+
+    # Keep session as a variable.
+    session_type = "x11"
+    if "XDG_SESSION_TYPE" in os.environ and "wayland" in os.environ["XDG_SESSION_TYPE"]:
+        os.system("gsettings set org.gnome.shell introspect true")
+        session_type = "wayland"
 
     # I do not understand this well enough. TODO
     def register_event(self, client, *names):
@@ -124,7 +129,7 @@ class DogtailAPI(object):
         Return window id of a node.
         """
 
-        if SESSION_TYPE == "x11":
+        if self.session_type == "x11":
             return None
 
         if self.__window_id is None:
@@ -197,7 +202,7 @@ class DogtailAPI(object):
         Check if window is focused.
         """
 
-        if SESSION_TYPE != "wayland":
+        if self.session_type != "wayland":
             LOGGER.info("Ponytail is not used in non Wayland session.")
             return False
 

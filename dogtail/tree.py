@@ -46,7 +46,7 @@ from _rawinput import click, point, doubleClick
 from config import read_config
 
 
-class DogtailAPI:
+class DogtailAPI(object):
     """
     Main dogtail API definition.
     """
@@ -60,6 +60,53 @@ class DogtailAPI:
     ponytail = ponytail_wrapper.get_ponytail_instance()
 
     configuration = read_config()
+
+    event_listeners = {}
+
+    # I do not understand this well enough. TODO
+    def register_event(self, client, *names):
+        """
+        Register an event listener.
+        """
+
+        try:
+            listener = self.event_listeners[client]
+        except Exception:
+            self.event_listeners[client] = Atspi.EventListener.new(self._dummy_listener)
+            listener = self.event_listeners[client]
+
+        for name in names:
+            # If Newton do X.
+                # Newton.event_listener.register...
+            # else: Do Atspi
+            Atspi.EventListener.register(listener, name)
+
+
+    # I do not understand this well enough. TODO
+    def deregister_event(self, client, *names):
+        """
+        Register an event listener.
+        """
+
+        try:
+            listener = self.event_listeners[client]
+        except Exception:
+            return
+
+        for name in names:
+            # If Newton do X.
+                # Newton.event_listener.deregister...
+            # else: Do Atspi
+            Atspi.EventListener.deregister(listener, name)
+
+
+    # I do not understand this well enough. TODO
+    def _dummy_listener(self):
+        """
+        I do not understand this well enough yet.
+        """
+
+        LOGGER.info("Dummy listener.")
 
 
     @property
@@ -777,10 +824,26 @@ class DogtailAPI:
 
 Atspi.Accessible.__bases__ = (
     DogtailAPI,
+    AccessibleActions,
+    AccessibleComponent,
+    AccessibleObject,
+    AccessibleRoot,
+    AccessibleSelection,
+    AccessibleState,
+    AccessibleText,
+    AccessibleUtilities,
+    AccessibleValue,
 ) + Atspi.Accessible.__bases__
 
 
+# Load desktop to the root variable.
 try:
     root = AccessibleUtilities.get_desktop()
 except Exception:  # pragma: no cover
     LOGGER.info("Error: Accessible desktop is not visible. Is accessibility enabled?")
+
+
+# The 'children' field on desktop is inherited Field from GObject.Object
+# We are recoding this logic in DogtailAPI so that the Object
+# in 'children' is Accessible instead of default [object].
+del Atspi.Accessible.children

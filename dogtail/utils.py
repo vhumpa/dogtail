@@ -29,7 +29,7 @@ Zack Cerza <zcerza@redhat.com,
 David Malcolm <dmalcolm@redhat.com>
 """
 
-
+# Image magic will not work anymore? TODO remove this util function
 def screenshot(file="screenshot.png", timeStamp=True):
     """
     This function wraps the ImageMagick import command to take a screenshot.
@@ -96,7 +96,7 @@ def screenshot(file="screenshot.png", timeStamp=True):
 
     return path
 
-
+# TODO if leaving it here, refactor it.
 def run(
     string,
     timeout=config.runTimeout,

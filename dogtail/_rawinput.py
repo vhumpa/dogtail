@@ -13,7 +13,7 @@ Experimental dogtail changes for 1.0 release. raw input.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-# TODO make this better that config?
+import os
 
 import gi
 
@@ -27,11 +27,10 @@ from gi.repository import Atspi
 import warnings
 warnings.filterwarnings("ignore", "g_object_unref")
 
-
-from _constants import SESSION_TYPE, MOUSE_BUTTON_EVENTS
 from .utils import do_delay
 
 from _ponytail_connection import PonytailWrapper, ponytail_check_connection
+
 # TODO To be change to dogtail.logging before release.
 from _logging import Logging
 logging_class = Logging()
@@ -42,7 +41,10 @@ from .config import read_config
 configuration = read_config()
 
 
-# TODO Complete rewrite and improvement.
+SESSION_TYPE = "x11"
+if "XDG_SESSION_TYPE" in os.environ and "wayland" in os.environ["XDG_SESSION_TYPE"]:
+    os.system("gsettings set org.gnome.shell introspect true")
+    SESSION_TYPE = "wayland"
 
 
 # There is a better way to do this since I am already rewriting it.
@@ -97,7 +99,7 @@ def click(x, y, button=1, check=True, window_id=None):
 
     if SESSION_TYPE == "x11":
         # TODO Newton if condition.
-        Atspi.generate_mouse_event(_x, _y, name=MOUSE_BUTTON_EVENTS[button]["click"])
+        Atspi.generate_mouse_event(_x, _y, name=f"b{button}c")
     else:
         ponytail_check_connection(window_id)
         ponytail.generateButtonEvent(button, _x, _y)
@@ -153,7 +155,7 @@ def double_click(x, y, button=1, check=True, window_id=None):
 
     if SESSION_TYPE == "x11":
         # TODO Newton if condition.
-        Atspi.generate_mouse_event(x, y, name=MOUSE_BUTTON_EVENTS[button]["double-click"])
+        Atspi.generate_mouse_event(x, y, name=f"b{button}d")
     else:
         ponytail_check_connection(window_id)
         ponytail.generateButtonEvent(button, _x, _y)
@@ -589,6 +591,7 @@ def dragWithTrajectoryGlobal(fromXY, toXY, button=1):  # pylint: disable=invalid
 
 
 
+# TODO Complete rewrite and improvement.
 # TODO continue here
 
 

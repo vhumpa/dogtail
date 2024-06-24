@@ -11,6 +11,8 @@ Experimental dogtail changes for 1.0 release. raw input.
 
 
 from __future__ import absolute_import, division, print_function, unicode_literals
+
+# TODO make this better that config?
 from dogtail.config import config
 
 import gi
@@ -120,7 +122,6 @@ def point(x, y, check=True, window_id=None):
     sleep(0.5)
 
 
-
 def double_click(x, y, button=1, check=True, window_id=None):
     """
     Synthesize a mouse button double-click at (x,y)
@@ -160,9 +161,18 @@ def double_click(x, y, button=1, check=True, window_id=None):
     sleep(0.5)
 
 
+########################################
+# Backwards compatibility definitions. #
+########################################
+def doubleClick(x, y, button=1, check=True, window_id=None):  # pylint: disable=invalid-name
+    """
+    Synthesize a mouse button double-click at (x,y)
+    """
 
-
-
+    double_click(x=x, y=y, button=button, check=check, window_id=window_id)
+###############################################
+# End of backwards compatibility definitions. #
+###############################################
 
 
 

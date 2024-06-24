@@ -12,7 +12,8 @@ class AccessibleRoot:
     Root class used to get data from Accessible.
     """
 
-    def applications(self):
+    @staticmethod
+    def applications():
         """
         Get all applications.
         """
@@ -20,7 +21,8 @@ class AccessibleRoot:
         return [x.get_name() for x in AccessibleUtilities.get_all_applications()]
 
 
-    def application(self, application_name):
+    @staticmethod
+    def application(application_name):
         """
         Gets an application by name, returning an Application instance or raising an
         exception.

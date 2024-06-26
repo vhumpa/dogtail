@@ -31,9 +31,9 @@ from gi.repository import GLib
 # TODO To be change to dogtail.logging before release.
 from _logging import Logging
 logging_class = Logging()
-LOGGER = logging_class.logger
+LOGGING = logging_class.logger
 
-from .config import read_config
+from config import read_config
 configuration = read_config()
 
 
@@ -44,10 +44,10 @@ def do_delay(delay=None):
 
     if delay is None:
         delay = configuration["default_delay"]
-        LOGGER.info(f"Default Delay: Sleeping for '{delay}'")
+        LOGGING.info(f"Default Delay: Sleeping for '{delay}'")
 
     if configuration["debug_sleep"]:
-        LOGGER.info(f"Debug Sleep: Sleeping for '{delay}'")
+        LOGGING.info(f"Debug Sleep: Sleeping for '{delay}'")
 
     sleep(delay)
 
@@ -86,7 +86,7 @@ def screenshot(file="screenshot.png", timeStamp=True):
     if not isinstance(timeStamp, bool):
         raise TypeError("timeStampt must be True or False")
 
-    assert os.path.isdir(config.scratchDir), LOGGER.info(
+    assert os.path.isdir(config.scratchDir), LOGGING.info(
         "Directory for screenshot not found."
     )
 

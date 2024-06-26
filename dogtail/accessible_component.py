@@ -12,23 +12,26 @@ Experimental dogtail changes for 1.0 release.
 # ruff: noqa: E402
 # ruff: noqa: E501
 
+import os
 import gi
-
 gi.require_version("Atspi", "2.0")
 from gi.repository import Atspi
 
 # TODO To be change to dogtail.logging before release.
 from _logging import Logging
 logging_class = Logging()
-LOGGER = logging_class.logger
+LOGGING = logging_class.logger
 
 from accessible_object import AccessibleObject
 
-from _constants import SESSION_TYPE
+SESSION_TYPE = "x11"
+if "XDG_SESSION_TYPE" in os.environ and "wayland" in os.environ["XDG_SESSION_TYPE"]:
+    SESSION_TYPE = "wayland"
 
 class AccessibleComponent:
     """
-    Root class used to get data from Accessible.
+    Component class.
+    Heavily inspired by Orca's classes.
     """
 
     @staticmethod
@@ -38,7 +41,7 @@ class AccessibleComponent:
         """
 
         if not AccessibleObject.is_component(acc_object):
-            LOGGER.info("Accessible object does not have a Component interface.")
+            LOGGING.info("Accessible object does not have a Component interface.")
             return False
 
         try:
@@ -47,7 +50,7 @@ class AccessibleComponent:
 
             return Atspi.Component.grab_focus(acc_object)
         except Exception as error:
-            LOGGER.info(f"Exception when grabbing focus: '{error}'")
+            LOGGING.info(f"Exception when grabbing focus: '{error}'")
             return False
 
 
@@ -84,7 +87,7 @@ class AccessibleComponent:
             return (acc_rect.x, acc_rect.y, acc_rect.width, acc_rect.height)
 
         except Exception as error:
-            LOGGER.info(f"Exception when getting position or size: '{error}'")
+            LOGGING.info(f"Exception when getting position or size: '{error}'")
             return None
 
     @staticmethod
@@ -94,7 +97,7 @@ class AccessibleComponent:
         """
 
         if not AccessibleObject.is_component(acc_object):
-            LOGGER.info("Accessible object does not have a Component interface.")
+            LOGGING.info("Accessible object does not have a Component interface.")
             return (-1, -1)
 
 
@@ -124,7 +127,7 @@ class AccessibleComponent:
         """
 
         if not AccessibleObject.is_component(acc_object):
-            LOGGER.info("Accessible object does not have a Component interface.")
+            LOGGING.info("Accessible object does not have a Component interface.")
             return (-1, -1)
 
         # Atspi.CoordType.SCREEN = 0
@@ -147,7 +150,7 @@ class AccessibleComponent:
             fullscreen_offset = (0, 0)  # No offset fullscreen, shadows or not!
             node = acc_object  # Assuming 'acc_object' is the current node
             try:
-                from dogtail.utils import get_screen_resolution
+                from dogtail._utils import get_screen_resolution
                 screen_width, _ = get_screen_resolution()
                 while node:
                     if node.role_name == "frame":
@@ -168,7 +171,7 @@ class AccessibleComponent:
                 else:
                     position = Atspi.Component.get_position(acc_object, Atspi.CoordType.WINDOW)
 
-                from dogtail.utils import get_current_x_window_position
+                from dogtail._utils import get_current_x_window_position
                 base_x, base_y = get_current_x_window_position()
                 # Add both gtk4_offset and the current x window position
                 # Inserting values in init for point has been deprecated and ignored.

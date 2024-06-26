@@ -16,7 +16,7 @@ from gi.repository import Atspi
 # TODO To be change to dogtail.logging before release.
 from _logging import Logging
 logging_class = Logging()
-LOGGER = logging_class.logger
+LOGGING = logging_class.logger
 
 
 from accessible_object import AccessibleObject
@@ -24,7 +24,7 @@ from accessible_object import AccessibleObject
 
 class AccessibleSelection:
     """
-    Utility class for Atspi.Selection.
+    Selection class.
     Heavily inspired by Orca's classes.
     """
 
@@ -35,7 +35,7 @@ class AccessibleSelection:
         """
 
         if not AccessibleObject.is_selection(acc_object):
-            LOGGER.info("This object does not have Atspi.Selection interface.")
+            LOGGING.info("This object does not have Atspi.Selection interface.")
 
         if AccessibleObject.is_newton(acc_object):
             acc_object.select_all()
@@ -50,7 +50,7 @@ class AccessibleSelection:
         """
 
         if not AccessibleObject.is_selection(acc_object):
-            LOGGER.info("This object does not have Atspi.Selection interface.")
+            LOGGING.info("This object does not have Atspi.Selection interface.")
 
         if AccessibleObject.is_newton(acc_object):
             acc_object.clear_selection()
@@ -65,7 +65,7 @@ class AccessibleSelection:
         """
 
         if not AccessibleObject.is_selection(acc_object):
-            LOGGER.info("This object does not have Atspi.Selection interface.")
+            LOGGING.info("This object does not have Atspi.Selection interface.")
 
         parent = AccessibleObject.get_parent_checked(acc_object)
 
@@ -82,7 +82,7 @@ class AccessibleSelection:
         """
 
         if not AccessibleObject.is_selection(acc_object):
-            LOGGER.info("This object does not have Atspi.Selection interface.")
+            LOGGING.info("This object does not have Atspi.Selection interface.")
 
         parent = AccessibleObject.get_parent_checked(acc_object)
 

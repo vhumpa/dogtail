@@ -16,7 +16,7 @@ from gi.repository import Atspi
 # TODO To be change to dogtail.logging before release.
 from _logging import Logging
 logging_class = Logging()
-LOGGER = logging_class.logger
+LOGGING = logging_class.logger
 
 
 from accessible_object import AccessibleObject
@@ -24,8 +24,8 @@ from accessible_object import AccessibleObject
 
 class AccessibleValue:
     """
-    Utility class.
-    Heavily inspired by Orca's AXUtilities.
+    Value class.
+    Heavily inspired by Orca's classes.
     """
 
     @staticmethod
@@ -35,11 +35,11 @@ class AccessibleValue:
         """
 
         if not AccessibleObject.is_valid(acc_object):
-            LOGGER.info("Object is not valid Accessible.")
+            LOGGING.info("Object is not valid Accessible.")
             return False
 
         if not AccessibleObject.is_value(acc_object):
-            LOGGER.info("Accessible object does not have a Value interface.")
+            LOGGING.info("Accessible object does not have a Value interface.")
             return False
 
         if AccessibleObject.is_newton(acc_object):
@@ -55,11 +55,11 @@ class AccessibleValue:
         """
 
         if not AccessibleObject.is_valid(acc_object):
-            LOGGER.info("Object is not valid Accessible.")
+            LOGGING.info("Object is not valid Accessible.")
             return False
 
         if not AccessibleObject.is_value(acc_object):
-            LOGGER.info("Accessible object does not have a Value interface.")
+            LOGGING.info("Accessible object does not have a Value interface.")
             return False
 
         if AccessibleObject.is_newton(acc_object):
@@ -75,11 +75,11 @@ class AccessibleValue:
         """
 
         if not AccessibleObject.is_valid(acc_object):
-            LOGGER.info("Object is not valid Accessible.")
+            LOGGING.info("Object is not valid Accessible.")
             return False
 
         if not AccessibleObject.is_value(acc_object):
-            LOGGER.info("Accessible object does not have a Value interface.")
+            LOGGING.info("Accessible object does not have a Value interface.")
             return False
 
         if AccessibleObject.is_newton(acc_object):
@@ -95,11 +95,11 @@ class AccessibleValue:
         """
 
         if not AccessibleObject.is_valid(acc_object):
-            LOGGER.info("Object is not valid Accessible.")
+            LOGGING.info("Object is not valid Accessible.")
             return False
 
         if not AccessibleObject.is_value(acc_object):
-            LOGGER.info("Accessible object does not have a Value interface.")
+            LOGGING.info("Accessible object does not have a Value interface.")
             return False
 
         if AccessibleObject.is_newton(acc_object):
@@ -115,11 +115,11 @@ class AccessibleValue:
         """
 
         if not AccessibleObject.is_valid(acc_object):
-            LOGGER.info("Object is not valid Accessible.")
+            LOGGING.info("Object is not valid Accessible.")
             return False
 
         if not AccessibleObject.is_value(acc_object):
-            LOGGER.info("Accessible object does not have a Value interface.")
+            LOGGING.info("Accessible object does not have a Value interface.")
             return False
 
         if AccessibleObject.is_newton(acc_object):

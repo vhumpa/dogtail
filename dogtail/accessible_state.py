@@ -18,13 +18,14 @@ from gi.repository import Atspi
 # TODO To be change to dogtail.logging before release.
 from _logging import Logging
 logging_class = Logging()
-LOGGER = logging_class.logger
+LOGGING = logging_class.logger
 
 from accessible_object import AccessibleObject
 
 class AccessibleState:
     """
-    Root class used to get data from Accessible.
+    State class.
+    Heavily inspired by Orca's classes.
     """
 
     @staticmethod
@@ -34,7 +35,7 @@ class AccessibleState:
         """
 
         if not AccessibleObject.is_valid(acc_object):
-            LOGGER.info("Object is not valid Accessible.")
+            LOGGING.info("Object is not valid Accessible.")
             return False
 
         if AccessibleObject.is_newton(acc_object):
@@ -51,7 +52,7 @@ class AccessibleState:
         """
 
         if not AccessibleObject.is_valid(acc_object):
-            LOGGER.info("Object is not valid Accessible.")
+            LOGGING.info("Object is not valid Accessible.")
             return False
 
         if AccessibleObject.is_newton(acc_object):
@@ -68,7 +69,7 @@ class AccessibleState:
         Get focused state.
         """
         if not AccessibleObject.is_valid(acc_object):
-            LOGGER.info("Object is not valid Accessible.")
+            LOGGING.info("Object is not valid Accessible.")
             return False
 
         if AccessibleObject.is_newton(acc_object):
@@ -86,7 +87,7 @@ class AccessibleState:
         """
 
         if not AccessibleObject.is_valid(acc_object):
-            LOGGER.info("Object is not valid Accessible.")
+            LOGGING.info("Object is not valid Accessible.")
             return False
 
         if AccessibleObject.is_newton(acc_object):
@@ -103,7 +104,7 @@ class AccessibleState:
         """
 
         if not AccessibleObject.is_valid(acc_object):
-            LOGGER.info("Object is not valid Accessible.")
+            LOGGING.info("Object is not valid Accessible.")
             return False
 
         if AccessibleObject.is_newton(acc_object):
@@ -120,7 +121,7 @@ class AccessibleState:
         """
 
         if not AccessibleObject.is_valid(acc_object):
-            LOGGER.info("Object is not valid Accessible.")
+            LOGGING.info("Object is not valid Accessible.")
             return False
 
         if AccessibleObject.is_newton(acc_object):
@@ -137,7 +138,7 @@ class AccessibleState:
         """
 
         if not AccessibleObject.is_valid(acc_object):
-            LOGGER.info("Object is not valid Accessible.")
+            LOGGING.info("Object is not valid Accessible.")
             return False
 
         if AccessibleObject.is_newton(acc_object):
@@ -154,7 +155,7 @@ class AccessibleState:
         """
 
         if not AccessibleObject.is_valid(acc_object):
-            LOGGER.info("Object is not valid Accessible.")
+            LOGGING.info("Object is not valid Accessible.")
             return False
 
         if AccessibleObject.is_newton(acc_object):
@@ -171,7 +172,7 @@ class AccessibleState:
         """
 
         if not AccessibleObject.is_valid(acc_object):
-            LOGGER.info("Object is not valid Accessible.")
+            LOGGING.info("Object is not valid Accessible.")
             return False
 
         if AccessibleObject.is_newton(acc_object):
@@ -188,7 +189,7 @@ class AccessibleState:
         """
 
         if not AccessibleObject.is_valid(acc_object):
-            LOGGER.info("Object is not valid Accessible.")
+            LOGGING.info("Object is not valid Accessible.")
             return False
 
         if AccessibleObject.is_newton(acc_object):
@@ -205,7 +206,7 @@ class AccessibleState:
         """
 
         if not AccessibleObject.is_valid(acc_object):
-            LOGGER.info("Object is not valid Accessible.")
+            LOGGING.info("Object is not valid Accessible.")
             return False
 
         if AccessibleObject.is_newton(acc_object):
@@ -222,7 +223,7 @@ class AccessibleState:
         """
 
         if not AccessibleObject.is_valid(acc_object):
-            LOGGER.info("Object is not valid Accessible.")
+            LOGGING.info("Object is not valid Accessible.")
             return False
 
         if AccessibleObject.is_newton(acc_object):
@@ -239,7 +240,7 @@ class AccessibleState:
         """
 
         if not AccessibleObject.is_valid(acc_object):
-            LOGGER.info("Object is not valid Accessible.")
+            LOGGING.info("Object is not valid Accessible.")
             return False
 
         if AccessibleObject.is_newton(acc_object):
@@ -256,7 +257,7 @@ class AccessibleState:
         """
 
         if not AccessibleObject.is_valid(acc_object):
-            LOGGER.info("Object is not valid Accessible.")
+            LOGGING.info("Object is not valid Accessible.")
             return False
 
         if AccessibleObject.is_newton(acc_object):
@@ -273,7 +274,7 @@ class AccessibleState:
         """
 
         if not AccessibleObject.is_valid(acc_object):
-            LOGGER.info("Object is not valid Accessible.")
+            LOGGING.info("Object is not valid Accessible.")
             return False
 
         if AccessibleObject.is_newton(acc_object):

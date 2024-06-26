@@ -21,12 +21,12 @@ from _simple_predicate import SimplePredicate
 # TODO To be change to dogtail.logging before release.
 from _logging import Logging
 logging_class = Logging()
-LOGGER = logging_class.logger
+LOGGING = logging_class.logger
 
 
 class AccessibleObject:
     """
-    Utility class for obtaining information about accessible objects.
+    Utility class for obtaining information about Accessible Objects.
     Heavily inspired by Orca's AXObject.
     """
 
@@ -166,11 +166,11 @@ class AccessibleObject:
                 child = Atspi.Accessible.get_child_at_index(acc_object, index)
 
         except Exception as error:
-            LOGGER.info(f"Exception when getting child at index: '{error}'")
+            LOGGING.info(f"Exception when getting child at index: '{error}'")
             return None
 
         if child == acc_object:
-            LOGGER.info(f"Object '{acc_object}' claims to be its own child.")
+            LOGGING.info(f"Object '{acc_object}' claims to be its own child.")
             return None
 
         return child
@@ -192,7 +192,7 @@ class AccessibleObject:
                 count = Atspi.Accessible.get_child_count(acc_object)
 
         except Exception as error:
-            LOGGER.info(f"Exception when getting child count: '{error}'")
+            LOGGING.info(f"Exception when getting child count: '{error}'")
             return 0
 
         return count
@@ -230,7 +230,7 @@ class AccessibleObject:
             predicate = given_predicate.satisfied_by_node
         # Unknown/unsupported way to compare nodes.
         else:
-            LOGGER.info("Unknown/unsupported way to compare nodes.")
+            LOGGING.info("Unknown/unsupported way to compare nodes.")
             return None
 
         matches = []
@@ -252,7 +252,7 @@ class AccessibleObject:
             predicate = given_predicate.satisfied_by_node
         # Unknown/unsupported way to compare nodes.
         else:
-            LOGGER.info("Unknown/unsupported way to compare nodes.")
+            LOGGING.info("Unknown/unsupported way to compare nodes.")
             return None
 
         if depth_first:
@@ -326,7 +326,7 @@ class AccessibleObject:
         parent = AccessibleObject.get_parent_checked(acc_object)
         while parent:
             if parent in objects:
-                LOGGER.info(f"Circular tree suspected, {parent} was found already.")
+                LOGGING.info(f"Circular tree suspected, {parent} was found already.")
                 return None
 
             if pred(parent):
@@ -379,7 +379,7 @@ class AccessibleObject:
                 process_id = Atspi.Accessible.get_process_id(acc_object)
 
         except Exception as error:
-            LOGGER.info(f"Exception when getting process id: '{error}'")
+            LOGGING.info(f"Exception when getting process id: '{error}'")
             return -1
 
         return process_id
@@ -415,7 +415,6 @@ class AccessibleObject:
         return Atspi.Accessible.get_role(acc_object)
 
 
-
     @staticmethod
     def get_role_name(acc_object):
         """
@@ -431,7 +430,6 @@ class AccessibleObject:
         return Atspi.Accessible.get_role_name(acc_object)
 
 
-
     @staticmethod
     def get_description(acc_object):
         """
@@ -445,7 +443,6 @@ class AccessibleObject:
             return acc_object.get_description()
 
         return Atspi.Accessible.get_description(acc_object)
-
 
 
     @staticmethod
@@ -475,18 +472,18 @@ class AccessibleObject:
         # Default value if object has no containing parent or exception happened.
         final_index = -1
 
-        # Not working as expected sometimes. Working around it.
         if AccessibleObject.is_newton(acc_object):
             final_index = acc_object.get_index_in_parent()
         else:
             final_index = Atspi.Accessible.get_index_in_parent(acc_object)
 
+        # Not working as expected sometimes. Working around it.
         if final_index == -1:
-            LOGGER.info("Error in get_index_in_parent. Attempting to work around.")
+            LOGGING.info("Error in get_index_in_parent. Attempting to work around.")
 
             for index, child in enumerate(acc_object.parent.children):
                 if child.parent.get_child_at_index(index) == acc_object:
-                    LOGGER.info(f"Success, index was: '{index}'")
+                    LOGGING.info(f"Success, index was: '{index}'")
                     return index
 
         return final_index

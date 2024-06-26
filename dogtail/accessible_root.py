@@ -9,7 +9,8 @@ from accessible_utilities import AccessibleUtilities
 
 class AccessibleRoot:
     """
-    Root class used to get data from Accessible.
+    Root class.
+    Heavily inspired by Orca's classes.
     """
 
     @staticmethod

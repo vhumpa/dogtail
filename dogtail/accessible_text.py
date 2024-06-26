@@ -17,13 +17,14 @@ from gi.repository import Atspi
 # TODO To be change to dogtail.logging before release.
 from _logging import Logging
 logging_class = Logging()
-LOGGER = logging_class.logger
+LOGGING = logging_class.logger
 
 from accessible_object import AccessibleObject
 
 class AccessibleText:
     """
-    Root class used to get data from Accessible.
+    Text class.
+    Heavily inspired by Orca's classes.
     """
 
     @staticmethod
@@ -36,7 +37,7 @@ class AccessibleText:
             return None
 
         if not AccessibleObject.is_text(acc_object):
-            LOGGER.info("This object does not have Atspi.Text interface.")
+            LOGGING.info("This object does not have Atspi.Text interface.")
             return ""
 
         if AccessibleObject.is_newton(acc_object):
@@ -54,7 +55,7 @@ class AccessibleText:
                 result = Atspi.Text.get_text(acc_object, 0, length)
 
         except Exception as error:
-            LOGGER.info(f"Error when getting text from Atspi: {error}")
+            LOGGING.info(f"Error when getting text from Atspi: {error}")
             return ""
 
         return result
@@ -75,7 +76,7 @@ class AccessibleText:
             current_object_interfaces = Atspi.Accessible.get_interfaces(acc_object)
 
         if not AccessibleObject.is_editable_text(acc_object):
-            LOGGER.info(f"Not valid interface: {current_object_interfaces}")
+            LOGGING.info(f"Not valid interface: {current_object_interfaces}")
             return False
 
         try:
@@ -86,5 +87,5 @@ class AccessibleText:
 
 
         except Exception as error:
-            LOGGER.info(f"Error when setting text to Atspi: {error}")
+            LOGGING.info(f"Error when setting text to Atspi: {error}")
             return False

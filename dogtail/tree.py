@@ -26,7 +26,7 @@ warnings.filterwarnings("ignore", "g_object_unref")
 # TODO To be change to dogtail.logging before release.
 from _logging import Logging
 logging_class = Logging()
-LOGGER = logging_class.logger
+LOGGING = logging_class.logger
 
 
 from accessible_actions import AccessibleActions
@@ -41,7 +41,7 @@ from accessible_value import AccessibleValue
 
 from _simple_predicate import SimplePredicate
 from _ponytail_connection import PonytailWrapper
-from _rawinput import click, point, doubleClick
+from dogtail.rawinput import click, point, doubleClick
 from config import read_config
 
 
@@ -53,19 +53,26 @@ class DogtailAPI(object):
     # Initial state, no connection.
     __window_id = None
 
-    LOGGER.info("Initiating dogtail api.")
+    LOGGING.info("Initiating dogtail api.")
 
     ponytail_wrapper = PonytailWrapper()
     ponytail = ponytail_wrapper.get_ponytail_instance()
 
     configuration = read_config()
 
+    # TODO remove
+    # Find out if debug dogtail is set to True and log to console if so.
+    LOGGING.info("Debugging dogtail to console? " + str(configuration["debug_dogtail"]))
+
+    if configuration["debug_dogtail"]:
+        LOGGING.info("Debugging dogtail to console.")
+        logging_class.debug_to_console()
+
     event_listeners = {}
 
     # Keep session as a variable.
     session_type = "x11"
     if "XDG_SESSION_TYPE" in os.environ and "wayland" in os.environ["XDG_SESSION_TYPE"]:
-        os.system("gsettings set org.gnome.shell introspect true")
         session_type = "wayland"
 
     # I do not understand this well enough. TODO
@@ -111,7 +118,7 @@ class DogtailAPI(object):
         I do not understand this well enough yet.
         """
 
-        LOGGER.info("Dummy listener.")
+        LOGGING.info("Dummy listener.")
 
 
     @property
@@ -133,7 +140,7 @@ class DogtailAPI(object):
             return None
 
         if self.__window_id is None:
-            LOGGER.debug("Window id event.")
+            LOGGING.info("Window id event.")
 
             window_list = self.ponytail.window_list
             if len(window_list) == 0:
@@ -203,7 +210,7 @@ class DogtailAPI(object):
         """
 
         if self.session_type != "wayland":
-            LOGGER.info("Ponytail is not used in non Wayland session.")
+            LOGGING.info("Ponytail is not used in non Wayland session.")
             return False
 
         window_id = self.window_id
@@ -258,6 +265,8 @@ class DogtailAPI(object):
         """
         Define a 'parent' property for Atspi object.
         """
+
+        LOGGING.info("Accessing .parent property.")
 
         return AccessibleObject.get_parent(self)
 
@@ -532,7 +541,7 @@ class DogtailAPI(object):
 
         result = None
 
-        for _ in range(50): # CHANGE TO CONFIG NUMBER TODO
+        for _ in range(self.configuration["search_cut_off_limit"]):
             result = AccessibleObject.find_descendant(self, predicate)
 
             if result:
@@ -678,9 +687,9 @@ class DogtailAPI(object):
         Dumping a tree structure of the node.
         """
 
-        from dogtail import dump
+        from dogtail import _dump
 
-        dumper = getattr(dump, output_type)
+        dumper = getattr(_dump, output_type)
         dumper(self, file_name)
 
 
@@ -692,7 +701,7 @@ class DogtailAPI(object):
         if not self.extents:
             return False
 
-        from dogtail.utils import Blinker
+        from dogtail._utils import Blinker
         (x, y, w, h) = self.extents
         Blinker(x, y, w, h)
         return True
@@ -845,10 +854,13 @@ Atspi.Accessible.__bases__ = (
 try:
     root = AccessibleUtilities.get_desktop()
 except Exception:  # pragma: no cover
-    LOGGER.info("Error: Accessible desktop is not visible. Is accessibility enabled?")
+    LOGGING.info("Error: Accessible desktop is not visible. Is accessibility enabled?")
 
 
 # The 'children' field on desktop is inherited Field from GObject.Object
 # We are recoding this logic in DogtailAPI so that the Object
 # in 'children' is Accessible instead of default [object].
 del Atspi.Accessible.children
+# To keep the same keyword 'parent' we need to remove the Atspi.Accessible.parent
+# So that the API is forced to use DogtailAPI.parent.
+del Atspi.Accessible.parent

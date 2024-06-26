@@ -18,13 +18,13 @@ from gi.repository import Atspi
 # TODO To be change to dogtail.logging before release.
 from _logging import Logging
 logging_class = Logging()
-LOGGER = logging_class.logger
+LOGGING = logging_class.logger
 
 from accessible_object import AccessibleObject
 
 class AccessibleActions:
     """
-    Utility class.
+    Action class.
     Heavily inspired by Orca's classes.
     """
 
@@ -35,7 +35,7 @@ class AccessibleActions:
         """
 
         if not AccessibleObject.is_action(acc_object):
-            LOGGER.info("Accessible object does not have an Action interface.")
+            LOGGING.info("Accessible object does not have an Action interface.")
             return 0
 
         try:
@@ -44,7 +44,7 @@ class AccessibleActions:
             else:
                 invocable_actions = Atspi.Action.get_n_actions(acc_object)
         except Exception as error:
-            LOGGER.info(f"Exception getting actions: '{error}'")
+            LOGGING.info(f"Exception getting actions: '{error}'")
             return 0
 
         return invocable_actions
@@ -57,7 +57,7 @@ class AccessibleActions:
         """
 
         if not AccessibleObject.is_action(acc_object):
-            LOGGER.info("Accessible object does not have an Action interface.")
+            LOGGING.info("Accessible object does not have an Action interface.")
             return 0
 
         try:
@@ -67,7 +67,7 @@ class AccessibleActions:
                 invocable_actions = Atspi.Action.get_action_name(acc_object, index)
 
         except Exception as error:
-            LOGGER.info(f"Exception getting actions: '{error}'")
+            LOGGING.info(f"Exception getting actions: '{error}'")
             return 0
 
         return invocable_actions
@@ -87,7 +87,7 @@ class AccessibleActions:
                 action_name = AccessibleActions.get_action_name(acc_object, action_index)
                 actions[action_name] = action_index
         except Exception as error:
-            LOGGER.info(f"Exception when getting actions dictionary: '{error}'")
+            LOGGING.info(f"Exception when getting actions dictionary: '{error}'")
 
         return actions
 
@@ -99,15 +99,15 @@ class AccessibleActions:
         """
 
         if not isinstance(named_action, str):
-            LOGGER.info("This function expects action name string.")
+            LOGGING.info("This function expects action name string.")
             return False
 
         if not AccessibleObject.is_action(acc_object):
-            LOGGER.info("Accessible object does not have an Action interface.")
+            LOGGING.info("Accessible object does not have an Action interface.")
             return False
 
         if named_action not in AccessibleActions.get_actions(acc_object):
-            LOGGER.info("Wanted action is not supported on wanted object.")
+            LOGGING.info("Wanted action is not supported on wanted object.")
             return False
 
         try:
@@ -119,5 +119,5 @@ class AccessibleActions:
             return Atspi.Action.do_action(action_to_do)
 
         except Exception as error:
-            LOGGER.info(f"Exception when executing a named action: '{error}'")
+            LOGGING.info(f"Exception when executing a named action: '{error}'")
             return False

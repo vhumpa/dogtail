@@ -16,7 +16,7 @@ from gi.repository import Atspi
 # TODO To be change to dogtail.logging before release.
 from _logging import Logging
 logging_class = Logging()
-LOGGER = logging_class.logger
+LOGGING = logging_class.logger
 
 
 from accessible_object import AccessibleObject
@@ -40,7 +40,7 @@ class AccessibleUtilities:
                 application = Atspi.Accessible.get_application(acc_object)
 
         except Exception as error:
-            LOGGER.info(f"Error when getting application node: {error}")
+            LOGGING.info(f"Error when getting application node: {error}")
             return None
 
         return application
@@ -75,7 +75,7 @@ class AccessibleUtilities:
                 toolkit_name = Atspi.Accessible.get_toolkit_name(acc_object)
 
         except Exception as error:
-            LOGGER.info(f"Error when getting toolkit name: {error}")
+            LOGGING.info(f"Error when getting toolkit name: {error}")
             return None
 
         return toolkit_name
@@ -94,7 +94,7 @@ class AccessibleUtilities:
                 toolkit_version = Atspi.Accessible.get_toolkit_version(acc_object)
 
         except Exception as error:
-            LOGGER.info(f"Error when getting toolkit name: {error}")
+            LOGGING.info(f"Error when getting toolkit name: {error}")
             return None
 
         return toolkit_version
@@ -116,7 +116,7 @@ class AccessibleUtilities:
                 desktop = Atspi.get_desktop(0)
 
         except Exception as error:
-            LOGGER.info(f"Error when getting desktop from Atspi: {error}")
+            LOGGING.info(f"Error when getting desktop from Atspi: {error}")
             return None
 
         return desktop
@@ -145,7 +145,7 @@ class AccessibleUtilities:
             if application.get_name() == application_name:
                 return application
 
-        LOGGER.info("Application was not found in desktop.")
+        LOGGING.info("Application was not found in desktop.")
         return None
 
 
@@ -159,7 +159,7 @@ class AccessibleUtilities:
             if child.get_name() == application:
                 return True
 
-        LOGGER.info("Application is not in desktop.")
+        LOGGING.info("Application is not in desktop.")
         return False
 
 
@@ -177,6 +177,6 @@ class AccessibleUtilities:
                 if Atspi.Accessible.get_process_id(application_object) == pid:
                     return application_object
 
-        LOGGER.info(f"Application with pid '{pid}' not in desktop.")
+        LOGGING.info(f"Application with pid '{pid}' not in desktop.")
 
         return None

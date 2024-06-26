@@ -9,6 +9,7 @@ Experimental dogtail changes for 1.0 release. Ponytail handling.
 # pylint: disable=wrong-import-order
 # pylint: disable=import-error
 # ruff: noqa: E402
+# ruff: noqa: E501
 
 import os
 
@@ -17,7 +18,7 @@ from time import sleep
 # TODO To be change to dogtail.logging before release.
 from _logging import Logging
 logging_class = Logging()
-LOGGER = logging_class.logger
+LOGGING = logging_class.logger
 
 
 class Singleton(type):
@@ -56,7 +57,6 @@ class PonytailWrapper(metaclass=Singleton):
     # Keep session as a variable.
     session_type = "x11"
     if "XDG_SESSION_TYPE" in os.environ and "wayland" in os.environ["XDG_SESSION_TYPE"]:
-        os.system("gsettings set org.gnome.shell introspect true")
         session_type = "wayland"
 
 
@@ -68,7 +68,7 @@ class PonytailWrapper(metaclass=Singleton):
         # Do not initiate it if already done.
         if not self.__already_initiated:
             try:
-                LOGGER.info("Initiating ponytail.")
+                LOGGING.info("Initiating ponytail.")
                 from ponytail.ponytail import Ponytail
                 self.__ponytail = Ponytail()
                 sleep(0.1) # Prevent any race conditions.
@@ -79,8 +79,8 @@ class PonytailWrapper(metaclass=Singleton):
                 self.__already_initiated = True
 
             except Exception as error:
-                LOGGER.info(f"Error when initiating ponytail: '{error}'")
-                LOGGER.info(self.error_message)
+                LOGGING.info(f"Error when initiating ponytail: '{error}'")
+                LOGGING.info(self.error_message)
 
 
     def get_ponytail_instance(self):
@@ -90,119 +90,119 @@ class PonytailWrapper(metaclass=Singleton):
         return self.__ponytail
 
 
-def ponytail_check_is_xwayland(window_id=None, window_list=None):
-    """
-    Detect Xwayland windows in order to use globals and recordMonitor
-    """
+    def ponytail_check_is_xwayland(self, window_id=None, window_list=None):
+        """
+        Detect Xwayland windows in order to use globals and recordMonitor
+        """
 
-    ponytail_wrapper = PonytailWrapper()
-    ponytail = ponytail_wrapper.ponytail
+        ponytail_wrapper = PonytailWrapper()
+        ponytail = ponytail_wrapper.ponytail
 
-    # If there is not window_list, get it from ponytail.
-    if window_list is None:
+        # If there is not window_list, get it from ponytail.
+        if window_list is None:
+            window_list = ponytail.window_list
+
+        # If window_id is integer return client type.
+        if isinstance(window_id, int):
+            LOGGING.debug("Return wanted window_id.")
+            return int([x["client-type"] for x in window_list if x["id"] == window_id][0])
+
+        # If window_id is None, get window_id of focused window.
+        if window_id is None:
+            LOGGING.debug("Return focused window if no window_id was provided.")
+            for window in window_list:
+                if bool(window["has-focus"]):
+                    return int(window["client-type"])
+
+        # The window_id match was not successful, return window_if of gnome-shell: 0.
+        LOGGING.debug("Return window_id 0 which is gnome-shell if no id is found.")
+        return 0
+
+
+    def ponytail_check_connection(self, window_id=None, input_source="mouse"):
+        """
+        Check ponytail connection.
+        """
+
+        ponytail_wrapper = PonytailWrapper()
+        ponytail = ponytail_wrapper.ponytail
+
         window_list = ponytail.window_list
 
-    # If window_id is integer return client type.
-    if isinstance(window_id, int):
-        LOGGER.debug("Return wanted window_id.")
-        return int([x["client-type"] for x in window_list if x["id"] == window_id][0])
+        if (not isinstance(window_id, str)) and (window_list != []) and\
+            window_id not in [x["id"] for x in window_list]:
+            window_id = None
 
-    # If window_id is None, get window_id of focused window.
-    if window_id is None:
-        LOGGER.debug("Return focused window if no window_id was provided.")
-        for window in window_list:
-            if bool(window["has-focus"]):
-                return int(window["client-type"])
+        LOGGING.debug("Checking if possibly connected window still exists.")
 
-    # The window_id match was not successful, return window_if of gnome-shell: 0.
-    LOGGER.debug("Return window_id 0 which is gnome-shell if no id is found.")
-    return 0
+        if ponytail.connected and isinstance(ponytail.connected, int):
+            if ponytail.connected not in [x["id"] for x in window_list]:
+                LOGGING.debug("Disconnecting no longer open window.")
+                ponytail.disconnect()
+                sleep(1)
+                LOGGING.debug("Done.")
 
-
-def ponytail_check_connection(window_id=None, input_source="mouse"):
-    """
-    Check ponytail connection.
-    """
-
-    ponytail_wrapper = PonytailWrapper()
-    ponytail = ponytail_wrapper.ponytail
-
-    window_list = ponytail.window_list
-
-    if (not isinstance(window_id, str)) and (window_list != []) and\
-        window_id not in [x["id"] for x in window_list]:
-        window_id = None
-
-    LOGGER.debug("Checking if possibly connected window still exists.")
-
-    if ponytail.connected and isinstance(ponytail.connected, int):
-        if ponytail.connected not in [x["id"] for x in window_list]:
-            LOGGER.debug("Disconnecting no longer open window.")
-            ponytail.disconnect()
-            sleep(1)
-            LOGGER.debug("Done.")
-
-    if input_source == "keyboard" and ponytail.connected is None:
-        LOGGER.debug("Keyboard event, connecting monitor.")
-        ponytail.connectMonitor()
-
-    elif input_source == "keyboard" and ponytail.connected is not None:
-        if window_id == "" and isinstance(ponytail.connected, int):
-            LOGGER.debug("Keyboard event, monitor request, forcing monitor.")
-            ponytail.disconnect()
-            sleep(1)
+        if input_source == "keyboard" and ponytail.connected is None:
+            LOGGING.debug("Keyboard event, connecting monitor.")
             ponytail.connectMonitor()
+
+        elif input_source == "keyboard" and ponytail.connected is not None:
+            if window_id == "" and isinstance(ponytail.connected, int):
+                LOGGING.debug("Keyboard event, monitor request, forcing monitor.")
+                ponytail.disconnect()
+                sleep(1)
+                ponytail.connectMonitor()
+            else:
+                LOGGING.debug("Any window/monitor already connected for keyboard event.")
+
         else:
-            LOGGER.debug("Any window/monitor already connected for keyboard event.")
+            LOGGING.debug("Mouse input event.")
+            if self.ponytail_check_is_xwayland(window_id, window_list):
+                window_id = ""
 
-    else:
-        LOGGER.debug("Mouse input event.")
-        if ponytail_check_is_xwayland(window_id, window_list):
-            window_id = ""
-
-        if ponytail.connected is None and window_id is None:
-            for window in window_list:
-                if bool(window["has-focus"]) is True:
-                    ponytail.connectWindow(window["id"])
-                    LOGGER.debug("Connected active window.")
-
-        elif ponytail.connected is not None and window_id is None:
-            LOGGER.debug("Re-connected active window.")
-            for window in window_list:
-                if bool(window["has-focus"]) is True:
-                    if ponytail.connected != window["id"]:
-                        ponytail.disconnect()
-                        sleep(1)
+            if ponytail.connected is None and window_id is None:
+                for window in window_list:
+                    if bool(window["has-focus"]) is True:
                         ponytail.connectWindow(window["id"])
-                        LOGGER.debug("Re-connected active window.")
+                        LOGGING.debug("Connected active window.")
 
-        elif ponytail.connected is None:
-            if isinstance(window_id, int):
+            elif ponytail.connected is not None and window_id is None:
+                LOGGING.debug("Re-connected active window.")
+                for window in window_list:
+                    if bool(window["has-focus"]) is True:
+                        if ponytail.connected != window["id"]:
+                            ponytail.disconnect()
+                            sleep(1)
+                            ponytail.connectWindow(window["id"])
+                            LOGGING.debug("Re-connected active window.")
+
+            elif ponytail.connected is None:
+                if isinstance(window_id, int):
+                    ponytail.connectWindow(window_id)
+                    LOGGING.debug("Connected window by window_id.")
+
+                elif isinstance(window_id, str):
+                    ponytail.connectMonitor(window_id)
+                    LOGGING.debug("Connected monitor (Xwayland?) by window_id.")
+
+            elif ponytail.connected != window_id and isinstance(window_id, int):
+                LOGGING.debug("Disconnecting window.")
+                ponytail.disconnect()
+                sleep(1.5)
+
+                LOGGING.debug(f"Connected window: '{ponytail.connected}'.")
+                LOGGING.debug(f"Reconnecting window: '{window_id}'.")
                 ponytail.connectWindow(window_id)
-                LOGGER.debug("Connected window by window_id.")
+                LOGGING.debug(f"Connected window: '{ponytail.connected}'.")
 
-            elif isinstance(window_id, str):
-                ponytail.connectMonitor(window_id)
-                LOGGER.debug("Connected monitor (Xwayland?) by window_id.")
+            elif ponytail.connected != window_id and isinstance(window_id, str):
+                LOGGING.debug("Disconnecting monitor.")
+                ponytail.disconnect()
+                sleep(1)
 
-        elif ponytail.connected != window_id and isinstance(window_id, int):
-            LOGGER.debug("Disconnecting window.")
-            ponytail.disconnect()
-            sleep(1.5)
+                LOGGING.debug("Reconnecting monitor.")
+                ponytail.connectMonitor()
+                LOGGING.debug("Connected monitor.")
 
-            LOGGER.debug(f"Connected window: '{ponytail.connected}'.")
-            LOGGER.debug(f"Reconnecting window: '{window_id}'.")
-            ponytail.connectWindow(window_id)
-            LOGGER.debug(f"Connected window: '{ponytail.connected}'.")
-
-        elif ponytail.connected != window_id and isinstance(window_id, str):
-            LOGGER.debug("Disconnecting monitor.")
-            ponytail.disconnect()
-            sleep(1)
-
-            LOGGER.debug("Reconnecting monitor.")
-            ponytail.connectMonitor()
-            LOGGER.debug("Connected monitor.")
-
-        elif ponytail.connected == window_id:
-            LOGGER.debug("Window or monitor is already connected.")
+            elif ponytail.connected == window_id:
+                LOGGING.debug("Window or monitor is already connected.")

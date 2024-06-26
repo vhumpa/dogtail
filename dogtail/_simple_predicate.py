@@ -10,8 +10,7 @@ Experimental dogtail changes for 1.0 release. Simple Predicate
 # ruff: noqa: E402
 
 # TODO To be change to dogtail.logging before release.
-from _logging import Logging
-logging_class = Logging()
+from _logging import logging_class
 LOGGER = logging_class.logger
 
 class SimplePredicate:

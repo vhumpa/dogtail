@@ -9,7 +9,6 @@ from subprocess import call, STDOUT
 
 # Singleton solution provided by https://stackoverflow.com/a/54209647
 
-
 class Singleton(type):
     """
     Singleton class used as metaclass by :py:class:`logger.Logging`.
@@ -80,6 +79,24 @@ class Logging(metaclass=Singleton):
                 handler.setLevel(logging.DEBUG)
                 break
 
+    def get_func_params_and_values(self):
+        """
+        Simple way to have logging data from the place it was called in.
+        """
+
+        # Get callers frame parameters.
+        _local_func_parameters = sys._getframe().f_back.f_locals.keys()
+        # Get callers frame parameter values.
+        _local_func_parameters_value = sys._getframe().f_back.f_locals.values()
+
+        _map_of_keys_and_values = [
+            x if "self" == x else x if "context" == x else str(x) + "=" + str(y)
+            for x, y in zip(_local_func_parameters, _local_func_parameters_value)
+        ]
+
+        return f"({', '.join(_map_of_keys_and_values)})"
+
+
 
 class FuncFilter(logging.Filter):
     """
@@ -95,19 +112,4 @@ class FuncFilter(logging.Filter):
         return True
 
 
-def get_func_params_and_values():
-    """
-    Simple way to have logging data from the place it was called in.
-    """
-
-    # Get callers frame parameters.
-    _local_func_parameters = sys._getframe().f_back.f_locals.keys()
-    # Get callers frame parameter values.
-    _local_func_parameters_value = sys._getframe().f_back.f_locals.values()
-
-    _map_of_keys_and_values = [
-        x if "self" == x else x if "context" == x else str(x) + "=" + str(y)
-        for x, y in zip(_local_func_parameters, _local_func_parameters_value)
-    ]
-
-    return f"({', '.join(_map_of_keys_and_values)})"
+logging_class = Logging()

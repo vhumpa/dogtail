@@ -24,8 +24,7 @@ import warnings
 warnings.filterwarnings("ignore", "g_object_unref")
 
 # TODO To be change to dogtail.logging before release.
-from _logging import Logging
-logging_class = Logging()
+from _logging import logging_class
 LOGGING = logging_class.logger
 
 
@@ -515,6 +514,8 @@ class DogtailAPI(object):
         """
         Find a single child satisfying the name role_name or description.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         # === Backward compatibility for 'roleName' usage ===
         using_role_name = role_name

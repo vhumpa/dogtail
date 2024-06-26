@@ -14,8 +14,7 @@ gi.require_version("Atspi", "2.0")
 from gi.repository import Atspi
 
 # TODO To be change to dogtail.logging before release.
-from _logging import Logging
-logging_class = Logging()
+from _logging import logging_class
 LOGGING = logging_class.logger
 
 

@@ -29,8 +29,7 @@ from gi.repository import Gtk
 from gi.repository import GLib
 
 # TODO To be change to dogtail.logging before release.
-from _logging import Logging
-logging_class = Logging()
+from _logging import logging_class
 LOGGING = logging_class.logger
 
 from config import read_config
@@ -68,79 +67,11 @@ def doDelay(delay=None):  # pylint: disable=invalid-name
 # TODO refactor this all.
 
 
-
-# Image magic will not work anymore? TODO remove this util function
-def screenshot(file="screenshot.png", timeStamp=True):
-    """
-    This function wraps the ImageMagick import command to take a screenshot.
-
-    The file argument may be specified as 'foo', 'foo.png', or using any other
-    extension that ImageMagick supports. PNG is the default.
-
-    By default, screenshot filenames are in the format of foo_YYYYMMDD-hhmmss.png .
-    The timeStamp argument may be set to False to name the file foo.png.
-    """
-
-    debug_log("screenshot(file=%s, timeStamp=%s)" % (str(file), str(timeStamp)))
-
-    if not isinstance(timeStamp, bool):
-        raise TypeError("timeStampt must be True or False")
-
-    assert os.path.isdir(config.scratchDir), LOGGING.info(
-        "Directory for screenshot not found."
-    )
-
-    baseName = "".join(file.split(".")[0:-1])
-    fileExt = file.split(".")[-1].lower()
-
-    if not baseName:
-        baseName = file
-        fileExt = "png"
-
-    if timeStamp:
-        ts = TimeStamp()
-        newFile = ts.fileStamp(baseName) + "." + fileExt
-        path = config.scratchDir + newFile
-
-    else:
-        newFile = baseName + "." + fileExt
-        path = config.scratchDir + newFile
-
-    from gi.repository import Gdk
-    from gi.repository import GdkPixbuf
-
-    rootWindow = Gdk.get_default_root_window()
-    geometry = rootWindow.get_geometry()
-    pixbuf = GdkPixbuf.Pixbuf(
-        colorspace=GdkPixbuf.Colorspace.RGB,
-        has_alpha=False,
-        bits_per_sample=8,
-        width=geometry[2],
-        height=geometry[3],
-    )
-
-    pixbuf = Gdk.pixbuf_get_from_window(rootWindow, 0, 0, geometry[2], geometry[3])
-
-    if fileExt == "jpg":
-        debug_log("GdkPixbuf.Pixbuf.save() needs 'jpeg' and not 'jpg'")
-        fileExt = "jpeg"
-
-    try:
-        pixbuf.savev(path, fileExt, [], [])
-    except GLib.GError:
-        raise ValueError("Failed to save screenshot in '%s' format" % fileExt)
-
-    assert os.path.exists(path), logger.log("Directory for screenshot does not exist.")
-
-    debug_log("Screenshot taken: " + path)
-
-    return path
-
 # TODO if leaving it here, refactor it.
 def run(
     string,
-    timeout=config.runTimeout,
-    interval=config.runInterval,
+    timeout=30,#config.runTimeout,
+    interval=0.5,#config.runInterval,
     desktop=None,
     dumb=False,
     appName="",

@@ -30,8 +30,7 @@ from _utils import do_delay
 
 from _ponytail_connection import PonytailWrapper
 # TODO To be change to dogtail.logging before release.
-from _logging import Logging, get_func_params_and_values
-logging_class = Logging()
+from _logging import logging_class
 LOGGING = logging_class.logger
 
 from config import read_config
@@ -249,6 +248,8 @@ def absolute_motion(x, y, mouse_delay=None, check=True, window_id=None):
         delay_to_use = mouse_delay
     else:
         delay_to_use = configuration["default_delay"]
+        #TODO delay_to_use = configuration.default_delay
+
 
     # TODO, remove and do it better.
     (_x, _y) = update_coords((x, y))
@@ -517,7 +518,7 @@ def key_name_to_key_sym(key_name):
     :type key_name: str
     """
 
-    LOGGING.debug(get_func_params_and_values())
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     LOGGING.debug(f"Attempting to use key name '{key_name}'.")
 
@@ -563,7 +564,7 @@ def key_name_to_key_code(key_name):
     the requested key string is obtained by holding down the Shift key.
     """
 
-    LOGGING.debug(get_func_params_and_values())
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     # Get Display.
     display = Gdk.Display().get_default()
@@ -616,7 +617,7 @@ def hold_key(key_name):
     Press and hold the key specified by key_name.
     """
 
-    LOGGING.debug(get_func_params_and_values())
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     LOGGING.debug(f"Attempting to hold key of name '{key_name}'.")
 
@@ -641,7 +642,7 @@ def release_key(key_name):
     Releases the held key specified by keyName.
     """
 
-    LOGGING.debug(get_func_params_and_values())
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     LOGGING.debug(f"Attempting to release key of name '{key_name}'.")
 
@@ -669,7 +670,7 @@ def type_text(string):
     Needed sometimes on slow setups/VMs typing non-ASCII utf8 chars.
     """
 
-    LOGGING.debug(get_func_params_and_values())
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     for character in string:
         press_key(character)
@@ -688,7 +689,7 @@ def key_combo(combo_string):
     more readable in some situations.
     """
 
-    LOGGING.debug(get_func_params_and_values())
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     keys_to_press = []
     # Remove left side lesser than sign.

@@ -19,8 +19,7 @@ from types import LambdaType
 from _simple_predicate import SimplePredicate
 
 # TODO To be change to dogtail.logging before release.
-from _logging import Logging
-logging_class = Logging()
+from _logging import logging_class
 LOGGING = logging_class.logger
 
 

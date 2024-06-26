@@ -55,6 +55,8 @@
     "gsettings",
     "journalctl",
     "keyrings",
+    "Keysym",
+    "keyval",
     "labelee",
     "levelname",
     "Nextcloud",

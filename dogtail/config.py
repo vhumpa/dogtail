@@ -20,6 +20,8 @@ def read_config():
     # Read the configuration file.
     config.read("config.ini")
 
+    NO_VALUES = ["", "n", "no", "f", "false", "False", "0"]
+
     # Access values from the configuration file.
     # Timing Delay section.
     section = "TimingDelay"
@@ -33,7 +35,7 @@ def read_config():
     section = "Searching"
     search_warning_threshold = config.get(section, "search_warning_threshold")
     search_cut_off_limit = config.get(section, "search_cut_off_limit")
-    search_showing_only = config.get(section, "search_showing_only")
+    search_showing_only = config.get(section, "search_showing_only") not in NO_VALUES
 
     # Children Limit section.
     section = "ChildrenLimit"
@@ -50,17 +52,20 @@ def read_config():
 
     # Debug section.
     section = "Debug"
-    debug_searching = config.get(section, "debug_searching")
-    debug_sleep = config.get(section, "debug_sleep")
-    debug_search_paths = config.get(section, "debug_search_paths")
+    debug_dogtail = config.get(section, "debug_dogtail") not in NO_VALUES
+    debug_searching = config.get(section, "debug_searching") not in NO_VALUES
+    debug_sleep = config.get(section, "debug_sleep") not in NO_VALUES
+    debug_search_paths = config.get(section, "debug_search_paths") not in NO_VALUES
 
     # Debug section.
     section = "Setting"
-    log_to_std_out = config.get(section, "log_to_std_out")
-    absolute_node_paths = config.get(section, "absolute_node_paths")
-    ensure_sensitivity = config.get(section, "ensure_sensitivity")
-    fatal_errors = config.get(section, "fatal_errors")
-    check_for_a11y = config.get(section, "check_for_a11y")
+    log_to_std_out = config.get(section, "log_to_std_out") not in NO_VALUES
+    absolute_node_paths = config.get(section, "absolute_node_paths") not in NO_VALUES
+    ensure_sensitivity = config.get(section, "ensure_sensitivity") not in NO_VALUES
+    fatal_errors = config.get(section, "fatal_errors") not in NO_VALUES
+    check_for_a11y = config.get(section, "check_for_a11y") not in NO_VALUES
+
+###
 
     # Return a dictionary with the retrieved values
     config_values = {
@@ -76,6 +81,7 @@ def read_config():
         "run_interval": run_interval,
         "run_timeout": run_timeout,
         "offset": offset,
+        "debug_dogtail": debug_dogtail,
         "debug_searching": debug_searching,
         "debug_sleep": debug_sleep,
         "debug_search_paths": debug_search_paths,
@@ -95,4 +101,4 @@ if __name__ == "__main__":
 
     # Print the retrieved values
     for key, value in config_data.items():
-        print(f"{key}: {value}")
+        print(f"{key:25}: {value}")

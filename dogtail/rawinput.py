@@ -10,7 +10,6 @@ Experimental dogtail changes for 1.0 release. raw input.
 # ruff: noqa: E402
 # ruff: noqa: E501
 
-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
@@ -27,23 +26,19 @@ from gi.repository import Atspi
 import warnings
 warnings.filterwarnings("ignore", "g_object_unref")
 
-from .utils import do_delay
+from _utils import do_delay
 
-from _ponytail_connection import PonytailWrapper, ponytail_check_connection
-
+from _ponytail_connection import PonytailWrapper
 # TODO To be change to dogtail.logging before release.
-from _logging import Logging
+from _logging import Logging, get_func_params_and_values
 logging_class = Logging()
-LOGGER = logging_class.logger
+LOGGING = logging_class.logger
 
-
-from .config import read_config
+from config import read_config
 configuration = read_config()
-
 
 SESSION_TYPE = "x11"
 if "XDG_SESSION_TYPE" in os.environ and "wayland" in os.environ["XDG_SESSION_TYPE"]:
-    os.system("gsettings set org.gnome.shell introspect true")
     SESSION_TYPE = "wayland"
 
 
@@ -88,20 +83,20 @@ def click(x, y, button=1, check=True, window_id=None):
     ponytail_wrapper = PonytailWrapper()
     ponytail = ponytail_wrapper.get_ponytail_instance()
 
-    # TODO, remove and do it better.
+    # TODO remove and do it better.
     (_x, _y) = update_coords((x, y))
 
     # Check if the coordinates are not
     if check:
         check_coordinates(_x, _y)
 
-    LOGGER.debug(f"Mouse button '{button}' click at ({_x}, {_y})")
+    LOGGING.debug(f"Mouse button '{button}' click at ({_x}, {_y})")
 
     if SESSION_TYPE == "x11":
         # TODO Newton if condition.
         Atspi.generate_mouse_event(_x, _y, name=f"b{button}c")
     else:
-        ponytail_check_connection(window_id)
+        ponytail.ponytail_check_connection(window_id)
         ponytail.generateButtonEvent(button, _x, _y)
 
     do_delay(configuration["default_delay"])
@@ -116,20 +111,20 @@ def point(x, y, check=True, window_id=None):
     ponytail_wrapper = PonytailWrapper()
     ponytail = ponytail_wrapper.get_ponytail_instance()
 
-    # TODO, remove and do it better.
+    # TODO remove and do it better.
     (_x, _y) = update_coords((x, y))
 
     # Check if the coordinates are not
     if check:
         check_coordinates(_x, _y)
 
-    LOGGER.debug(f"Mouse over at ({_x}, {_y})")
+    LOGGING.debug(f"Mouse over at ({_x}, {_y})")
 
     if SESSION_TYPE == "x11":
         # TODO Newton if condition.
         Atspi.generate_mouse_event(_x, _y, name="abs")
     else:
-        ponytail_check_connection(window_id)
+        ponytail.ponytail_check_connection(window_id)
         ponytail.generateMotionEvent(_x, _y)
 
     do_delay(configuration["default_delay"])
@@ -144,20 +139,20 @@ def double_click(x, y, button=1, check=True, window_id=None):
     ponytail_wrapper = PonytailWrapper()
     ponytail = ponytail_wrapper.get_ponytail_instance()
 
-    # TODO, remove and do it better.
+    # TODO remove and do it better.
     (_x, _y) = update_coords((x, y))
 
     # Check if the coordinates are not
     if check:
         check_coordinates(x, y)
 
-    LOGGER.debug(f"Mouse button '{button}' double-click at ({_x}, {_y})")
+    LOGGING.debug(f"Mouse button '{button}' double-click at ({_x}, {_y})")
 
     if SESSION_TYPE == "x11":
         # TODO Newton if condition.
         Atspi.generate_mouse_event(x, y, name=f"b{button}d")
     else:
-        ponytail_check_connection(window_id)
+        ponytail.ponytail_check_connection(window_id)
         ponytail.generateButtonEvent(button, _x, _y)
 
         do_delay(configuration["double_click_delay"])
@@ -188,19 +183,20 @@ def press(x, y, button=1, check=True, window_id=None, delay=None):
     ponytail_wrapper = PonytailWrapper()
     ponytail = ponytail_wrapper.get_ponytail_instance()
 
+    # TODO remove and do it better.
     (_x, _y) = update_coords((x, y))
 
     if check:
         check_coordinates(_x, _y)
 
-    LOGGER.debug(f"Mouse button '{button}' press at ({_x}, {_y})")
+    LOGGING.debug(f"Mouse button '{button}' press at ({_x}, {_y})")
 
     if SESSION_TYPE == "x11":
         # TODO Newton if condition.
         Atspi.generate_mouse_event(_x, _y, name=f"b{button}p")
 
     else:
-        ponytail_check_connection(window_id)
+        ponytail.ponytail_check_connection(window_id)
         ponytail.generateMotionEvent(_x, _y)
         ponytail.generateButtonPress(button)
 
@@ -216,19 +212,20 @@ def release(x, y, button=1, check=True, window_id=None):
     ponytail_wrapper = PonytailWrapper()
     ponytail = ponytail_wrapper.get_ponytail_instance()
 
+    # TODO remove and do it better.
     (_x, _y) = update_coords((x, y))
 
     if check:
         check_coordinates(_x, _y)
 
-    LOGGER.debug(f"Mouse button '{button}' release at ({_x}, {_y})")
+    LOGGING.debug(f"Mouse button '{button}' release at ({_x}, {_y})")
 
     if SESSION_TYPE == "x11":
         # TODO Newton if condition.
         Atspi.generate_mouse_event(_x, _y, name=f"b{button}r")
 
     else:
-        ponytail_check_connection(window_id)
+        ponytail.ponytail_check_connection(window_id)
         ponytail.generateMotionEvent(_x, _y)
 
         do_delay()
@@ -253,19 +250,20 @@ def absolute_motion(x, y, mouse_delay=None, check=True, window_id=None):
     else:
         delay_to_use = configuration["default_delay"]
 
+    # TODO, remove and do it better.
     (_x, _y) = update_coords((x, y))
 
     if check:
         check_coordinates(_x, _y)
 
-    LOGGER.debug(f"Mouse absolute motion at ({_x}, {_y})")
+    LOGGING.debug(f"Mouse absolute motion at ({_x}, {_y})")
 
     if SESSION_TYPE == "x11":
         # TODO Newton if condition.
         Atspi.generate_mouse_event(_x, _y, name="abs")
 
     else:
-        ponytail_check_connection(window_id)
+        ponytail.ponytail_check_connection(window_id)
         ponytail.generateMotionEvent(_x, _y)
 
     do_delay(delay_to_use)
@@ -300,10 +298,10 @@ def absolute_motion_with_trajectory(
         check_coordinates(source_x, source_y)
         check_coordinates(destination_x, destination_y)
 
-    LOGGER.debug(f"Mouse absolute motion with trajectory at ({destination_x}, {destination_y})")
+    LOGGING.debug(f"Mouse absolute motion with trajectory at ({destination_x}, {destination_y})")
 
     if SESSION_TYPE == "wayland":
-        ponytail_check_connection(window_id)
+        ponytail.ponytail_check_connection(window_id)
 
     difference_x = float(destination_x - source_x)
     difference_y = float(destination_y - source_y)
@@ -340,10 +338,10 @@ def relative_motion(x, y, mouse_delay=None):
     Note: Does not check if the end coordinates are positive.
     """
 
-    LOGGER.debug(f"Mouse relative motion of ({x}, {y})")
+    LOGGING.debug(f"Mouse relative motion of ({x}, {y})")
 
     if SESSION_TYPE == "wayland":
-        LOGGER.debug("Relative motion unavailable under wayland not available.")
+        LOGGING.debug("Relative motion unavailable under wayland not available.")
         return
 
     # TODO Newton if condition.
@@ -360,7 +358,7 @@ def drag(fromXY, toXY, button=1, check=True):  # pylint: disable=invalid-name
     Synthesize a mouse press, drag, and release on the screen.
     """
 
-    LOGGER.debug(f"Mouse button '{button}' drag from '{fromXY}' to '{toXY}'")
+    LOGGING.debug(f"Mouse button '{button}' drag from '{fromXY}' to '{toXY}'")
 
     (_x, _y) = fromXY
     press(x=_x, y=_y, button=button, check=check)
@@ -379,8 +377,8 @@ def drag_node_to_node(source_node, destination_node, button=1, check=True):
     of these Nodes directly, so you don't have to calculate end enter them directly.
     """
 
-    LOGGER.debug(f"Dragging from '{str(source_node)}' to '{str(destination_node)}'.")
-    LOGGER.debug(f"Dragging using button '{button}' and check '{check}'")
+    LOGGING.debug(f"Dragging from '{str(source_node)}' to '{str(destination_node)}'.")
+    LOGGING.debug(f"Dragging using button '{button}' and check '{check}'")
 
     x = int(source_node.position[0] + source_node.size[0] / 2)
     y = int(source_node.position[1] + source_node.size[1] / 2)
@@ -413,9 +411,9 @@ def drag_with_trajectory(  # pylint: disable=invalid-name
     else:
         delay_to_use = configuration["default_delay"]
 
-    LOGGER.debug(f"Dragging with trajectory from '{fromXY}' to '{toXY}'.")
-    LOGGER.debug(f"Dragging using button '{button}' and check '{check}'")
-    LOGGER.debug(f"Dragging using press delay '{delay_to_use}' and mouse_delay '{mouse_delay}'")
+    LOGGING.debug(f"Dragging with trajectory from '{fromXY}' to '{toXY}'.")
+    LOGGING.debug(f"Dragging using button '{button}' and check '{check}'")
+    LOGGING.debug(f"Dragging using press delay '{delay_to_use}' and mouse_delay '{mouse_delay}'")
 
     (from_x, from_y) = fromXY
     press(x=from_x, y=from_y, button=button, check=check, delay=delay_to_use)
@@ -453,11 +451,11 @@ def drag_with_trajectory_global(fromXY, toXY, button=1):  # pylint: disable=inva
     ponytail_wrapper = PonytailWrapper()
     ponytail = ponytail_wrapper.get_ponytail_instance()
 
-    LOGGER.debug(f"Dragging with trajectory from '{fromXY}' to '{toXY}', button '{button}'.")
+    LOGGING.debug(f"Dragging with trajectory from '{fromXY}' to '{toXY}', button '{button}'.")
 
     if SESSION_TYPE == "wayland":
         (from_x, from_y) = fromXY
-        ponytail_check_connection(window_id="")
+        ponytail.ponytail_check_connection(window_id="")
 
         ponytail.generateMotionEvent(from_x, from_y)
         do_delay(configuration["default_delay"])
@@ -485,140 +483,9 @@ def drag_with_trajectory_global(fromXY, toXY, button=1):  # pylint: disable=inva
         drag_with_trajectory(fromXY, toXY, button)
 
 
-########################################
-# Backwards compatibility definitions. #
-########################################
-def doubleClick(x, y, button=1, check=True, window_id=None):  # pylint: disable=invalid-name
-    """
-    Synthesize a mouse button double-click at (x,y)
-    """
+# Section for Keyboard Events.
 
-    double_click(x=x, y=y, button=button, check=check, window_id=window_id)
-
-
-def doTypingDelay():  # pylint: disable=invalid-name
-    """
-    Execute a typing delay.
-    """
-
-    do_typing_delay()
-
-
-def absoluteMotion(x, y, mouseDelay=None, check=True, window_id=None):  # pylint: disable=invalid-name
-    """
-    Synthesize mouse absolute motion to (x,y)
-    """
-
-    absolute_motion(x=x, y=y, mouse_delay=mouseDelay, check=check, window_id=window_id)
-
-
-def absoluteMotionWithTrajectory(  # pylint: disable=invalid-name
-        source_x,
-        source_y,
-        dest_x,
-        dest_y,
-        mouseDelay=None,
-        check=True,
-        window_id=None
-    ):
-    """
-    Synthesize mouse absolute motion with trajectory.
-    The 'trajectory' means that the whole motion is divided into several atomic
-    movements which are Synthesize separately.
-    """
-
-    absolute_motion_with_trajectory(
-        source_x=source_x,
-        source_y=source_y,
-        destination_x=dest_x,
-        destination_y=dest_y,
-        mouse_delay=mouseDelay,
-        check=check,
-        window_id=window_id
-    )
-
-
-def relativeMotion(x, y, mouseDelay=None):  # pylint: disable=invalid-name
-    """
-    Synthesize a relative motion from actual position.
-    Note: Does not check if the end coordinates are positive.
-    """
-
-    relative_motion(x=x, y=y, mouse_delay=mouseDelay)
-
-
-def dragNodeToNode(source_node, dest_node, button=1, check=True):  # pylint: disable=invalid-name
-    """
-    Drag source_node onto dest_node. These are tree.Node objects. Takes positions
-    of these Nodes directly, so you don't have to calculate end enter them directly.
-    """
-
-    drag_node_to_node(
-        source_node=source_node,
-        destination_node=dest_node,
-        button=button,
-        check=check
-    )
-
-
-def dragWithTrajectory(  # pylint: disable=invalid-name
-        fromXY,
-        toXY,
-        button=1,
-        check=True,
-        press_delay=0.5,
-        mouse_delay=0.01
-    ):
-    """
-    Synthesize a mouse press, drag (including move events), and release on the screen
-    Please note, that on Wayland, this function works for drags only within a single window.
-    On X this function works with global coords and equals dragWithTrajectoryGlobal
-    """
-
-    drag_with_trajectory(
-        fromXY=fromXY,
-        toXY=toXY,
-        button=button,
-        check=check,
-        press_delay=press_delay,
-        mouse_delay=mouse_delay
-    )
-
-
-def dragWithTrajectoryGlobal(fromXY, toXY, button=1):  # pylint: disable=invalid-name
-    """
-    Backwards compatibility wrapper over drag_with_trajectory_global
-    """
-
-    drag_with_trajectory_global(fromXY=fromXY, toXY=toXY, button=button)
-
-###############################################
-# End of backwards compatibility definitions. #
-###############################################
-
-
-
-# TODO Complete rewrite and improvement.
-# TODO continue here
-
-
-
-# Might split this to mouse and keyboard parts. TODO
-def typeText(string):
-    """
-    Types the specified string, one character at a time.
-    Please note, you may have to set a higher typing delay,
-    if your machine misses/switches the characters typed.
-    Needed sometimes on slow setups/VMs typing non-ASCII utf8 chars.
-    """
-
-    debug_log("typeText(string=%s)" % string)
-
-    for char in string:
-        pressKey(char)
-
-
-keyNameAliases = {
+KEY_NAME_ALIASES = {
     "enter": "Return",
     "esc": "Escape",
     "backspace": "BackSpace",
@@ -638,182 +505,405 @@ keyNameAliases = {
     " ": "space",
     "\t": "Tab",
     "\n": "Return",
-    "\b": "BackSpac"
+    "\b": "BackSpace"
 }
 
 
-def uniCharToKeySym(uniChar):
-    """
-    Use GDK to get the key symbol for a given unicode character.
-    """
-
-    debug_log("uniCharToKeySym(uniChar=%s)" % uniChar)
-
-    i = ord(uniChar)
-    keySym = Gdk.unicode_to_keyval(i)
-    return keySym
-
-
-def keyNameToKeySym(keyName):
+def key_name_to_key_sym(key_name):
     """
     Use GDK to get the key symbol for a key name.
+
+    :param key_name: Key Name
+    :type key_name: str
     """
 
-    debug_log("keyNameToKeySym(keyName=%s)" % keyName)
+    LOGGING.debug(get_func_params_and_values())
 
-    keyName = keyNameAliases.get(keyName.lower(), keyName)
-    keySym = Gdk.keyval_from_name(keyName)
-    # various error 'codes' returned for non-recognized chars in versions of GTK3.X
-    if keySym == 0xffffff or keySym == 0x0 or keySym is None:
+    LOGGING.debug(f"Attempting to use key name '{key_name}'.")
+
+    # Try to get the name from its alias.
+    actual_key_name = KEY_NAME_ALIASES.get(key_name.lower(), key_name)
+    LOGGING.debug(f"Key name after possible alias used '{actual_key_name}'.")
+
+    # Get name vale from Gdk.keyval_from_name.
+    actual_key_sym = Gdk.keyval_from_name(actual_key_name)
+    LOGGING.debug(f"Key symbol value after Gdk.keyval_from_name '{actual_key_sym}'.")
+
+    # If an error value is detected.
+    if actual_key_sym in (0xffffff, 0x0, None):
+        LOGGING.debug("Error value was detected '0xffffff, 0x0, None'.")
         try:
-            keySym = uniCharToKeySym(keyName)
-        except Exception:  # not even valid utf-8 char
-            try:  # Last attempt run at a keyName ('Meta_L', 'Dash' ...)
-                keySym = getattr(Gdk, "KEY_" + keyName)
-            except AttributeError:
-                raise KeyError(keyName)
-    return keySym
+
+            LOGGING.debug("Attempt to get key value from Unicode representation of the key.")
+            # Unicode code from a given character.
+            unicode_key_value = ord(actual_key_sym)
+            actual_key_sym = Gdk.unicode_to_keyval(unicode_key_value)
+            LOGGING.debug(f"Key symbol value from Gdk.unicode_to_keyval '{actual_key_sym}'.")
+
+        # Not valid utf-8 character.
+        except Exception as error :
+            LOGGING.debug(f"Not valid character '{error}'.")
+
+            try:
+
+                LOGGING.debug("Attempt to match key name with Gdk.KEY_<key_name>.")
+                actual_key_sym = getattr(Gdk, f"KEY_{key_name}")
+
+            except AttributeError as attribute_error:
+                raise AttributeError(key_name) from attribute_error
+
+    return actual_key_sym
 
 
-def keyNameToKeyCode(keyName):
+def key_name_to_key_code(key_name):
     """
-    Use GDK to get the keycode for a given keystring.
+    Use GDK to get the keycode for a given key string.
 
     Note that the keycode returned by this function is often incorrect when
-    the requested keystring is obtained by holding down the Shift key.
-
-    Generally you should use uniCharToKeySym() and should only need this
-    function for nonprintable keys anyway.
+    the requested key string is obtained by holding down the Shift key.
     """
 
-    debug_log("keyNameToKeyCode(keyName=%s)" % keyName)
+    LOGGING.debug(get_func_params_and_values())
 
-    keymap = Gdk.Keymap.get_for_display(Gdk.Display.get_default())
-    entries = keymap.get_entries_for_keyval(Gdk.keyval_from_name(keyName))
+    # Get Display.
+    display = Gdk.Display().get_default()
+
+    # Get Key Map
+    key_map = Gdk.Keymap().get_for_display(display)
+
+    # Get Key value.
+    key_symbol_value = key_name_to_key_sym(key_name)
+    entries = key_map.get_entries_for_keyval(key_symbol_value)
 
     try:
         return entries[1][0].keycode
     except TypeError:
-        pass
+        return key_name
 
 
-def pressKey(keyName, window_id=None):
+def press_key(key_name, window_id=None):
     """
-    Presses (and releases) the key specified by keyName.
-    keyName is the English name of the key as seen on the keyboard. Ex: 'enter'
+    Presses (and releases) the key specified by key_name.
+    The key_name is the English name of the key as seen on the keyboard. Ex: 'enter'
     Names are looked up in Gdk.KEY_ If they are not found there, they are
-    looked up by uniCharToKeySym().
+    looked up by Gdk.unicode_to_keyval(key_name).
     """
 
-    debug_log("pressKey(keyName=%s, window_id=%s)" % (keyName, str(window_id)))
+    LOGGING.debug(f"Pressing key '{key_name}' with window_id '{str(window_id)}'.")
 
-    if keyName.lower() in ("esc", "escape", "enter", "return"):
-        window_id = "" # when this would quit a window, release event would be doomed
+    if key_name.lower() in ("esc", "escape", "enter", "return"):
+        # When this would quit a window, release event would be doomed.
+        window_id = ""
 
-    keySym = keyNameToKeySym(keyName)
+    key_symbol_value = key_name_to_key_sym(key_name)
+
     if SESSION_TYPE == "x11":
-        registry.generateKeyboardEvent(keySym, None, KEY_SYM)
-        doTypingDelay()
+        Atspi.generate_keyboard_event(key_symbol_value, None, Atspi.KeySynthType.SYM)
+        do_delay(configuration["typing_delay"])
 
     else:
-        ponytail_check_connection(window_id, input_source="keyboard")
-        ponytail.generateKeysymEvent(keySym, delay=config.typingDelay/2)
+
+        ponytail_wrapper = PonytailWrapper()
+        ponytail = ponytail_wrapper.get_ponytail_instance()
+        ponytail.ponytail_check_connection(window_id, input_source="keyboard")
+
+        use_delay = configuration["typing_delay"]
+        ponytail.generateKeysymEvent(key_symbol_value, delay=use_delay)
 
 
+def hold_key(key_name):
+    """
+    Press and hold the key specified by key_name.
+    """
 
-def keyCombo(comboString):
+    LOGGING.debug(get_func_params_and_values())
+
+    LOGGING.debug(f"Attempting to hold key of name '{key_name}'.")
+
+    key_code = key_name_to_key_code(key_name)
+
+    if SESSION_TYPE == "x11":
+        Atspi.generate_keyboard_event(key_code, None, Atspi.KeySynthType.PRESS)
+        do_delay(configuration["typing_delay"])
+
+    else:
+        ponytail_wrapper = PonytailWrapper()
+        ponytail = ponytail_wrapper.get_ponytail_instance()
+        ponytail.ponytail_check_connection(input_source="keyboard")
+
+        ponytail.generateKeycodePress(key_code)
+
+    do_delay()
+
+
+def release_key(key_name):
+    """
+    Releases the held key specified by keyName.
+    """
+
+    LOGGING.debug(get_func_params_and_values())
+
+    LOGGING.debug(f"Attempting to release key of name '{key_name}'.")
+
+    key_code = key_name_to_key_code(key_name)
+
+    if SESSION_TYPE == "x11":
+        Atspi.generate_keyboard_event(key_code, None, Atspi.KeySynthType.RELEASE)
+        do_delay(configuration["typing_delay"])
+
+    else:
+        ponytail_wrapper = PonytailWrapper()
+        ponytail = ponytail_wrapper.get_ponytail_instance()
+        ponytail.ponytail_check_connection(input_source="keyboard")
+
+        ponytail.generateKeycodePress(key_code)
+
+    do_delay()
+
+
+def type_text(string):
+    """
+    Types the specified string, one character at a time.
+    Please note, you may have to set a higher typing delay,
+    if your machine misses/switches the characters typed.
+    Needed sometimes on slow setups/VMs typing non-ASCII utf8 chars.
+    """
+
+    LOGGING.debug(get_func_params_and_values())
+
+    for character in string:
+        press_key(character)
+
+
+def key_combo(combo_string):
     """
     Generates the appropriate keyboard events to simulate a user pressing the
     specified key combination.
 
-    comboString is the representation of the key combo to be generated.
+    The combo_string is the representation of the key combo to be generated.
     e.g. '<Control><Alt>p' or '<Control><Shift>PageUp' or '<Control>q'
+
+    The combo string does not need to have a final key. It can also be used as.
+    '<Control><Alt><P>' or '<Control><Shift><PageUp>' or '<Control><Q>' which might be
+    more readable in some situations.
     """
 
-    debug_log("keyCombo(comboString=%s)" % comboString)
+    LOGGING.debug(get_func_params_and_values())
 
-    strings = []
-    for s in comboString.split('<'):
-        if s:
-            for S in s.split('>'):
-                if S:
-                    S = keyNameAliases.get(S.lower(), S)
-                    strings.append(S)
+    keys_to_press = []
+    # Remove left side lesser than sign.
+    for key_partial_split in combo_string.split("<"):
+        if key_partial_split:
+            # Remove right side bigger than sign.
+            for key_full_split in key_partial_split.split(">"):
+                if key_full_split:
+                    possible_alias_use = KEY_NAME_ALIASES.get(
+                        key = key_full_split.lower(),
+                        default = key_full_split
+                    )
+                    keys_to_press.append(possible_alias_use)
 
-    for s in strings:
-        if not hasattr(Gdk, s):
-            if not hasattr(Gdk, "KEY_" + s):
-                raise ValueError("Cannot find key '%s'" % s)
+    # Check that the keys to be pressed are defined.
+    for key_name in keys_to_press:
+        if not hasattr(Gdk, key_name):
+            if not hasattr(Gdk, f"KEY_{key_name}"):
+                raise ValueError(f"Cannot find key '{key_name}'")
 
-    modifiers = strings[:-1]
-    finalKey = strings[-1]
+    # Get all keys leading up to the final key.
+    modifiers = keys_to_press[:-1]
+
+    # Get the final key to press.
+    final_key = keys_to_press[-1]
 
     if SESSION_TYPE == "x11":
+        # First press all modifiers leading up to the final key.
         for modifier in modifiers:
-            code = keyNameToKeyCode(modifier)
-            registry.generateKeyboardEvent(code, None, KEY_PRESS)
+            # TODO figure out how to tell if Newton is to be used.
+            key_code = key_name_to_key_code(modifier)
+            Atspi.generate_keyboard_event(key_code, None, Atspi.KeySynthType.PRESS)
 
-        code = keyNameToKeyCode(finalKey)
-        registry.generateKeyboardEvent(code, None, KEY_PRESSRELEASE)
+        # TODO figure out how to tell if Newton is to be used.
+        final_key_code = key_name_to_key_code(final_key)
+        Atspi.generate_keyboard_event(final_key_code, None, Atspi.KeySynthType.PRESSRELEASE)
 
+        # Than release all modifiers after the final key was pressed and released.
         for modifier in modifiers:
-            code = keyNameToKeyCode(modifier)
-            registry.generateKeyboardEvent(code, None, KEY_RELEASE)
+            # TODO figure out how to tell if Newton is to be used.
+            key_code = key_name_to_key_code(modifier)
+            Atspi.generate_keyboard_event(key_code, None, Atspi.KeySynthType.RELEASE)
 
     else:
         # always use monitor, window will often get closed
         # before final release i.e. with alt-f4 ctrl-q etc!
-        ponytail_check_connection(input_source="keyboard", window_id="")
 
+        ponytail_wrapper = PonytailWrapper()
+        ponytail = ponytail_wrapper.get_ponytail_instance()
+        ponytail.ponytail_check_connection(input_source="keyboard", window_id="")
+
+        # First press all modifiers leading up to the final key.
         for modifier in modifiers:
-            code = keyNameToKeyCode(modifier)
-            ponytail.generateKeycodePress(code)
+            key_code = key_name_to_key_code(modifier)
+            ponytail.generateKeycodePress(key_code)
 
-        code = keyNameToKeyCode(finalKey)
-        ponytail.generateKeycodeEvent(code)
+        key_code = key_name_to_key_code(final_key)
+        ponytail.generateKeycodeEvent(key_code)
 
+        # Than release all modifiers after the final key was pressed and released.
         for modifier in modifiers:
-            code = keyNameToKeyCode(modifier)
-            ponytail.generateKeycodeRelease(code)
+            key_code = key_name_to_key_code(modifier)
+            ponytail.generateKeycodeRelease(key_code)
 
-    doDelay()
+    do_delay()
 
 
-def holdKey(keyName):
+########################################
+# Backwards compatibility definitions. #
+########################################
+def doubleClick(x, y, button=1, check=True, window_id=None):  # pylint: disable=invalid-name
     """
-    Press and hold the key specified by keyName.
-    """
-
-    debug_log("holdKey(keyName=%s)" % keyName)
-
-    keyName = keyNameAliases.get(keyName.lower(), keyName)
-    code = keyNameToKeyCode(keyName)
-
-    if SESSION_TYPE == "x11":
-        registry.generateKeyboardEvent(code, None, KEY_PRESS)
-
-    else:
-        ponytail_check_connection(input_source="keyboard")
-        ponytail.generateKeycodePress(code)
-
-    doDelay()
-
-
-def releaseKey(keyName):
-    """
-    Releases the holded key specified by keyName.
+    Backwards compatibility wrapper over double_click.
     """
 
-    debug_log("releaseKey(keyName=%s)" % keyName)
+    double_click(x=x, y=y, button=button, check=check, window_id=window_id)
 
-    keyName = keyNameAliases.get(keyName.lower(), keyName)
-    code = keyNameToKeyCode(keyName)
 
-    if SESSION_TYPE == "x11":
-        registry.generateKeyboardEvent(code, None, KEY_RELEASE)
+def doTypingDelay():  # pylint: disable=invalid-name
+    """
+    Backwards compatibility wrapper over do_typing_delay.
+    """
 
-    else:
-        ponytail_check_connection(input_source="keyboard")
-        ponytail.generateKeycodeRelease(code)
+    do_typing_delay()
 
-    doDelay()
+
+def absoluteMotion(x, y, mouseDelay=None, check=True, window_id=None):  # pylint: disable=invalid-name
+    """
+    Backwards compatibility wrapper over absolute_motion.
+    """
+
+    absolute_motion(x=x, y=y, mouse_delay=mouseDelay, check=check, window_id=window_id)
+
+
+def absoluteMotionWithTrajectory(  # pylint: disable=invalid-name
+        source_x,
+        source_y,
+        dest_x,
+        dest_y,
+        mouseDelay=None,
+        check=True,
+        window_id=None
+    ):
+    """
+    Backwards compatibility wrapper over absolute_motion_with_trajectory.
+    """
+
+    absolute_motion_with_trajectory(
+        source_x=source_x,
+        source_y=source_y,
+        destination_x=dest_x,
+        destination_y=dest_y,
+        mouse_delay=mouseDelay,
+        check=check,
+        window_id=window_id
+    )
+
+
+def relativeMotion(x, y, mouseDelay=None):  # pylint: disable=invalid-name
+    """
+    Backwards compatibility wrapper over relative_motion.
+    """
+
+    relative_motion(x=x, y=y, mouse_delay=mouseDelay)
+
+
+def dragNodeToNode(source_node, dest_node, button=1, check=True):  # pylint: disable=invalid-name
+    """
+    Backwards compatibility wrapper over drag_node_to_node.
+    """
+
+    drag_node_to_node(
+        source_node=source_node,
+        destination_node=dest_node,
+        button=button,
+        check=check
+    )
+
+
+def dragWithTrajectory(  # pylint: disable=invalid-name
+        fromXY,
+        toXY,
+        button=1,
+        check=True,
+        press_delay=0.5,
+        mouse_delay=0.01
+    ):
+    """
+    Backwards compatibility wrapper over drag_with_trajectory.
+    """
+
+    drag_with_trajectory(
+        fromXY=fromXY,
+        toXY=toXY,
+        button=button,
+        check=check,
+        press_delay=press_delay,
+        mouse_delay=mouse_delay
+    )
+
+
+def dragWithTrajectoryGlobal(fromXY, toXY, button=1):  # pylint: disable=invalid-name
+    """
+    Backwards compatibility wrapper over drag_with_trajectory_global
+    """
+
+    drag_with_trajectory_global(fromXY=fromXY, toXY=toXY, button=button)
+
+
+def pressKey(keyName, window_id=None):  # pylint: disable=invalid-name
+    """
+    Backwards compatibility wrapper over press_key.
+    """
+
+    press_key(key_name=keyName, window_id=window_id)
+
+
+def typeText(string):  # pylint: disable=invalid-name
+    """
+    Backwards compatibility wrapper over type_text.
+    """
+
+    type_text(string=string)
+
+
+def keyNameToKeyCode(keyName):  # pylint: disable=invalid-name
+    """
+    Backwards compatibility wrapper over key_name_to_key_code.
+    """
+
+    return key_name_to_key_code(key_name=keyName)
+
+
+def holdKey(keyName):  # pylint: disable=invalid-name
+    """
+    Backwards compatibility wrapper over hold_key.
+    """
+
+    hold_key(key_name=keyName)
+
+
+def releaseKey(keyName):  # pylint: disable=invalid-name
+    """
+    Backwards compatibility wrapper over release_key.
+    """
+
+    release_key(key_name=keyName)
+
+
+def keyCombo(comboString):  # pylint: disable=invalid-name
+    """
+    Backwards compatibility wrapper over key_combo.
+    """
+
+    key_combo(combo_string=comboString)
+###############################################
+# End of backwards compatibility definitions. #
+###############################################

@@ -41,7 +41,7 @@ from accessible_value import AccessibleValue
 
 from _simple_predicate import SimplePredicate
 from _ponytail_connection import PonytailWrapper
-from dogtail.rawinput import click, point, doubleClick
+from rawinput import click, point, double_click
 from config import read_config
 
 
@@ -665,7 +665,7 @@ class DogtailAPI(object):
         # Starting with no workarounds for any role names or objects.
         # If something will start crashing we can fix it easily.
 
-        doubleClick(click_x, click_y, button, window_id=self.window_id)
+        double_click(click_x, click_y, button, window_id=self.window_id)
 
 
     def point(self):

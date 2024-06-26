@@ -7,6 +7,9 @@ Experimental dogtail changes for 1.0 release.
 import configparser
 
 # TODO might be worth keeping getters and setters to the dictionary.
+
+# TODO add backwards compatibility for camelCasing
+
 def read_config():
     """
     Read config values from config.ini file and return them as dictionary.
@@ -14,6 +17,7 @@ def read_config():
     :return: Dictionary of configuration values.
     :rtype: dict
     """
+
     # Create a ConfigParser object.
     config = configparser.ConfigParser()
 

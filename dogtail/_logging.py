@@ -93,3 +93,21 @@ class FuncFilter(logging.Filter):
             sys._getframe().f_back.f_back.f_back.f_back.f_back.f_code.co_name
         )
         return True
+
+
+def get_func_params_and_values():
+    """
+    Simple way to have logging data from the place it was called in.
+    """
+
+    # Get callers frame parameters.
+    _local_func_parameters = sys._getframe().f_back.f_locals.keys()
+    # Get callers frame parameter values.
+    _local_func_parameters_value = sys._getframe().f_back.f_locals.values()
+
+    _map_of_keys_and_values = [
+        x if "self" == x else x if "context" == x else str(x) + "=" + str(y)
+        for x, y in zip(_local_func_parameters, _local_func_parameters_value)
+    ]
+
+    return f"({', '.join(_map_of_keys_and_values)})"

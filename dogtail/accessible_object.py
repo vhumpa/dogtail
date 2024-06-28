@@ -23,6 +23,9 @@ from _logging import logging_class
 LOGGING = logging_class.logger
 
 
+# TODO think about logging and how much of it we need to not get flooded.
+
+
 class AccessibleObject:
     """
     Utility class for obtaining information about Accessible Objects.
@@ -36,6 +39,8 @@ class AccessibleObject:
         For now lets just prepare it before having hands on experience.
         """
 
+        # DO not put logging LOGGING.debug(logging_class.get_func_params_and_values()) here
+
         return False
         #return isinstance(acc_object, newton_atspi_compat.Accessible)
 
@@ -45,6 +50,8 @@ class AccessibleObject:
         """
         Returns False if we know for certain this object is invalid.
         """
+
+        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         return acc_object is not None
 
@@ -128,6 +135,8 @@ class AccessibleObject:
         specified, children for which pred is False will be skipped.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         if not AccessibleObject.is_valid(acc_object):
             return
 
@@ -143,6 +152,8 @@ class AccessibleObject:
         """
         Returns the nth child of obj.
         """
+
+        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return None
@@ -165,11 +176,11 @@ class AccessibleObject:
                 child = Atspi.Accessible.get_child_at_index(acc_object, index)
 
         except Exception as error:
-            LOGGING.info(f"Exception when getting child at index: '{error}'")
+            LOGGING.debug(f"Exception when getting child at index: '{error}'")
             return None
 
         if child == acc_object:
-            LOGGING.info(f"Object '{acc_object}' claims to be its own child.")
+            LOGGING.debug(f"Object '{acc_object}' claims to be its own child.")
             return None
 
         return child
@@ -181,6 +192,8 @@ class AccessibleObject:
         Returns number of children in given object.
         """
 
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
         if not AccessibleObject.is_valid(acc_object):
             return 0
 
@@ -191,7 +204,7 @@ class AccessibleObject:
                 count = Atspi.Accessible.get_child_count(acc_object)
 
         except Exception as error:
-            LOGGING.info(f"Exception when getting child count: '{error}'")
+            LOGGING.debug(f"Exception when getting child count: '{error}'")
             return 0
 
         return count
@@ -202,6 +215,8 @@ class AccessibleObject:
         """
         Returns all descendants that match a predicate.
         """
+
+        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return
@@ -221,6 +236,8 @@ class AccessibleObject:
         Returns all descendants that match a predicate.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         # User is using lambdas.
         if isinstance(given_predicate, LambdaType):
             predicate = given_predicate
@@ -229,7 +246,7 @@ class AccessibleObject:
             predicate = given_predicate.satisfied_by_node
         # Unknown/unsupported way to compare nodes.
         else:
-            LOGGING.info("Unknown/unsupported way to compare nodes.")
+            LOGGING.debug("Unknown/unsupported way to compare nodes.")
             return None
 
         matches = []
@@ -243,6 +260,8 @@ class AccessibleObject:
         Find a single descendant node satisfying the predicate.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         # User is using lambdas.
         if isinstance(given_predicate, LambdaType):
             predicate = given_predicate
@@ -251,7 +270,7 @@ class AccessibleObject:
             predicate = given_predicate.satisfied_by_node
         # Unknown/unsupported way to compare nodes.
         else:
-            LOGGING.info("Unknown/unsupported way to compare nodes.")
+            LOGGING.debug("Unknown/unsupported way to compare nodes.")
             return None
 
         if depth_first:
@@ -267,6 +286,8 @@ class AccessibleObject:
         """
         Find a single descendant node satisfying the predicate, searching depth first.
         """
+
+        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         try:
             if pred(acc_object):
@@ -291,6 +312,8 @@ class AccessibleObject:
         """
         Find a single descendant node satisfying the predicate, searching breadth first.
         """
+
+        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         for child in acc_object:
             try:
@@ -317,6 +340,9 @@ class AccessibleObject:
         Find a single ancestor satisfying the predicate.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+
         if not AccessibleObject.is_valid(acc_object):
             return None
 
@@ -325,7 +351,7 @@ class AccessibleObject:
         parent = AccessibleObject.get_parent_checked(acc_object)
         while parent:
             if parent in objects:
-                LOGGING.info(f"Circular tree suspected, {parent} was found already.")
+                LOGGING.debug(f"Circular tree suspected, {parent} was found already.")
                 return None
 
             if pred(parent):
@@ -342,6 +368,8 @@ class AccessibleObject:
         """
         Returns the parent of obj, doing checks for tree validity.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return None
@@ -368,6 +396,8 @@ class AccessibleObject:
         Returns the pid associated with the obj.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         if not AccessibleObject.is_valid(acc_object):
             return -1
 
@@ -378,7 +408,7 @@ class AccessibleObject:
                 process_id = Atspi.Accessible.get_process_id(acc_object)
 
         except Exception as error:
-            LOGGING.info(f"Exception when getting process id: '{error}'")
+            LOGGING.debug(f"Exception when getting process id: '{error}'")
             return -1
 
         return process_id
@@ -389,6 +419,8 @@ class AccessibleObject:
         """
         Returns a 'name' for Accessible object.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return None
@@ -405,6 +437,8 @@ class AccessibleObject:
         Returns a 'role' for Accessible object.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         if not AccessibleObject.is_valid(acc_object):
             return None
 
@@ -419,6 +453,8 @@ class AccessibleObject:
         """
         Returns a 'role_name' for Accessible object.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return None
@@ -435,6 +471,8 @@ class AccessibleObject:
         Returns a 'description' for Accessible object.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         if not AccessibleObject.is_valid(acc_object):
             return None
 
@@ -449,6 +487,8 @@ class AccessibleObject:
         """
         Returns a 'parent' for Accessible object.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return None
@@ -465,6 +505,8 @@ class AccessibleObject:
         Returns a 'index_in_parent' for Accessible object.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         if not AccessibleObject.is_valid(acc_object):
             return None
 
@@ -478,11 +520,11 @@ class AccessibleObject:
 
         # Not working as expected sometimes. Working around it.
         if final_index == -1:
-            LOGGING.info("Error in get_index_in_parent. Attempting to work around.")
+            LOGGING.debug("Error in get_index_in_parent. Attempting to work around.")
 
             for index, child in enumerate(acc_object.parent.children):
                 if child.parent.get_child_at_index(index) == acc_object:
-                    LOGGING.info(f"Success, index was: '{index}'")
+                    LOGGING.debug(f"Success, index was: '{index}'")
                     return index
 
         return final_index
@@ -493,6 +535,8 @@ class AccessibleObject:
         """
         Returns a 'parent' for Accessible object.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return None
@@ -513,6 +557,8 @@ class AccessibleObject:
         'labeller' (read-only list of Node instances):
         The node(s) that is/are a label for this node. Generated from 'relations'.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return []
@@ -550,6 +596,8 @@ class AccessibleObject:
         'labelee' (read-only list of Node instances):
         The node(s) that this node is a label for. Generated from 'relations'.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return []

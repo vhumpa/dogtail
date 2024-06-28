@@ -43,12 +43,12 @@ def do_delay(delay=None):
 
     if delay is None:
         delay = configuration["default_delay"]
-        LOGGING.info(f"Default Delay: Sleeping for '{delay}'")
+        LOGGING.debug(f"Default Delay: Sleeping for '{delay}'")
 
     if configuration["debug_sleep"]:
-        LOGGING.info(f"Debug Sleep: Sleeping for '{delay}'")
+        LOGGING.debug(f"Debug Sleep: Sleeping for '{delay}'")
 
-    sleep(delay)
+    sleep(float(delay))
 
 
 ########################################

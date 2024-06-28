@@ -40,7 +40,7 @@ class AccessibleComponent:
         """
 
         if not AccessibleObject.is_component(acc_object):
-            LOGGING.info("Accessible object does not have a Component interface.")
+            LOGGING.debug("Accessible object does not have a Component interface.")
             return False
 
         try:
@@ -49,7 +49,7 @@ class AccessibleComponent:
 
             return Atspi.Component.grab_focus(acc_object)
         except Exception as error:
-            LOGGING.info(f"Exception when grabbing focus: '{error}'")
+            LOGGING.debug(f"Exception when grabbing focus: '{error}'")
             return False
 
 
@@ -86,7 +86,7 @@ class AccessibleComponent:
             return (acc_rect.x, acc_rect.y, acc_rect.width, acc_rect.height)
 
         except Exception as error:
-            LOGGING.info(f"Exception when getting position or size: '{error}'")
+            LOGGING.debug(f"Exception when getting position or size: '{error}'")
             return None
 
     @staticmethod
@@ -95,8 +95,10 @@ class AccessibleComponent:
         A tuple containing the size of the Accessible: (w, h)
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         if not AccessibleObject.is_component(acc_object):
-            LOGGING.info("Accessible object does not have a Component interface.")
+            LOGGING.debug("Accessible object does not have a Component interface.")
             return (-1, -1)
 
 
@@ -125,8 +127,10 @@ class AccessibleComponent:
         A tuple containing the position of the Accessible: (x, y)
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         if not AccessibleObject.is_component(acc_object):
-            LOGGING.info("Accessible object does not have a Component interface.")
+            LOGGING.debug("Accessible object does not have a Component interface.")
             return (-1, -1)
 
         # Atspi.CoordType.SCREEN = 0

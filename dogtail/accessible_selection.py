@@ -34,7 +34,7 @@ class AccessibleSelection:
         """
 
         if not AccessibleObject.is_selection(acc_object):
-            LOGGING.info("This object does not have Atspi.Selection interface.")
+            LOGGING.debug("This object does not have Atspi.Selection interface.")
 
         if AccessibleObject.is_newton(acc_object):
             acc_object.select_all()
@@ -49,7 +49,7 @@ class AccessibleSelection:
         """
 
         if not AccessibleObject.is_selection(acc_object):
-            LOGGING.info("This object does not have Atspi.Selection interface.")
+            LOGGING.debug("This object does not have Atspi.Selection interface.")
 
         if AccessibleObject.is_newton(acc_object):
             acc_object.clear_selection()
@@ -64,7 +64,7 @@ class AccessibleSelection:
         """
 
         if not AccessibleObject.is_selection(acc_object):
-            LOGGING.info("This object does not have Atspi.Selection interface.")
+            LOGGING.debug("This object does not have Atspi.Selection interface.")
 
         parent = AccessibleObject.get_parent_checked(acc_object)
 
@@ -81,7 +81,7 @@ class AccessibleSelection:
         """
 
         if not AccessibleObject.is_selection(acc_object):
-            LOGGING.info("This object does not have Atspi.Selection interface.")
+            LOGGING.debug("This object does not have Atspi.Selection interface.")
 
         parent = AccessibleObject.get_parent_checked(acc_object)
 

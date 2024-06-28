@@ -39,7 +39,7 @@ class AccessibleUtilities:
                 application = Atspi.Accessible.get_application(acc_object)
 
         except Exception as error:
-            LOGGING.info(f"Error when getting application node: {error}")
+            LOGGING.debug(f"Error when getting application node: {error}")
             return None
 
         return application
@@ -74,7 +74,7 @@ class AccessibleUtilities:
                 toolkit_name = Atspi.Accessible.get_toolkit_name(acc_object)
 
         except Exception as error:
-            LOGGING.info(f"Error when getting toolkit name: {error}")
+            LOGGING.debug(f"Error when getting toolkit name: {error}")
             return None
 
         return toolkit_name
@@ -93,7 +93,7 @@ class AccessibleUtilities:
                 toolkit_version = Atspi.Accessible.get_toolkit_version(acc_object)
 
         except Exception as error:
-            LOGGING.info(f"Error when getting toolkit name: {error}")
+            LOGGING.debug(f"Error when getting toolkit name: {error}")
             return None
 
         return toolkit_version
@@ -115,7 +115,7 @@ class AccessibleUtilities:
                 desktop = Atspi.get_desktop(0)
 
         except Exception as error:
-            LOGGING.info(f"Error when getting desktop from Atspi: {error}")
+            LOGGING.debug(f"Error when getting desktop from Atspi: {error}")
             return None
 
         return desktop
@@ -144,7 +144,7 @@ class AccessibleUtilities:
             if application.get_name() == application_name:
                 return application
 
-        LOGGING.info("Application was not found in desktop.")
+        LOGGING.debug("Application was not found in desktop.")
         return None
 
 
@@ -158,7 +158,7 @@ class AccessibleUtilities:
             if child.get_name() == application:
                 return True
 
-        LOGGING.info("Application is not in desktop.")
+        LOGGING.debug("Application is not in desktop.")
         return False
 
 
@@ -176,6 +176,6 @@ class AccessibleUtilities:
                 if Atspi.Accessible.get_process_id(application_object) == pid:
                     return application_object
 
-        LOGGING.info(f"Application with pid '{pid}' not in desktop.")
+        LOGGING.debug(f"Application with pid '{pid}' not in desktop.")
 
         return None

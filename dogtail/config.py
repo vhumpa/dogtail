@@ -10,6 +10,8 @@ import configparser
 
 # TODO add backwards compatibility for camelCasing
 
+# Make sure it works as https://gitlab.com/dogtail/dogtail/-/issues/12
+
 def read_config():
     """
     Read config values from config.ini file and return them as dictionary.

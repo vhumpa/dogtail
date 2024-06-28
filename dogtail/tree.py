@@ -14,7 +14,6 @@ Experimental dogtail changes for 1.0 release.
 import os
 
 import gi
-from time import sleep
 
 gi.require_version("Atspi", "2.0")
 from gi.repository import Atspi
@@ -49,19 +48,12 @@ class DogtailAPI(object):
     Main dogtail API definition.
     """
 
-    # Initial state, no connection.
-    __window_id = None
-
     LOGGING.info("Initiating dogtail api.")
 
     ponytail_wrapper = PonytailWrapper()
     ponytail = ponytail_wrapper.get_ponytail_instance()
 
     configuration = read_config()
-
-    # TODO remove
-    # Find out if debug dogtail is set to True and log to console if so.
-    LOGGING.info("Debugging dogtail to console? " + str(configuration["debug_dogtail"]))
 
     if configuration["debug_dogtail"]:
         LOGGING.info("Debugging dogtail to console.")
@@ -117,7 +109,7 @@ class DogtailAPI(object):
         I do not understand this well enough yet.
         """
 
-        LOGGING.info("Dummy listener.")
+        LOGGING.debug("Dummy listener.")
 
 
     @property
@@ -126,80 +118,20 @@ class DogtailAPI(object):
         Return string description of the toolkit we are using.
         """
 
-        return AccessibleUtilities.get_toolkit()
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleUtilities.get_toolkit(self)
 
 
     @property
     def window_id(self):
         """
-        Return window id of a node.
+        Return window_id of a node.
         """
 
-        if self.session_type == "x11":
-            return None
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
-        if self.__window_id is None:
-            LOGGING.info("Window id event.")
-
-            window_list = self.ponytail.window_list
-            if len(window_list) == 0:
-                sleep(0.1)
-                window_list = self.ponytail.window_list
-
-            for window in window_list:
-                if "title" not in window.keys():
-                    window["title"] = ""
-
-            node = self
-            parent_list = [node]
-            while node.parent is not None:
-                parent_list.append(node.parent)
-                node = node.parent
-
-            for ancestor in parent_list:
-                # Ancestors parent is None
-                if ancestor.parent is None:
-                    self.__window_id = [
-                        x["id"] for x in window_list if bool(x["has-focus"]) is True
-                    ][0]
-                    return self.__window_id
-
-                # Ancestors parent is an application and the application is gnome-shell.
-                elif (
-                    ancestor.parent.role_name == "application"
-                    and ancestor.parent.name == "gnome-shell"
-                ):
-                    return ""
-
-                # Ancestors parent is an application and ancestor is a window.
-                elif (
-                    ancestor.parent.role_name == "application"
-                    and ancestor.role_name == "window"
-                    and ancestor.name == ""
-                ):
-                    self.__window_id = [
-                        x["id"] for x in window_list if bool(x["has-focus"]) is True
-                    ][0]
-                    return self.__window_id
-
-                # Ancestors parent is an application and ancestors name is in the list.
-                elif ancestor.parent.role_name == "application" and ancestor.name in [
-                    x["title"] for x in window_list
-                ]:
-                    self.__window_id = [
-                        x["id"] for x in window_list if x["title"] == ancestor.name
-                    ][0]
-                    return self.__window_id
-
-                # Ancestors parent is an application.
-                elif ancestor.parent.roleName == "application":
-                    self.__window_id = [
-                        x["id"] for x in window_list if bool(x["has-focus"]) is True
-                    ][0]
-                    return self.__window_id
-
-        else:
-            return self.__window_id
+        return self.ponytail_wrapper.get_window_id(self)
 
 
     @property
@@ -208,19 +140,13 @@ class DogtailAPI(object):
         Check if window is focused.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         if self.session_type != "wayland":
             LOGGING.info("Ponytail is not used in non Wayland session.")
             return False
 
-        window_id = self.window_id
-
-        window_list = self.ponytail.window_list
-        # Iterate through the window_list to see what window has focus.
-        for window in window_list:
-            if window["id"] == window_id and bool(window["has-focus"]) is True:
-                return True
-
-        return False
+        return self.ponytail_wrapper.get_window_has_focus()
 
 
     @property
@@ -228,6 +154,8 @@ class DogtailAPI(object):
         """
         Define a 'name' property for Atspi object.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleObject.get_name(self)
 
@@ -247,6 +175,8 @@ class DogtailAPI(object):
         Define a 'role_name' property for Atspi object.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleObject.get_role_name(self)
 
 
@@ -264,8 +194,6 @@ class DogtailAPI(object):
         """
         Define a 'parent' property for Atspi object.
         """
-
-        LOGGING.info("Accessing .parent property.")
 
         return AccessibleObject.get_parent(self)
 

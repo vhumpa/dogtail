@@ -70,13 +70,15 @@ def do_typing_delay():
     """
     Execute a typing delay.
     """
-    do_delay(configuration["typing_delay"])
+    do_delay(float(configuration["typing_delay"]))
 
 
 def click(x, y, button=1, check=True, window_id=None):
     """
     Synthesize a mouse button click at coordinates (x, y).
     """
+
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     # Get ponytail only when required.
     ponytail_wrapper = PonytailWrapper()
@@ -95,7 +97,7 @@ def click(x, y, button=1, check=True, window_id=None):
         # TODO Newton if condition.
         Atspi.generate_mouse_event(_x, _y, name=f"b{button}c")
     else:
-        ponytail.ponytail_check_connection(window_id)
+        ponytail_wrapper.ponytail_check_connection(window_id)
         ponytail.generateButtonEvent(button, _x, _y)
 
     do_delay(configuration["default_delay"])
@@ -105,6 +107,8 @@ def point(x, y, check=True, window_id=None):
     """
     Synthesize a button point at (x,y)
     """
+
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     # Get ponytail only when required.
     ponytail_wrapper = PonytailWrapper()
@@ -123,7 +127,7 @@ def point(x, y, check=True, window_id=None):
         # TODO Newton if condition.
         Atspi.generate_mouse_event(_x, _y, name="abs")
     else:
-        ponytail.ponytail_check_connection(window_id)
+        ponytail_wrapper.ponytail_check_connection(window_id)
         ponytail.generateMotionEvent(_x, _y)
 
     do_delay(configuration["default_delay"])
@@ -133,6 +137,8 @@ def double_click(x, y, button=1, check=True, window_id=None):
     """
     Synthesize a mouse button double-click at (x,y)
     """
+
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     # Get ponytail only when required.
     ponytail_wrapper = PonytailWrapper()
@@ -151,7 +157,7 @@ def double_click(x, y, button=1, check=True, window_id=None):
         # TODO Newton if condition.
         Atspi.generate_mouse_event(x, y, name=f"b{button}d")
     else:
-        ponytail.ponytail_check_connection(window_id)
+        ponytail_wrapper.ponytail_check_connection(window_id)
         ponytail.generateButtonEvent(button, _x, _y)
 
         do_delay(configuration["double_click_delay"])
@@ -171,6 +177,8 @@ def press(x, y, button=1, check=True, window_id=None, delay=None):
     """
     Synthesize a mouse button press at (x,y)
     """
+
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     # Check if user defined their own delay.
     if delay:
@@ -195,7 +203,7 @@ def press(x, y, button=1, check=True, window_id=None, delay=None):
         Atspi.generate_mouse_event(_x, _y, name=f"b{button}p")
 
     else:
-        ponytail.ponytail_check_connection(window_id)
+        ponytail_wrapper.ponytail_check_connection(window_id)
         ponytail.generateMotionEvent(_x, _y)
         ponytail.generateButtonPress(button)
 
@@ -206,6 +214,8 @@ def release(x, y, button=1, check=True, window_id=None):
     """
     Synthesize a mouse button release at (x,y)
     """
+
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     # Get ponytail only when required.
     ponytail_wrapper = PonytailWrapper()
@@ -224,7 +234,7 @@ def release(x, y, button=1, check=True, window_id=None):
         Atspi.generate_mouse_event(_x, _y, name=f"b{button}r")
 
     else:
-        ponytail.ponytail_check_connection(window_id)
+        ponytail_wrapper.ponytail_check_connection(window_id)
         ponytail.generateMotionEvent(_x, _y)
 
         do_delay()
@@ -238,6 +248,8 @@ def absolute_motion(x, y, mouse_delay=None, check=True, window_id=None):
     """
     Synthesize mouse absolute motion to (x,y)
     """
+
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     # Get ponytail only when required.
     ponytail_wrapper = PonytailWrapper()
@@ -264,7 +276,7 @@ def absolute_motion(x, y, mouse_delay=None, check=True, window_id=None):
         Atspi.generate_mouse_event(_x, _y, name="abs")
 
     else:
-        ponytail.ponytail_check_connection(window_id)
+        ponytail_wrapper.ponytail_check_connection(window_id)
         ponytail.generateMotionEvent(_x, _y)
 
     do_delay(delay_to_use)
@@ -285,6 +297,8 @@ def absolute_motion_with_trajectory(
     movements which are Synthesize separately.
     """
 
+    LOGGING.debug(logging_class.get_func_params_and_values())
+
     # Get ponytail only when required.
     ponytail_wrapper = PonytailWrapper()
     ponytail = ponytail_wrapper.get_ponytail_instance()
@@ -302,7 +316,7 @@ def absolute_motion_with_trajectory(
     LOGGING.debug(f"Mouse absolute motion with trajectory at ({destination_x}, {destination_y})")
 
     if SESSION_TYPE == "wayland":
-        ponytail.ponytail_check_connection(window_id)
+        ponytail_wrapper.ponytail_check_connection(window_id)
 
     difference_x = float(destination_x - source_x)
     difference_y = float(destination_y - source_y)
@@ -339,6 +353,8 @@ def relative_motion(x, y, mouse_delay=None):
     Note: Does not check if the end coordinates are positive.
     """
 
+    LOGGING.debug(logging_class.get_func_params_and_values())
+
     LOGGING.debug(f"Mouse relative motion of ({x}, {y})")
 
     if SESSION_TYPE == "wayland":
@@ -359,6 +375,8 @@ def drag(fromXY, toXY, button=1, check=True):  # pylint: disable=invalid-name
     Synthesize a mouse press, drag, and release on the screen.
     """
 
+    LOGGING.debug(logging_class.get_func_params_and_values())
+
     LOGGING.debug(f"Mouse button '{button}' drag from '{fromXY}' to '{toXY}'")
 
     (_x, _y) = fromXY
@@ -377,6 +395,8 @@ def drag_node_to_node(source_node, destination_node, button=1, check=True):
     Drag source_node onto dest_node. These are tree.Node objects. Takes positions
     of these Nodes directly, so you don't have to calculate end enter them directly.
     """
+
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     LOGGING.debug(f"Dragging from '{str(source_node)}' to '{str(destination_node)}'.")
     LOGGING.debug(f"Dragging using button '{button}' and check '{check}'")
@@ -405,6 +425,8 @@ def drag_with_trajectory(  # pylint: disable=invalid-name
     Please note, that on Wayland, this function works for drags only within a single window.
     On X this function works with global coords and equals dragWithTrajectoryGlobal
     """
+
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     # Check if user defined their own delay.
     if press_delay:
@@ -448,6 +470,8 @@ def drag_with_trajectory_global(fromXY, toXY, button=1):  # pylint: disable=inva
     version of dogtail.
     """
 
+    LOGGING.debug(logging_class.get_func_params_and_values())
+
     # Get ponytail only when required.
     ponytail_wrapper = PonytailWrapper()
     ponytail = ponytail_wrapper.get_ponytail_instance()
@@ -456,7 +480,7 @@ def drag_with_trajectory_global(fromXY, toXY, button=1):  # pylint: disable=inva
 
     if SESSION_TYPE == "wayland":
         (from_x, from_y) = fromXY
-        ponytail.ponytail_check_connection(window_id="")
+        ponytail_wrapper.ponytail_check_connection(window_id="")
 
         ponytail.generateMotionEvent(from_x, from_y)
         do_delay(configuration["default_delay"])
@@ -600,15 +624,15 @@ def press_key(key_name, window_id=None):
 
     if SESSION_TYPE == "x11":
         Atspi.generate_keyboard_event(key_symbol_value, None, Atspi.KeySynthType.SYM)
-        do_delay(configuration["typing_delay"])
+        do_delay(float(configuration["typing_delay"]))
 
     else:
 
         ponytail_wrapper = PonytailWrapper()
-        ponytail = ponytail_wrapper.get_ponytail_instance()
-        ponytail.ponytail_check_connection(window_id, input_source="keyboard")
+        ponytail_wrapper.ponytail_check_connection(window_id, input_source="keyboard")
 
-        use_delay = configuration["typing_delay"]
+        ponytail = ponytail_wrapper.get_ponytail_instance()
+        use_delay = float(configuration["typing_delay"])
         ponytail.generateKeysymEvent(key_symbol_value, delay=use_delay)
 
 
@@ -625,13 +649,13 @@ def hold_key(key_name):
 
     if SESSION_TYPE == "x11":
         Atspi.generate_keyboard_event(key_code, None, Atspi.KeySynthType.PRESS)
-        do_delay(configuration["typing_delay"])
+        do_delay(float(configuration["typing_delay"]))
 
     else:
         ponytail_wrapper = PonytailWrapper()
-        ponytail = ponytail_wrapper.get_ponytail_instance()
-        ponytail.ponytail_check_connection(input_source="keyboard")
+        ponytail_wrapper.ponytail_check_connection(input_source="keyboard")
 
+        ponytail = ponytail_wrapper.get_ponytail_instance()
         ponytail.generateKeycodePress(key_code)
 
     do_delay()
@@ -650,13 +674,13 @@ def release_key(key_name):
 
     if SESSION_TYPE == "x11":
         Atspi.generate_keyboard_event(key_code, None, Atspi.KeySynthType.RELEASE)
-        do_delay(configuration["typing_delay"])
+        do_delay(float(configuration["typing_delay"]))
 
     else:
         ponytail_wrapper = PonytailWrapper()
-        ponytail = ponytail_wrapper.get_ponytail_instance()
-        ponytail.ponytail_check_connection(input_source="keyboard")
+        ponytail_wrapper.ponytail_check_connection(input_source="keyboard")
 
+        ponytail = ponytail_wrapper.get_ponytail_instance()
         ponytail.generateKeycodePress(key_code)
 
     do_delay()
@@ -738,8 +762,9 @@ def key_combo(combo_string):
         # before final release i.e. with alt-f4 ctrl-q etc!
 
         ponytail_wrapper = PonytailWrapper()
+        ponytail_wrapper.ponytail_check_connection(input_source="keyboard", window_id="")
+
         ponytail = ponytail_wrapper.get_ponytail_instance()
-        ponytail.ponytail_check_connection(input_source="keyboard", window_id="")
 
         # First press all modifiers leading up to the final key.
         for modifier in modifiers:

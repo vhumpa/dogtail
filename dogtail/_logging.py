@@ -21,7 +21,6 @@ class Singleton(type):
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
 
-
 class Logging(metaclass=Singleton):
     """
     Logging class.
@@ -33,12 +32,12 @@ class Logging(metaclass=Singleton):
         """
         Initiating logger class with some basic logging setup.
         """
-
         if not self.logger:
             call("sudo rm -rf /tmp/dogtail_logger.log", shell=True, stderr=STDOUT)
 
         self.logger = logging.getLogger("general")
         self.logger.setLevel(logging.DEBUG)
+
         # Disable default handler.
         self.logger.propagate = False
 
@@ -84,19 +83,18 @@ class Logging(metaclass=Singleton):
         Simple way to have logging data from the place it was called in.
         """
 
-        # Get callers frame parameters.
-        _local_func_parameters = sys._getframe().f_back.f_locals.keys()
-        # Get callers frame parameter values.
-        _local_func_parameters_value = sys._getframe().f_back.f_locals.values()
-
-        _map_of_keys_and_values = [
-            x if "self" == x else x if "context" == x else str(x) + "=" + str(y)
-            for x, y in zip(_local_func_parameters, _local_func_parameters_value)
-        ]
-
-        return f"({', '.join(_map_of_keys_and_values)})"
-
-
+        try:
+            frame = sys._getframe().f_back
+            _local_func_parameters = frame.f_locals.keys()
+            _local_func_parameters_value = frame.f_locals.values()
+            map_of_keys_and_values = [
+                x if "self" == x else x if "context" == x else repr(x) + "=" + repr(y)
+                for x, y in zip(_local_func_parameters, _local_func_parameters_value)
+            ]
+            return f"({', '.join(map_of_keys_and_values)})"
+        except Exception as error:
+            self.logger.error(f"Error in get_func_params_and_values: {error}")
+            return ""
 
 class FuncFilter(logging.Filter):
     """
@@ -110,6 +108,5 @@ class FuncFilter(logging.Filter):
             sys._getframe().f_back.f_back.f_back.f_back.f_back.f_code.co_name
         )
         return True
-
 
 logging_class = Logging()

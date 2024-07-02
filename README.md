@@ -38,6 +38,24 @@ For GNOME/GTK, enable accessibility support in your GNOME session with:
 This only affects newly-started applications, so you may want to log out and
 log back in again.
 
+Important: Handling GTK4 Application Windows in Dogtail
+=======================================================
+
+For GTK4 applications, disabling window shadows is essential to ensure accurate positioning by Dogtail. With shadows disabled, we encounters a consistent coordinate offset, which we've preconfigured as `dogtail.config.gtk4Offset`. In case of working with fullscreen windows, the offset is 0, and we manage to detect that
+on-the-fly both in x11 and wayland sessions. However this process requires `python-xlib`, even for Wayland sessions, leveraging Xwayland to ascertain resolution information, as no more direct method we've found currently available for Wayland.
+
+When window shadows are active, the perceived offset can vary significantly, influenced by factors such as the specific application, window size, and scaling settings. To ensure consistent behavior across applications, disabling shadows is recommended.
+
+Disabling Shadows in GTK4:
+
+To disable window shadows, add the following CSS to your GTK4 configuration (`~/.config/gtk-4.0/gtk.css`):
+
+window, .popover, .tooltip {
+    box-shadow: none;
+}
+
+======
+
 Then, look at some of the example scripts. Run them, tweak them, write your own.
 
 I suggest starting with gedit-test-utf8-procedural-api.py, as it's updated the

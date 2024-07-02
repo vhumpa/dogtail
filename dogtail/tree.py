@@ -4,6 +4,7 @@ Experimental dogtail changes for 1.0 release.
 """
 
 # pylint: disable=broad-exception-caught
+# pylint: disable=no-name-in-module
 # pylint: disable=wrong-import-position
 # pylint: disable=wrong-import-order
 # pylint: disable=import-error
@@ -23,24 +24,24 @@ import warnings
 warnings.filterwarnings("ignore", "g_object_unref")
 
 # TODO To be change to dogtail.logging before release.
-from _logging import logging_class
+from dogtail._logging import logging_class
 LOGGING = logging_class.logger
 
 
-from accessible_actions import AccessibleActions
-from accessible_component import AccessibleComponent
-from accessible_object import AccessibleObject
-from accessible_root import AccessibleRoot
-from accessible_selection import AccessibleSelection
-from accessible_state import AccessibleState
-from accessible_text import AccessibleText
-from accessible_utilities import AccessibleUtilities
-from accessible_value import AccessibleValue
+from dogtail.accessible_actions import AccessibleActions
+from dogtail.accessible_component import AccessibleComponent
+from dogtail.accessible_object import AccessibleObject
+from dogtail.accessible_root import AccessibleRoot
+from dogtail.accessible_selection import AccessibleSelection
+from dogtail.accessible_state import AccessibleState
+from dogtail.accessible_text import AccessibleText
+from dogtail.accessible_utilities import AccessibleUtilities
+from dogtail.accessible_value import AccessibleValue
 
-from _simple_predicate import SimplePredicate
-from _ponytail_connection import PonytailWrapper
-from rawinput import click, point, double_click
-from config import read_config
+from dogtail.predicate import GenericPredicate
+from dogtail._ponytail_connection import PonytailWrapper
+from dogtail.rawinput import click, point, double_click
+from dogtail.config import config
 
 
 class DogtailAPI(object):
@@ -48,14 +49,12 @@ class DogtailAPI(object):
     Main dogtail API definition.
     """
 
-    LOGGING.info("Initiating dogtail api.")
+    LOGGING.debug("Initiating dogtail api.")
 
     ponytail_wrapper = PonytailWrapper()
     ponytail = ponytail_wrapper.get_ponytail_instance()
 
-    configuration = read_config()
-
-    if configuration["debug_dogtail"]:
+    if config.debug_dogtail:
         LOGGING.info("Debugging dogtail to console.")
         logging_class.debug_to_console()
 
@@ -155,7 +154,7 @@ class DogtailAPI(object):
         Define a 'name' property for Atspi object.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
+        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleObject.get_name(self)
 
@@ -175,7 +174,7 @@ class DogtailAPI(object):
         Define a 'role_name' property for Atspi object.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
+        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleObject.get_role_name(self)
 
@@ -447,13 +446,12 @@ class DogtailAPI(object):
 
         # === Backward compatibility for 'roleName' usage ===
         using_role_name = role_name
-
         for key, val in kwargs.items():
-            if "roleName" in str(key).lower():
+            if "roleName" in str(key):
                 using_role_name = val
         # =================================================
 
-        predicate = SimplePredicate(
+        predicate = GenericPredicate(
             name=name,
             role_name=using_role_name,
             description=description,
@@ -463,17 +461,20 @@ class DogtailAPI(object):
         return AccessibleObject.find_descendant(self, predicate.satisfied_by_node)
 
 
-    def find_child(self, predicate):
+    def find_child(self, predicate, retry=True):
         """
         Find a single child satisfying th predicate
         """
 
         result = None
 
-        for _ in range(self.configuration["search_cut_off_limit"]):
+        for _ in range(config.search_cut_off_limit):
             result = AccessibleObject.find_descendant(self, predicate)
 
             if result:
+                break
+
+            if not retry:
                 break
 
         return result
@@ -630,9 +631,9 @@ class DogtailAPI(object):
         if not self.extents:
             return False
 
-        from dogtail._utils import Blinker
-        (x, y, w, h) = self.extents
-        Blinker(x, y, w, h)
+        #from dogtail.utils import Blinker
+        #(x, y, w, h) = self.extents
+        #Blinker(x, y, w, h)
         return True
 
 
@@ -692,12 +693,12 @@ class DogtailAPI(object):
         return self.index_in_parent
 
 
-    def findChild(self, predicate): # pylint: disable=invalid-name
+    def findChild(self, predicate, retry=True): # pylint: disable=invalid-name
         """
         For backwards compatibility reasons. Wrapper for self.find_child.
         """
 
-        return self.find_child(predicate)
+        return self.find_child(predicate, retry=retry)
 
 
     def findChildren(self, predicate): # pylint: disable=invalid-name
@@ -790,6 +791,7 @@ except Exception:  # pragma: no cover
 # We are recoding this logic in DogtailAPI so that the Object
 # in 'children' is Accessible instead of default [object].
 del Atspi.Accessible.children
-# To keep the same keyword 'parent' we need to remove the Atspi.Accessible.parent
-# So that the API is forced to use DogtailAPI.parent.
+# To keep the same keyword <keyword> we need to remove the Atspi.Accessible.<keyword>
+# So that the API is forced to use DogtailAPI.<keyword> and we can adjust it for Newton
 del Atspi.Accessible.parent
+del Atspi.Accessible.name

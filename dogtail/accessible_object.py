@@ -7,6 +7,7 @@ Experimental dogtail changes for 1.0 release.
 # pylint: disable=wrong-import-position
 # pylint: disable=wrong-import-order
 # pylint: disable=import-error
+# pylint: disable=no-name-in-module
 # ruff: noqa: E402
 # ruff: noqa: E501
 
@@ -16,10 +17,10 @@ gi.require_version("Atspi", "2.0")
 from gi.repository import Atspi
 
 from types import LambdaType
-from _simple_predicate import SimplePredicate
+from dogtail.predicate import GenericPredicate
 
 # TODO To be change to dogtail.logging before release.
-from _logging import logging_class
+from dogtail._logging import logging_class
 LOGGING = logging_class.logger
 
 
@@ -224,14 +225,17 @@ class AccessibleObject:
         child_count = AccessibleObject.get_child_count(acc_object)
         for index in range(child_count):
             child = AccessibleObject.get_child_at_index(acc_object, index)
-            if predicate and predicate(child):
-                matches.append(child)
+            try:
+                if predicate and predicate(child):
+                    matches.append(child)
+            except Exception as error:
+                LOGGING.debug(f"Exception occurred in predicate match '{error}'.")
 
             AccessibleObject._find_all_descendants(child, predicate, matches)
 
 
     @staticmethod
-    def find_all_descendants(acc_obj, given_predicate):
+    def find_all_descendants(acc_object, given_predicate):
         """
         Returns all descendants that match a predicate.
         """
@@ -241,21 +245,21 @@ class AccessibleObject:
         # User is using lambdas.
         if isinstance(given_predicate, LambdaType):
             predicate = given_predicate
-        # User is using a SimplePredicate.
-        elif isinstance(given_predicate, SimplePredicate):
+        # User is using a GenericPredicate.
+        elif isinstance(given_predicate, GenericPredicate):
             predicate = given_predicate.satisfied_by_node
         # Unknown/unsupported way to compare nodes.
         else:
-            LOGGING.debug("Unknown/unsupported way to compare nodes.")
+            LOGGING.info("Unknown/unsupported way to compare nodes.")
             return None
 
         matches = []
-        AccessibleObject._find_all_descendants(acc_obj, predicate, matches)
+        AccessibleObject._find_all_descendants(acc_object, predicate, matches)
         return matches
 
 
     @staticmethod
-    def find_descendant(acc_obj, given_predicate, depth_first=True):
+    def find_descendant(acc_object, given_predicate, depth_first=True):
         """
         Find a single descendant node satisfying the predicate.
         """
@@ -265,8 +269,8 @@ class AccessibleObject:
         # User is using lambdas.
         if isinstance(given_predicate, LambdaType):
             predicate = given_predicate
-        # User is using a SimplePredicate.
-        elif isinstance(given_predicate, SimplePredicate):
+        # User is using a GenericPredicate.
+        elif isinstance(given_predicate, GenericPredicate):
             predicate = given_predicate.satisfied_by_node
         # Unknown/unsupported way to compare nodes.
         else:
@@ -274,9 +278,9 @@ class AccessibleObject:
             return None
 
         if depth_first:
-            success_match = AccessibleObject._find_descendant_depth_first(acc_obj, predicate)
+            success_match = AccessibleObject._find_descendant_depth_first(acc_object, predicate)
         else:  # breadth_first
-            success_match = AccessibleObject._find_descendant_breadth_first(acc_obj, predicate)
+            success_match = AccessibleObject._find_descendant_breadth_first(acc_object, predicate)
 
         return success_match
 
@@ -420,7 +424,7 @@ class AccessibleObject:
         Returns a 'name' for Accessible object.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
+        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return None
@@ -428,7 +432,10 @@ class AccessibleObject:
         if AccessibleObject.is_newton(acc_object):
             return acc_object.get_name()
 
-        return Atspi.Accessible.get_name(acc_object)
+        try:
+            return Atspi.Accessible.get_name(acc_object)
+        except Exception as error:
+            raise RuntimeError("Get Name function failed.") from error
 
 
     @staticmethod
@@ -437,7 +444,7 @@ class AccessibleObject:
         Returns a 'role' for Accessible object.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
+        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return None
@@ -454,7 +461,7 @@ class AccessibleObject:
         Returns a 'role_name' for Accessible object.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
+        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return None
@@ -488,7 +495,7 @@ class AccessibleObject:
         Returns a 'parent' for Accessible object.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
+        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return None

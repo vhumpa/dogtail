@@ -4,8 +4,16 @@ Experimental dogtail changes for 1.0 release.
 """
 
 # pylint: disable=import-error
+# pylint: disable=wrong-import-position
+# pylint: disable=wrong-import-order
+# ruff: noqa: E402
 
-from accessible_utilities import AccessibleUtilities
+
+# TODO To be change to dogtail.logging before release.
+from dogtail._logging import logging_class
+LOGGING = logging_class.logger
+
+from dogtail.accessible_utilities import AccessibleUtilities
 
 class AccessibleRoot:
     """
@@ -19,7 +27,7 @@ class AccessibleRoot:
         Get all applications.
         """
 
-        return [x.get_name() for x in AccessibleUtilities.get_all_applications()]
+        return AccessibleUtilities.get_all_applications()
 
 
     @staticmethod

@@ -18,10 +18,10 @@ gi.require_version("Atspi", "2.0")
 from gi.repository import Atspi
 
 # TODO To be change to dogtail.logging before release.
-from _logging import logging_class
+from dogtail._logging import logging_class
 LOGGING = logging_class.logger
 
-from accessible_object import AccessibleObject
+from dogtail.accessible_object import AccessibleObject
 
 SESSION_TYPE = "x11"
 if "XDG_SESSION_TYPE" in os.environ and "wayland" in os.environ["XDG_SESSION_TYPE"]:
@@ -153,7 +153,7 @@ class AccessibleComponent:
             fullscreen_offset = (0, 0)  # No offset fullscreen, shadows or not!
             node = acc_object  # Assuming 'acc_object' is the current node
             try:
-                from dogtail._utils import get_screen_resolution
+                from dogtail.utils import get_screen_resolution
                 screen_width, _ = get_screen_resolution()
                 while node:
                     if node.role_name == "frame":
@@ -174,7 +174,7 @@ class AccessibleComponent:
                 else:
                     position = Atspi.Component.get_position(acc_object, Atspi.CoordType.WINDOW)
 
-                from dogtail._utils import get_current_x_window_position
+                from dogtail.utils import get_current_x_window_position
                 base_x, base_y = get_current_x_window_position()
                 # Add both gtk4_offset and the current x window position
                 # Inserting values in init for point has been deprecated and ignored.

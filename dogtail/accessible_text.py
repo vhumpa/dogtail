@@ -15,10 +15,10 @@ gi.require_version("Atspi", "2.0")
 from gi.repository import Atspi
 
 # TODO To be change to dogtail.logging before release.
-from _logging import logging_class
+from dogtail._logging import logging_class
 LOGGING = logging_class.logger
 
-from accessible_object import AccessibleObject
+from dogtail.accessible_object import AccessibleObject
 
 class AccessibleText:
     """

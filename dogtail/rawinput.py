@@ -13,6 +13,7 @@ Experimental dogtail changes for 1.0 release. raw input.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
+from time import sleep
 
 import gi
 
@@ -26,19 +27,25 @@ from gi.repository import Atspi
 import warnings
 warnings.filterwarnings("ignore", "g_object_unref")
 
-from _utils import do_delay
+from dogtail.utils import do_delay
 
-from _ponytail_connection import PonytailWrapper
+from dogtail._ponytail_connection import PonytailWrapper
 # TODO To be change to dogtail.logging before release.
-from _logging import logging_class
+from dogtail._logging import logging_class
 LOGGING = logging_class.logger
 
-from config import read_config
-configuration = read_config()
+from dogtail.config import config
 
 SESSION_TYPE = "x11"
 if "XDG_SESSION_TYPE" in os.environ and "wayland" in os.environ["XDG_SESSION_TYPE"]:
     SESSION_TYPE = "wayland"
+
+# Without this part it currently fails - TODO, have the wrapper do it.
+if SESSION_TYPE == "wayland":
+    from ponytail.ponytail import Ponytail
+    ponytail = Ponytail()
+    ponytail.disconnect()
+    sleep(1) # needed now to overcome fast reconnect issue in ponytail
 
 
 # There is a better way to do this since I am already rewriting it.
@@ -70,7 +77,7 @@ def do_typing_delay():
     """
     Execute a typing delay.
     """
-    do_delay(float(configuration["typing_delay"]))
+    do_delay(float(config.typing_delay))
 
 
 def click(x, y, button=1, check=True, window_id=None):
@@ -100,7 +107,7 @@ def click(x, y, button=1, check=True, window_id=None):
         ponytail_wrapper.ponytail_check_connection(window_id)
         ponytail.generateButtonEvent(button, _x, _y)
 
-    do_delay(configuration["default_delay"])
+    do_delay(config.default_delay)
 
 
 def point(x, y, check=True, window_id=None):
@@ -130,7 +137,7 @@ def point(x, y, check=True, window_id=None):
         ponytail_wrapper.ponytail_check_connection(window_id)
         ponytail.generateMotionEvent(_x, _y)
 
-    do_delay(configuration["default_delay"])
+    do_delay(config.default_delay)
 
 
 def double_click(x, y, button=1, check=True, window_id=None):
@@ -160,7 +167,7 @@ def double_click(x, y, button=1, check=True, window_id=None):
         ponytail_wrapper.ponytail_check_connection(window_id)
         ponytail.generateButtonEvent(button, _x, _y)
 
-        do_delay(configuration["double_click_delay"])
+        do_delay(config.double_click_delay)
 
         # Prevent executing release event on closed application
         ponytail.generateButtonPress(button)
@@ -170,7 +177,7 @@ def double_click(x, y, button=1, check=True, window_id=None):
             ponytail.connectMonitor()
             ponytail.generateButtonRelease(button)
 
-    do_delay(configuration["default_delay"])
+    do_delay(config.default_delay)
 
 
 def press(x, y, button=1, check=True, window_id=None, delay=None):
@@ -184,7 +191,7 @@ def press(x, y, button=1, check=True, window_id=None, delay=None):
     if delay:
         delay_to_use = delay
     else:
-        delay_to_use = configuration["default_delay"]
+        delay_to_use = config.default_delay
 
     # Get ponytail only when required.
     ponytail_wrapper = PonytailWrapper()
@@ -259,7 +266,7 @@ def absolute_motion(x, y, mouse_delay=None, check=True, window_id=None):
     if mouse_delay:
         delay_to_use = mouse_delay
     else:
-        delay_to_use = configuration["default_delay"]
+        delay_to_use = config.default_delay
         #TODO delay_to_use = configuration.default_delay
 
 
@@ -307,7 +314,7 @@ def absolute_motion_with_trajectory(
     if mouse_delay:
         delay_to_use = mouse_delay
     else:
-        delay_to_use = configuration["default_delay"]
+        delay_to_use = config.default_delay
 
     if check:
         check_coordinates(source_x, source_y)
@@ -432,7 +439,7 @@ def drag_with_trajectory(  # pylint: disable=invalid-name
     if press_delay:
         delay_to_use = press_delay
     else:
-        delay_to_use = configuration["default_delay"]
+        delay_to_use = config.default_delay
 
     LOGGING.debug(f"Dragging with trajectory from '{fromXY}' to '{toXY}'.")
     LOGGING.debug(f"Dragging using button '{button}' and check '{check}'")
@@ -483,10 +490,10 @@ def drag_with_trajectory_global(fromXY, toXY, button=1):  # pylint: disable=inva
         ponytail_wrapper.ponytail_check_connection(window_id="")
 
         ponytail.generateMotionEvent(from_x, from_y)
-        do_delay(configuration["default_delay"])
+        do_delay(config.default_delay)
 
         ponytail.generateButtonPress(1)
-        do_delay(configuration["default_delay"])
+        do_delay(config.default_delay)
 
         (to_x, to_y) = toXY
         absolute_motion_with_trajectory(
@@ -499,7 +506,7 @@ def drag_with_trajectory_global(fromXY, toXY, button=1):  # pylint: disable=inva
         )
 
         ponytail.generateMotionEvent(to_x, to_y)
-        do_delay(configuration["default_delay"])
+        do_delay(config.default_delay)
 
         ponytail.generateButtonRelease(1)
         do_delay()
@@ -561,7 +568,7 @@ def key_name_to_key_sym(key_name):
 
             LOGGING.debug("Attempt to get key value from Unicode representation of the key.")
             # Unicode code from a given character.
-            unicode_key_value = ord(actual_key_sym)
+            unicode_key_value = ord(actual_key_name)
             actual_key_sym = Gdk.unicode_to_keyval(unicode_key_value)
             LOGGING.debug(f"Key symbol value from Gdk.unicode_to_keyval '{actual_key_sym}'.")
 
@@ -572,7 +579,7 @@ def key_name_to_key_sym(key_name):
             try:
 
                 LOGGING.debug("Attempt to match key name with Gdk.KEY_<key_name>.")
-                actual_key_sym = getattr(Gdk, f"KEY_{key_name}")
+                actual_key_sym = getattr(Gdk, f"KEY_{actual_key_sym}")
 
             except AttributeError as attribute_error:
                 raise AttributeError(key_name) from attribute_error
@@ -624,15 +631,14 @@ def press_key(key_name, window_id=None):
 
     if SESSION_TYPE == "x11":
         Atspi.generate_keyboard_event(key_symbol_value, None, Atspi.KeySynthType.SYM)
-        do_delay(float(configuration["typing_delay"]))
+        do_delay(float(config.typing_delay))
 
     else:
-
         ponytail_wrapper = PonytailWrapper()
         ponytail_wrapper.ponytail_check_connection(window_id, input_source="keyboard")
 
         ponytail = ponytail_wrapper.get_ponytail_instance()
-        use_delay = float(configuration["typing_delay"])
+        use_delay = float(config.typing_delay)
         ponytail.generateKeysymEvent(key_symbol_value, delay=use_delay)
 
 
@@ -649,7 +655,7 @@ def hold_key(key_name):
 
     if SESSION_TYPE == "x11":
         Atspi.generate_keyboard_event(key_code, None, Atspi.KeySynthType.PRESS)
-        do_delay(float(configuration["typing_delay"]))
+        do_delay(float(config.typing_delay))
 
     else:
         ponytail_wrapper = PonytailWrapper()
@@ -674,7 +680,7 @@ def release_key(key_name):
 
     if SESSION_TYPE == "x11":
         Atspi.generate_keyboard_event(key_code, None, Atspi.KeySynthType.RELEASE)
-        do_delay(float(configuration["typing_delay"]))
+        do_delay(float(config.typing_delay))
 
     else:
         ponytail_wrapper = PonytailWrapper()
@@ -723,8 +729,8 @@ def key_combo(combo_string):
             for key_full_split in key_partial_split.split(">"):
                 if key_full_split:
                     possible_alias_use = KEY_NAME_ALIASES.get(
-                        key = key_full_split.lower(),
-                        default = key_full_split
+                        key_full_split.lower(), # key
+                        key_full_split # default
                     )
                     keys_to_press.append(possible_alias_use)
 

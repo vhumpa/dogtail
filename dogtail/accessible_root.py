@@ -6,11 +6,11 @@ Experimental dogtail changes for 1.0 release.
 # pylint: disable=import-error
 # pylint: disable=wrong-import-position
 # pylint: disable=wrong-import-order
+# pylint: disable=no-name-in-module
 # ruff: noqa: E402
 
 
-# TODO To be change to dogtail.logging before release.
-from dogtail._logging import logging_class
+from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 
 from dogtail.accessible_utilities import AccessibleUtilities

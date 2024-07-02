@@ -9,6 +9,7 @@ Experimental dogtail changes for 1.0 release. Ponytail handling.
 # pylint: disable=wrong-import-order
 # pylint: disable=import-error
 # pylint: disable=protected-access
+# pylint: disable=no-name-in-module
 # ruff: noqa: E402
 # ruff: noqa: E501
 
@@ -16,8 +17,7 @@ import os
 
 from time import sleep
 
-# TODO To be change to dogtail.logging before release.
-from dogtail._logging import logging_class
+from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 
 

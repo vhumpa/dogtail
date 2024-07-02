@@ -7,6 +7,7 @@ Experimental dogtail changes for 1.0 release. raw input.
 # pylint: disable=wrong-import-position
 # pylint: disable=wrong-import-order
 # pylint: disable=import-error
+# pylint: disable=no-name-in-module
 # ruff: noqa: E402
 # ruff: noqa: E501
 
@@ -29,8 +30,7 @@ warnings.filterwarnings("ignore", "g_object_unref")
 from dogtail.utils import do_delay
 
 from dogtail._ponytail_connection import PonytailWrapper
-# TODO To be change to dogtail.logging before release.
-from dogtail._logging import logging_class
+from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 
 from dogtail.config import config

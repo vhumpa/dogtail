@@ -19,8 +19,7 @@ from gi.repository import Atspi
 from types import LambdaType
 from dogtail.predicate import GenericPredicate
 
-# TODO To be change to dogtail.logging before release.
-from dogtail._logging import logging_class
+from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 
 

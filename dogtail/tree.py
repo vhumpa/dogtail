@@ -23,8 +23,7 @@ import warnings
 
 warnings.filterwarnings("ignore", "g_object_unref")
 
-# TODO To be change to dogtail.logging before release.
-from dogtail._logging import logging_class
+from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 
 

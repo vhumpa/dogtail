@@ -9,6 +9,7 @@ Experimental dogtail changes for 1.0 release.
 # pylint: disable=import-outside-toplevel
 # pylint: disable=invalid-name
 # pylint: disable=import-error
+# pylint: disable=no-name-in-module
 # ruff: noqa: E402
 # ruff: noqa: E501
 
@@ -17,8 +18,7 @@ import gi
 gi.require_version("Atspi", "2.0")
 from gi.repository import Atspi
 
-# TODO To be change to dogtail.logging before release.
-from dogtail._logging import logging_class
+from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 
 from dogtail.accessible_object import AccessibleObject

@@ -17,7 +17,7 @@ import os
 from time import sleep
 
 # TODO To be change to dogtail.logging before release.
-from _logging import logging_class
+from dogtail._logging import logging_class
 LOGGING = logging_class.logger
 
 
@@ -53,12 +53,10 @@ class PonytailWrapper(metaclass=Singleton):
 
     error_message = "\n".join((
         "Error in ponytail initiation might be cause by several reasons:",
-        f"1) Packages '{str(expected_packages)}' are not installed.",
-        "2) If installed the gnome-ponytail-daemon process might not be running.",
-        "3) You are on the system that does not have GNOME Shell Introspection.",
+        f"\t1) Packages '{str(expected_packages)}' are not installed.",
+        "\t2) If installed the gnome-ponytail-daemon process might not be running.",
+        "\t3) You are on the system that does not have GNOME Shell Introspection.",
     ))
-
-
 
     # Keep session as a variable.
     session_type = "x11"
@@ -67,18 +65,22 @@ class PonytailWrapper(metaclass=Singleton):
 
 
     def __init__(self):
+        LOGGING.debug("DEBUG - Initiating ponytail.")
+
         # Only makes sense when running under Wayland.
         if self.session_type != "wayland":
-            pass
+            return
 
         # Do not initiate it if already done.
         if not self.__already_initiated:
             try:
                 LOGGING.debug("Initiating ponytail.")
+                LOGGING.debug("DEBUG - IMPORT.")
                 from ponytail.ponytail import Ponytail
+                LOGGING.debug("DEBUG - INIT.")
                 self.__ponytail = Ponytail()
                 sleep(0.1) # Prevent any race conditions.
-
+                LOGGING.debug("DEBUG - DISCONNECT.")
                 self.__ponytail.disconnect()
                 sleep(0.1) # Prevent any race conditions.
 
@@ -93,6 +95,8 @@ class PonytailWrapper(metaclass=Singleton):
         """
         Get ponytail instance.
         """
+        LOGGING.debug("DEBUG - get_ponytail_instance.")
+
         return self.__ponytail
 
 
@@ -100,6 +104,7 @@ class PonytailWrapper(metaclass=Singleton):
         """
         Detect Xwayland windows in order to use globals and recordMonitor
         """
+        LOGGING.debug("DEBUG - ponytail_check_is_xwayland.")
 
         ponytail = self.get_ponytail_instance()
 
@@ -110,7 +115,10 @@ class PonytailWrapper(metaclass=Singleton):
         # If window_id is integer return client type.
         if isinstance(window_id, int):
             LOGGING.debug("Return wanted window_id.")
-            return int([x["client-type"] for x in window_list if x["id"] == window_id][0])
+            try:
+                return int([x["client-type"] for x in window_list if x["id"] == window_id][0])
+            except Exception:
+                return window_id
 
         # If window_id is None, get window_id of focused window.
         if window_id is None:
@@ -128,6 +136,7 @@ class PonytailWrapper(metaclass=Singleton):
         """
         Check ponytail connection.
         """
+        LOGGING.debug("DEBUG - ponytail_check_connection.")
 
         ponytail = self.get_ponytail_instance()
 
@@ -216,6 +225,7 @@ class PonytailWrapper(metaclass=Singleton):
         """
         Get window_id.
         """
+        LOGGING.debug("DEBUG - get_window_id.")
 
         LOGGING.debug(" ===== Verbose window_id handling ===== ")
 
@@ -301,6 +311,7 @@ class PonytailWrapper(metaclass=Singleton):
         """
         Check if window is focused.
         """
+        LOGGING.debug("DEBUG - get_window_has_focus.")
 
         #Get current window_id.
         window_id = self.__window_id

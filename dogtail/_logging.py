@@ -9,7 +9,7 @@ from subprocess import call, STDOUT
 
 # Singleton solution provided by https://stackoverflow.com/a/54209647
 
-class Singleton(type):
+class DogtailSingleton(type):
     """
     Singleton class used as metaclass by :py:class:`logger.Logging`.
     """
@@ -18,10 +18,10 @@ class Singleton(type):
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+            cls._instances[cls] = super(DogtailSingleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
 
-class Logging(metaclass=Singleton):
+class DogtailLogging(metaclass=DogtailSingleton):
     """
     Logging class.
     """
@@ -54,14 +54,14 @@ class Logging(metaclass=Singleton):
         file_handler = logging.FileHandler("/tmp/dogtail_logger.log")
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(formatter)
-        file_handler.set_name("file_handler")
+        file_handler.set_name("dogtail_file_handler")
 
         # Setup of console handler.
         # All INFO and higher level logs will be going to the console.
         console_handler = logging.StreamHandler()
         console_handler.setLevel(logging.INFO)
         console_handler.setFormatter(formatter)
-        console_handler.set_name("console_handler")
+        console_handler.set_name("dogtail_console_handler")
 
         self.logger.addHandler(file_handler)
         self.logger.addHandler(console_handler)
@@ -74,7 +74,7 @@ class Logging(metaclass=Singleton):
         """
 
         for handler in self.logger.handlers:
-            if handler.get_name() == "console_handler":
+            if handler.get_name() == "dogtail_console_handler":
                 handler.setLevel(logging.DEBUG)
                 break
 
@@ -109,4 +109,4 @@ class FuncFilter(logging.Filter):
         )
         return True
 
-logging_class = Logging()
+logging_class = DogtailLogging()

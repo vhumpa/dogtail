@@ -13,7 +13,6 @@ Experimental dogtail changes for 1.0 release. raw input.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
-from time import sleep
 
 import gi
 
@@ -40,12 +39,10 @@ SESSION_TYPE = "x11"
 if "XDG_SESSION_TYPE" in os.environ and "wayland" in os.environ["XDG_SESSION_TYPE"]:
     SESSION_TYPE = "wayland"
 
-# Without this part it currently fails - TODO, have the wrapper do it.
+# Without this part it currently fails - TODO, figure out why it has to be done globally
 if SESSION_TYPE == "wayland":
-    from ponytail.ponytail import Ponytail
-    ponytail = Ponytail()
-    ponytail.disconnect()
-    sleep(1) # needed now to overcome fast reconnect issue in ponytail
+    ponytail_wrapper = PonytailWrapper()
+    ponytail = ponytail_wrapper.get_ponytail_instance()
 
 
 # There is a better way to do this since I am already rewriting it.

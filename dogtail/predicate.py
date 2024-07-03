@@ -9,9 +9,11 @@ Experimental dogtail changes for 1.0 release. Simple Predicate
 # pylint: disable=import-error
 # pylint: disable=no-name-in-module
 # ruff: noqa: E402
+# ruff: noqa: E501
 
 from dogtail.logging import logging_class
 LOGGER = logging_class.logger
+
 
 class GenericPredicate:
     """
@@ -75,3 +77,184 @@ class GenericPredicate:
                 return False
 
         return predicate_satisfied_by_node
+
+
+    def __eq__(self, other):
+        """
+        Predicates are considered equal if they are of the same subclass and have the
+        same data.
+        """
+
+        if not isinstance(self, type(other)):
+            return False
+
+        return self.__dict__ == other.__dict__
+
+
+class IsATabNamed(GenericPredicate):
+    """
+    Predicate subclass that looks for a tab by name.
+    """
+
+    def __init__(self, name=None):
+        self.name = name
+
+        if not self.name:
+            LOGGER.info("You did not provide any 'name' to match.")
+            self.name = "__invalid__"
+
+        super().__init__(name=self.name, role_name="tab")
+
+
+class IsAButtonNamed(GenericPredicate):
+    """
+    Predicate subclass that looks for a push button by name.
+    """
+
+    def __init__(self, name=None):
+        self.name = name
+
+        if not self.name:
+            LOGGER.info("You did not provide any 'name' to match.")
+            self.name = "__invalid__"
+
+        super().__init__(name=self.name, role_name="push button")
+
+
+class IsATextEntryNamed(GenericPredicate):
+    """
+    Predicate subclass that looks for a text entry by name.
+    """
+
+    def __init__(self, name=None):
+        self.name = name
+
+        if not self.name:
+            LOGGER.info("You did not provide any 'name' to match.")
+            self.name = "__invalid__"
+
+        super().__init__(name=self.name, role_name="text")
+
+class IsAMenuItemNamed(GenericPredicate):
+    """
+    Predicate subclass that looks for a menu item by name.
+    """
+
+    def __init__(self, name=None):
+        self.name = name
+
+        if not self.name:
+            LOGGER.info("You did not provide any 'name' to match.")
+            self.name = "__invalid__"
+
+        super().__init__(name=self.name, role_name="menu item")
+
+
+class IsAMenuNamed(GenericPredicate):
+    """
+    Predicate subclass that looks for a menu by name.
+    """
+
+    def __init__(self, name=None):
+        self.name = name
+
+        if not self.name:
+            LOGGER.info("You did not provide any 'name' to match.")
+            self.name = "__invalid__"
+
+        super().__init__(name=self.name, role_name="menu")
+
+
+class IsLabelledBy(GenericPredicate):
+    """
+    Predicate: is this node labelled by another node.
+    """
+
+    # I do not see a reason for this.
+    # If user wants to know that something has a labeller, who not just ask <>.labeller?
+    # This was empty in older version of dogtail, so what did it do?
+
+
+class IsLabelledAs(GenericPredicate):
+    """
+    Predicate: is this node labelled with the text string (i.e. by another node with
+    that as a name).
+    """
+
+    def __init__(self, label=None):
+        self.label = label
+
+        if not self.label:
+            LOGGER.info("You did not provide any 'label' to match.")
+            self.name = "__invalid__"
+
+        super().__init__(label=self.label)
+
+
+class IsADialogNamed(GenericPredicate):
+    """
+    Predicate subclass that looks for a top-level dialog by name.
+    """
+
+    def __init__(self, name=None):
+        self.name = name
+
+        if not self.name:
+            LOGGER.info("You did not provide any 'name' to match.")
+            self.name = "__invalid__"
+
+        super().__init__(name=self.name, role_name="dialog")
+
+
+class IsAWindow(GenericPredicate):
+    """
+    Predicate subclass that looks for top-level windows.
+    """
+
+
+    def __init__(self):
+        super().__init__(role_name="window")
+
+
+class IsAWindowNamed(GenericPredicate):
+    """
+    Predicate subclass that looks for a top-level window by name.
+    """
+
+    def __init__(self, name=None):
+        self.name = name
+
+        if not self.name:
+            LOGGER.info("You did not provide any 'name' to match.")
+            self.name = "__invalid__"
+
+        super().__init__(name=self.name, role_name="window")
+
+
+class IsAFrameNamed(GenericPredicate):
+    """
+    Predicate subclass that looks for a top-level frame by name.
+    """
+
+    def __init__(self, name=None):
+        self.name = name
+
+        if not self.name:
+            LOGGER.info("You did not provide any 'name' to match.")
+            self.name = "__invalid__"
+
+        super().__init__(name=self.name, role_name="frame")
+
+
+class IsNamed(GenericPredicate):
+    """
+    Predicate subclass that looks simply by name.
+    """
+    def __init__(self, name=None):
+        self.name = name
+
+        if not self.name:
+            LOGGER.info("You did not provide any 'name' to match.")
+            self.name = "__invalid__"
+
+        super().__init__(name=self.name)

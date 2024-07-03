@@ -245,7 +245,7 @@ class AccessibleObject:
         if isinstance(given_predicate, LambdaType):
             predicate = given_predicate
         # User is using a GenericPredicate.
-        elif isinstance(given_predicate, GenericPredicate):
+        elif isinstance(given_predicate, type(GenericPredicate())):
             predicate = given_predicate.satisfied_by_node
         # Unknown/unsupported way to compare nodes.
         else:
@@ -269,7 +269,7 @@ class AccessibleObject:
         if isinstance(given_predicate, LambdaType):
             predicate = given_predicate
         # User is using a GenericPredicate.
-        elif isinstance(given_predicate, GenericPredicate):
+        elif isinstance(given_predicate, type(GenericPredicate())):
             predicate = given_predicate.satisfied_by_node
         # Unknown/unsupported way to compare nodes.
         else:

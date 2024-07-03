@@ -186,7 +186,7 @@ class IsLabelledAs(GenericPredicate):
 
         if not self.label:
             LOGGER.info("You did not provide any 'label' to match.")
-            self.name = "__invalid__"
+            self.label = "__invalid__"
 
         super().__init__(label=self.label)
 

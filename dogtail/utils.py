@@ -515,7 +515,7 @@ def get_current_x_window_position():
         print(f"Error getting current window position: {e}")
         return 0, 0
 
-
+#TODO attempt to pull qecore resolution here and use that .
 def get_screen_resolution():
     """Additional helper function with similar reasoning as the get_current_x_window_position needed
     to work with GTK4 apps - even on wayland! (needs Xwayland running for xlib to get this info).

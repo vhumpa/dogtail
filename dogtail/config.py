@@ -4,13 +4,27 @@
 Experimental dogtail changes for 1.0 release.
 """
 
+# ruff: noqa: E501
+
 import configparser
 
-# TODO might be worth keeping getters and setters to the dictionary.
+from dogtail.logging import logging_class
+LOGGING = logging_class.logger
 
-# TODO add backwards compatibility for camelCasing
 
 # Make sure it works as https://gitlab.com/dogtail/dogtail/-/issues/12
+#   This is mostly for utils.run function.
+
+
+class Value:
+    """
+    Value class to keep value and its types.
+    """
+
+    def __init__(self, set_value, defined_types=list):
+        self.value = set_value
+        self.defined_types = defined_types
+
 
 class _Config:
     """
@@ -18,164 +32,173 @@ class _Config:
     """
 
     # Create a ConfigParser object.
-    _config = configparser.ConfigParser()
+    cfg = configparser.ConfigParser()
 
     # Read the configuration file.
     # TODO Figure out where the file will be.
-    _config.read("config.ini")
+    cfg.read("config.ini")
 
     NO_VALUES = ["", "n", "no", "f", "false", "False", "0"]
 
     # Access values from the configuration file.
+
     # Timing Delay section.
-    section = "TimingDelay"
-    action_delay = float(_config.get(section, "action_delay", fallback=1.0))
-    typing_delay = float(_config.get(section, "typing_delay"))
-    default_delay = float(_config.get(section, "default_delay"))
-    double_click_delay = float(_config.get(section, "double_click_delay"))
-    search_back_off_delay = float(_config.get(section, "search_back_off_delay"))
+    section = "timing_section"
+    _action_delay = float(cfg.get(section, "action_delay", fallback=1.0))
+    _typing_delay = float(cfg.get(section, "typing_delay", fallback=0.1))
+    _default_delay = float(cfg.get(section, "default_delay", fallback=0.5))
+    _double_click_delay = float(cfg.get(section, "double_click_delay", fallback=0.1))
+    _search_back_off_delay = float(cfg.get(section, "search_back_off_delay", fallback=0.5))
 
     # Searching section.
-    section = "Searching"
-    search_warning_threshold = int(_config.get(section, "search_warning_threshold"))
-    search_cut_off_limit = int(_config.get(section, "search_cut_off_limit"))
-    search_showing_only = _config.get(section, "search_showing_only") not in NO_VALUES
+    section = "searching"
+    _search_warning_threshold = int(cfg.get(section, "search_warning_threshold", fallback=3))
+    _search_cut_off_limit = int(cfg.get(section, "search_cut_off_limit", fallback=20))
+    _search_showing_only = cfg.get(section, "search_showing_only", fallback=False) not in NO_VALUES
 
     # Children Limit section.
-    section = "ChildrenLimit"
-    children_limit = _config.get(section, "children_limit")
+    section = "children_limit"
+    _children_limit = int(cfg.get(section, "children_limit", fallback=100))
 
     # Util Scripts section.
-    section = "UtilScripts"
-    run_interval = _config.get(section, "run_interval")
-    run_timeout = _config.get(section, "run_timeout")
+    section = "util_scripts"
+    _run_interval = float(cfg.get(section, "run_interval", fallback=0.5))
+    _run_timeout = int(cfg.get(section, "run_timeout", fallback=30))
 
     # GTK4Offset section.
-    section = "GTK4Offset"
-    offset = _config.get(section, "offset")
+    section = "gtk4_offset"
+    _offset = list(cfg.get(section, "offset", fallback=(12, 12)))
 
     # Debug section.
-    section = "Debug"
-    debug_dogtail = _config.get(section, "debug_dogtail") not in NO_VALUES
-    debug_searching = _config.get(section, "debug_searching") not in NO_VALUES
-    debug_sleep = _config.get(section, "debug_sleep") not in NO_VALUES
-    debug_search_paths = _config.get(section, "debug_search_paths") not in NO_VALUES
+    section = "debug"
+    _debug_dogtail = cfg.get(section, "debug_dogtail", fallback=False) not in NO_VALUES
+    _debug_searching = cfg.get(section, "debug_searching", fallback=False) not in NO_VALUES
+    _debug_sleep = cfg.get(section, "debug_sleep", fallback=False) not in NO_VALUES
+    _debug_search_paths = cfg.get(section, "debug_search_paths", fallback=False) not in NO_VALUES
 
     # Debug section.
-    section = "Setting"
-    log_to_std_out = _config.get(section, "log_to_std_out") not in NO_VALUES
-    absolute_node_paths = _config.get(section, "absolute_node_paths") not in NO_VALUES
-    ensure_sensitivity = _config.get(section, "ensure_sensitivity") not in NO_VALUES
-    fatal_errors = _config.get(section, "fatal_errors") not in NO_VALUES
-    check_for_a11y = _config.get(section, "check_for_a11y") not in NO_VALUES
-
-    # Debug section.
-    section = "CompatibilityTOREMOVE"
-    scratchDir = _config.get(section, "scratchDir", fallback="")
-    dataDir = _config.get(section, "dataDir", fallback="")
-    logDir = _config.get(section, "logDir", fallback="")
-    scriptName = _config.get(section, "scriptName", fallback="")
-    encoding = _config.get(section, "encoding", fallback="")
-    configFile = _config.get(section, "configFile", fallback="")
-    baseFile = _config.get(section, "baseFile", fallback="")
-    actionDelay = _config.get(section, "actionDelay", fallback=1.0)
-    typingDelay = _config.get(section, "typingDelay", fallback=0.1)
-    runInterval = _config.get(section, "runInterval", fallback=0.5)
-    runTimeout = _config.get(section, "runTimeout", fallback=30)
-    doubleClickDelay = _config.get(section, "doubleClickDelay", fallback=0.1)
-    searchBackoffDuration = _config.get(section, "searchBackoffDuration", fallback=0.5)
-    searchWarningThreshold = _config.get(section, "searchWarningThreshold", fallback=3)
-    searchCutoffCount = _config.get(section, "searchCutoffCount", fallback=20)
-    searchShowingOnly = _config.get(section, "searchShowingOnly", fallback=False)
-    defaultDelay = _config.get(section, "defaultDelay", fallback=0.5)
-    childrenLimit = _config.get(section, "childrenLimit", fallback=100)
-    gtk4Offset = _config.get(section, "gtk4Offset", fallback=(12, 12))
-    debugSearching = _config.get(section, "debugSearching", fallback=False)
-    debugSleep = _config.get(section, "debugSleep", fallback=False)
-    debugSearchPaths = _config.get(section, "debugSearchPaths", fallback=False)
-    logDebugToStdOut = _config.get(section, "logDebugToStdOut", fallback=True)
-    absoluteNodePaths = _config.get(section, "absoluteNodePaths", fallback=False)
-    ensureSensitivity = _config.get(section, "ensureSensitivity", fallback=False)
-    debugTranslation = _config.get(section, "debugTranslation", fallback=False)
-    blinkOnActions = _config.get(section, "blinkOnActions", fallback=False)
-    fatalErrors = _config.get(section, "fatalErrors", fallback=False)
-    checkForA11y = _config.get(section, "checkForA11y", fallback=True)
-    logDebugToFile = _config.get(section, "logDebugToFile", fallback=True)
-
-    ###
+    section = "setting"
+    _log_to_std_out = cfg.get(section, "log_to_std_out", fallback=True) not in NO_VALUES
+    _absolute_node_paths = cfg.get(section, "absolute_node_paths", fallback=False) not in NO_VALUES
+    _ensure_sensitivity = cfg.get(section, "ensure_sensitivity", fallback=False) not in NO_VALUES
+    _fatal_errors = cfg.get(section, "fatal_errors", fallback=False) not in NO_VALUES
+    _check_for_a11y = cfg.get(section, "check_for_a11y", fallback=True) not in NO_VALUES
 
     # Return a dictionary with the retrieved values
     options = {
-        "action_delay": action_delay,
-        "typing_delay": typing_delay,
-        "default_delay": default_delay,
-        "double_click_delay": double_click_delay,
-        "search_back_off_delay": search_back_off_delay,
-        "search_warning_threshold": search_warning_threshold,
-        "search_cut_off_limit": search_cut_off_limit,
-        "search_showing_only": search_showing_only,
-        "children_limit": children_limit,
-        "run_interval": run_interval,
-        "run_timeout": run_timeout,
-        "offset": offset,
-        "debug_dogtail": debug_dogtail,
-        "debug_searching": debug_searching,
-        "debug_sleep": debug_sleep,
-        "debug_search_paths": debug_search_paths,
-        "log_to_std_out": log_to_std_out,
-        "absolute_node_paths": absolute_node_paths,
-        "ensure_sensitivity": ensure_sensitivity,
-        "fatal_errors": fatal_errors,
-        "check_for_a11y": check_for_a11y,
+        "action_delay": Value(_action_delay, [float, int]),
+        "typing_delay": Value(_typing_delay, [float, int]),
+        "default_delay": Value(_default_delay, [float, int]),
+        "double_click_delay": Value(_double_click_delay, [float, int]),
+        "search_back_off_delay": Value(_search_back_off_delay, [float, int]),
 
-        # TODO remove
-        "scratchDir": scratchDir,
-        "dataDir": dataDir,
-        "logDir": logDir,
-        "scriptName": scriptName,
-        "encoding": encoding,
-        "configFile": configFile,
-        "baseFile": baseFile,
-        "actionDelay": actionDelay,
-        "typingDelay": typingDelay,
-        "runInterval": runInterval,
-        "runTimeout": runTimeout,
-        "doubleClickDelay": doubleClickDelay,
-        "searchBackoffDuration": searchBackoffDuration,
-        "searchWarningThreshold": searchWarningThreshold,
-        "searchCutoffCount": searchCutoffCount,
-        "searchShowingOnly": searchShowingOnly,
-        "defaultDelay": defaultDelay,
-        "childrenLimit": childrenLimit,
-        "gtk4Offset": gtk4Offset,
-        "debugSearching": debugSearching,
-        "debugSleep": debugSleep,
-        "debugSearchPaths": debugSearchPaths,
-        "logDebugToStdOut": logDebugToStdOut,
-        "absoluteNodePaths": absoluteNodePaths,
-        "ensureSensitivity": ensureSensitivity,
-        "debugTranslation": debugTranslation,
-        "blinkOnActions": blinkOnActions,
-        "fatalErrors": fatalErrors,
-        "checkForA11y": checkForA11y,
-        "logDebugToFile": logDebugToFile,
+        "search_warning_threshold": Value(_search_warning_threshold, [int]),
+        "search_cut_off_limit": Value(_search_cut_off_limit, [int]),
+        "search_showing_only": Value(_search_showing_only, [bool]),
+
+        "children_limit": Value(_children_limit, [int]),
+
+        "run_interval": Value(_run_interval, [float, int]),
+        "run_timeout": Value(_run_timeout, [float, int]),
+
+        "gtk4_offset": Value(_offset, [list]),
+
+        "debug_dogtail": Value(_debug_dogtail, [bool]),
+        "debug_searching": Value(_debug_searching, [bool]),
+        "debug_sleep": Value(_debug_sleep, [bool]),
+        "debug_search_paths": Value(_debug_search_paths, [bool]),
+
+        "log_to_std_out": Value(_log_to_std_out, [bool]),
+        "absolute_node_paths": Value(_absolute_node_paths, [bool]),
+        "ensure_sensitivity": Value(_ensure_sensitivity, [bool]),
+        "fatal_errors": Value(_fatal_errors, [bool]),
+        "check_for_a11y": Value(_check_for_a11y, [bool]),
     }
 
-    invalid_value = "__INVALID__"
+    # Custom user section.
+    section = "user_setting"
+    user_setting_dictionary = dict(cfg.items(section))
+    # Set all user setup.
+    for key, value in user_setting_dictionary.items():
+        # Should we force 'custom_' prefix on users?
+        # As of now I opted to not do that, users can define any option they want.
+        options[key] = Value(value, [type(value)])
+
+    def adjust_casing(self, string_to_fix):
+        """
+        Transforms a string to snake_case.
+
+        :param string_to_fix: String to transform to snake_case
+        :type string_to_fix: str
+
+        :return: Transformed string.
+        :rtype: str
+        """
+
+        string_in_snake_case = ""
+        for character in string_to_fix:
+            if character.isalpha and character.isupper():
+                string_in_snake_case += "_" + character.lower()
+            else:
+                string_in_snake_case += character
+
+        return string_in_snake_case
 
     def __setattr__(self, option_id, value_to_set):
-        if option_id not in self.options:
-            raise AttributeError(f"Attempt to use invalid option '{option_id}'.")
+        # TODO development only, set to .debug before release.
+        LOGGING.info(logging_class.get_func_params_and_values())
 
-        if self.options[option_id] != value_to_set:
-            self.options[option_id] = value_to_set
+        # Set a variable to use for the setter logic.
+        set_option_id = option_id
 
+        # Attempt to have some backwards compatibility and support camelCase.
+        if any(char.isupper() for char in set_option_id):
+            set_option_id = self.adjust_casing(set_option_id)
+            LOGGING.info(f"Value was transformed to '{set_option_id}'.")
 
-    def __getattr__(self, name):
+        # Set custom user value to use in dogtail run.
+        # Current logic will fail on any attempt not set in config.ini.
+        # Should we allow setting values during a dogtail execution?
+        # if "custom_" in set_option_id:
+        #     LOGGING.info(f"Setting a custom user value '{set_option_id}'.")
+        #     self.options[set_option_id] = value_to_set
+
+        # In other cases check that the value exists.
+        if set_option_id not in self.options:
+            #LOGGING.info("To define a custom value, use 'custom_' to prefix your value.")
+            raise AttributeError(f"Attempt to use invalid option '{set_option_id}'.")
+
+        # Set the value if the value is not already present.
+        if self.options[set_option_id].value != value_to_set:
+            # Defined types variable.
+            _defined_types = self.options[set_option_id].defined_types
+
+            # Type checking.
+            if type(value_to_set) not in _defined_types:
+                raise ValueError(" ".join((
+                    f"Attempt to set value of type '{type(value_to_set)}'",
+                    f"to key with accepted types '{_defined_types}'",
+                )))
+
+            # Type was checked, keep the defined types.
+            self.options[set_option_id] = Value(value_to_set, _defined_types)
+
+    def __getattr__(self, option_id):
+        # TODO development only, set to .debug before release.
+        LOGGING.info(logging_class.get_func_params_and_values())
+
+        # Set a variable to use for the getter logic.
+        get_option_id = option_id
+
+        # Attempt to have some backwards compatibility and support camelCase.
+        if any(char.isupper() for char in get_option_id):
+            get_option_id = self.adjust_casing(get_option_id)
+            LOGGING.info(f"Value was transformed to '{get_option_id}'.")
+
         try:
-            self.options[name]
+            return self.options[get_option_id].value
         except KeyError as error:
-            raise AttributeError(f"Attempt to use invalid option '{name}'.") from error
+            raise AttributeError(f"Attempt to use invalid option '{get_option_id}'.") from error
 
 
 if __name__ == "__main__":

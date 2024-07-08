@@ -12,10 +12,6 @@ from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 
 
-# Make sure it works as https://gitlab.com/dogtail/dogtail/-/issues/12
-#   This is mostly for utils.run function.
-
-
 class Value:
     """
     Value class to keep value and its types.

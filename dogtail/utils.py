@@ -66,8 +66,8 @@ def doDelay(delay=None):  # pylint: disable=invalid-name
 # TODO if leaving it here, refactor it.
 def run(
     string,
-    timeout=30,#config.runTimeout,
-    interval=0.5,#config.runInterval,
+    timeout=None,
+    interval=None,
     desktop=None,
     dumb=False,
     appName="",
@@ -79,17 +79,9 @@ def run(
     starting, or until timeout is reached. If dumb is True, returns when timeout is reached.
     """
 
-    #debug_log(
-    #    "run(string=%s, timeout=%s, interval=%s, desktop=%s, dumb=%s, appName=%s)"
-    #    % (
-    #        str(string),
-    #        str(timeout),
-    #        str(interval),
-    #        str(desktop),
-    #        str(dumb),
-    #        str(appName),
-    #    )
-    #)
+    # Users can change timeout and interval via congig.ini or by parameter in function.
+    validated_timeout = config.run_timeout if timeout is None else timeout
+    validated_interval = config.run_interval if interval is None else interval
 
     if not desktop:
         from dogtail.tree import root as desktop
@@ -106,7 +98,7 @@ def run(
         #    "Disable startup detection. We're starting a non-AT-SPI-aware application."
         #)
 
-        doDelay(timeout)
+        do_delay(validated_timeout)
 
     else:
         #debug_log(
@@ -115,23 +107,21 @@ def run(
 
         time = 0
 
-        while time < timeout:
-            time = time + interval
+        while time < validated_timeout:
+            time = time + validated_interval
 
             try:
                 for child in desktop.children[::-1]:
                     if child.name == appName:
                         for grandchild in child.children:
-                            if grandchild.roleName == "frame":
-                                #from dogtail.procedural import focus
-                                #focus.application.node = child
-                                doDelay(interval)
+                            if grandchild.role_name == "frame":
+                                do_delay(validated_interval)
 
                                 return pid
             except AttributeError:  # pragma: no cover
                 pass
 
-            doDelay(interval)
+            do_delay(validated_interval)
 
     return pid
 

@@ -1,6 +1,13 @@
 TODO lets do something comprehensive
 
 
+Config in 1.0:
+- Changing casing to snake_case, but still have backwards compatibility to camelCase.
+- Custom keys and values: users can define their own config values in .ini file.
+- Type checking: users will get ValueError when trying to set e.g. bool to value defined as float in config.ini.
+- Improved getter and setter.
+
+
 Atspi API references
 ====================
 http://lazka.github.io/pgi-docs/#Atspi-2.0

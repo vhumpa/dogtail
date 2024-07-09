@@ -75,7 +75,8 @@ class _Config:
 
     # Debug section.
     section = "setting"
-    _log_to_std_out = cfg.get(section, "log_to_std_out", fallback="True") not in NO_VALUES
+    _log_debug_to_std_out = cfg.get(section, "log_debug_to_std_out", fallback="True") not in NO_VALUES
+    _log_debug_to_file = cfg.get(section, "log_debug_to_file", fallback="False") not in NO_VALUES
     _absolute_node_paths = cfg.get(section, "absolute_node_paths", fallback="False") not in NO_VALUES
     _ensure_sensitivity = cfg.get(section, "ensure_sensitivity", fallback="False") not in NO_VALUES
     _fatal_errors = cfg.get(section, "fatal_errors", fallback="False") not in NO_VALUES
@@ -105,7 +106,8 @@ class _Config:
         "debug_sleep": Value(_debug_sleep, [bool]),
         "debug_search_paths": Value(_debug_search_paths, [bool]),
 
-        "log_to_std_out": Value(_log_to_std_out, [bool]),
+        "log_debug_to_std_out": Value(_log_debug_to_std_out, [bool]),
+        "log_debug_to_file": Value(_log_debug_to_file, [bool]),
         "absolute_node_paths": Value(_absolute_node_paths, [bool]),
         "ensure_sensitivity": Value(_ensure_sensitivity, [bool]),
         "fatal_errors": Value(_fatal_errors, [bool]),

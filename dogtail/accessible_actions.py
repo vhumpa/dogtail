@@ -120,3 +120,26 @@ class AccessibleActions:
         except Exception as error:
             LOGGING.debug(f"Exception when executing a named action: '{error}'")
             return False
+
+
+    @staticmethod
+    def get_key_binding(acc_object, action_index):
+        """
+        Get keybindings to the action_index-th action.
+        """
+
+        if not AccessibleObject.is_action(acc_object):
+            LOGGING.debug("Accessible object does not have an Action interface.")
+            return None
+
+        try:
+            if AccessibleObject.is_newton(acc_object):
+                action_key_bind = acc_object.get_key_binding(action_index)
+            else:
+                action_key_bind = Atspi.Action.get_key_binding(acc_object, action_index)
+
+        except Exception as error:
+            LOGGING.debug(f"Exception getting action key bind: '{error}'")
+            return None
+
+        return action_key_bind

@@ -9,6 +9,7 @@ Experimental dogtail changes for 1.0 release.
 # pylint: disable=wrong-import-order
 # pylint: disable=import-error
 # pylint: disable=import-outside-toplevel
+# pylint: disable=protected-access
 # ruff: noqa: E402
 # ruff: noqa: E501
 
@@ -235,7 +236,7 @@ class DogtailAPI(object):
     @property
     def actions(self):
         """
-        Dictionary of actions.
+        Get dictionary of actions.
         """
 
         return AccessibleActions.get_actions(self)
@@ -247,6 +248,16 @@ class DogtailAPI(object):
         """
 
         return AccessibleActions.do_action_named(self, named_action)
+
+
+    def action_key_bind(self, named_action):
+        """
+        Get key bind of an action.
+        """
+
+        action_index = self.actions[named_action]
+
+        return AccessibleActions.get_key_binding(self, action_index)
 
 
     def grab_focus(self):
@@ -395,7 +406,7 @@ class DogtailAPI(object):
     @property
     def value(self):
         """
-        Gets the current value for an Atspi.Value
+        Gets the current value for an Atspi.Value.
         """
 
         return AccessibleValue.get_current_value(self)
@@ -404,7 +415,7 @@ class DogtailAPI(object):
     @value.setter
     def value(self, new_value):
         """
-        Gets the current value for an Atspi.Value
+        Gets the current value for an Atspi.Value.
         """
 
         return AccessibleValue.set_current_value(self, new_value)
@@ -462,7 +473,7 @@ class DogtailAPI(object):
 
     def find_child(self, predicate, retry=True):
         """
-        Find a single child satisfying th predicate
+        Find a single child satisfying th predicate.
         """
 
         result = None
@@ -481,10 +492,28 @@ class DogtailAPI(object):
 
     def find_children(self, predicate):
         """
-        Find a all children satisfying th predicate
+        Find a all children satisfying the predicate.
         """
 
         return AccessibleObject.find_all_descendants(self, predicate)
+
+
+    @property
+    def last_child(self):
+        """
+        Is this Accessible Node the last child in parent node?
+        """
+
+        return AccessibleObject.is_last_child(self)
+
+
+    @property
+    def child_count(self):
+        """
+        Get how many children Accessible Node has.
+        """
+
+        return AccessibleObject.get_child_count(self)
 
 
     @property
@@ -510,7 +539,7 @@ class DogtailAPI(object):
     @property
     def extents(self):
         """
-        A tuple containing the location and size of the Accessible: (x, y, w, h)
+        A tuple containing the location and size of the Accessible: (x, y, w, h).
         """
 
         return AccessibleComponent.get_extents(self)
@@ -519,7 +548,7 @@ class DogtailAPI(object):
     @property
     def size(self):
         """
-        A tuple containing the size of the Accessible: (w, h)
+        A tuple containing the size of the Accessible: (w, h).
         """
 
         return AccessibleComponent.get_size(self)
@@ -528,7 +557,7 @@ class DogtailAPI(object):
     @property
     def position(self):
         """
-        A tuple containing the position of the Accessible: (x, y)
+        A tuple containing the position of the Accessible: (x, y).
         """
 
         return AccessibleComponent.get_position(self)
@@ -613,13 +642,33 @@ class DogtailAPI(object):
 
     def dump(self, output_type="plain", file_name=None):
         """
-        Dumping a tree structure of the node.
+        Dumping a structure representation.
         """
 
-        from dogtail import _dump
+        from dogtail.dump import AccessibleStructureRepresentation
 
-        dumper = getattr(_dump, output_type)
-        dumper(self, file_name)
+        if output_type == "plain":
+            print(AccessibleStructureRepresentation(self, "plain", file_name=file_name))
+
+        elif output_type == "verbose":
+            print(AccessibleStructureRepresentation(self, "verbose", file_name=file_name))
+
+        elif output_type == "tree":
+            # Print done by tree method.
+            self.tree(file_name=file_name)
+
+        else:
+            LOGGING.info(f"Unknown output type: '{output_type}'")
+
+
+    def tree(self, file_name=None):
+        """
+        Dumping a tree structure of the node in tree like representation.
+        """
+
+        from dogtail.dump import AccessibleStructureRepresentation
+
+        print(AccessibleStructureRepresentation(self, "tree", file_name=file_name))
 
 
     def blink(self):
@@ -760,7 +809,7 @@ class DogtailAPI(object):
 
     def __str__(self):
         try:
-            return f"[{self.name} | {self.role_name} | {self.description}]"
+            return f"[ '{self.name}' | '{self.role_name}' | '{self.description}' ]"
         except Exception as error:
             return f"[Exception encountered]: {error}"
 

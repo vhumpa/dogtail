@@ -7,6 +7,7 @@ Experimental dogtail changes for 1.0 release.
 # ruff: noqa: E501
 
 import configparser
+from configparser import NoSectionError
 
 from dogtail.logging import logging_class
 LOGGING = logging_class.logger
@@ -50,7 +51,7 @@ class _Config:
     section = "searching"
     _search_warning_threshold = int(cfg.get(section, "search_warning_threshold", fallback=3))
     _search_cut_off_limit = int(cfg.get(section, "search_cut_off_limit", fallback=20))
-    _search_showing_only = cfg.get(section, "search_showing_only", fallback=False) not in NO_VALUES
+    _search_showing_only = cfg.get(section, "search_showing_only", fallback="False") not in NO_VALUES
 
     # Children Limit section.
     section = "children_limit"
@@ -67,18 +68,18 @@ class _Config:
 
     # Debug section.
     section = "debug"
-    _debug_dogtail = cfg.get(section, "debug_dogtail", fallback=False) not in NO_VALUES
-    _debug_searching = cfg.get(section, "debug_searching", fallback=False) not in NO_VALUES
-    _debug_sleep = cfg.get(section, "debug_sleep", fallback=False) not in NO_VALUES
-    _debug_search_paths = cfg.get(section, "debug_search_paths", fallback=False) not in NO_VALUES
+    _debug_dogtail = cfg.get(section, "debug_dogtail", fallback="False") not in NO_VALUES
+    _debug_searching = cfg.get(section, "debug_searching", fallback="False") not in NO_VALUES
+    _debug_sleep = cfg.get(section, "debug_sleep", fallback="False") not in NO_VALUES
+    _debug_search_paths = cfg.get(section, "debug_search_paths", fallback="False") not in NO_VALUES
 
     # Debug section.
     section = "setting"
-    _log_to_std_out = cfg.get(section, "log_to_std_out", fallback=True) not in NO_VALUES
-    _absolute_node_paths = cfg.get(section, "absolute_node_paths", fallback=False) not in NO_VALUES
-    _ensure_sensitivity = cfg.get(section, "ensure_sensitivity", fallback=False) not in NO_VALUES
-    _fatal_errors = cfg.get(section, "fatal_errors", fallback=False) not in NO_VALUES
-    _check_for_a11y = cfg.get(section, "check_for_a11y", fallback=True) not in NO_VALUES
+    _log_to_std_out = cfg.get(section, "log_to_std_out", fallback="True") not in NO_VALUES
+    _absolute_node_paths = cfg.get(section, "absolute_node_paths", fallback="False") not in NO_VALUES
+    _ensure_sensitivity = cfg.get(section, "ensure_sensitivity", fallback="False") not in NO_VALUES
+    _fatal_errors = cfg.get(section, "fatal_errors", fallback="False") not in NO_VALUES
+    _check_for_a11y = cfg.get(section, "check_for_a11y", fallback="True") not in NO_VALUES
 
     # Return a dictionary with the retrieved values
     options = {
@@ -113,12 +114,22 @@ class _Config:
 
     # Custom user section.
     section = "user_setting"
-    user_setting_dictionary = dict(cfg.items(section))
-    # Set all user setup.
-    for key, value in user_setting_dictionary.items():
-        # Should we force 'custom_' prefix on users?
-        # As of now I opted to not do that, users can define any option they want.
-        options[key] = Value(value, [type(value)])
+    try:
+        user_setting_dictionary = dict(cfg.items(section))
+
+        # Set all user setup.
+        for key, value in user_setting_dictionary.items():
+            # Should we force 'custom_' prefix on users?
+            # As of now I opted to not do that, users can define any option they want.
+            options[key] = Value(value, [type(value)])
+
+    except NoSectionError:
+        # Do nothing, no user setting defined, which is ok.
+        pass
+
+    except Exception as error:
+        raise RuntimeError("Unexpected exception caught.") from error
+
 
     def adjust_casing(self, string_to_fix):
         """

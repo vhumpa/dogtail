@@ -547,14 +547,43 @@ class AccessibleObject:
         if not AccessibleObject.is_valid(acc_object):
             return None
 
-        children_list = []
+        if AccessibleObject.is_newton(acc_object):
+            # TODO Newton
+            return []
+        else:
+            children_list = []
 
-        for index in range(AccessibleObject.get_child_count(acc_object)):
-            child = AccessibleObject.get_child_at_index(acc_object, index)
-            if child:
-                children_list.append(child)
+            for index in range(AccessibleObject.get_child_count(acc_object)):
+                child = AccessibleObject.get_child_at_index(acc_object, index)
+                if child:
+                    children_list.append(child)
 
-        return children_list
+            return children_list
+
+
+    @staticmethod
+    def is_last_child(acc_object):
+        """
+        Returns a 'parent' for Accessible object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_valid(acc_object):
+            return None
+
+        if AccessibleObject.is_newton(acc_object):
+            return False # TODO
+        else:
+            does_not_have_parent = not AccessibleObject.get_parent(acc_object)
+            index_in_parent_is_not_valid = AccessibleObject.get_index_in_parent(acc_object) is None
+
+            index_in_parent = AccessibleObject.get_index_in_parent(acc_object)
+            child_count = AccessibleObject.get_parent(acc_object).get_child_count(acc_object) - 1
+
+            is_last_index = index_in_parent == child_count
+
+            return does_not_have_parent or index_in_parent_is_not_valid or is_last_index
 
 
     @staticmethod

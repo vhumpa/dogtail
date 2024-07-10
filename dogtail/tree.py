@@ -838,8 +838,22 @@ except Exception:  # pragma: no cover
 # The 'children' field on desktop is inherited Field from GObject.Object
 # We are recoding this logic in DogtailAPI so that the Object
 # in 'children' is Accessible instead of default [object].
-del Atspi.Accessible.children
+try:
+    del Atspi.Accessible.children
+except AttributeError:
+    # Might be already deleted.
+    pass
+
 # To keep the same keyword <keyword> we need to remove the Atspi.Accessible.<keyword>
 # So that the API is forced to use DogtailAPI.<keyword> and we can adjust it for Newton
-del Atspi.Accessible.parent
-del Atspi.Accessible.name
+try:
+    del Atspi.Accessible.parent
+except AttributeError:
+    # Might be already deleted.
+    pass
+
+try:
+    del Atspi.Accessible.name
+except AttributeError:
+    # Might be already deleted.
+    pass

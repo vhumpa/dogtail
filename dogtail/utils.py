@@ -472,14 +472,14 @@ def waitForWindow(name, timeout=30):
 
 def get_current_x_window_position():
     """
-    This is a helper to get window possition (top left corner) solely by means of
+    This is a helper to get window position (top left corner) solely by means of
     Xlib (direct X calls) - without a11y. This is targeted to be used with !GTK4!
     apps only - which don't support giving GLOBAL coords of their nodes under Xorg
     (as well as on wayland). By getting the win location and adding that up together
     with local coords, we can make actions with GTK4 apps under Xorg as well.
     Not to be mixed with what we do with local coords and local functions on W.
 
-    Imports are used locally here not to bring uncessery deps in most cases - because
+    Imports are used locally here not to bring unnecessary deps in most cases - because
     this is for rather a corner case... GTK4 apps will mostly be run in wayland and
     with Xorg most likely much much less.
     """
@@ -487,23 +487,30 @@ def get_current_x_window_position():
     try:
         from Xlib import X, display
         from Xlib.error import XError
-    except ModuleNotFoundError as e:
-        raise ImportError(
-            "python-xlib is required for this script to run. Please install it i.e. using 'pip install python-xlib'."
-        ) from e
+    except ModuleNotFoundError as error:
+        raise ImportError("".join(
+                (
+                    "python-xlib is required for this script to run.",
+                    "Please install it i.e. using 'pip3 install python-xlib'.",
+                )
+            )
+        ) from error
 
-    d = display.Display()
-    root = d.screen().root
+    _display = display.Display()
+    root = _display.screen().root
+
     window_id = root.get_full_property(
-        d.intern_atom("_NET_ACTIVE_WINDOW"), X.AnyPropertyType
+        _display.intern_atom("_NET_ACTIVE_WINDOW"), X.AnyPropertyType
     ).value[0]
-    window = d.create_resource_object("window", window_id)
+
+    window = _display.create_resource_object("window", window_id)
 
     try:
         geom = window.get_geometry()
         return geom.x, geom.y
-    except XError as e:
-        print(f"Error getting current window position: {e}")
+
+    except XError as error:
+        print(f"Error getting current window position: {error}")
         return 0, 0
 
 

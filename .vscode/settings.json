@@ -79,6 +79,7 @@
     "XAUTHORITY",
     "xdmcp",
     "Xephyr",
+    "Xlib",
     "xorg",
     "xrandr",
     "Xwayland",

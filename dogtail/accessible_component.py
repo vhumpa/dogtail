@@ -157,6 +157,7 @@ class AccessibleComponent:
 
                 # This gets executed a lot, on every .position query.
                 # The function is cashed in utils.py for better performance.
+                # TODO make a check for return value.
                 screen_width, _ = get_screen_resolution()
 
                 while node:

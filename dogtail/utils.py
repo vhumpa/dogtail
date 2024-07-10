@@ -26,6 +26,7 @@ import gi
 
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
+from gi.repository import Gtk
 
 from dogtail.logging import logging_class
 LOGGING = logging_class.logger
@@ -43,36 +44,14 @@ def do_delay(delay=None):
         LOGGING.debug(f"Default Delay: Sleeping for '{delay}'")
 
     if config.debug_sleep:
+        delay = config.debug_sleep
         LOGGING.debug(f"Debug Sleep: Sleeping for '{delay}'")
 
     sleep(float(delay))
 
 
-########################################
-# Backwards compatibility definitions. #
-########################################
-def doDelay(delay=None):  # pylint: disable=invalid-name
-    """
-    Do Delay.
-    """
-    do_delay(delay=delay)
-###############################################
-# End of backwards compatibility definitions. #
-###############################################
-
-
-# TODO refactor this all.
-
-
-# TODO if leaving it here, refactor it.
-def run(
-    string,
-    timeout=None,
-    interval=None,
-    desktop=None,
-    dumb=False,
-    appName="",
-):
+# TODO run
+def run(string, timeout=None, interval=None, desktop=None, dumb=False, app_name="", **kwargs,):
     """
     Runs an application.
     [For simple command execution such as 'rm *', use os.popen() or os.system()]
@@ -80,46 +59,65 @@ def run(
     starting, or until timeout is reached. If dumb is True, returns when timeout is reached.
     """
 
-    # Users can change timeout and interval via congig.ini or by parameter in function.
+    LOGGING.debug(logging_class.get_func_params_and_values())
+
+    # Users can change timeout and interval via config.ini or by parameter in function.
     validated_timeout = config.run_timeout if timeout is None else timeout
     validated_interval = config.run_interval if interval is None else interval
 
-    if not desktop:
-        from dogtail.tree import root as desktop
+    # Use root if not desktop was given. Why desktop though? This is weird.
+    if desktop is None:
+        from dogtail.tree import root
+    else:
+        root = desktop
 
     args = shlex.split(string)
     os.environ["GTK_MODULES"] = "gail:atk-bridge"
     pid = subprocess.Popen(args, env=os.environ).pid
 
-    if not appName:
-        appName = args[0]
+    # === Backward compatibility for 'appName' usage ===
+    validated_application_name = app_name
+    for key, val in kwargs.items():
+        if "appName" in str(key):
+            validated_application_name = val
+    # ==================================================
+    if not validated_application_name:
+        validated_application_name = args[0]
 
     if dumb:
-        #debug_log(
-        #    "Disable startup detection. We're starting a non-AT-SPI-aware application."
-        #)
-
+        LOGGING.debug("Disable startup detection.")
         do_delay(validated_timeout)
 
     else:
-        #debug_log(
-        #    "Startup detection code. The timing here is not totally precise, but it's good enough for now."
-        #)
+        LOGGING.debug("Startup detection code.")
 
         time = 0
 
         while time < validated_timeout:
             time = time + validated_interval
 
-            try:
-                for child in desktop.children[::-1]:
-                    if child.name == appName:
-                        for grandchild in child.children:
-                            if grandchild.role_name == "frame":
-                                do_delay(validated_interval)
+            # TODO just look at this.
+            # This is so wrong, why can it be easy when it can be difficult huh?
+            #try:
+            #    #for child in desktop_object.children[::-1]:
+            #        # Why not just detect root.application(appName) ??
+            #        if child.name == appName:
+            #            # Why not just detect child(roleName="frame") ??
+            #            for grandchild in child.children:
+            #                if grandchild.role_name == "frame":
+            #                    do_delay(validated_interval)
+            #                    return pid
+            #except AttributeError:  # pragma: no cover
+            #    pass
 
-                                return pid
-            except AttributeError:  # pragma: no cover
+            # Lets do it better.
+            try:
+                application = root.application(validated_application_name)
+                assert application.child(role_name="frame")
+                do_delay(validated_interval)
+                return pid
+
+            except Exception:
                 pass
 
             do_delay(validated_interval)
@@ -128,91 +126,15 @@ def run(
 
 
 
-
-
-
-# For now commenting this out.
-#class Highlight(Gtk.Window):  # pragma: no cover
-#    """
-#    Hightlight class used by Blinker. Display a red rectangle corresponding to the Accessibility
-#    node position and size via Gtk.Window class.
-#    """
-#
-#    def __init__(self, x, y, w, h):
-#        super(Highlight, self).__init__()
-#
-#        self.x = x
-#        self.y = y
-#        self.w = w
-#        self.h = h
-#        self.set_decorated(False)
-#        self.set_has_resize_grip(False)
-#        self.maximize()
-#        self.screen = self.get_screen()
-#        self.visual = self.screen.get_rgba_visual()
-#
-#        if self.visual is not None and self.screen.is_composited():
-#            self.set_visual(self.visual)
-#
-#        self.set_app_paintable(True)
-#        self.connect("draw", self.area_draw)
-#        self.show_all()
-#
-#    def area_draw(self, widget, cr):
-#        """
-#        Draw a rectangle on the screen.
-#        """
-#
-#        debug_log("Drawing the node on the screen.")
-#
-#        cr.set_source_rgba(0.0, 0.0, 0.0, 0.0)
-#        cr.set_operator(cairo.OPERATOR_SOURCE)
-#        cr.paint()
-#        cr.set_operator(cairo.OPERATOR_OVER)
-#        cr.set_source_rgb(0.9, 0.1, 0.1)
-#        cr.set_line_width(6)
-#        cr.rectangle(self.x, self.y, self.w, self.h)
-#        cr.stroke()
-#
-#
-#class Blinker:  # pragma: no cover
-#    """
-#    Blinker class used to highlight the Accessibility node in graphical interface.
-#    This highlight will be seen for 1 second before it will disappear.
-#    """
-#
-#    INTERVAL_MS = 1000
-#
-#    def __init__(self, x, y, w, h):
-#        self.highlight_window = Highlight(x, y, w, h)
-#        if self.highlight_window.screen.is_composited() is not False:
-#            self.timeout_handler_id = GLib.timeout_add(
-#                Blinker.INTERVAL_MS, self.destroyHighlight
-#            )
-#            Gtk.main()
-#        else:
-#            self.highlight_window.destroy()
-#
-#    def destroyHighlight(self):
-#        """
-#        Remove the highlight.
-#        """
-#
-#        debug_log("Blinker destroy highlight.")
-#
-#        self.highlight_window.destroy()
-#        Gtk.main_quit()
-#
-#        return False
-
-
+# TODO Lock
+########################################################################################
 class Lock(object):
     """
-    A known sytem-wide mutex implementation that uses atomicity of the mkdir operation in UNIX-like
-    systems. This should be used mainly to provide mutual exclution in handling possible collisions
+    A known system-wide mutex implementation that uses atomicity of the mkdir operation in UNIX-like
+    systems. This should be used mainly to provide mutual exclusion in handling possible collisions
     among multiple script instances. You can choose to make randomized single-script wise locks
-    or a more general locks if you do not choose to randomize the lockdir name. Set unLockOnExit
-    to True to enable automatic unlock when scipt process exits to avoid having to unlock manually.
+    or a more general locks if you do not choose to randomize the lock dir name. Set unLockOnExit
+    to True to enable automatic unlock when script process exits to avoid having to unlock manually.
     """
 
     def __init__(
@@ -318,139 +240,206 @@ class Lock(object):
         return "".join(
             random.choice(string.ascii_letters + string.digits) for x in range(5)
         )
+########################################################################################
 
 
-a11yDConfKey = "org.gnome.desktop.interface"
-
-
-def isA11yEnabled():
-    """
-    Checks if accessibility is enabled via DConf.
-    """
-
-    #debug_log("isA11yEnabled()")
-
-    from gi.repository.Gio import Settings
-
-    try:
-        InterfaceSettings = Settings(schema_id=a11yDConfKey)
-    except TypeError:
-        InterfaceSettings = Settings(schema=a11yDConfKey)
-
-    dconfEnabled = InterfaceSettings.get_boolean("toolkit-accessibility")
-
-    if os.environ.get("GTK_MODULES", "").find("gail:atk-bridge") == -1:
-        envEnabled = False
-    else:
-        envEnabled = True  # pragma: no cover
-
-    return dconfEnabled or envEnabled
-
-
-def bailBecauseA11yIsDisabled():
+def bail_because_accessibility_is_disabled():
     """
     Accessibility is detected as enabled. End the execution if there are no exceptions.
     """
 
-    #debug_log("bailBecauseA11yIsDisabled()")
+    LOGGING.info(logging_class.get_func_params_and_values())
 
     if sys.argv[0].endswith("pydoc"):
-        #debug_log("Execution was not ended. Script name with 'pydoc' exception.")
+        LOGGING.info("Execution was not ended. Script name with 'pydoc' exception.")
         return
 
     try:
-        with open("/proc/%s/cmdline" % os.getpid(), "r") as f:
+        with open(f"/proc/{os.getpid()}/cmdline", "r", encoding="utf-8") as f:
             content = f.read()
 
         if content.find("epydoc") != -1:
-            #debug_log("Execution was not ended. Proces content 'epydoc' exception.")
-            return  # pragma: no cover
-        if content.find("sphinx") != -1:
-            #debug_log("Execution was not ended. Proces content 'sphinx' exception.")
-            return  # pragma: no cover
-    except Exception:  # pragma: no cover
-        pass
+            LOGGING.info("Execution was not ended. Process content 'epydoc' exception.")
+            return
 
-    #logger.log(
-    #    "\n".join(
-    #        (
-    #            "Dogtail requires that Assistive Technology support be enabled.",
-    #            "You can enable accessibility with sniff or by running:",
-    #            "'gsettings set org.gnome.desktop.interface toolkit-accessibility true'",
-    #            "Aborting...",
-    #        )
-    #    )
-    #)
+        if content.find("sphinx") != -1:
+            LOGGING.info("Execution was not ended. Process content 'sphinx' exception.")
+            return
+
+    except Exception as error:
+        LOGGING.info(f"Exception caught, but the execution is ending anyway: '{error}'")
+
+
+    LOGGING.info("".join((
+        "Dogtail requires that Assistive Technology support to be enabled.",
+        "You can enable accessibility with sniff or by running:",
+        "'gsettings set org.gnome.desktop.interface toolkit-accessibility true'",
+        "Aborting...",
+    )))
 
     sys.exit(1)
 
 
-def enableA11y(enable=True):
-    """
-    Enables accessibility via DConf.
-    """
-
-    #debug_log("enableA11y(enable=%s)" % str(enable))
-
-    from gi.repository.Gio import Settings
-
-    InterfaceSettings = Settings(schema_id=a11yDConfKey)
-    InterfaceSettings.set_boolean("toolkit-accessibility", enable)
-
-
-def checkForA11y():  # pragma: no cover
+def check_for_accessibility():
     """
     Checks if accessibility is enabled, and halts execution if it is not.
     """
 
-    #debug_log("checkForA11y()")
+    LOGGING.info(logging_class.get_func_params_and_values())
 
-    if not isA11yEnabled():
-        bailBecauseA11yIsDisabled()
+    if not is_accessibility_enabled():
+        bail_because_accessibility_is_disabled()
 
 
-def checkForA11yInteractively():  # pragma: no cover
+def enable_accessibility(enable=True):
+    """
+    Enable Accessibility toolkit via dconf.
+    """
+
+    LOGGING.info(logging_class.get_func_params_and_values())
+
+    from gi.repository.Gio import Settings
+
+    a11y_dconf_key = "org.gnome.desktop.interface"
+    try:
+        interface_settings = Settings(schema_id=a11y_dconf_key)
+
+    except TypeError:
+        interface_settings = Settings(schema=a11y_dconf_key)
+
+    interface_settings.set_boolean("toolkit-accessibility", enable)
+
+
+def is_accessibility_enabled():
+    """
+    Checks if accessibility is enabled via DConf.
+    """
+
+    LOGGING.info(logging_class.get_func_params_and_values())
+
+    from gi.repository.Gio import Settings
+
+    a11y_dconf_key = "org.gnome.desktop.interface"
+    try:
+        interface_settings = Settings(schema_id=a11y_dconf_key)
+
+    except TypeError:
+        interface_settings = Settings(schema=a11y_dconf_key)
+    dconf_enabled = interface_settings.get_boolean("toolkit-accessibility")
+
+    if os.environ.get("GTK_MODULES", "").find("gail:atk-bridge") == -1:
+        env_enabled = False
+
+    else:
+        env_enabled = True
+
+    return dconf_enabled or env_enabled
+
+
+def check_for_accessibility_interactively():
     """
     Checks if accessibility is enabled, and presents a dialog prompting the
     user if it should be enabled if it is not already, then halts execution.
     """
 
-    #debug_log("checkForA11yInteractively()")
+    LOGGING.info(logging_class.get_func_params_and_values())
 
-    if isA11yEnabled():
+    if is_a11y_enabled():
+        LOGGING.info("Accessibility already enabled.")
         return
 
-    #dialog = Gtk.Dialog(
-    #    "Enable Assistive Technology Support?",
-    #    None,
-    #    Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
-    #    (Gtk.STOCK_QUIT, Gtk.ResponseType.CLOSE, "_Enable", Gtk.ResponseType.ACCEPT),
-    #)
+    # Inspiration found in Gtk examples, lets not reinvent the wheel.
+    class InteractiveDialog(Gtk.Dialog):
+        """
+        Interactive Dialog that user can confirm or cancel.
+        """
 
-    #question = """
-    #    Dogtail requires that Assistive Technology Support be enabled for it to function. Would you like to
-    #    enable Assistive Technology support now?
-#
-    #    Note that you will have to log out for the change to fully take effect.
-    #""".strip()
+        def __init__(self, parent):
+            super().__init__(title="Are you sure?", transient_for=parent, flags=0)
+            self.add_buttons(
+                Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK
+            )
 
-    pass
-    #dialog.set_default_response(Gtk.ResponseType.ACCEPT)
-    #questionLabel = Gtk.Label(label=question)
-    #questionLabel.set_line_wrap(True)
-    #dialog.vbox.pack_start(questionLabel, True, True, 0)
-    #dialog.show_all()
-    #result = dialog.run()
-#
-    #if result == Gtk.ResponseType.ACCEPT:
-    #    logger.log("Enabling accessibility...")
-    #    enableA11y()
-    #elif result == Gtk.ResponseType.CLOSE:
-    #    bailBecauseA11yIsDisabled()
-    #dialog.destroy()
+            self.set_default_size(300, 100)
+            self.set_resizable(False)
+
+            grid = Gtk.Grid(column_spacing=10, row_spacing=10)
+
+            # TODO is sniff still enough to just enable the toolkit?
+            # Nowadays we need ponytail, xauthority to properly function on wayland.
+            # using qecore-headless might be the only way to to properly enable everything.
+            # In which case this function might be useless.
+            question = """
+            Dogtail requires Assistive Technology Support to be enabled for it to function.
+            Would you like to enable Assistive Technology support now?
+
+            Note that you might have to logout for the change to fully take effect.
+            """
+
+            label = Gtk.Label(label=question)
+            grid.add(label)
+            grid.set_margin_end(20)
+
+            box = self.get_content_area()
+            #box.add(label)
+
+            box.add(grid)
+            self.show_all()
+
+    class InteractiveWindow(Gtk.Window):
+        """
+        Interactive window that will spawn question dialog.
+        """
+
+        def __init__(self):
+            Gtk.Window.__init__(self, title="Interactive Check for Accessibility toolkit.")
+            self.set_border_width(6)
+
+            grid = Gtk.Grid(column_spacing=10, row_spacing=10)
+            grid.set_margin_bottom(20)
+            grid.set_margin_top(20)
+            grid.set_margin_start(20)
+            grid.set_margin_end(20)
+            grid.set_column_homogeneous(True)
+            grid.set_row_homogeneous(False)
+
+            button = Gtk.Button(label="Enable toolkit-accessibility")
+            button.connect("clicked", self.on_button_clicked)
+
+            grid.add(button)
+
+            self.add(grid)
+
+        def on_button_clicked(self, widget): # pylint: disable=unused-argument
+            """
+            On click function.
+
+            :param widget: Unused Gtk Button.
+            :type widget: Gtk Button.
+            """
+
+            dialog = InteractiveDialog(self)
+            response = dialog.run()
+
+            if response == Gtk.ResponseType.OK:
+                LOGGING.info("Enabling Accessibility.")
+                enable_accessibility()
+            elif response == Gtk.ResponseType.CANCEL:
+                LOGGING.info("Execution halted, Accessibility Enabling was Cancelled.")
+                bail_because_accessibility_is_disabled()
+
+            # Destroy the dialog.
+            dialog.destroy()
+            # Destroy the main window.
+            self.destroy()
+
+    win = InteractiveWindow()
+    win.connect("destroy", Gtk.main_quit)
+    win.show_all()
+    Gtk.main()
 
 
-def waitForWindow(name, timeout=30):
+def wait_for_window(name, timeout=30):
     """
     Wait for window to appear. Currently wayland only.
     name can be a window 'title' as reported via Node.name
@@ -458,16 +447,15 @@ def waitForWindow(name, timeout=30):
     Returns true on success, false on x11.
     """
 
-    #debug_log("waitForWindow(name=%s, timeout=%s)" % (name, str(timeout)))
+    LOGGING.info(logging_class.get_func_params_and_values())
 
-    #from dogtail.rawinput import ponytail, SESSION_TYPE
-#
-    #if SESSION_TYPE == "wayland":
-    #    ponytail.waitFor(name, timeout=timeout)
-    #    return True
-    #else:
-    #    return False
-    return True
+    from dogtail.rawinput import ponytail, SESSION_TYPE
+
+    if SESSION_TYPE == "wayland":
+        ponytail.waitFor(name, timeout=timeout)
+        return True
+
+    return False
 
 
 def get_current_x_window_position():
@@ -483,6 +471,8 @@ def get_current_x_window_position():
     this is for rather a corner case... GTK4 apps will mostly be run in wayland and
     with Xorg most likely much much less.
     """
+
+    LOGGING.info(logging_class.get_func_params_and_values())
 
     try:
         from Xlib import X, display
@@ -510,8 +500,8 @@ def get_current_x_window_position():
         return geom.x, geom.y
 
     except XError as error:
-        print(f"Error getting current window position: {error}")
-        return 0, 0
+        LOGGING.info(f"Error getting current window position: {error}")
+        return (0, 0)
 
 
 # Before cache
@@ -532,6 +522,8 @@ def get_screen_resolution():
     :return: Resolution.
     :rtype: list
     """
+
+    LOGGING.info(logging_class.get_func_params_and_values())
 
     try:
         import dbus
@@ -613,3 +605,117 @@ def get_screen_resolution():
         resolution = f"The resolution retrieval failed for: {error}"
         LOGGING.info(f"resolution error: '{resolution}'")
         resolution (0,0)
+
+
+########################################
+# Backwards compatibility definitions. #
+########################################
+def doDelay(delay=None):  # pylint: disable=invalid-name
+    """
+    Do Delay.
+    """
+    do_delay(delay=delay)
+
+
+def waitForWindow(name, timeout=30): # pylint: disable=invalid-name
+    """
+    Wrapper over wait_for_window.
+    """
+
+    return wait_for_window(name=name, timeout=timeout)
+
+
+def check_for_a11y_interactively():
+    """
+    Wrapper over check_for_accessibility_interactively.
+    """
+
+    return check_for_accessibility_interactively()
+
+
+def checkForA11yInteractively(): # pylint: disable=invalid-name
+    """
+    Wrapper over check_for_a11y_interactively.
+    """
+
+    return check_for_accessibility_interactively()
+
+
+def enable_a11y(enable=True):
+    """
+    Wrapper over enable_accessibility.
+    """
+
+    return enable_accessibility(enable=enable)
+
+
+def enableA11y(enable=True): # pylint: disable=invalid-name
+    """
+    Wrapper over enable_accessibility.
+    """
+
+    return enable_accessibility(enable=enable)
+
+
+def check_for_a11y():
+    """
+    Wrapper over check_for_accessibility.
+    """
+
+    return check_for_accessibility()
+
+
+def checkForA11y(): # pylint: disable=invalid-name
+    """
+    Wrapper over check_for_accessibility.
+    """
+
+    return check_for_accessibility()
+
+
+def is_a11y_enabled():
+    """
+    Wrapper over is_accessibility_enabled.
+    """
+
+    return is_accessibility_enabled()
+
+
+def isA11yEnabled(): # pylint: disable=invalid-name
+    """
+    Wrapper over is_accessibility_enabled.
+    """
+
+    return is_accessibility_enabled()
+
+
+def bail_because_a11y_is_disabled():
+    """
+    Wrapper over bail_because_accessibility_is_disabled.
+    """
+
+    return bail_because_accessibility_is_disabled()
+
+
+def bailBecauseA11yIsDisabled(): # pylint: disable=invalid-name
+    """
+    Wrapper over bail_because_accessibility_is_disabled.
+    """
+
+    return bail_because_accessibility_is_disabled()
+
+
+# TODO delete once all changes are applied.
+# Keeping for now to not break something along the way.
+class Highlight(Gtk.Window): # pylint: disable=missing-class-docstring
+    def __init__(self):
+        LOGGING.info("Deprecated from release 1.0.")
+
+
+class Blinker: # pylint: disable=missing-class-docstring
+    def __init__(self):
+        LOGGING.info("Deprecated from release 1.0.")
+
+###############################################
+# End of backwards compatibility definitions. #
+###############################################

@@ -154,7 +154,11 @@ class AccessibleComponent:
             node = acc_object  # Assuming 'acc_object' is the current node
             try:
                 from dogtail.utils import get_screen_resolution
+
+                # This gets executed a lot, on every .position query.
+                # The function is cashed in utils.py for better performance.
                 screen_width, _ = get_screen_resolution()
+
                 while node:
                     if node.role_name == "frame":
                         frame_width, _ = node.size

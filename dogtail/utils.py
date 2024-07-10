@@ -20,6 +20,7 @@ import sys
 import errno
 import shlex
 import subprocess
+import functools
 
 import gi
 
@@ -505,23 +506,103 @@ def get_current_x_window_position():
         print(f"Error getting current window position: {e}")
         return 0, 0
 
-#TODO attempt to pull qecore resolution here and use that .
-def get_screen_resolution():
-    """Additional helper function with similar reasoning as the get_current_x_window_position needed
-    to work with GTK4 apps - even on wayland! (needs Xwayland running for xlib to get this info).
-    We need this to detect whether the frame is in fullscreen mode in order to either use the config.gtk4Offset
-    or not. There is no offset when window is full-screen. Se README for more info on this and shadows.
-    """
-    try:
-        from Xlib import X, display
-        from Xlib.error import XError
-    except ModuleNotFoundError as e:
-        raise ImportError(
-            "python-xlib is required for this script to run. Please install it i.e. using 'pip install python-xlib'."
-        ) from e
 
-    d = display.Display()
-    screen = d.screen()
-    width = screen.width_in_pixels
-    height = screen.height_in_pixels
-    return width, height
+# Before cache
+#'0.0014488697052001953' seconds - first call
+#'0.0018050670623779297' seconds - all following calls
+
+# After cache
+#'0.0014488697052001953' seconds - first call
+#'2.384185791015625e-06' seconds - all following calls
+
+# Since 3.2
+# Since 3.9 we could use @functools.cache
+@functools.lru_cache
+def get_screen_resolution():
+    """
+    Get resolution.
+
+    :return: Resolution.
+    :rtype: list
+    """
+
+    try:
+        import dbus
+
+        bus = dbus.SessionBus()
+        obj = bus.get_object(
+            "org.gnome.Mutter.DisplayConfig", "/org/gnome/Mutter/DisplayConfig"
+        )
+        interface = dbus.Interface(obj, "org.gnome.Mutter.DisplayConfig")
+        call_method = interface.get_dbus_method("GetCurrentState")
+        method_call_output = call_method()
+
+        # Unwrapping the values to deal with usual types and not dbus types.
+        def unwrap(value):
+            if isinstance(value, dbus.ByteArray):
+                return "".join([str(x) for x in value])
+            if isinstance(value, (dbus.Array, list, tuple, dbus.Struct)):
+                return [unwrap(x) for x in value]
+            if isinstance(value, (dbus.Dictionary, dict)):
+                return dict([(unwrap(x), unwrap(y)) for x, y in value.items()])
+            if isinstance(value, (dbus.Signature, dbus.String)):
+                return str(value)
+            if isinstance(value, dbus.Boolean):
+                return bool(value)
+            if isinstance(
+                value,
+                (
+                    dbus.Int16,
+                    dbus.UInt16,
+                    dbus.Int32,
+                    dbus.UInt32,
+                    dbus.Int64,
+                    dbus.UInt64,
+                ),
+            ):
+                return int(value)
+            if isinstance(value, (dbus.Double)):
+                return float(value)
+            if isinstance(value, dbus.Byte):
+                return bytes([int(value)])
+            return value
+
+        # Recursive helper function to walk the data structure.
+        # Data structure is searched for current resolution.
+        def search_dbus_structure(dbus_object, previous_object=None):
+
+            # Check if the structure is dictionary.
+            if isinstance(dbus_object, dict):
+                for key, value in dbus_object.items():
+                    # Check for the wanted condition of a dictionary.
+                    # We need current display.
+                    if key == "is-current" and value is True:
+                        # If current object value is True
+                        # return previous object's values.
+                        return previous_object[1], previous_object[2]
+
+                    # Check the result from the recursive function.
+                    result_found = search_dbus_structure(value, dbus_object)
+                    # End if there was result present. Return the value.
+                    if result_found:
+                        return result_found
+
+            # Check if the structure is iterable but not a string.
+            elif hasattr(dbus_object, "__iter__") and not isinstance(
+                dbus_object, str
+            ):
+                # Check all the items present in the object.
+                for item in dbus_object:
+                    # Check the result from the recursive function.
+                    result_found = search_dbus_structure(item, dbus_object)
+                    # End if there was result present. Return the value.
+                    if result_found:
+                        return result_found
+
+        resolution = search_dbus_structure(unwrap(method_call_output))
+        LOGGING.info(f"Resolution detected: '{resolution}'")
+        return resolution
+    except Exception as error:
+        resolution = f"The resolution retrieval failed for: {error}"
+        LOGGING.info(f"resolution error: '{resolution}'")
+        resolution (0,0)

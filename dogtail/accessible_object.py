@@ -18,6 +18,8 @@ from gi.repository import Atspi
 
 from types import LambdaType
 from dogtail.predicate import GenericPredicate
+from dogtail.config import config
+from dogtail.utils import do_delay
 
 from dogtail.logging import logging_class
 LOGGING = logging_class.logger
@@ -276,10 +278,22 @@ class AccessibleObject:
             LOGGING.debug("Unknown/unsupported way to compare nodes.")
             return None
 
-        if depth_first:
-            success_match = AccessibleObject._find_descendant_depth_first(acc_object, predicate)
-        else:  # breadth_first
-            success_match = AccessibleObject._find_descendant_breadth_first(acc_object, predicate)
+        for number_of_attempts in range(config.search_cut_off_limit):
+            if number_of_attempts >= config.search_warning_threshold:
+                LOGGING.info(f"Searching again (attempt '{number_of_attempts}')")
+
+            if depth_first:
+                success_match = AccessibleObject._find_descendant_depth_first(acc_object, predicate)
+            else:  # breadth_first
+                success_match = AccessibleObject._find_descendant_breadth_first(acc_object, predicate)
+
+            if success_match:
+                return success_match
+
+            #if not retry:
+            # break
+
+            do_delay(config.search_back_off_delay)
 
         return success_match
 

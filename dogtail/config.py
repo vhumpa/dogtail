@@ -154,8 +154,7 @@ class _Config:
         return string_in_snake_case
 
     def __setattr__(self, option_id, value_to_set):
-        # TODO development only, set to .debug before release.
-        LOGGING.info(logging_class.get_func_params_and_values())
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         # Set a variable to use for the setter logic.
         set_option_id = option_id
@@ -163,7 +162,7 @@ class _Config:
         # Attempt to have some backwards compatibility and support camelCase.
         if any(char.isupper() for char in set_option_id):
             set_option_id = self.adjust_casing(set_option_id)
-            LOGGING.info(f"Value was transformed to '{set_option_id}'.")
+            LOGGING.debug(f"Value was transformed to '{set_option_id}'.")
 
         # Set custom user value to use in dogtail run.
         # Current logic will fail on any attempt not set in config.ini.
@@ -193,8 +192,7 @@ class _Config:
             self.options[set_option_id] = Value(value_to_set, _defined_types)
 
     def __getattr__(self, option_id):
-        # TODO development only, set to .debug before release.
-        LOGGING.info(logging_class.get_func_params_and_values())
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         # Set a variable to use for the getter logic.
         get_option_id = option_id

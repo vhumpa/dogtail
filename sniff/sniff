@@ -14,7 +14,6 @@ Data display is handled by the SniffController class.
 import gi
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
-import sys
 from dogtail.config import config
 
 if config.checkForA11y:
@@ -25,10 +24,8 @@ config.logDebugToFile = False
 config.childrenLimit = 100000
 
 import pyatspi
-import Accessibility
 from gi.repository import Gtk
 from gi.repository import Gdk
-from gi.repository import Gio
 from gi.repository import GdkPixbuf
 from gi.repository import GObject
 from gi.repository import GLib
@@ -60,7 +57,7 @@ class SniffApp(object):
             import os
             path = os.path.abspath(
                 os.path.join(__file__, os.path.pardir, os.path.pardir))
-            if path is '/':
+            if path == '/':
                 path = '/usr'
             try:
                 self.app.set_icon_from_file(os.path.join(path, 'share/icons/hicolor/scalable/apps/dogtail-head.svg'))
@@ -190,7 +187,6 @@ class SniffController(object):
             column.set_sizing(Gtk.TreeViewColumnSizing.AUTOSIZE)
             column.set_resizable(True)
         self.treeView.show()
-        path = 0
         self.treeView.expand_all()
         #self.rowExpanded(self.treeView, self.treeModel.get_iter(path), path)
 
@@ -419,8 +415,8 @@ class SniffModel(Gtk.TreeStore):
         self.appendAndPopulate(None, self.rootNode)
 
     def __contains__(self, item):
-        from dogtail.tree import Node
-        if isinstance(item, Node):
+        from dogtail.tree import DogtailAPI
+        if isinstance(item, DogtailAPI):
             if item in self.cache:
                 row = self.cache[item]
                 # If row is None, we need to call getPath() to be sure
@@ -470,7 +466,7 @@ class SniffModel(Gtk.TreeStore):
             return Gtk.TreeStore.remove(self, iter)
 
     def populateChildren(self, iter):
-        if not iter in self:
+        if iter not in self:
             return False
         result = True
         node = self.getNode(iter)
@@ -489,7 +485,7 @@ class SniffModel(Gtk.TreeStore):
         return self.populateChildren(childIter)
 
     def getNode(self, iter):
-        if not iter in self:
+        if iter not in self:
             return None
         return self.get_value(iter, self.nodeColumn)
 
@@ -563,7 +559,7 @@ class SniffModel(Gtk.TreeStore):
     def nodeChanged(self, event):
         # if self.autorefresh.get_active() is False: return
         node = event.source
-        if not node or not node in self:
+        if not node or node not in self:
             return
         app = event.host_application
         if app and app.name == 'sniff':
@@ -573,7 +569,7 @@ class SniffModel(Gtk.TreeStore):
 
     def processChangedNode(self, event):
         node = event.source
-        if not node or not node in self:
+        if not node or node not in self:
             return
         path = self.getPath(node)
         try:
@@ -591,7 +587,7 @@ class SniffModel(Gtk.TreeStore):
         elif event.type.major == "children-changed":
             if event.type.minor == 'add':
                 for child in node.children:
-                    if not child in self:
+                    if child not in self:
                         if len(child) > 0:
                             self.appendAndPopulate(iter, child)
                         else:
@@ -788,7 +784,7 @@ def main():
         sniff_running.lock()
     except OSError:
         pass
-    sniff = SniffApp()
+    SniffApp()
 
 if __name__ == '__main__':
     main()

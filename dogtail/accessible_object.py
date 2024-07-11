@@ -237,19 +237,38 @@ class AccessibleObject:
 
 
     @staticmethod
-    def find_all_descendants(acc_object, given_predicate):
+    def find_all_descendants(acc_object, given_predicate, **kwargs):
         """
         Returns all descendants that match a predicate.
         """
 
         LOGGING.debug(logging_class.get_func_params_and_values())
 
+        # Pull values from kwargs here.
+        validated_showing_only = config.search_showing_only
+        # ===================================================
+        for key, val in kwargs.items():
+            if str(key) in ("showingOnly", "showing_only"):
+                validated_showing_only = val
+        # ===================================================
+
         # User is using lambdas.
         if isinstance(given_predicate, LambdaType):
             predicate = given_predicate
+
+            # Showing only handling.
+            if validated_showing_only:
+                def extend_predicate(x):
+                    return predicate(x) and x.showing
+                predicate = extend_predicate
+
         # User is using a GenericPredicate.
         elif isinstance(given_predicate, type(GenericPredicate())):
+            # Showing only handling for predicates.
+            given_predicate.showing_only = validated_showing_only
+
             predicate = given_predicate.satisfied_by_node
+
         # Unknown/unsupported way to compare nodes.
         else:
             LOGGING.info("Unknown/unsupported way to compare nodes.")
@@ -269,33 +288,55 @@ class AccessibleObject:
         LOGGING.debug(logging_class.get_func_params_and_values())
 
         # Pull values from kwargs here.
-        using_retry = True
+        validated_retry = True
+        validated_require_result = True
+        validated_showing_only = config.search_showing_only
+        # ===================================================
         for key, val in kwargs.items():
-            if "retry" in str(key):
-                using_retry = val
+            if "retry" == str(key):
+                validated_retry = val
+
+            if str(key) in ("requireResult", "require_result"):
+                validated_require_result = val
+
+            if str(key) in ("showingOnly", "showing_only"):
+                validated_showing_only = val
+        # ===================================================
 
         # User is using lambdas.
         if isinstance(given_predicate, LambdaType):
             predicate = given_predicate
+
             _description = inspect.getsource(predicate).strip("\n")
             formatted_description = _description.replace("  ", "").replace("\n", " ")
             description_to_use = formatted_description
 
+            # Showing only handling.
+            if validated_showing_only:
+                def extend_predicate(x):
+                    return predicate(x) and x.showing
+                predicate = extend_predicate
+                description_to_use += " and x.showing"
+
         # User is using a GenericPredicate.
         elif isinstance(given_predicate, type(GenericPredicate())):
+            # Showing only handling for predicates.
+            given_predicate.showing_only = validated_showing_only
+
             predicate = given_predicate.satisfied_by_node
+
             description_to_use = str(given_predicate)
 
         # Unknown/unsupported way to compare nodes.
         else:
             LOGGING.info("Unknown/unsupported way to compare nodes.")
-            return None
+            raise RuntimeError("No match.")
 
+        # Debug description of what user is searching for.
         LOGGING.debug(f"Searching for '{description_to_use}'")
 
         for number_of_attempts in range(config.search_cut_off_limit):
             if number_of_attempts >= config.search_warning_threshold:
-
                 LOGGING.info(f"Searching again (attempt '{number_of_attempts}')")
 
             if depth_first:
@@ -306,12 +347,13 @@ class AccessibleObject:
             if success_match:
                 return success_match
 
-            if not using_retry:
+            if not validated_retry:
                 break
 
             do_delay(config.search_back_off_delay)
 
-        return success_match
+        if validated_require_result:
+            raise RuntimeError(f"No match for '{description_to_use}'")
 
 
     @staticmethod
@@ -337,7 +379,7 @@ class AccessibleObject:
             if success_match is not None:
                 return success_match
 
-        return
+        return None
 
 
     @staticmethod
@@ -364,7 +406,7 @@ class AccessibleObject:
             if success_match is not None:
                 return success_match
 
-        return
+        return None
 
 
     @staticmethod

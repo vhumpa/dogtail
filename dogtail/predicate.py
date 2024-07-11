@@ -25,6 +25,7 @@ class GenericPredicate:
         self.role_name = role_name
         self.description = description
         self.label = label
+        self.showing_only = None
         self.satisfied_by_node = self._get_compare_function()
 
 
@@ -70,6 +71,12 @@ class GenericPredicate:
                     if self.description != node.description:
                         return False
 
+                # Check if user wants to match showing only.
+                if self.showing_only:
+                    # Compare description of self with the given node.
+                    if not node.showing:
+                        return False
+
                 # There are no conflicting parameters, match is a success.
                 return True
 
@@ -100,7 +107,8 @@ class GenericPredicate:
         string_to_represent_object += f"name:'{self.name if self.name else 'None'}' "
         string_to_represent_object += f"role_name:'{self.role_name if self.role_name else 'None'}' "
         string_to_represent_object += f"description:'{self.description if self.description else 'None'}' "
-        string_to_represent_object += f"label:'{self.label if self.label else 'None'}'"
+        string_to_represent_object += f"label:'{self.label if self.label else 'None'}' "
+        string_to_represent_object += f"showing_only:'{self.showing_only if self.showing_only else 'None'}'"
         return string_to_represent_object
 
 

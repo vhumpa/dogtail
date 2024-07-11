@@ -479,12 +479,12 @@ class DogtailAPI(object):
         return AccessibleObject.find_descendant(self, predicate, **kwargs)
 
 
-    def find_children(self, predicate):
+    def find_children(self, predicate, **kwargs):
         """
         Find a all children satisfying the predicate.
         """
 
-        return AccessibleObject.find_all_descendants(self, predicate)
+        return AccessibleObject.find_all_descendants(self, predicate, **kwargs)
 
 
     @property

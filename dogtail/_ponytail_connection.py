@@ -40,11 +40,10 @@ class PonytailWrapper(metaclass=Singleton):
     """
 
     # Initial state, no connection.
-    __window_id = None
+    _window_id = None
 
-    __ponytail = None
-    __already_initiated = False
-
+    _ponytail = None
+    _already_initiated = False
 
     expected_packages = [
         "gnome-ponytail-daemon",
@@ -65,46 +64,48 @@ class PonytailWrapper(metaclass=Singleton):
 
 
     def __init__(self):
-        LOGGING.debug("DEBUG - Initiating ponytail.")
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         # Only makes sense when running under Wayland.
         if self.session_type != "wayland":
             return
 
         # Do not initiate it if already done.
-        if not self.__already_initiated:
+        if not self._already_initiated:
             try:
-                LOGGING.debug("Initiating ponytail.")
-                LOGGING.debug("DEBUG - IMPORT.")
+                LOGGING.info("Initiating ponytail.")
+                LOGGING.info("DEBUG - IMPORT.")
                 from ponytail.ponytail import Ponytail
-                LOGGING.debug("DEBUG - INIT.")
-                self.__ponytail = Ponytail()
+                LOGGING.info("DEBUG - INIT.")
+                self._ponytail = Ponytail()
                 sleep(0.1) # Prevent any race conditions.
-                LOGGING.debug("DEBUG - DISCONNECT.")
-                self.__ponytail.disconnect()
+                LOGGING.info("DEBUG - DISCONNECT.")
+                self._ponytail.disconnect()
                 sleep(0.1) # Prevent any race conditions.
 
-                self.__already_initiated = True
+                self._already_initiated = True
 
             except Exception as error:
-                LOGGING.debug(f"Error when initiating ponytail: '{error}'")
-                LOGGING.debug(self.error_message)
+                LOGGING.info(f"Error when initiating ponytail: '{error}'")
+                LOGGING.info(self.error_message)
 
 
     def get_ponytail_instance(self):
         """
         Get ponytail instance.
         """
-        LOGGING.debug("DEBUG - get_ponytail_instance.")
 
-        return self.__ponytail
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return self._ponytail
 
 
     def ponytail_check_is_xwayland(self, window_id=None, window_list=None):
         """
         Detect Xwayland windows in order to use globals and recordMonitor
         """
-        LOGGING.debug("DEBUG - ponytail_check_is_xwayland.")
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         ponytail = self.get_ponytail_instance()
 
@@ -116,8 +117,12 @@ class PonytailWrapper(metaclass=Singleton):
         if isinstance(window_id, int):
             LOGGING.debug("Return wanted window_id.")
             try:
-                return int([x["client-type"] for x in window_list if x["id"] == window_id][0])
-            except Exception:
+                _window_id = int([x["client-type"] for x in window_list if x["id"] == window_id][0])
+                LOGGING.debug(f"Returning: '{_window_id}'")
+                return _window_id
+
+            except Exception as error:
+                LOGGING.debug(f"Exception in ponytail: '{error}'")
                 return window_id
 
         # If window_id is None, get window_id of focused window.
@@ -136,7 +141,8 @@ class PonytailWrapper(metaclass=Singleton):
         """
         Check ponytail connection.
         """
-        LOGGING.debug("DEBUG - ponytail_check_connection.")
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         ponytail = self.get_ponytail_instance()
 
@@ -225,22 +231,26 @@ class PonytailWrapper(metaclass=Singleton):
         """
         Get window_id.
         """
-        LOGGING.debug("DEBUG - get_window_id.")
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         LOGGING.debug(" ===== Verbose window_id handling ===== ")
 
         window_id_return_value = ""
 
         if accessible_object.session_type == "x11":
+            LOGGING.debug(f"Session type: '{accessible_object.session_type}'")
             window_id_return_value = None
 
-        if self.__window_id is None:
-            LOGGING.debug("Window id event.")
+        # Save window_list to work through.
+        window_list = self._ponytail.window_list
+        if len(window_list) == 0:
+            LOGGING.debug("Window list was empty, doing another attempt.")
+            sleep(0.1)
+            window_list = self._ponytail.window_list
 
-            window_list = self.__ponytail.window_list
-            if len(window_list) == 0:
-                sleep(0.1)
-                window_list = self.__ponytail.window_list
+        if self._window_id is None:
+            LOGGING.debug("Window id event.")
 
             for window in window_list:
                 if "title" not in window.keys():
@@ -255,55 +265,48 @@ class PonytailWrapper(metaclass=Singleton):
             for ancestor in parent_list:
                 # Ancestors parent is None
                 if ancestor.parent is None:
-                    self.__window_id = [
-                        x["id"] for x in window_list if bool(x["has-focus"]) is True
-                    ][0]
-                    window_id_return_value = self.__window_id
+                    self._window_id = [x["id"] for x in window_list if bool(x["has-focus"])][0]
+                    window_id_return_value = self._window_id
                     break
 
                 # Ancestors parent is an application and the application is gnome-shell.
-                if (
-                    ancestor.parent.role_name == "application"
-                    and ancestor.parent.name == "gnome-shell"
-                ):
+                if (ancestor.parent.role_name == "application"and ancestor.parent.name == "gnome-shell"):
                     window_id_return_value = ""
                     break
 
                 # Ancestors parent is an application and ancestor is a window.
-                if (
-                    ancestor.parent.role_name == "application"
-                    and ancestor.role_name == "window"
-                    and ancestor.name == ""
-                ):
-                    self.__window_id = [
-                        x["id"] for x in window_list if bool(x["has-focus"]) is True
-                    ][0]
-                    window_id_return_value = self.__window_id
+                if (ancestor.parent.role_name == "application" and ancestor.role_name == "window" and ancestor.name == ""):
+                    self._window_id = [x["id"] for x in window_list if bool(x["has-focus"])][0]
+                    window_id_return_value = self._window_id
                     break
 
                 # Ancestors parent is an application and ancestors name is in the list.
-                if ancestor.parent.role_name == "application" and ancestor.name in [
-                    x["title"] for x in window_list
-                ]:
-                    self.__window_id = [
-                        x["id"] for x in window_list if x["title"] == ancestor.name
-                    ][0]
-                    window_id_return_value = self.__window_id
+                if ancestor.parent.role_name == "application" and ancestor.name in [x["title"] for x in window_list]:
+                    self._window_id = [x["id"] for x in window_list if x["title"] == ancestor.name][0]
+                    window_id_return_value = self._window_id
                     break
 
                 # Ancestors parent is an application.
                 if ancestor.parent.roleName == "application":
-                    self.__window_id = [
-                        x["id"] for x in window_list if bool(x["has-focus"]) is True
-                    ][0]
-                    window_id_return_value = self.__window_id
+                    window_id_return_value = self._window_id
                     break
 
+        # If user provides a window that is not focused, refocus.
+        elif self._window_id is not None and not self.get_window_has_focus():
+            LOGGING.debug("Attempt to click on not focused window, refocusing.")
+            self._window_id = [x["id"] for x in window_list if bool(x["has-focus"])][0]
+            window_id_return_value = self._window_id
+
         else:
-            window_id_return_value = self.__window_id
+            LOGGING.debug("Window ID provided.")
+            window_id_return_value = self._window_id
 
-
+        LOGGING.debug(f"Window ID to use '{window_id_return_value}'")
         LOGGING.debug(" ===== End of window_id handling ====== ")
+
+        # Do not cache the value.
+        self._window_id = None
+
         return window_id_return_value
 
 
@@ -311,13 +314,14 @@ class PonytailWrapper(metaclass=Singleton):
         """
         Check if window is focused.
         """
-        LOGGING.debug("DEBUG - get_window_has_focus.")
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         #Get current window_id.
-        window_id = self.__window_id
+        window_id = self._window_id
 
         # Get window_list.
-        window_list = self.__ponytail.window_list
+        window_list = self._ponytail.window_list
 
         # Iterate through the window_list to see what window has focus.
         for window in window_list:

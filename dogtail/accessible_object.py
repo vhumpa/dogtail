@@ -17,6 +17,7 @@ gi.require_version("Atspi", "2.0")
 from gi.repository import Atspi
 
 from types import LambdaType
+import inspect
 from dogtail.predicate import GenericPredicate
 from dogtail.config import config
 from dogtail.utils import do_delay
@@ -276,16 +277,25 @@ class AccessibleObject:
         # User is using lambdas.
         if isinstance(given_predicate, LambdaType):
             predicate = given_predicate
+            _description = inspect.getsource(predicate).strip("\n")
+            formatted_description = _description.replace("  ", "").replace("\n", " ")
+            description_to_use = formatted_description
+
         # User is using a GenericPredicate.
         elif isinstance(given_predicate, type(GenericPredicate())):
             predicate = given_predicate.satisfied_by_node
+            description_to_use = str(given_predicate)
+
         # Unknown/unsupported way to compare nodes.
         else:
             LOGGING.info("Unknown/unsupported way to compare nodes.")
             return None
 
+        LOGGING.debug(f"Searching for '{description_to_use}'")
+
         for number_of_attempts in range(config.search_cut_off_limit):
             if number_of_attempts >= config.search_warning_threshold:
+
                 LOGGING.info(f"Searching again (attempt '{number_of_attempts}')")
 
             if depth_first:
@@ -613,7 +623,8 @@ class AccessibleObject:
         The node(s) that is/are a label for this node. Generated from 'relations'.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
+        # #TODO what to do, its flooding the debug logs.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return []

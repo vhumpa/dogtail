@@ -84,9 +84,9 @@ def click(x, y, button=1, check=True, window_id=None):
 
     LOGGING.debug(logging_class.get_func_params_and_values())
 
-    # Get ponytail only when required.
-    ponytail_wrapper = PonytailWrapper()
-    ponytail = ponytail_wrapper.get_ponytail_instance()
+    window_list = ponytail_wrapper._ponytail.window_list
+    debug_click = [(x["id"], x["has-focus"]) for x in window_list]
+    LOGGING.debug(f"DEBUG CLICK: '{debug_click}'")
 
     # TODO remove and do it better.
     (_x, _y) = update_coords((x, y))
@@ -114,10 +114,6 @@ def point(x, y, check=True, window_id=None):
 
     LOGGING.debug(logging_class.get_func_params_and_values())
 
-    # Get ponytail only when required.
-    ponytail_wrapper = PonytailWrapper()
-    ponytail = ponytail_wrapper.get_ponytail_instance()
-
     # TODO remove and do it better.
     (_x, _y) = update_coords((x, y))
 
@@ -143,10 +139,6 @@ def double_click(x, y, button=1, check=True, window_id=None):
     """
 
     LOGGING.debug(logging_class.get_func_params_and_values())
-
-    # Get ponytail only when required.
-    ponytail_wrapper = PonytailWrapper()
-    ponytail = ponytail_wrapper.get_ponytail_instance()
 
     # TODO remove and do it better.
     (_x, _y) = update_coords((x, y))
@@ -190,10 +182,6 @@ def press(x, y, button=1, check=True, window_id=None, delay=None):
     else:
         delay_to_use = config.default_delay
 
-    # Get ponytail only when required.
-    ponytail_wrapper = PonytailWrapper()
-    ponytail = ponytail_wrapper.get_ponytail_instance()
-
     # TODO remove and do it better.
     (_x, _y) = update_coords((x, y))
 
@@ -220,10 +208,6 @@ def release(x, y, button=1, check=True, window_id=None):
     """
 
     LOGGING.debug(logging_class.get_func_params_and_values())
-
-    # Get ponytail only when required.
-    ponytail_wrapper = PonytailWrapper()
-    ponytail = ponytail_wrapper.get_ponytail_instance()
 
     # TODO remove and do it better.
     (_x, _y) = update_coords((x, y))
@@ -254,10 +238,6 @@ def absolute_motion(x, y, mouse_delay=None, check=True, window_id=None):
     """
 
     LOGGING.debug(logging_class.get_func_params_and_values())
-
-    # Get ponytail only when required.
-    ponytail_wrapper = PonytailWrapper()
-    ponytail = ponytail_wrapper.get_ponytail_instance()
 
     # Check if user defined their own delay.
     if mouse_delay:
@@ -302,10 +282,6 @@ def absolute_motion_with_trajectory(
     """
 
     LOGGING.debug(logging_class.get_func_params_and_values())
-
-    # Get ponytail only when required.
-    ponytail_wrapper = PonytailWrapper()
-    ponytail = ponytail_wrapper.get_ponytail_instance()
 
     # Check if user defined their own delay.
     if mouse_delay:
@@ -476,10 +452,6 @@ def drag_with_trajectory_global(fromXY, toXY, button=1):  # pylint: disable=inva
 
     LOGGING.debug(logging_class.get_func_params_and_values())
 
-    # Get ponytail only when required.
-    ponytail_wrapper = PonytailWrapper()
-    ponytail = ponytail_wrapper.get_ponytail_instance()
-
     LOGGING.debug(f"Dragging with trajectory from '{fromXY}' to '{toXY}', button '{button}'.")
 
     if SESSION_TYPE == "wayland":
@@ -631,10 +603,7 @@ def press_key(key_name, window_id=None):
         do_delay(float(config.typing_delay))
 
     else:
-        ponytail_wrapper = PonytailWrapper()
         ponytail_wrapper.ponytail_check_connection(window_id, input_source="keyboard")
-
-        ponytail = ponytail_wrapper.get_ponytail_instance()
         use_delay = float(config.typing_delay)
         ponytail.generateKeysymEvent(key_symbol_value, delay=use_delay)
 
@@ -655,10 +624,7 @@ def hold_key(key_name):
         do_delay(float(config.typing_delay))
 
     else:
-        ponytail_wrapper = PonytailWrapper()
         ponytail_wrapper.ponytail_check_connection(input_source="keyboard")
-
-        ponytail = ponytail_wrapper.get_ponytail_instance()
         ponytail.generateKeycodePress(key_code)
 
     do_delay()
@@ -680,10 +646,7 @@ def release_key(key_name):
         do_delay(float(config.typing_delay))
 
     else:
-        ponytail_wrapper = PonytailWrapper()
         ponytail_wrapper.ponytail_check_connection(input_source="keyboard")
-
-        ponytail = ponytail_wrapper.get_ponytail_instance()
         ponytail.generateKeycodePress(key_code)
 
     do_delay()
@@ -764,10 +727,7 @@ def key_combo(combo_string):
         # always use monitor, window will often get closed
         # before final release i.e. with alt-f4 ctrl-q etc!
 
-        ponytail_wrapper = PonytailWrapper()
         ponytail_wrapper.ponytail_check_connection(input_source="keyboard", window_id="")
-
-        ponytail = ponytail_wrapper.get_ponytail_instance()
 
         # First press all modifiers leading up to the final key.
         for modifier in modifiers:

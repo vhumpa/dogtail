@@ -91,6 +91,19 @@ class GenericPredicate:
         return self.__dict__ == other.__dict__
 
 
+    def __str__(self):
+        """
+        Representation of what the Predicate is matching.
+        """
+
+        string_to_represent_object = ""
+        string_to_represent_object += f"name:'{self.name if self.name else 'None'}' "
+        string_to_represent_object += f"role_name:'{self.role_name if self.role_name else 'None'}' "
+        string_to_represent_object += f"description:'{self.description if self.description else 'None'}' "
+        string_to_represent_object += f"label:'{self.label if self.label else 'None'}'"
+        return string_to_represent_object
+
+
 class IsATabNamed(GenericPredicate):
     """
     Predicate subclass that looks for a tab by name.

@@ -113,9 +113,9 @@ class AccessibleActions:
             action_to_do = AccessibleActions.get_actions(acc_object)[named_action]
 
             if AccessibleObject.is_newton(acc_object):
-                return acc_object.do_action(action_to_do)
+                return acc_object.do_action(acc_object, action_to_do)
 
-            return Atspi.Action.do_action(action_to_do)
+            return Atspi.Action.do_action(acc_object, action_to_do)
 
         except Exception as error:
             LOGGING.debug(f"Exception when executing a named action: '{error}'")

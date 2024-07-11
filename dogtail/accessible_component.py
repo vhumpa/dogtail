@@ -155,10 +155,10 @@ class AccessibleComponent:
             try:
                 from dogtail.utils import get_screen_resolution
 
-                # This gets executed a lot, on every .position query.
-                # The function is cashed in utils.py for better performance.
-                # TODO make a check for return value.
-                screen_width, _ = get_screen_resolution()
+                # Check resolution result first. Can be None with caching.
+                resolution_result = get_screen_resolution()
+                if resolution_result:
+                    screen_width, _ = resolution_result
 
                 while node:
                     if node.role_name == "frame":

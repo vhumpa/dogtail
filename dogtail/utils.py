@@ -523,7 +523,7 @@ def get_screen_resolution():
     :rtype: list
     """
 
-    LOGGING.info(logging_class.get_func_params_and_values())
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     try:
         import dbus
@@ -599,7 +599,7 @@ def get_screen_resolution():
                         return result_found
 
         resolution = search_dbus_structure(unwrap(method_call_output))
-        LOGGING.info(f"Resolution detected: '{resolution}'")
+        LOGGING.debug(f"Resolution detected: '{resolution}'")
         return resolution
     except Exception as error:
         resolution = f"The resolution retrieval failed for: {error}"

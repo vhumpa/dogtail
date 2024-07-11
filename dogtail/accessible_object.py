@@ -260,12 +260,18 @@ class AccessibleObject:
 
 
     @staticmethod
-    def find_descendant(acc_object, given_predicate, depth_first=True):
+    def find_descendant(acc_object, given_predicate, depth_first=True, **kwargs):
         """
         Find a single descendant node satisfying the predicate.
         """
 
         LOGGING.debug(logging_class.get_func_params_and_values())
+
+        # Pull values from kwargs here.
+        using_retry = True
+        for key, val in kwargs.items():
+            if "retry" in str(key):
+                using_retry = val
 
         # User is using lambdas.
         if isinstance(given_predicate, LambdaType):
@@ -290,8 +296,8 @@ class AccessibleObject:
             if success_match:
                 return success_match
 
-            #if not retry:
-            # break
+            if not using_retry:
+                break
 
             do_delay(config.search_back_off_delay)
 

@@ -454,12 +454,12 @@ class DogtailAPI(object):
 
         LOGGING.debug(logging_class.get_func_params_and_values())
 
-        # === Backward compatibility for 'roleName' usage ===
         using_role_name = role_name
+        # === Backward compatibility for 'roleName' usage ===
         for key, val in kwargs.items():
             if "roleName" in str(key):
                 using_role_name = val
-        # =================================================
+        # ===================================================
 
         predicate = GenericPredicate(
             name=name,
@@ -468,26 +468,15 @@ class DogtailAPI(object):
             label=label
         )
 
-        return AccessibleObject.find_descendant(self, predicate.satisfied_by_node)
+        return AccessibleObject.find_descendant(self, predicate.satisfied_by_node, **kwargs)
 
 
-    def find_child(self, predicate, retry=True):
+    def find_child(self, predicate, **kwargs):
         """
         Find a single child satisfying th predicate.
         """
 
-        result = None
-
-        for _ in range(config.search_cut_off_limit):
-            result = AccessibleObject.find_descendant(self, predicate)
-
-            if result:
-                break
-
-            if not retry:
-                break
-
-        return result
+        return AccessibleObject.find_descendant(self, predicate, **kwargs)
 
 
     def find_children(self, predicate):

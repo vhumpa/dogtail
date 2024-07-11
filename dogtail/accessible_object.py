@@ -275,7 +275,7 @@ class AccessibleObject:
             predicate = given_predicate.satisfied_by_node
         # Unknown/unsupported way to compare nodes.
         else:
-            LOGGING.debug("Unknown/unsupported way to compare nodes.")
+            LOGGING.info("Unknown/unsupported way to compare nodes.")
             return None
 
         for number_of_attempts in range(config.search_cut_off_limit):

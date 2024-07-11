@@ -117,7 +117,7 @@ class DogtailAPI(object):
         Return string description of the toolkit we are using.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
+        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleUtilities.get_toolkit(self)
 
@@ -468,7 +468,7 @@ class DogtailAPI(object):
             label=label
         )
 
-        return AccessibleObject.find_descendant(self, predicate.satisfied_by_node, **kwargs)
+        return AccessibleObject.find_descendant(self, predicate, **kwargs)
 
 
     def find_child(self, predicate, **kwargs):

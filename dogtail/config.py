@@ -99,7 +99,7 @@ class _Config:
         "run_interval": Value(_run_interval, [float, int]),
         "run_timeout": Value(_run_timeout, [float, int]),
 
-        "gtk4_offset": Value(_offset, [list]),
+        "gtk4_offset": Value(_offset, [list, tuple]),
 
         "debug_dogtail": Value(_debug_dogtail, [bool]),
         "debug_searching": Value(_debug_searching, [bool]),

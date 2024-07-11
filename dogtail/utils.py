@@ -50,7 +50,6 @@ def do_delay(delay=None):
     sleep(float(delay))
 
 
-# TODO run
 def run(string, timeout=None, interval=None, desktop=None, dumb=False, app_name="", **kwargs,):
     """
     Runs an application.

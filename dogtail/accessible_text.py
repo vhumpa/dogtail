@@ -37,7 +37,7 @@ class AccessibleText:
 
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
-            return ""
+            return None
 
         if AccessibleObject.is_newton(acc_object):
             length = acc_object.get_character_count()

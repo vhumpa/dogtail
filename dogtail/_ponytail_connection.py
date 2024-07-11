@@ -73,13 +73,10 @@ class PonytailWrapper(metaclass=Singleton):
         # Do not initiate it if already done.
         if not self._already_initiated:
             try:
-                LOGGING.info("Initiating ponytail.")
-                LOGGING.info("DEBUG - IMPORT.")
+                LOGGING.debug("Initiating ponytail.")
                 from ponytail.ponytail import Ponytail
-                LOGGING.info("DEBUG - INIT.")
                 self._ponytail = Ponytail()
                 sleep(0.1) # Prevent any race conditions.
-                LOGGING.info("DEBUG - DISCONNECT.")
                 self._ponytail.disconnect()
                 sleep(0.1) # Prevent any race conditions.
 

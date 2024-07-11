@@ -200,7 +200,7 @@ class _Config:
         # Attempt to have some backwards compatibility and support camelCase.
         if any(char.isupper() for char in get_option_id):
             get_option_id = self.adjust_casing(get_option_id)
-            LOGGING.info(f"Value was transformed to '{get_option_id}'.")
+            LOGGING.debug(f"Value was transformed to '{get_option_id}'.")
 
         try:
             return self.options[get_option_id].value

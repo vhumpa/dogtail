@@ -247,7 +247,7 @@ def bail_because_accessibility_is_disabled():
     Accessibility is detected as enabled. End the execution if there are no exceptions.
     """
 
-    LOGGING.info(logging_class.get_func_params_and_values())
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     if sys.argv[0].endswith("pydoc"):
         LOGGING.info("Execution was not ended. Script name with 'pydoc' exception.")
@@ -284,7 +284,7 @@ def check_for_accessibility():
     Checks if accessibility is enabled, and halts execution if it is not.
     """
 
-    LOGGING.info(logging_class.get_func_params_and_values())
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     if not is_accessibility_enabled():
         bail_because_accessibility_is_disabled()
@@ -295,7 +295,7 @@ def enable_accessibility(enable=True):
     Enable Accessibility toolkit via dconf.
     """
 
-    LOGGING.info(logging_class.get_func_params_and_values())
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     from gi.repository.Gio import Settings
 
@@ -314,7 +314,7 @@ def is_accessibility_enabled():
     Checks if accessibility is enabled via DConf.
     """
 
-    LOGGING.info(logging_class.get_func_params_and_values())
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     from gi.repository.Gio import Settings
 
@@ -341,10 +341,10 @@ def check_for_accessibility_interactively():
     user if it should be enabled if it is not already, then halts execution.
     """
 
-    LOGGING.info(logging_class.get_func_params_and_values())
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     if is_a11y_enabled():
-        LOGGING.info("Accessibility already enabled.")
+        LOGGING.debug("Accessibility already enabled.")
         return
 
     # Inspiration found in Gtk examples, lets not reinvent the wheel.
@@ -446,7 +446,7 @@ def wait_for_window(name, timeout=30):
     Returns true on success, false on x11.
     """
 
-    LOGGING.info(logging_class.get_func_params_and_values())
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     from dogtail.rawinput import ponytail, SESSION_TYPE
 
@@ -471,7 +471,7 @@ def get_current_x_window_position():
     with Xorg most likely much much less.
     """
 
-    LOGGING.info(logging_class.get_func_params_and_values())
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     try:
         from Xlib import X, display

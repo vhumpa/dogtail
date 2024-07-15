@@ -31,17 +31,9 @@ class LoadDefaultConfiguration:
     Configuration class for default values.
     """
 
-    # Create a ConfigParser object.
-    cfg = configparser.ConfigParser()
-
-    # Read the configuration file.
-    # TODO Figure out where the file will be.
-    # Currently think about having it placed/looked for in current user directory.
-    # Or perhaps having it in $HOME?
-    cfg.read("dogtail_config.ini")
-
-    def __init__(self):
+    def __init__(self, config_parser):
         # Access values from the configuration file.
+        self.cfg = config_parser
 
         # Timing Delay section.
         section = "config"
@@ -86,7 +78,22 @@ class _Config:
     Config class to keep backwards compatibility and to have getters and setters.
     """
 
-    _default = LoadDefaultConfiguration()
+    # Create a ConfigParser object.
+    config_parser = configparser.ConfigParser()
+
+    # Read the configuration file.
+    # TODO Figure out where the file will be.
+    # Currently think about having it placed/looked for in current user directory.
+    # Or perhaps having it in $HOME?
+    successful_file_parsed = config_parser.read("dogtail_config.ini")
+
+    if not successful_file_parsed:
+        LOGGING.debug("\n".join((
+            "Configuration file 'dogtail_config.ini' was not found, using default values.",
+            "You can create the configuration file with '$ dogtail-create-config'.",
+        )))
+
+    _default = LoadDefaultConfiguration(config_parser)
 
     # Return a dictionary with the retrieved values.
     # Define allowed type so that user cannot by mistake set different type than allowed.

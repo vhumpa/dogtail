@@ -448,10 +448,12 @@ def wait_for_window(name, timeout=30):
 
     LOGGING.debug(logging_class.get_func_params_and_values())
 
-    from dogtail.rawinput import ponytail, SESSION_TYPE
+    from dogtail.rawinput import SESSION_TYPE
+    from dogtail.ponytail_helper import ponytail_helper
 
     if SESSION_TYPE == "wayland":
-        ponytail.waitFor(name, timeout=timeout)
+        ponytail_interface = ponytail_helper.get_ponytail_interface()
+        ponytail_interface.waitFor(name, timeout=timeout)
         return True
 
     return False

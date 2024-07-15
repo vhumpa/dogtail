@@ -39,7 +39,7 @@ from dogtail.accessible_utilities import AccessibleUtilities
 from dogtail.accessible_value import AccessibleValue
 
 from dogtail.predicate import GenericPredicate
-from dogtail._ponytail_connection import PonytailWrapper
+from dogtail.ponytail_helper import ponytail_helper
 from dogtail.rawinput import click, point, double_click
 from dogtail.config import config
 
@@ -50,9 +50,6 @@ class Node(object):
     """
 
     LOGGING.debug("Initiating dogtail api.")
-
-    ponytail_wrapper = PonytailWrapper()
-    ponytail = ponytail_wrapper.get_ponytail_instance()
 
     if config.debug_dogtail:
         LOGGING.info("Debugging dogtail to console.")
@@ -130,7 +127,7 @@ class Node(object):
 
         LOGGING.debug(logging_class.get_func_params_and_values())
 
-        return self.ponytail_wrapper.get_window_id(self)
+        return ponytail_helper.get_window_id(self)
 
 
     @property
@@ -145,7 +142,7 @@ class Node(object):
             LOGGING.info("Ponytail is not used in non Wayland session.")
             return False
 
-        return self.ponytail_wrapper.get_window_has_focus()
+        return ponytail_helper.get_window_has_focus()
 
 
     @property

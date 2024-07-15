@@ -29,7 +29,7 @@ warnings.filterwarnings("ignore", "g_object_unref")
 
 from dogtail.utils import do_delay
 
-from dogtail._ponytail_connection import PonytailWrapper
+from dogtail.ponytail_helper import ponytail_helper
 from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 
@@ -38,11 +38,6 @@ from dogtail.config import config
 SESSION_TYPE = "x11"
 if "XDG_SESSION_TYPE" in os.environ and "wayland" in os.environ["XDG_SESSION_TYPE"]:
     SESSION_TYPE = "wayland"
-
-# Without this part it currently fails - TODO, figure out why it has to be done globally
-if SESSION_TYPE == "wayland":
-    ponytail_wrapper = PonytailWrapper()
-    ponytail = ponytail_wrapper.get_ponytail_instance()
 
 
 # There is a better way to do this since I am already rewriting it.
@@ -84,10 +79,6 @@ def click(x, y, button=1, check=True, window_id=None):
 
     LOGGING.debug(logging_class.get_func_params_and_values())
 
-    window_list = ponytail_wrapper._ponytail.window_list
-    debug_click = [(x["id"], x["has-focus"]) for x in window_list]
-    LOGGING.debug(f"DEBUG CLICK: '{debug_click}'")
-
     # TODO remove and do it better.
     (_x, _y) = update_coords((x, y))
 
@@ -101,8 +92,14 @@ def click(x, y, button=1, check=True, window_id=None):
         # TODO Newton if condition.
         Atspi.generate_mouse_event(_x, _y, name=f"b{button}c")
     else:
-        ponytail_wrapper.ponytail_check_connection(window_id)
-        ponytail.generateButtonEvent(button, _x, _y)
+        ponytail_helper.ponytail_check_connection(window_id)
+        ponytail_interface = ponytail_helper.get_ponytail_interface()
+
+        window_list = ponytail_interface.window_list
+        debug_click = [(x["id"], x["has-focus"]) for x in window_list]
+        LOGGING.debug(f"Ponytail click: '{debug_click}'")
+
+        ponytail_interface.generateButtonEvent(button, _x, _y)
 
     do_delay(config.default_delay)
 
@@ -127,8 +124,9 @@ def point(x, y, check=True, window_id=None):
         # TODO Newton if condition.
         Atspi.generate_mouse_event(_x, _y, name="abs")
     else:
-        ponytail_wrapper.ponytail_check_connection(window_id)
-        ponytail.generateMotionEvent(_x, _y)
+        ponytail_helper.ponytail_check_connection(window_id)
+        ponytail_interface = ponytail_helper.get_ponytail_interface()
+        ponytail_interface.generateMotionEvent(_x, _y)
 
     do_delay(config.default_delay)
 
@@ -153,18 +151,19 @@ def double_click(x, y, button=1, check=True, window_id=None):
         # TODO Newton if condition.
         Atspi.generate_mouse_event(x, y, name=f"b{button}d")
     else:
-        ponytail_wrapper.ponytail_check_connection(window_id)
-        ponytail.generateButtonEvent(button, _x, _y)
+        ponytail_helper.ponytail_check_connection(window_id)
+        ponytail_interface = ponytail_helper.get_ponytail_interface()
+        ponytail_interface.generateButtonEvent(button, _x, _y)
 
         do_delay(config.double_click_delay)
 
         # Prevent executing release event on closed application
-        ponytail.generateButtonPress(button)
-        if ponytail.connected:
-            ponytail.generateButtonRelease(button)
+        ponytail_interface.generateButtonPress(button)
+        if ponytail_interface.connected:
+            ponytail_interface.generateButtonRelease(button)
         else: # not ponytail.connected:
-            ponytail.connectMonitor()
-            ponytail.generateButtonRelease(button)
+            ponytail_interface.connectMonitor()
+            ponytail_interface.generateButtonRelease(button)
 
     do_delay(config.default_delay)
 
@@ -195,9 +194,10 @@ def press(x, y, button=1, check=True, window_id=None, delay=None):
         Atspi.generate_mouse_event(_x, _y, name=f"b{button}p")
 
     else:
-        ponytail_wrapper.ponytail_check_connection(window_id)
-        ponytail.generateMotionEvent(_x, _y)
-        ponytail.generateButtonPress(button)
+        ponytail_helper.ponytail_check_connection(window_id)
+        ponytail_interface = ponytail_helper.get_ponytail_interface()
+        ponytail_interface.generateMotionEvent(_x, _y)
+        ponytail_interface.generateButtonPress(button)
 
     do_delay(delay_to_use)
 
@@ -222,12 +222,13 @@ def release(x, y, button=1, check=True, window_id=None):
         Atspi.generate_mouse_event(_x, _y, name=f"b{button}r")
 
     else:
-        ponytail_wrapper.ponytail_check_connection(window_id)
-        ponytail.generateMotionEvent(_x, _y)
+        ponytail_helper.ponytail_check_connection(window_id)
+        ponytail_interface = ponytail_helper.get_ponytail_interface()
+        ponytail_interface.generateMotionEvent(_x, _y)
 
         do_delay()
 
-        ponytail.generateButtonRelease(button)
+        ponytail_interface.generateButtonRelease(button)
 
     do_delay()
 
@@ -260,8 +261,9 @@ def absolute_motion(x, y, mouse_delay=None, check=True, window_id=None):
         Atspi.generate_mouse_event(_x, _y, name="abs")
 
     else:
-        ponytail_wrapper.ponytail_check_connection(window_id)
-        ponytail.generateMotionEvent(_x, _y)
+        ponytail_helper.ponytail_check_connection(window_id)
+        ponytail_interface = ponytail_helper.get_ponytail_interface()
+        ponytail_interface.generateMotionEvent(_x, _y)
 
     do_delay(delay_to_use)
 
@@ -295,9 +297,6 @@ def absolute_motion_with_trajectory(
 
     LOGGING.debug(f"Mouse absolute motion with trajectory at ({destination_x}, {destination_y})")
 
-    if SESSION_TYPE == "wayland":
-        ponytail_wrapper.ponytail_check_connection(window_id)
-
     difference_x = float(destination_x - source_x)
     difference_y = float(destination_y - source_y)
     max_length = max(abs(difference_x), abs(difference_y))
@@ -322,7 +321,9 @@ def absolute_motion_with_trajectory(
             Atspi.generate_mouse_event(int(act_x), int(act_y), name="abs")
 
         else:
-            ponytail.generateMotionEvent(int(act_x), int(act_y))
+            ponytail_helper.ponytail_check_connection(window_id)
+            ponytail_interface = ponytail_helper.get_ponytail_interface()
+            ponytail_interface.generateMotionEvent(int(act_x), int(act_y))
 
     do_delay(delay_to_use)
 
@@ -452,16 +453,16 @@ def drag_with_trajectory_global(fromXY, toXY, button=1):  # pylint: disable=inva
 
     LOGGING.debug(logging_class.get_func_params_and_values())
 
-    LOGGING.debug(f"Dragging with trajectory from '{fromXY}' to '{toXY}', button '{button}'.")
 
     if SESSION_TYPE == "wayland":
         (from_x, from_y) = fromXY
-        ponytail_wrapper.ponytail_check_connection(window_id="")
+        ponytail_helper.ponytail_check_connection(window_id="")
+        ponytail_interface = ponytail_helper.get_ponytail_interface()
 
-        ponytail.generateMotionEvent(from_x, from_y)
+        ponytail_interface.generateMotionEvent(from_x, from_y)
         do_delay(config.default_delay)
 
-        ponytail.generateButtonPress(1)
+        ponytail_interface.generateButtonPress(1)
         do_delay(config.default_delay)
 
         (to_x, to_y) = toXY
@@ -474,10 +475,10 @@ def drag_with_trajectory_global(fromXY, toXY, button=1):  # pylint: disable=inva
             window_id=""
         )
 
-        ponytail.generateMotionEvent(to_x, to_y)
+        ponytail_interface.generateMotionEvent(to_x, to_y)
         do_delay(config.default_delay)
 
-        ponytail.generateButtonRelease(1)
+        ponytail_interface.generateButtonRelease(1)
         do_delay()
 
     else:
@@ -519,8 +520,6 @@ def key_name_to_key_sym(key_name):
     """
 
     LOGGING.debug(logging_class.get_func_params_and_values())
-
-    LOGGING.debug(f"Attempting to use key name '{key_name}'.")
 
     # Try to get the name from its alias.
     actual_key_name = KEY_NAME_ALIASES.get(key_name.lower(), key_name)
@@ -590,7 +589,8 @@ def press_key(key_name, window_id=None):
     looked up by Gdk.unicode_to_keyval(key_name).
     """
 
-    LOGGING.debug(f"Pressing key '{key_name}' with window_id '{str(window_id)}'.")
+    LOGGING.debug(logging_class.get_func_params_and_values())
+
 
     if key_name.lower() in ("esc", "escape", "enter", "return"):
         # When this would quit a window, release event would be doomed.
@@ -603,9 +603,11 @@ def press_key(key_name, window_id=None):
         do_delay(float(config.typing_delay))
 
     else:
-        ponytail_wrapper.ponytail_check_connection(window_id, input_source="keyboard")
+        ponytail_helper.ponytail_check_connection(window_id, input_source="keyboard")
+        ponytail_interface = ponytail_helper.get_ponytail_interface()
+
         use_delay = float(config.typing_delay)
-        ponytail.generateKeysymEvent(key_symbol_value, delay=use_delay)
+        ponytail_interface.generateKeysymEvent(key_symbol_value, delay=use_delay)
 
 
 def hold_key(key_name):
@@ -615,7 +617,6 @@ def hold_key(key_name):
 
     LOGGING.debug(logging_class.get_func_params_and_values())
 
-    LOGGING.debug(f"Attempting to hold key of name '{key_name}'.")
 
     key_code = key_name_to_key_code(key_name)
 
@@ -624,8 +625,9 @@ def hold_key(key_name):
         do_delay(float(config.typing_delay))
 
     else:
-        ponytail_wrapper.ponytail_check_connection(input_source="keyboard")
-        ponytail.generateKeycodePress(key_code)
+        ponytail_helper.ponytail_check_connection(input_source="keyboard")
+        ponytail_interface = ponytail_helper.get_ponytail_interface()
+        ponytail_interface.generateKeycodePress(key_code)
 
     do_delay()
 
@@ -646,8 +648,9 @@ def release_key(key_name):
         do_delay(float(config.typing_delay))
 
     else:
-        ponytail_wrapper.ponytail_check_connection(input_source="keyboard")
-        ponytail.generateKeycodePress(key_code)
+        ponytail_helper.ponytail_check_connection(input_source="keyboard")
+        ponytail_interface = ponytail_helper.get_ponytail_interface()
+        ponytail_interface.generateKeycodePress(key_code)
 
     do_delay()
 
@@ -724,23 +727,24 @@ def key_combo(combo_string):
             Atspi.generate_keyboard_event(key_code, None, Atspi.KeySynthType.RELEASE)
 
     else:
-        # always use monitor, window will often get closed
-        # before final release i.e. with alt-f4 ctrl-q etc!
+        #Always use monitor, window will often get closed
+        # before final release i.e. with Alt-F4, Ctrl-Q etc!
 
-        ponytail_wrapper.ponytail_check_connection(input_source="keyboard", window_id="")
+        ponytail_helper.ponytail_check_connection(window_id="", input_source="keyboard")
+        ponytail_interface = ponytail_helper.get_ponytail_interface()
 
         # First press all modifiers leading up to the final key.
         for modifier in modifiers:
             key_code = key_name_to_key_code(modifier)
-            ponytail.generateKeycodePress(key_code)
+            ponytail_interface.generateKeycodePress(key_code)
 
         key_code = key_name_to_key_code(final_key)
-        ponytail.generateKeycodeEvent(key_code)
+        ponytail_interface.generateKeycodeEvent(key_code)
 
         # Than release all modifiers after the final key was pressed and released.
         for modifier in modifiers:
             key_code = key_name_to_key_code(modifier)
-            ponytail.generateKeycodeRelease(key_code)
+            ponytail_interface.generateKeycodeRelease(key_code)
 
     do_delay()
 

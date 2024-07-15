@@ -23,6 +23,8 @@ LOGGING = logging_class.logger
 
 from dogtail.accessible_object import AccessibleObject
 
+from dogtail.ponytail_helper import ponytail_helper
+
 SESSION_TYPE = "x11"
 if "XDG_SESSION_TYPE" in os.environ and "wayland" in os.environ["XDG_SESSION_TYPE"]:
     SESSION_TYPE = "wayland"
@@ -104,7 +106,9 @@ class AccessibleComponent:
 
         if SESSION_TYPE == "wayland":
             if acc_object.role_name in ("window", "dialog", "frame"):
-                window_list = acc_object.ponytail.window_list
+                ponytail_interface = ponytail_helper.get_ponytail_interface()
+
+                window_list = ponytail_interface.window_list
                 window_id = acc_object.window_id
 
                 for window in window_list:

@@ -90,6 +90,15 @@ class Logging(metaclass=Singleton):
             frame = sys._getframe().f_back
             _local_func_parameters = frame.f_locals.keys()
             _local_func_parameters_value = frame.f_locals.values()
+
+            # ATTENTION: Never change this from repr() to str().
+            # In case of .name .role_name and .description when log is called it goes
+            # to the Node's __str__ which will want to represent the node with
+            # name role_name and description causing it to get logged again and again
+            # wanting to go the __str__ representation.
+            # Causing infinite recursion.
+            # The need to do it this way is for backwards compatibility.
+            # Logging is new so we have to work around it.
             map_of_keys_and_values = [
                 x if "self" == x else x if "context" == x else repr(x) + "=" + repr(y)
                 for x, y in zip(_local_func_parameters, _local_func_parameters_value)

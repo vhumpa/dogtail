@@ -13,6 +13,9 @@ from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 
 
+NO_VALUES = ["", "n", "no", "f", "false", "False", "0"]
+
+
 class Value:
     """
     Value class to keep value and its types.
@@ -23,9 +26,9 @@ class Value:
         self.defined_types = defined_types
 
 
-class _Config:
+class LoadDefaultConfiguration:
     """
-    Config class to keep backwards compatibility and to have getters and setters.
+    Configuration class for default values.
     """
 
     # Create a ConfigParser object.
@@ -33,91 +36,95 @@ class _Config:
 
     # Read the configuration file.
     # TODO Figure out where the file will be.
-    cfg.read("config.ini")
+    # Currently think about having it placed/looked for in current user directory.
+    # Or perhaps having it in $HOME?
+    cfg.read("dogtail_config.ini")
 
-    NO_VALUES = ["", "n", "no", "f", "false", "False", "0"]
+    def __init__(self):
+        # Access values from the configuration file.
 
-    # Access values from the configuration file.
+        # Timing Delay section.
+        section = "config"
+        self.action_delay = float(self.cfg.get(section, "action_delay", fallback=1.0))
+        self.typing_delay = float(self.cfg.get(section, "typing_delay", fallback=0.1))
+        self.default_delay = float(self.cfg.get(section, "default_delay", fallback=0.5))
+        self.double_click_delay = float(self.cfg.get(section, "double_click_delay", fallback=0.1))
+        self.search_back_off_delay = float(self.cfg.get(section, "search_back_off_delay", fallback=0.5))
 
-    # Timing Delay section.
-    section = "timing_section"
-    _action_delay = float(cfg.get(section, "action_delay", fallback=1.0))
-    _typing_delay = float(cfg.get(section, "typing_delay", fallback=0.1))
-    _default_delay = float(cfg.get(section, "default_delay", fallback=0.5))
-    _double_click_delay = float(cfg.get(section, "double_click_delay", fallback=0.1))
-    _search_back_off_delay = float(cfg.get(section, "search_back_off_delay", fallback=0.5))
+        # Searching section.
+        self.search_warning_threshold = int(self.cfg.get(section, "search_warning_threshold", fallback=3))
+        self.search_cut_off_limit = int(self.cfg.get(section, "search_cut_off_limit", fallback=20))
+        self.search_showing_only = self.cfg.get(section, "search_showing_only", fallback="False") not in NO_VALUES
 
-    # Searching section.
-    section = "searching"
-    _search_warning_threshold = int(cfg.get(section, "search_warning_threshold", fallback=3))
-    _search_cut_off_limit = int(cfg.get(section, "search_cut_off_limit", fallback=20))
-    _search_showing_only = cfg.get(section, "search_showing_only", fallback="False") not in NO_VALUES
+        # Children Limit section.
+        self.children_limit = int(self.cfg.get(section, "children_limit", fallback=100))
 
-    # Children Limit section.
-    section = "children_limit"
-    _children_limit = int(cfg.get(section, "children_limit", fallback=100))
+        # Util Scripts section.
+        self.run_interval = float(self.cfg.get(section, "run_interval", fallback=0.5))
+        self.run_timeout = int(self.cfg.get(section, "run_timeout", fallback=30))
 
-    # Util Scripts section.
-    section = "util_scripts"
-    _run_interval = float(cfg.get(section, "run_interval", fallback=0.5))
-    _run_timeout = int(cfg.get(section, "run_timeout", fallback=30))
+        # GTK4Offset section.
+        self.offset = list(self.cfg.get(section, "offset", fallback=(12, 12)))
 
-    # GTK4Offset section.
-    section = "gtk4_offset"
-    _offset = list(cfg.get(section, "offset", fallback=(12, 12)))
+        # Debug section.
+        self.debug_dogtail = self.cfg.get(section, "debug_dogtail", fallback="False") not in NO_VALUES
+        self.debug_searching = self.cfg.get(section, "debug_searching", fallback="False") not in NO_VALUES
+        self.debug_sleep = self.cfg.get(section, "debug_sleep", fallback="False") not in NO_VALUES
+        self.debug_search_paths = self.cfg.get(section, "debug_search_paths", fallback="False") not in NO_VALUES
 
-    # Debug section.
-    section = "debug"
-    _debug_dogtail = cfg.get(section, "debug_dogtail", fallback="False") not in NO_VALUES
-    _debug_searching = cfg.get(section, "debug_searching", fallback="False") not in NO_VALUES
-    _debug_sleep = cfg.get(section, "debug_sleep", fallback="False") not in NO_VALUES
-    _debug_search_paths = cfg.get(section, "debug_search_paths", fallback="False") not in NO_VALUES
+        # Debug section.
+        self.log_debug_to_std_out = self.cfg.get(section, "log_debug_to_std_out", fallback="True") not in NO_VALUES
+        self.log_debug_to_file = self.cfg.get(section, "log_debug_to_file", fallback="False") not in NO_VALUES
+        self.absolute_node_paths = self.cfg.get(section, "absolute_node_paths", fallback="False") not in NO_VALUES
+        self.ensure_sensitivity = self.cfg.get(section, "ensure_sensitivity", fallback="False") not in NO_VALUES
+        self.fatal_errors = self.cfg.get(section, "fatal_errors", fallback="False") not in NO_VALUES
+        self.check_for_a11y = self.cfg.get(section, "check_for_a11y", fallback="True") not in NO_VALUES
 
-    # Debug section.
-    section = "setting"
-    _log_debug_to_std_out = cfg.get(section, "log_debug_to_std_out", fallback="True") not in NO_VALUES
-    _log_debug_to_file = cfg.get(section, "log_debug_to_file", fallback="False") not in NO_VALUES
-    _absolute_node_paths = cfg.get(section, "absolute_node_paths", fallback="False") not in NO_VALUES
-    _ensure_sensitivity = cfg.get(section, "ensure_sensitivity", fallback="False") not in NO_VALUES
-    _fatal_errors = cfg.get(section, "fatal_errors", fallback="False") not in NO_VALUES
-    _check_for_a11y = cfg.get(section, "check_for_a11y", fallback="True") not in NO_VALUES
 
-    # Return a dictionary with the retrieved values
+class _Config:
+    """
+    Config class to keep backwards compatibility and to have getters and setters.
+    """
+
+    _default = LoadDefaultConfiguration()
+
+    # Return a dictionary with the retrieved values.
+    # Define allowed type so that user cannot by mistake set different type than allowed.
     options = {
-        "action_delay": Value(_action_delay, [float, int]),
-        "typing_delay": Value(_typing_delay, [float, int]),
-        "default_delay": Value(_default_delay, [float, int]),
-        "double_click_delay": Value(_double_click_delay, [float, int]),
-        "search_back_off_delay": Value(_search_back_off_delay, [float, int]),
+        "action_delay": Value(_default.action_delay, [float, int]),
+        "typing_delay": Value(_default.typing_delay, [float, int]),
+        "default_delay": Value(_default.default_delay, [float, int]),
+        "double_click_delay": Value(_default.double_click_delay, [float, int]),
+        "search_back_off_delay": Value(_default.search_back_off_delay, [float, int]),
 
-        "search_warning_threshold": Value(_search_warning_threshold, [int]),
-        "search_cut_off_limit": Value(_search_cut_off_limit, [int]),
-        "search_showing_only": Value(_search_showing_only, [bool]),
+        "search_warning_threshold": Value(_default.search_warning_threshold, [int]),
+        "search_cut_off_limit": Value(_default.search_cut_off_limit, [int]),
+        "search_showing_only": Value(_default.search_showing_only, [bool]),
 
-        "children_limit": Value(_children_limit, [int]),
+        "children_limit": Value(_default.children_limit, [int]),
 
-        "run_interval": Value(_run_interval, [float, int]),
-        "run_timeout": Value(_run_timeout, [float, int]),
+        "run_interval": Value(_default.run_interval, [float, int]),
+        "run_timeout": Value(_default.run_timeout, [float, int]),
 
-        "gtk4_offset": Value(_offset, [list, tuple]),
+        "gtk4_offset": Value(_default.offset, [list, tuple]),
 
-        "debug_dogtail": Value(_debug_dogtail, [bool]),
-        "debug_searching": Value(_debug_searching, [bool]),
-        "debug_sleep": Value(_debug_sleep, [bool]),
-        "debug_search_paths": Value(_debug_search_paths, [bool]),
+        "debug_dogtail": Value(_default.debug_dogtail, [bool]),
+        "debug_searching": Value(_default.debug_searching, [bool]),
+        "debug_sleep": Value(_default.debug_sleep, [bool]),
+        "debug_search_paths": Value(_default.debug_search_paths, [bool]),
 
-        "log_debug_to_std_out": Value(_log_debug_to_std_out, [bool]),
-        "log_debug_to_file": Value(_log_debug_to_file, [bool]),
-        "absolute_node_paths": Value(_absolute_node_paths, [bool]),
-        "ensure_sensitivity": Value(_ensure_sensitivity, [bool]),
-        "fatal_errors": Value(_fatal_errors, [bool]),
-        "check_for_a11y": Value(_check_for_a11y, [bool]),
+        "log_debug_to_std_out": Value(_default.log_debug_to_std_out, [bool]),
+        "log_debug_to_file": Value(_default.log_debug_to_file, [bool]),
+        "absolute_node_paths": Value(_default.absolute_node_paths, [bool]),
+        "ensure_sensitivity": Value(_default.ensure_sensitivity, [bool]),
+        "fatal_errors": Value(_default.fatal_errors, [bool]),
+        "check_for_a11y": Value(_default.check_for_a11y, [bool]),
     }
 
-    # Custom user section.
-    section = "user_setting"
+    # User configuration.
+    section = "user_config"
     try:
-        user_setting_dictionary = dict(cfg.items(section))
+        user_setting_dictionary = dict(_default.cfg.items(section))
 
         # Set all user setup.
         for key, value in user_setting_dictionary.items():
@@ -152,6 +159,7 @@ class _Config:
                 string_in_snake_case += character
 
         return string_in_snake_case
+
 
     def __setattr__(self, option_id, value_to_set):
         LOGGING.debug(logging_class.get_func_params_and_values())
@@ -208,12 +216,4 @@ class _Config:
             raise AttributeError(f"Attempt to use invalid option '{get_option_id}'.") from error
 
 
-if __name__ == "__main__":
-    # Call the function to read the configuration file
-    config_data = _Config()
-
-    # Print the retrieved values
-    for key, value in config_data.items():
-        print(f"{key:25}: {value}")
-else:
-    config = _Config()
+config = _Config()

@@ -415,8 +415,8 @@ class SniffModel(Gtk.TreeStore):
         self.appendAndPopulate(None, self.rootNode)
 
     def __contains__(self, item):
-        from dogtail.tree import DogtailAPI
-        if isinstance(item, DogtailAPI):
+        from dogtail.tree import Node
+        if isinstance(item, Node):
             if item in self.cache:
                 row = self.cache[item]
                 # If row is None, we need to call getPath() to be sure

@@ -44,7 +44,7 @@ from dogtail.rawinput import click, point, double_click
 from dogtail.config import config
 
 
-class DogtailAPI(object):
+class Node(object):
     """
     Main dogtail API definition.
     """
@@ -804,7 +804,7 @@ class DogtailAPI(object):
 
 
 Atspi.Accessible.__bases__ = (
-    DogtailAPI,
+    Node,
     AccessibleActions,
     AccessibleComponent,
     AccessibleObject,

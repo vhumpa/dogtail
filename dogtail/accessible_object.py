@@ -25,8 +25,8 @@ from dogtail.utils import do_delay
 from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 
-
 # TODO think about logging and how much of it we need to not get flooded.
+# Most likely will do 2 levels, debug and debug_verbose and check method by method.
 
 
 class AccessibleObject:
@@ -42,7 +42,8 @@ class AccessibleObject:
         For now lets just prepare it before having hands on experience.
         """
 
-        # DO not put logging LOGGING.debug(logging_class.get_func_params_and_values()) here
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         return False
         #return isinstance(acc_object, newton_atspi_compat.Accessible)
@@ -54,6 +55,7 @@ class AccessibleObject:
         Returns False if we know for certain this object is invalid.
         """
 
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
         #LOGGING.debug(logging_class.get_func_params_and_values())
 
         return acc_object is not None
@@ -64,6 +66,8 @@ class AccessibleObject:
         """
         Return True if Atspi object is an Action else False.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if AccessibleObject.is_newton(acc_object):
             return acc_object.get_action_iface() is not None
@@ -77,6 +81,8 @@ class AccessibleObject:
         Return True if Atspi object is an Text else False.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         if AccessibleObject.is_newton(acc_object):
             return acc_object.get_text_iface() is not None
 
@@ -88,6 +94,8 @@ class AccessibleObject:
         """
         Return True if Atspi object is an EditableText else False.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if AccessibleObject.is_newton(acc_object):
             return acc_object.get_editable_text_iface() is not None
@@ -101,6 +109,8 @@ class AccessibleObject:
         Return True if Atspi object is a Component else False.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         if AccessibleObject.is_newton(acc_object):
             return acc_object.get_component_iface() is not None
 
@@ -113,6 +123,8 @@ class AccessibleObject:
         Return True if Atspi object is an EditableText else False.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         if AccessibleObject.is_newton(acc_object):
             return acc_object.get_selection_iface() is not None
 
@@ -124,6 +136,8 @@ class AccessibleObject:
         """
         Return True if Atspi object is an Value else False.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if AccessibleObject.is_newton(acc_object):
             return acc_object.get_value_iface() is not None
@@ -156,6 +170,7 @@ class AccessibleObject:
         Returns the nth child of obj.
         """
 
+        # TODO verbose logging?
         #LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
@@ -195,6 +210,7 @@ class AccessibleObject:
         Returns number of children in given object.
         """
 
+        # TODO verbose logging?
         #LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
@@ -219,6 +235,7 @@ class AccessibleObject:
         Returns all descendants that match a predicate.
         """
 
+        # TODO verbose logging?
         #LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
@@ -362,6 +379,7 @@ class AccessibleObject:
         Find a single descendant node satisfying the predicate, searching depth first.
         """
 
+        # TODO verbose logging?
         #LOGGING.debug(logging_class.get_func_params_and_values())
 
         try:
@@ -388,6 +406,7 @@ class AccessibleObject:
         Find a single descendant node satisfying the predicate, searching breadth first.
         """
 
+        # TODO verbose logging?
         #LOGGING.debug(logging_class.get_func_params_and_values())
 
         for child in acc_object:
@@ -416,7 +435,6 @@ class AccessibleObject:
         """
 
         LOGGING.debug(logging_class.get_func_params_and_values())
-
 
         if not AccessibleObject.is_valid(acc_object):
             return None
@@ -495,6 +513,7 @@ class AccessibleObject:
         Returns a 'name' for Accessible object.
         """
 
+        # TODO verbose logging?
         #LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
@@ -515,6 +534,7 @@ class AccessibleObject:
         Returns a 'role' for Accessible object.
         """
 
+        # TODO verbose logging?
         #LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
@@ -532,6 +552,7 @@ class AccessibleObject:
         Returns a 'role_name' for Accessible object.
         """
 
+        # TODO verbose logging?
         #LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
@@ -549,7 +570,8 @@ class AccessibleObject:
         Returns a 'description' for Accessible object.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
+        # TODO verbose logging?
+        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return None
@@ -566,6 +588,7 @@ class AccessibleObject:
         Returns a 'parent' for Accessible object.
         """
 
+        # TODO verbose logging?
         #LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
@@ -665,7 +688,7 @@ class AccessibleObject:
         The node(s) that is/are a label for this node. Generated from 'relations'.
         """
 
-        # #TODO what to do, its flooding the debug logs.
+        # TODO verbose logging?
         #LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):

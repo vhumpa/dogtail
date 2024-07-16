@@ -51,10 +51,12 @@ class PonytailHelper(metaclass=Singleton):
     ]
 
     error_message = "\n".join((
+        "\n",
         "Error in ponytail initiation might be cause by several reasons:",
         f"\t1) Packages '{str(expected_packages)}' are not installed.",
-        "\t2) If installed the gnome-ponytail-daemon process might not be running.",
+        "\t2) If installed, the gnome-ponytail-daemon process might not be running.",
         "\t3) You are on the system that does not have GNOME Shell Introspection.",
+        "\n",
     ))
 
     # Keep session as a variable.
@@ -94,6 +96,9 @@ class PonytailHelper(metaclass=Singleton):
         """
 
         LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not self._ponytail_dbus_interface:
+            raise RuntimeError(self.error_message)
 
         return self._ponytail_dbus_interface
 

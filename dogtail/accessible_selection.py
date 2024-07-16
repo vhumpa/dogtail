@@ -17,7 +17,6 @@ from gi.repository import Atspi
 from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 
-
 from dogtail.accessible_object import AccessibleObject
 
 
@@ -32,6 +31,8 @@ class AccessibleSelection:
         """
         Selects all children.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_selection(acc_object):
             LOGGING.debug("This object does not have Atspi.Selection interface.")
@@ -48,6 +49,8 @@ class AccessibleSelection:
         Deselects all children.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         if not AccessibleObject.is_selection(acc_object):
             LOGGING.debug("This object does not have Atspi.Selection interface.")
 
@@ -62,6 +65,8 @@ class AccessibleSelection:
         """
         Selects a child.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_selection(acc_object):
             LOGGING.debug("This object does not have Atspi.Selection interface.")
@@ -79,6 +84,8 @@ class AccessibleSelection:
         """
         Deselects a child.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_selection(acc_object):
             LOGGING.debug("This object does not have Atspi.Selection interface.")

@@ -151,6 +151,7 @@ class Node(object):
         Define a 'name' property for Atspi object.
         """
 
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
         #LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleObject.get_name(self)
@@ -162,6 +163,9 @@ class Node(object):
         Define a 'role property for Atspi object.
         """
 
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleObject.get_role(self)
 
 
@@ -170,7 +174,7 @@ class Node(object):
         """
         Define a 'role_name' property for Atspi object.
         """
-
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
         #LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleObject.get_role_name(self)
@@ -182,6 +186,9 @@ class Node(object):
         Define a 'description' property for Atspi object.
         """
 
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleObject.get_description(self)
 
 
@@ -190,6 +197,9 @@ class Node(object):
         """
         Define a 'parent' property for Atspi object.
         """
+
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleObject.get_parent(self)
 
@@ -200,6 +210,9 @@ class Node(object):
         Define a 'index_in_parent' property for Atspi object.
         """
 
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleObject.get_index_in_parent(self)
 
 
@@ -208,6 +221,9 @@ class Node(object):
         """
         Creating children easy navigation when required.
         """
+
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleObject.get_children(self)
 
@@ -218,6 +234,9 @@ class Node(object):
         Define a 'text' property for Atspi object.
         """
 
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleText.get_text(self)
 
 
@@ -226,6 +245,8 @@ class Node(object):
         """
         Define a 'text' setter for Atspi.Text object.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleText.set_text(self, content)
 
@@ -236,6 +257,8 @@ class Node(object):
         Get dictionary of actions.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleActions.get_actions(self)
 
 
@@ -244,6 +267,8 @@ class Node(object):
         Do an Action.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleActions.do_action_named(self, named_action)
 
 
@@ -251,6 +276,8 @@ class Node(object):
         """
         Get key bind of an action.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         action_index = self.actions[named_action]
 
@@ -261,6 +288,8 @@ class Node(object):
         """
         Grab focus.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleComponent.grab_focus(self)
 
@@ -273,6 +302,8 @@ class Node(object):
         focus.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleState.get_active(self)
 
 
@@ -284,6 +315,8 @@ class Node(object):
         focus.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleState.get_focusable(self)
 
 
@@ -292,6 +325,8 @@ class Node(object):
         """
         Indicates this object currently has the keyboard focus.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleState.get_focused(self)
 
@@ -302,6 +337,8 @@ class Node(object):
         Indicates this object is currently pressed.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleState.get_pressed(self)
 
 
@@ -311,6 +348,8 @@ class Node(object):
         Indicates the size of this object's size is not fixed.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleState.get_resizable(self)
 
 
@@ -319,6 +358,8 @@ class Node(object):
         """
         Indicates this object is sensitive, e.g. to user interaction.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleState.get_sensitive(self)
 
@@ -332,6 +373,8 @@ class Node(object):
         window stack.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleState.get_showing(self)
 
 
@@ -342,6 +385,8 @@ class Node(object):
         to the user.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleState.get_visible(self)
 
 
@@ -350,6 +395,8 @@ class Node(object):
         """
         Indicates this object is currently checked.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleState.get_checked(self)
 
@@ -361,6 +408,8 @@ class Node(object):
         toggle-able table cell.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleState.get_checkable(self)
 
 
@@ -371,6 +420,8 @@ class Node(object):
         read, but not modified, by the user.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleState.get_read_only(self)
 
 
@@ -379,6 +430,8 @@ class Node(object):
         """
         Indicates this object is collapsed.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleState.get_collapsed(self)
 
@@ -389,6 +442,8 @@ class Node(object):
         Indicates the user can change the contents of this object.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleState.get_editable(self)
 
 
@@ -396,6 +451,8 @@ class Node(object):
         """
         Get states.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleState.get_accessible_states(self)
 
@@ -406,6 +463,8 @@ class Node(object):
         Gets the current value for an Atspi.Value.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleValue.get_current_value(self)
 
 
@@ -414,6 +473,8 @@ class Node(object):
         """
         Gets the current value for an Atspi.Value.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleValue.set_current_value(self, new_value)
 
@@ -424,6 +485,8 @@ class Node(object):
         Gets the minimum allowed value for an Atspi.Value.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleValue.get_minimum_value(self)
 
     @property
@@ -431,6 +494,8 @@ class Node(object):
         """
         Gets the maximum allowed value for an Atspi.Value.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleValue.get_maximum_value(self)
 
@@ -440,6 +505,8 @@ class Node(object):
         """
         Gets the minimum increment by which an Atspi.Value can be adjusted.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleValue.get_minimum_increment(self)
 
@@ -473,6 +540,8 @@ class Node(object):
         Find a single child satisfying th predicate.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleObject.find_descendant(self, predicate, **kwargs)
 
 
@@ -480,6 +549,8 @@ class Node(object):
         """
         Find a all children satisfying the predicate.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleObject.find_all_descendants(self, predicate, **kwargs)
 
@@ -490,6 +561,8 @@ class Node(object):
         Is this Accessible Node the last child in parent node?
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleObject.is_last_child(self)
 
 
@@ -498,6 +571,8 @@ class Node(object):
         """
         Get how many children Accessible Node has.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleObject.get_child_count(self)
 
@@ -509,6 +584,8 @@ class Node(object):
         The node(s) that is/are a label for this node. Generated from 'relations'.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleObject.get_labeler(self)
 
 
@@ -519,6 +596,8 @@ class Node(object):
         The node(s) that this node is a label for. Generated from 'relations'.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleObject.get_labelee(self)
 
 
@@ -527,6 +606,8 @@ class Node(object):
         """
         A tuple containing the location and size of the Accessible: (x, y, w, h).
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleComponent.get_extents(self)
 
@@ -537,6 +618,8 @@ class Node(object):
         A tuple containing the size of the Accessible: (w, h).
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleComponent.get_size(self)
 
 
@@ -546,6 +629,8 @@ class Node(object):
         A tuple containing the position of the Accessible: (x, y).
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleComponent.get_position(self)
 
 
@@ -553,6 +638,8 @@ class Node(object):
         """
         Selects all children.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleSelection.select_all(self)
 
@@ -562,6 +649,8 @@ class Node(object):
         Deselects all children.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleSelection.deselect_all(self)
 
 
@@ -570,6 +659,8 @@ class Node(object):
         Selects a child.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleSelection.select(self)
 
 
@@ -577,6 +668,8 @@ class Node(object):
         """
         Deselects a child.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleSelection.deselect(self)
 
@@ -588,6 +681,8 @@ class Node(object):
         - 2 is middle,
         - 3 is right.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         click_x = int(self.position[0] + self.size[0] / 2)
         click_y = int(self.position[1] + self.size[1] / 2)
@@ -603,6 +698,8 @@ class Node(object):
         Generates a raw mouse double-click event, using the specified button.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         click_x = int(self.position[0] + self.size[0] / 2)
         click_y = int(self.position[1] + self.size[1] / 2)
 
@@ -617,6 +714,8 @@ class Node(object):
         Move mouse cursor to the center of the widget.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         point_x = int(self.position[0] + self.size[0] / 2)
         point_y = int(self.position[1] + self.size[1] / 2)
 
@@ -630,6 +729,8 @@ class Node(object):
         """
         Dumping a structure representation.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         from dogtail.dump import AccessibleStructureRepresentation
 
@@ -652,6 +753,8 @@ class Node(object):
         Dumping a tree structure of the node in tree like representation.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         from dogtail.dump import AccessibleStructureRepresentation
 
         print(AccessibleStructureRepresentation(self, "tree", file_name=file_name))
@@ -661,6 +764,8 @@ class Node(object):
         """
         Blink will highlight the current node on the screen. Using Blinker from utility.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not self.extents:
             return False
@@ -678,6 +783,8 @@ class Node(object):
         exception.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         return AccessibleRoot.application(application_name)
 
 
@@ -686,6 +793,8 @@ class Node(object):
         """
         Get all applications.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleRoot.applications()
 

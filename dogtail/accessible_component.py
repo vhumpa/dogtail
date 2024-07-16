@@ -29,6 +29,7 @@ SESSION_TYPE = "x11"
 if "XDG_SESSION_TYPE" in os.environ and "wayland" in os.environ["XDG_SESSION_TYPE"]:
     SESSION_TYPE = "wayland"
 
+
 class AccessibleComponent:
     """
     Component class.
@@ -40,6 +41,8 @@ class AccessibleComponent:
         """
         Grab focus.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_component(acc_object):
             LOGGING.debug("Accessible object does not have a Component interface.")
@@ -60,6 +63,8 @@ class AccessibleComponent:
         """
         A tuple containing the location and size of the Accessible: (x, y, w, h)
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_component(acc_object):
             return None
@@ -97,6 +102,7 @@ class AccessibleComponent:
         A tuple containing the size of the Accessible: (w, h)
         """
 
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
         LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_component(acc_object):
@@ -131,6 +137,7 @@ class AccessibleComponent:
         A tuple containing the position of the Accessible: (x, y)
         """
 
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
         LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_component(acc_object):

@@ -39,6 +39,8 @@ def do_delay(delay=None):
     Utility function to insert a delay (with logging and a configurable default delay).
     """
 
+    LOGGING.debug(logging_class.get_func_params_and_values())
+
     if delay is None:
         delay = config.default_delay
         LOGGING.debug(f"Default Delay: Sleeping for '{delay}'")
@@ -135,6 +137,8 @@ class Lock(object):
     or a more general locks if you do not choose to randomize the lock dir name. Set unLockOnExit
     to True to enable automatic unlock when script process exits to avoid having to unlock manually.
     """
+
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     def __init__(
         self,
@@ -710,12 +714,12 @@ def bailBecauseA11yIsDisabled(): # pylint: disable=invalid-name
 # Keeping for now to not break something along the way.
 class Highlight(Gtk.Window): # pylint: disable=missing-class-docstring
     def __init__(self):
-        LOGGING.info("Deprecated from release 1.0.")
+        LOGGING.info("Deprecated on Wayland with release 2.0.")
 
 
 class Blinker: # pylint: disable=missing-class-docstring
     def __init__(self):
-        LOGGING.info("Deprecated from release 1.0.")
+        LOGGING.info("Deprecated on Wayland with release 2.0.")
 
 ###############################################
 # End of backwards compatibility definitions. #

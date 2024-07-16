@@ -20,6 +20,7 @@ LOGGING = logging_class.logger
 
 from dogtail.accessible_object import AccessibleObject
 
+
 class AccessibleText:
     """
     Text class.
@@ -31,6 +32,9 @@ class AccessibleText:
         """
         Define a 'text' property for Atspi object.
         """
+
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return None
@@ -65,6 +69,8 @@ class AccessibleText:
         """
         Define a 'text' setter for Atspi.Text object.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return False

@@ -33,6 +33,8 @@ class AccessibleActions:
         Get number of invocable actions.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         if not AccessibleObject.is_action(acc_object):
             LOGGING.debug("Accessible object does not have an Action interface.")
             return 0
@@ -54,6 +56,8 @@ class AccessibleActions:
         """
         Get an invocable action located on index.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_action(acc_object):
             LOGGING.debug("Accessible object does not have an Action interface.")
@@ -79,6 +83,8 @@ class AccessibleActions:
         Dictionary of actions.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         actions = {}
 
         try:
@@ -96,6 +102,8 @@ class AccessibleActions:
         """
         Do an Action.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not isinstance(named_action, str):
             LOGGING.debug("This function expects action name string.")
@@ -127,6 +135,8 @@ class AccessibleActions:
         """
         Get keybindings to the action_index-th action.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_action(acc_object):
             LOGGING.debug("Accessible object does not have an Action interface.")

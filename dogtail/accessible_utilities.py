@@ -7,6 +7,7 @@ Experimental dogtail changes for 1.0 release.
 # pylint: disable=wrong-import-position
 # pylint: disable=import-error
 # pylint: disable=no-name-in-module
+# ruff: noqa: E501
 # ruff: noqa: E402
 
 import gi
@@ -14,9 +15,11 @@ import gi
 gi.require_version("Atspi", "2.0")
 from gi.repository import Atspi
 
+from dogtail.utils import do_delay
+from dogtail.config import config
 from dogtail.logging import logging_class
-LOGGING = logging_class.logger
 
+LOGGING = logging_class.logger
 
 from dogtail.accessible_object import AccessibleObject
 
@@ -32,6 +35,9 @@ class AccessibleUtilities:
         """
         Returns the application object of an Accessible.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         try:
             if AccessibleObject.is_newton(acc_object):
                 application = acc_object.get_application()
@@ -51,6 +57,8 @@ class AccessibleUtilities:
         Return string description of the toolkit we are using.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         toolkit = {}
         application_object = AccessibleUtilities.get_application(acc_object)
         toolkit_name = AccessibleUtilities.get_toolkit_name(application_object)
@@ -66,6 +74,8 @@ class AccessibleUtilities:
         """
         Returns the name of the toolkit.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         try:
             if AccessibleObject.is_newton(acc_object):
@@ -86,6 +96,8 @@ class AccessibleUtilities:
         Returns the name of the toolkit.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         try:
             if AccessibleObject.is_newton(acc_object):
                 toolkit_version = acc_object.get_toolkit_version()
@@ -104,6 +116,8 @@ class AccessibleUtilities:
         """
         Returns the accessible desktop.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         try:
             # TODO, figure out how to tell if Newton is to be used.
@@ -127,6 +141,8 @@ class AccessibleUtilities:
         Returns a list of applications known to Atspi.
         """
 
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
         desktop = AccessibleUtilities.get_desktop()
         if desktop is None:
             return []
@@ -135,17 +151,27 @@ class AccessibleUtilities:
 
 
     @staticmethod
-    def get_application_named(application_name):
+    def get_application_named(application_name, retry=True):
         """
         Returns a list of applications known to Atspi.
         """
 
-        for application in AccessibleUtilities.get_all_applications():
-            if application.get_name() == application_name:
-                return application
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
-        LOGGING.debug("Application was not found in desktop.")
-        return None
+        for number_of_attempts in range(config.search_cut_off_limit):
+            if number_of_attempts >= config.search_warning_threshold:
+                LOGGING.info(f"Searching again (attempt '{number_of_attempts}')")
+
+            for application in AccessibleUtilities.get_all_applications():
+                if application.get_name() == application_name:
+                    return application
+
+            if not retry:
+                break
+
+            do_delay(config.search_back_off_delay)
+
+        raise RuntimeError(f"Application '{application_name}' was not found in desktop.")
 
 
     @staticmethod
@@ -153,6 +179,8 @@ class AccessibleUtilities:
         """
         Returns true if app is known to Atspi.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         for child in AccessibleUtilities.get_all_applications():
             if child.get_name() == application:
@@ -167,6 +195,8 @@ class AccessibleUtilities:
         """
         Returns the accessible application with the specified pid.
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         for application_object in AccessibleUtilities.get_all_applications():
             if AccessibleObject.is_newton(application_object):

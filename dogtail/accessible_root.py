@@ -53,6 +53,6 @@ class AccessibleRoot:
         # ===================================================
 
         return AccessibleUtilities.get_application_named(
-            validated_application_name,
+            application_name=validated_application_name,
             retry=validated_retry
         )

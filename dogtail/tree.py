@@ -1401,8 +1401,7 @@ class Node(object):
                 number_of_attempts += 1
                 if number_of_attempts == config.searchCutoffCount:
                     logger.log("Warning: errors caught from the a11y tree, giving up search")
-                    logger.log("Error: Session has probaly broken a11y! Exiting allowing session re-runs")
-                    sys.exit(1)
+                    raise RuntimeError("Error: Session has probaly broken a11y! Exiting allowing session re-runs")
                 else:
                     sleep(config.searchBackoffDuration)
                 continue

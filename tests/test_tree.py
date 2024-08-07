@@ -869,14 +869,14 @@ class TestUnicodeNames(unittest.TestCase):
             self.app = dogtail.tree.root.application('gedit')
 
     def test_unicode_char_in_name(self):
-        self.app.child('Menu', roleName='toggle button').click()
+        self.app.child('Open', roleName='toggle button').click()
         unicode_button = None
-        unicode_button = self.app.child(name=u'Find and Replace…', roleName='push button')
+        unicode_button = self.app.child(name=u'Other Documents…', roleName='push button')
         assert unicode_button is not None
 
     def test_unicode_char_in_name_click(self):
-        self.app.child('Menu', roleName='toggle button').click()
-        unicode_button = self.app.child(name=u'Find and Replace…', roleName='push button')
+        self.app.child('Open', roleName='toggle button').click()
+        unicode_button = self.app.child(name=u'Other Documents…', roleName='push button')
         unicode_button.click()
         dialog = None
         t_ver = tuple(map(int, (self.ver.split("."))))

@@ -27,13 +27,12 @@ from gi.repository import Atspi
 import warnings
 warnings.filterwarnings("ignore", "g_object_unref")
 
+from dogtail.config import config
 from dogtail.utils import do_delay
 
 from dogtail.ponytail_helper import ponytail_helper
 from dogtail.logging import logging_class
 LOGGING = logging_class.logger
-
-from dogtail.config import config
 
 SESSION_TYPE = "x11"
 if "XDG_SESSION_TYPE" in os.environ and "wayland" in os.environ["XDG_SESSION_TYPE"]:
@@ -101,7 +100,7 @@ def click(x, y, button=1, check=True, window_id=None):
 
         ponytail_interface.generateButtonEvent(button, _x, _y)
 
-    do_delay(config.default_delay)
+    do_delay(config.action_delay)
 
 
 def point(x, y, check=True, window_id=None):
@@ -128,7 +127,7 @@ def point(x, y, check=True, window_id=None):
         ponytail_interface = ponytail_helper.get_ponytail_interface()
         ponytail_interface.generateMotionEvent(_x, _y)
 
-    do_delay(config.default_delay)
+    do_delay(config.action_delay)
 
 
 def double_click(x, y, button=1, check=True, window_id=None):
@@ -165,7 +164,7 @@ def double_click(x, y, button=1, check=True, window_id=None):
             ponytail_interface.connectMonitor()
             ponytail_interface.generateButtonRelease(button)
 
-    do_delay(config.default_delay)
+    do_delay(config.action_delay)
 
 
 def press(x, y, button=1, check=True, window_id=None, delay=None):
@@ -226,11 +225,11 @@ def release(x, y, button=1, check=True, window_id=None):
         ponytail_interface = ponytail_helper.get_ponytail_interface()
         ponytail_interface.generateMotionEvent(_x, _y)
 
-        do_delay()
+        do_delay(config.action_delay)
 
         ponytail_interface.generateButtonRelease(button)
 
-    do_delay()
+    do_delay(config.action_delay)
 
 
 def absolute_motion(x, y, mouse_delay=None, check=True, window_id=None):
@@ -244,9 +243,7 @@ def absolute_motion(x, y, mouse_delay=None, check=True, window_id=None):
     if mouse_delay:
         delay_to_use = mouse_delay
     else:
-        delay_to_use = config.default_delay
-        #TODO delay_to_use = configuration.default_delay
-
+        delay_to_use = config.action_delay
 
     # TODO, remove and do it better.
     (_x, _y) = update_coords((x, y))
@@ -289,7 +286,7 @@ def absolute_motion_with_trajectory(
     if mouse_delay:
         delay_to_use = mouse_delay
     else:
-        delay_to_use = config.default_delay
+        delay_to_use = config.action_delay
 
     if check:
         check_coordinates(source_x, source_y)
@@ -348,7 +345,7 @@ def relative_motion(x, y, mouse_delay=None):
     if mouse_delay:
         do_delay(mouse_delay)
     else:
-        do_delay()
+        do_delay(config.action_delay)
 
 
 def drag(fromXY, toXY, button=1, check=True):  # pylint: disable=invalid-name
@@ -365,10 +362,10 @@ def drag(fromXY, toXY, button=1, check=True):  # pylint: disable=invalid-name
 
     (_x, _y) = toXY
     absolute_motion(x=_x, y=_y, check=check)
-    do_delay()
+    do_delay(config.action_delay)
 
     release(x=_x, y=_y, button=button, check=check)
-    do_delay()
+    do_delay(config.action_delay)
 
 
 def drag_node_to_node(source_node, destination_node, button=1, check=True):
@@ -390,7 +387,7 @@ def drag_node_to_node(source_node, destination_node, button=1, check=True):
     y = int(destination_node.position[1] + destination_node.size[1] / 2)
 
     release(x, y, button, check, window_id=destination_node.window_id)
-    do_delay()
+    do_delay(config.action_delay)
 
 
 def drag_with_trajectory(  # pylint: disable=invalid-name
@@ -431,10 +428,10 @@ def drag_with_trajectory(  # pylint: disable=invalid-name
         mouse_delay=mouse_delay,
         check=check
     )
-    do_delay()
+    do_delay(config.action_delay)
 
     release(x=to_x, y=to_y, button=button, check=check)
-    do_delay()
+    do_delay(config.action_delay)
 
 
 def drag_with_trajectory_global(fromXY, toXY, button=1):  # pylint: disable=invalid-name
@@ -460,10 +457,10 @@ def drag_with_trajectory_global(fromXY, toXY, button=1):  # pylint: disable=inva
         ponytail_interface = ponytail_helper.get_ponytail_interface()
 
         ponytail_interface.generateMotionEvent(from_x, from_y)
-        do_delay(config.default_delay)
+        do_delay(config.action_delay)
 
         ponytail_interface.generateButtonPress(1)
-        do_delay(config.default_delay)
+        do_delay(config.action_delay)
 
         (to_x, to_y) = toXY
         absolute_motion_with_trajectory(
@@ -476,10 +473,10 @@ def drag_with_trajectory_global(fromXY, toXY, button=1):  # pylint: disable=inva
         )
 
         ponytail_interface.generateMotionEvent(to_x, to_y)
-        do_delay(config.default_delay)
+        do_delay(config.action_delay)
 
         ponytail_interface.generateButtonRelease(1)
-        do_delay()
+        do_delay(config.action_delay)
 
     else:
         drag_with_trajectory(fromXY, toXY, button)
@@ -629,7 +626,7 @@ def hold_key(key_name):
         ponytail_interface = ponytail_helper.get_ponytail_interface()
         ponytail_interface.generateKeycodePress(key_code)
 
-    do_delay()
+    do_delay(config.action_delay)
 
 
 def release_key(key_name):
@@ -652,7 +649,7 @@ def release_key(key_name):
         ponytail_interface = ponytail_helper.get_ponytail_interface()
         ponytail_interface.generateKeycodePress(key_code)
 
-    do_delay()
+    do_delay(config.action_delay)
 
 
 def type_text(string):
@@ -746,7 +743,7 @@ def key_combo(combo_string):
             key_code = key_name_to_key_code(modifier)
             ponytail_interface.generateKeycodeRelease(key_code)
 
-    do_delay()
+    do_delay(config.action_delay)
 
 
 ########################################

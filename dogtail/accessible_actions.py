@@ -19,6 +19,9 @@ from gi.repository import Atspi
 from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 
+from dogtail.config import config
+from dogtail.utils import do_delay
+
 from dogtail.accessible_object import AccessibleObject
 
 class AccessibleActions:
@@ -123,7 +126,11 @@ class AccessibleActions:
             if AccessibleObject.is_newton(acc_object):
                 return acc_object.do_action(acc_object, action_to_do)
 
-            return Atspi.Action.do_action(acc_object, action_to_do)
+            action_result = Atspi.Action.do_action(acc_object, action_to_do)
+
+            do_delay(config.search_back_off_delay)
+
+            return action_result
 
         except Exception as error:
             LOGGING.debug(f"Exception when executing a named action: '{error}'")

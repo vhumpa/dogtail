@@ -7,6 +7,7 @@ Experimental dogtail changes for 1.0 release. Simple Predicate
 # pylint: disable=wrong-import-position
 # pylint: disable=wrong-import-order
 # pylint: disable=import-error
+# pylint: disable=line-too-long
 # pylint: disable=no-name-in-module
 # ruff: noqa: E402
 # ruff: noqa: E501

@@ -17,6 +17,9 @@ import os
 
 from time import sleep
 
+from dogtail.config import config
+from dogtail.utils import do_delay
+
 from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 
@@ -250,7 +253,9 @@ class PonytailHelper(metaclass=Singleton):
         window_list = ponytail_interface.window_list
         if len(window_list) == 0:
             LOGGING.debug("Window list was empty, doing another attempt.")
-            sleep(1)
+
+            do_delay(config.action_delay)
+
             window_list = ponytail_interface.window_list
 
         if self._window_id is None:

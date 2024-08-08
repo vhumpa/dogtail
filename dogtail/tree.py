@@ -725,7 +725,7 @@ class Node(object):
         point(point_x, point_y, window_id=self.window_id)
 
 
-    def dump(self, output_type="plain", file_name=None):
+    def dump(self, output_type="plain", file_name=None, labels=False):
         """
         Dumping a structure representation.
         """
@@ -735,20 +735,20 @@ class Node(object):
         from dogtail.dump import AccessibleStructureRepresentation
 
         if output_type == "plain":
-            print(AccessibleStructureRepresentation(self, "plain", file_name=file_name))
+            print(AccessibleStructureRepresentation(self, "plain", file_name=file_name, labels=labels))
 
         elif output_type == "verbose":
-            print(AccessibleStructureRepresentation(self, "verbose", file_name=file_name))
+            print(AccessibleStructureRepresentation(self, "verbose", file_name=file_name, labels=labels))
 
         elif output_type == "tree":
             # Print done by tree method.
-            self.tree(file_name=file_name)
+            self.tree(file_name=file_name, labels=labels)
 
         else:
             LOGGING.info(f"Unknown output type: '{output_type}'")
 
 
-    def tree(self, file_name=None):
+    def tree(self, file_name=None, labels=False):
         """
         Dumping a tree structure of the node in tree like representation.
         """
@@ -757,7 +757,7 @@ class Node(object):
 
         from dogtail.dump import AccessibleStructureRepresentation
 
-        print(AccessibleStructureRepresentation(self, "tree", file_name=file_name))
+        print(AccessibleStructureRepresentation(self, "tree", file_name=file_name, labels=labels))
 
 
     def blink(self):

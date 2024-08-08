@@ -3,6 +3,7 @@
 Experimental dogtail changes for 1.0 release.
 """
 
+# pylint: disable=line-too-long
 # ruff: noqa: E501
 
 class AccessibleStructureRepresentation:
@@ -11,16 +12,31 @@ class AccessibleStructureRepresentation:
     """
 
     # TODO - add with_labels and print x.labeler.name and x.labeler.text
-    def __init__(self, accessible_node, structure_format="plain", file_name=None):
+    def __init__(self, accessible_node, structure_format="plain", file_name=None, labels=False):
         self.spacer = "  "
         self.format = structure_format
         self.accessible_node = accessible_node
         self.tree_representation = ""
         self.file_name = file_name
+        self.labels = labels
+
+
+    def _get_label_string(self, acc_object):
+        labeler_string = ""
+        if self.labels and acc_object.labeler:
+            labeler_string += f" (labeler.text='{acc_object.labeler.text}') "
+            labeler_string += f" (labeler.name='{acc_object.labeler.name}') "
+
+        if self.labels and not acc_object.labeler:
+            labeler_string += " (No labeler) "
+
+        return labeler_string
 
 
     def _represent_structure_as_plain(self, acc_object, level=0):
-        tree_representation = self.spacer * level + str(acc_object) + "\n"
+        labeler_string = self._get_label_string(acc_object)
+
+        tree_representation = self.spacer * level + str(acc_object) + labeler_string + "\n"
 
         for child in acc_object.children:
             # Not adding Action strings by choice, we can revisit in the future.
@@ -34,11 +50,14 @@ class AccessibleStructureRepresentation:
         if not acc_object:
             return
 
+        labeler_string = self._get_label_string(acc_object)
+
         verbose_str = "".join((
             str(acc_object),
             " - ",
             f"(position:'{acc_object.position}', size:'{acc_object.size}', ",
-            f"visible:{acc_object.visible}, showing:{acc_object.showing})"
+            f"visible:{acc_object.visible}, showing:{acc_object.showing})",
+            f"{labeler_string}"
         ))
 
         tree_representation = self.spacer * level + verbose_str + "\n"
@@ -56,8 +75,8 @@ class AccessibleStructureRepresentation:
         return self.tree_representation
 
 
-    def _recursive_tree_structure_construction(self, node, last, spacer):
-        if not node:
+    def _recursive_tree_structure_construction(self, acc_object, last, spacer):
+        if not acc_object:
             return
 
         prefix_spacer = "    "
@@ -65,16 +84,19 @@ class AccessibleStructureRepresentation:
         suffix_branch = " ├──"
         suffix_last =   " └──"
 
+        labeler_string = self._get_label_string(acc_object)
+
         # Attempt to shorten the line.
         suffix_based_on_last = suffix_last if last else suffix_branch
         # Add a line to the tree representation.
-        self.tree_representation += (spacer + suffix_based_on_last + str(node))  + "\n"
 
-        for index, child in enumerate(node.children):
+        self.tree_representation += (spacer + suffix_based_on_last + str(acc_object)) + labeler_string + "\n"
+
+        for index, child in enumerate(acc_object.children):
             # Not adding Action strings by choice, we can revisit in the future.
 
             # Check if the index is last.
-            is_last = index == node.child_count - 1
+            is_last = index == acc_object.child_count - 1
             # Make a new spacer.
             new_spacer = spacer + (prefix_spacer if last else prefix_extend)
 

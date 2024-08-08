@@ -1,5 +1,18 @@
-Installation
-============
-NOT YET, this is a preparation
+# TODO
+Installation from pypi.
 
-sudo python3 -m pip install dogtail==1.0
+DOES NOT WORK YET, this is a preparation
+
+    udo python3 -m pip install dogtail==2.0
+
+
+# TODO
+Installation on Red-Hat-like systems:
+	make rpm
+	rpm -Uvh ./dist/dogtail3-*.noarch.rpm
+
+# TODO
+Installation on other systems:
+	./setup.py install --prefix=/usr
+
+	(or /usr/local, $HOME/local, etc...)

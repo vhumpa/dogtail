@@ -1,3 +1,17 @@
+2024-12-31 Michal Odehnal <modehnal@redhat.com>
+
+	dogtail 2.0
+	===========
+	See the NEWS file for all changes.
+
+2024-12-31 Vita Humpa <vhumpa@redhat.com>
+
+	dogtail 1.0
+	===========
+	Releasing version with Wayland support to PYPI
+
+
+
 2018-11-09 Vita Humpa <vhumpa@redhat.com>
 
 	dogtail 1.0

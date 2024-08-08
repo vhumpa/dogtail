@@ -926,7 +926,7 @@ Atspi.Accessible.__bases__ = (
 # Load desktop to the root variable.
 try:
     root = AccessibleUtilities.get_desktop()
-except Exception:  # pragma: no cover
+except Exception:
     LOGGING.info("Error: Accessible desktop is not visible. Is accessibility enabled?")
 
 

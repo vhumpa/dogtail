@@ -7,6 +7,7 @@ Experimental dogtail changes for 1.0 release.
 # pylint: disable=wrong-import-position
 # pylint: disable=wrong-import-order
 # pylint: disable=import-error
+# pylint: disable=line-too-long
 # pylint: disable=no-name-in-module
 # ruff: noqa: E402
 # ruff: noqa: E501
@@ -15,6 +16,7 @@ import gi
 
 gi.require_version("Atspi", "2.0")
 from gi.repository import Atspi
+from gi.repository import GLib
 
 from types import LambdaType
 import inspect
@@ -352,20 +354,36 @@ class AccessibleObject:
         # Debug description of what user is searching for.
         LOGGING.debug(f"Searching for '{description_to_use}'")
 
-        for number_of_attempts in range(config.search_cut_off_limit):
-            if number_of_attempts >= config.search_warning_threshold:
+        for number_of_attempts in range(1, config.search_cut_off_limit + 1):
+            if number_of_attempts >= config.search_warning_threshold or config.debug_searching:
                 LOGGING.info(f"Searching again (attempt '{number_of_attempts}')")
 
-            if depth_first:
-                success_match = AccessibleObject._find_descendant_depth_first(acc_object, predicate)
-            else:  # breadth_first
-                success_match = AccessibleObject._find_descendant_breadth_first(acc_object, predicate)
+            try:
 
-            if success_match:
-                return success_match
+                if depth_first:
+                    success_match = AccessibleObject._find_descendant_depth_first(acc_object, predicate)
+                else:  # breadth_first
+                    success_match = AccessibleObject._find_descendant_breadth_first(acc_object, predicate)
 
-            if not validated_retry:
-                break
+                if success_match:
+                    return success_match
+
+                if not validated_retry:
+                    break
+
+            except GLib.GError as error:
+                if number_of_attempts == config.search_cut_off_limit:
+                    LOGGING.info(f"GLib Error caught from a11y tree: '{error}'")
+                    raise RuntimeError(" ".join((
+                        "Error: Session has probably broken a11y!",
+                        "Exiting allowing session re-runs",
+                    ))) from error
+
+                do_delay(config.search_back_off_delay)
+
+            except TypeError as error:
+                LOGGING.info(f"Unexpected TypeError from a11y tree search: '{error}'")
+                do_delay(config.search_back_off_delay)
 
             do_delay(config.search_back_off_delay)
 

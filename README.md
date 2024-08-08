@@ -3,9 +3,9 @@ TODO lets do something comprehensive
 
 
 How To Install current version:
-- git checkout devel/release-1.0 branch
+- git checkout devel/release-2.0 branch
 - python3 -m build
-- sudo pip3 install dist/dogtail-1.0-py3-none-any.whl --force-reinstall
+- sudo pip3 install dist/dogtail-2.0-py3-none-any.whl --force-reinstall
 
 
 Config in 1.0:

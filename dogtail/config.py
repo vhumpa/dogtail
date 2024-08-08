@@ -4,6 +4,7 @@
 Experimental dogtail changes for 1.0 release.
 """
 
+# pylint: disable=line-too-long
 # ruff: noqa: E501
 
 import configparser

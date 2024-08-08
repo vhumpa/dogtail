@@ -1,4 +1,3 @@
-
 #/usr/bin/python3
 """
 Experimental dogtail changes for 1.0 release.

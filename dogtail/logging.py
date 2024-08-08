@@ -61,7 +61,7 @@ class Logging(metaclass=Singleton):
 
         # Setup of console handler.
         # All INFO and higher level logs will be going to the console.
-        console_handler = logging.StreamHandler()
+        console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setLevel(logging.INFO)
         console_handler.setFormatter(formatter)
         console_handler.set_name("console_handler")

@@ -10,6 +10,7 @@ class AccessibleStructureRepresentation:
     Accessible Structure Representation from given Accessible Node.
     """
 
+    # TODO - add with_labels and print x.labeler.name and x.labeler.text
     def __init__(self, accessible_node, structure_format="plain", file_name=None):
         self.spacer = "  "
         self.format = structure_format

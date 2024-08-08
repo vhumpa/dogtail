@@ -1,6 +1,6 @@
 #/usr/bin/python3
 """
-Experimental dogtail changes for 1.0 release. Ponytail handling.
+Experimental dogtail changes for 2.0 release. Ponytail handling.
 """
 
 # pylint: disable=broad-exception-caught

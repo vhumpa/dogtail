@@ -37,10 +37,10 @@ class LoadDefaultConfiguration:
 
         # Timing Delay section.
         section = "config"
-        self.action_delay = float(self.cfg.get(section, "action_delay", fallback=1.0))
-        self.typing_delay = float(self.cfg.get(section, "typing_delay", fallback=0.1))
+        self.action_delay = float(self.cfg.get(section, "action_delay", fallback=0.5))
+        self.typing_delay = float(self.cfg.get(section, "typing_delay", fallback=0.05))
         self.default_delay = float(self.cfg.get(section, "default_delay", fallback=0.5))
-        self.double_click_delay = float(self.cfg.get(section, "double_click_delay", fallback=0.1))
+        self.double_click_delay = float(self.cfg.get(section, "double_click_delay", fallback=0.05))
         self.search_back_off_delay = float(self.cfg.get(section, "search_back_off_delay", fallback=0.5))
 
         # Searching section.

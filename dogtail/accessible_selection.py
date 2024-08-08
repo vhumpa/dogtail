@@ -38,9 +38,9 @@ class AccessibleSelection:
             LOGGING.debug("This object does not have Atspi.Selection interface.")
 
         if AccessibleObject.is_newton(acc_object):
-            acc_object.select_all()
-        else:
-            Atspi.Selection.select_all(acc_object)
+            return acc_object.select_all()
+
+        return Atspi.Selection.select_all(acc_object)
 
 
     @staticmethod
@@ -55,9 +55,9 @@ class AccessibleSelection:
             LOGGING.debug("This object does not have Atspi.Selection interface.")
 
         if AccessibleObject.is_newton(acc_object):
-            acc_object.clear_selection()
-        else:
-            Atspi.Selection.clear_selection(acc_object)
+            return acc_object.clear_selection()
+
+        return Atspi.Selection.clear_selection(acc_object)
 
 
     @staticmethod
@@ -74,9 +74,9 @@ class AccessibleSelection:
         parent = AccessibleObject.get_parent_checked(acc_object)
 
         if AccessibleObject.is_newton(acc_object):
-            acc_object.select_child(parent, acc_object.get_index_in_parent())
-        else:
-            Atspi.Selection.select_child(parent, acc_object.get_index_in_parent())
+            return acc_object.select_child(parent, acc_object.get_index_in_parent())
+
+        return Atspi.Selection.select_child(parent, acc_object.get_index_in_parent())
 
 
     @staticmethod
@@ -93,6 +93,6 @@ class AccessibleSelection:
         parent = AccessibleObject.get_parent_checked(acc_object)
 
         if AccessibleObject.is_newton(acc_object):
-            acc_object.deselect_child(parent, acc_object.get_index_in_parent())
-        else:
-            Atspi.Selection.deselect_child(parent, acc_object.get_index_in_parent())
+            return acc_object.deselect_child(parent, acc_object.get_index_in_parent())
+
+        return Atspi.Selection.deselect_child(parent, acc_object.get_index_in_parent())

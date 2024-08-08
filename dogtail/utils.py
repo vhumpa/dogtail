@@ -97,21 +97,6 @@ def run(string, timeout=None, interval=None, desktop=None, dumb=False, app_name=
         while time < validated_timeout:
             time = time + validated_interval
 
-            # TODO just look at this.
-            # This is so wrong, why can it be easy when it can be difficult huh?
-            #try:
-            #    #for child in desktop_object.children[::-1]:
-            #        # Why not just detect root.application(appName) ??
-            #        if child.name == appName:
-            #            # Why not just detect child(roleName="frame") ??
-            #            for grandchild in child.children:
-            #                if grandchild.role_name == "frame":
-            #                    do_delay(validated_interval)
-            #                    return pid
-            #except AttributeError:  # pragma: no cover
-            #    pass
-
-            # Lets do it better.
             try:
                 application = root.application(validated_application_name)
                 assert application.child(role_name="frame")

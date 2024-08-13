@@ -1,11 +1,21 @@
+dogtail 2.0
+===========
 
-# dogtail 1.0.1
+- Remove obsolete and legacy code that was never used in my several years of heavy dogtail usage.
+- Improving code structure and moving specific parts to its own files to improve readability in high level Node.
+- Remove all pyatspi2 usage and switch to only Atspi usage.
+- Introduction of accessibility classes, which were heavily inspired by Orca to solve problems with Accessibility when required.
+- Logging was remade to be more useful.
+- Ponytail now has its own file, so it is not sprinkled all over the code.
+- Dumping Accessibility Structure Representation with dump and tree was improved.
+- Config file was improved and ability to have a config file specific for a project was added.
+- Changing casing to snake_case, but still have backwards compatibility to camelCase.
+- Custom keys and values - users can define their own config values in .ini file.
+- Type checking: users will get ValueError when trying to set e.g. bool to value defined as float in config.ini.
+- Release to pypi.
 
-Rebased with a number of contributions that were done to the master branch while we were working on Wayland and we have accidentaly not included them in 1.0.
-See https://gitlab.com/dogtail/dogtail/-/issues/31
-Also returned couple of modules we thought were of no use (tc, wrapped) but were proved otherwise to keep 1.0 fully compatible with 0.x.
-
-# dogtail 1.0
+dogtail 1.0
+===========
 
 After more than five years of continuous experimentation and development, we are excited to finally release Dogtail 1.0—a Wayland-enabled version of Dogtail! How did we achieve this? It was made possible by the `gnome-ponytail-daemon`, originally crafted by Olivier Fourdan: https://gitlab.gnome.org/ofourdan/gnome-ponytail-daemon. This tool allows us to perform actions in a Wayland GNOME session in a similar way to how we have been doing so with X functions.
 
@@ -21,9 +31,7 @@ Dogtail handles all of this logic seamlessly, so in practical use, the user does
 
 ## A long journey to 1.0
 
-We began working on the Wayland-enabled version over five years ago (originally available in the `devel/wayland` branch). It has taken all this time to ensure the solution is robust and reliable enough to warrant a 1.0 release. This version includes all the Wayland-related developments and other changes (like the GTK4 support tweaks mentioned below) and has been extensively tested. Importantly, it is backward compatible with the entire Dogtail API that has been available so far. This release includes all modules from the 0.9.x series, most notably the "procedural" module, which we plan to deprecate in favor of a completely "tree-based" approach in Dogtail 2.0.
-
-That release will also involve significant cleanup, major code refactoring, and a transition from `pyatspi` to directly introspected `atspi`. It will also contain up date code examples and dogtail's unittests should pass with gitlab pipelines re-enabled.
+We began working on the Wayland-enabled version over five years ago (originally available in the `devel/wayland` branch). It has taken all this time to ensure the solution is robust and reliable enough to warrant a 1.0 release. This version includes all the Wayland-related developments and other changes (like the GTK4 support tweaks mentioned below) and has been extensively tested. Importantly, it is backward compatible with the entire Dogtail API that has been available so far. This release includes all modules from the 0.9.x series, most notably the "procedural" module, which we plan to deprecate in favor of a completely "tree-based" approach in Dogtail 2.0. That release will also involve significant cleanup, major code refactoring, and a transition from `pyatspi` to directly introspected `atspi`.
 
 For more details on these upcoming changes, see issue #29.
 

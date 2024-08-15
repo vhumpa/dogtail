@@ -109,11 +109,10 @@ class IsAnApplicationNamed(Predicate):
     Search subclass that looks for an application by name
     """
 
-    def __init__(self, appName, description=None):
+    def __init__(self, appName):
         self.appName = TranslatableString(appName)
         self.debugName = self.describeSearchResult()
         self.satisfiedByNode = self._genCompareFunc()
-        self.description = TranslatableString(description)
 
 
     def _genCompareFunc(self):
@@ -154,7 +153,7 @@ class GenericPredicate(Predicate):
     SubtreePredicate subclass that takes various optional search fields
     """
 
-    def __init__(self, name=None, roleName=None, description=None, label=None, identifier=None, debugName=None):
+    def __init__(self, name=None, roleName=None, description=None, label=None, debugName=None):
         if name:
             self.name = TranslatableString(name)
         else:
@@ -167,7 +166,6 @@ class GenericPredicate(Predicate):
             self.label = TranslatableString(label)
         else:
             self.label = None
-        self.identifier = identifier
 
         if debugName:
             self.debugName = debugName
@@ -240,8 +238,6 @@ class GenericPredicate(Predicate):
 
             if self.description:
                 args += " description='%s'" % self.description
-            if self.identifier:
-                args += " identifier='%s'" % self.identifier
         return "child(%s%s)" % (args, makeScriptRecursiveArgument(isRecursive, True))
 
 

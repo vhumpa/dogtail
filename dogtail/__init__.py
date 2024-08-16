@@ -1,4 +1,4 @@
-#/usr/bin/python3
+#!/usr/bin/python3
 """
 GUI test tool and automation framework that uses Accessibility (a11y) technologies
 to communicate with desktop applications.

@@ -674,7 +674,7 @@ class Node(object):
         return AccessibleSelection.deselect(self)
 
 
-    def click(self, button=1):
+    def click(self, button=1, offset_x=0, offset_y=0):
         """
         Generates a raw mouse click event, using the specified button.
         - 1 is left,
@@ -684,8 +684,8 @@ class Node(object):
 
         LOGGING.debug(logging_class.get_func_params_and_values())
 
-        click_x = int(self.position[0] + self.size[0] / 2)
-        click_y = int(self.position[1] + self.size[1] / 2)
+        click_x = int(self.position[0] + self.size[0] / 2) + offset_x
+        click_y = int(self.position[1] + self.size[1] / 2) + offset_y
 
         # Starting with no workarounds for any role names or objects.
         # If something will start crashing we can fix it easily.
@@ -693,15 +693,15 @@ class Node(object):
         click(click_x, click_y, button, window_id=self.window_id)
 
 
-    def double_click(self, button=1):
+    def double_click(self, button=1, offset_x=0, offset_y=0):
         """
         Generates a raw mouse double-click event, using the specified button.
         """
 
         LOGGING.debug(logging_class.get_func_params_and_values())
 
-        click_x = int(self.position[0] + self.size[0] / 2)
-        click_y = int(self.position[1] + self.size[1] / 2)
+        click_x = int(self.position[0] + self.size[0] / 2) + offset_x
+        click_y = int(self.position[1] + self.size[1] / 2) + offset_y
 
         # Starting with no workarounds for any role names or objects.
         # If something will start crashing we can fix it easily.
@@ -709,15 +709,15 @@ class Node(object):
         double_click(click_x, click_y, button, window_id=self.window_id)
 
 
-    def point(self):
+    def point(self, offset_x=0, offset_y=0):
         """
         Move mouse cursor to the center of the widget.
         """
 
         LOGGING.debug(logging_class.get_func_params_and_values())
 
-        point_x = int(self.position[0] + self.size[0] / 2)
-        point_y = int(self.position[1] + self.size[1] / 2)
+        point_x = int(self.position[0] + self.size[0] / 2) + offset_x
+        point_y = int(self.position[1] + self.size[1] / 2) + offset_y
 
         # Starting with no workarounds for any role names or objects.
         # If something will start crashing we can fix it easily.

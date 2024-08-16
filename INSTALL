@@ -3,7 +3,7 @@ Installation from pypi.
 
 DOES NOT WORK YET, this is a preparation
 
-    udo python3 -m pip install dogtail==2.0
+    sudo python3 -m pip install dogtail==2.0
 
 
 # TODO

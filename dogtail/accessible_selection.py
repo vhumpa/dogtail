@@ -1,4 +1,4 @@
-#/usr/bin/python3
+#!/usr/bin/python3
 """
 Experimental dogtail changes for 2.0 release.
 """

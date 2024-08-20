@@ -113,22 +113,14 @@ Contact
 Website:
     https://gitlab.com/dogtail/dogtail/
 
-### TODO could use an update
+Issue tracker:
+    https://gitlab.com/dogtail/dogtail/issues
+
 API Documentation:
     http://fedorapeople.org/~vhumpa/dogtail/epydoc/
 
-### TODO no longer true?
-IRC:
-    #dogtail on irc.freenode.net
-
-### TODO no longer true?
-Mailing list for users:
-    dogtail-list@gnome.org
-
-### TODO no longer true?
-Mailing list for developers:
-    dogtail-devel-list@gnome.org
-
+We have deprecated our mailing lists as well as IRC channel. Please use our GITLAB for issues and merge requests! (Or possibly https://github.com/vhumpa/dogtail perhaps for your pull requests should
+you prefer to use github, but gitlab.com is preferred)
 
 -----
 

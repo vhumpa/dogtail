@@ -5,7 +5,7 @@
 Summary: GUI test tool and automation framework
 Name: dogtail
 Version: 1.0.0
-Release: 0.20.0d72db7e%{?dist}
+Release: 0.21.65d93b2e%{?dist}
 License: GPLv2
 URL: https://gitlab.com/dogtail/dogtail/
 Source0: https://gitlab.com/dogtail/dogtail/raw/released/%{name}-%{version}.tar.gz
@@ -41,7 +41,7 @@ Requires: python3-pyatspi
 Requires: gnome-ponytail-daemon
 Requires: python3-gobject
 Requires: python3-cairo
-Requires: xorg-x11-xinit
+#Requires: xorg-x11-xinit
 Requires: hicolor-icon-theme
 
 %description -n python3-dogtail
@@ -56,7 +56,7 @@ BuildRequires: desktop-file-utils
 Requires: python3-pyatspi
 Requires: python3-gobject
 Requires: python3-cairo
-Requires: xorg-x11-xinit
+#Requires: xorg-x11-xinit
 Requires: hicolor-icon-theme
 Requires: python3-dogtail >= 1.0.0
 

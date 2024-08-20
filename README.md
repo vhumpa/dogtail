@@ -23,7 +23,9 @@ Dogtail handles all of this logic seamlessly, so in practical use, the user does
 
 ## A long journey to 1.0
 
-We began working on the Wayland-enabled version over five years ago (originally available in the `devel/wayland` branch). It has taken all this time to ensure the solution is robust and reliable enough to warrant a 1.0 release. This version includes all the Wayland-related developments and other changes (like the GTK4 support tweaks mentioned below) and has been extensively tested. Importantly, it is backward compatible with the entire Dogtail API that has been available so far. This release includes all modules from the 0.9.x series, most notably the "procedural" module, which we plan to deprecate in favor of a completely "tree-based" approach in Dogtail 2.0. That release will also involve significant cleanup, major code refactoring, and a transition from `pyatspi` to directly introspected `atspi`.
+We began working on the Wayland-enabled version over five years ago (originally available in the `devel/wayland` branch). It has taken all this time to ensure the solution is robust and reliable enough to warrant a 1.0 release. This version includes all the Wayland-related developments and other changes (like the GTK4 support tweaks mentioned below) and has been extensively tested. Importantly, it is backward compatible with the entire Dogtail API that has been available so far. This release includes all modules from the 0.9.x series, most notably the "procedural" module, which we plan to deprecate in favor of a completely "tree-based" approach in Dogtail 2.0.
+
+That release will also involve significant cleanup, major code refactoring, and a transition from `pyatspi` to directly introspected `atspi`. It will also contain up date code examples and dogtail's unittests should pass with gitlab pipelines re-enabled.
 
 For more details on these upcoming changes, see issue #29.
 
@@ -70,13 +72,20 @@ Applications to test, e.g. from the GNOME desktop:
 Using
 =====
 
-Currently GNOME and GTK+ applications are supported. Thanks to qt-at-spi
-KDE4 and QT applications are now available too.
+Currently GNOME and GTK+ applications are supported. Both Xorg and Wayland sessions.
+See examples for direct dogtail use or check: https://fedoramagazine.org/automation-through-accessibility/
+
+Thanks to qt-at-spi KDE4 and QT applications are now available too,
+feel free to try, but it's no longer supported from us, might be better to check
+KDE's native solutions.
 
 First, enable accessibility support in your GNOME session with:
   gsettings set org.gnome.desktop.interface toolkit-accessibility true
 This only affects newly-started applications, so you may want to log out and
 log back in again.
+
+Should you run "sniff" first, or be using 'dogtail-run-headless-next' or 'qecore-headless'
+scripts to handle your sessions, the accessibility will be auto enabled for you.
 
 
 Bugs

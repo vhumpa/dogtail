@@ -119,7 +119,7 @@ fi
 # %{_datadir}/dogtail/
 # %{_datadir}/icons/hicolor/*/apps/%{name}*.*
 # %doc COPYING
-# %doc README
+# %doc README.md
 # %doc NEWS
 # %doc examples/
 
@@ -129,7 +129,7 @@ fi
 %{_datadir}/dogtail/
 %{_datadir}/icons/hicolor/*/apps/%{name}*.*
 %doc COPYING
-%doc README
+%doc README.md
 %doc NEWS
 %doc examples/
 
@@ -137,7 +137,7 @@ fi
 %{_bindir}/*
 %{_datadir}/applications/*
 %doc COPYING
-%doc README
+%doc README.md
 %doc NEWS
 
 %endif # with_python3

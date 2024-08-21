@@ -1,5 +1,11 @@
 2018-11-09 Vita Humpa <vhumpa@redhat.com>
 
+	dogtail 1.0
+	==============
+	After more than five years of continuous experimentation and development, we are excited to finally release Dogtail 1.0—a Wayland-enabled version of Dogtail! How did we achieve this? It was made possible by the `gnome-ponytail-daemon`, originally crafted by Olivier Fourdan: https://gitlab.gnome.org/ofourdan/gnome-ponytail-daemon. This tool allows us to perform actions in a Wayland GNOME session in a similar way to how we have been doing so with X functions. See NEWS or README.md for more details!
+
+2018-11-09 Vita Humpa <vhumpa@redhat.com>
+
 	dogtail 0.9.11
 	==============
 	A number of fixes related mainly to python3 and bilingual nature of dogtail.

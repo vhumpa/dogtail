@@ -59,8 +59,8 @@ def session_file():
     result = ['scripts/gnome-dogtail-headless.session']
     return result
 
-# with open("README.md", "r") as fh:
-#     long_description = fh.read()
+with open("README.txt", "r") as fh:
+    long_description = fh.read()
 
 setup(
     name='dogtail',
@@ -68,10 +68,8 @@ setup(
     description="GUI test tool and automation framework " +
     "that uses Accessibility (a11y) technologies to " +
     "communicate with desktop applications.",
-    long_description="dogtail is a GUI test tool and UI automation framework written in Python. It uses Accessibility (a11y) technologies to communicate with desktop applications. dogtail scripts are written in Python and executed like any other Python program.\n\nDogtail works great in combination with behave and qecore (based on behave and dogtail) if you're interested in using it with modern Wayland-based GNOME. Please see this article for more details on how we mainly use it: https://fedoramagazine.org/automation-through-accessibility/ \n\nOther than that, dogtail should work with any desktop environment that still runs AT-SPI with Xorg.",
-    long_description_content_type="text/plain",  # Use plain text format
-    # long_description=long_description,
-    # long_description_content_type="text/markdown",
+    long_description=long_description,
+    long_description_content_type="text/plain",
     author="""Zack Cerza <zcerza@redhat.com>,
 Ed Rousseau <rousseau@redhat.com>,
 David Malcolm <dmalcolm@redhat.com>,

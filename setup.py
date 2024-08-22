@@ -72,15 +72,14 @@ setup(
     """,
     long_description=long_description,
     long_description_content_type="text/markdown",
-    author="""
-        Zack Cerza <zcerza@redhat.com>,
-        Ed Rousseau <rousseau@redhat.com>,
-        David Malcolm <dmalcolm@redhat.com>,
-        Vitezslav Humpa <vhumpa@redhat.com>
-    """,
-    #author_email="dogtail-list@gnome.org",
-    url="https://gitlab.com/dogtail/dogtail",
-    packages=["dogtail"],
+    author="""Zack Cerza <zcerza@redhat.com>,
+Ed Rousseau <rousseau@redhat.com>,
+David Malcolm <dmalcolm@redhat.com>,
+Vitezslav Humpa <vhumpa@redhat.com>,
+Michal Odehnal <modehnal@redhat.com>""",
+    author_email='dogtail-list@gnome.org',
+    url='https://gitlab.com/dogtail/dogtail',
+    packages=['dogtail'],
     scripts=scripts(),
     data_files=[
         ("share/doc/dogtail/examples",

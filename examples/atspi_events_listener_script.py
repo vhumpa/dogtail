@@ -12,15 +12,12 @@ Event listener demo.
 # ruff: noqa: E402
 # ruff: noqa: E501
 
-__author__ = "David Malcolm <dmalcolm@redhat.com>"
-
 import gi
 gi.require_version("Atspi", "2.0")
 from gi.repository import Atspi
 from gi.repository import GLib
 
 from time import sleep
-
 
 # Explicit list of selected events:
 # https://gitlab.gnome.org/GNOME/at-spi2-core/-/blob/HEAD/atspi/atspi-event-listener.c#L479

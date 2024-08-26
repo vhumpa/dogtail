@@ -27,7 +27,7 @@ from time import sleep
 EVENT_NAMES = [
     "focus:",
     "mouse:rel",
-    "mouse:b1p",
+    "mouse:button",
     "mouse:abs",
     "keyboard:modifiers",
     # The property-change event will trigger together with the sub-event, leaving it out for now.

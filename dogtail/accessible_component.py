@@ -18,6 +18,7 @@ import gi
 gi.require_version("Atspi", "2.0")
 from gi.repository import Atspi
 
+from dogtail.config import config
 from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 
@@ -157,8 +158,8 @@ class AccessibleComponent:
 
         # Check if the toolkit is GTK4.
         if "GTK" in acc_object.get_toolkit and acc_object.get_toolkit["GTK"][0] == "4":
-            #gtk4Offset = config.gtk4Offset TODO
-            gtk4_offset = (12, 12)
+            #gtk4_offset = (12, 12)
+            gtk4_offset = config.gtk4Offset
 
             # Determine if *this* node is a part of a full-screen frame
             fullscreen_offset = (0, 0)  # No offset fullscreen, shadows or not!

@@ -62,16 +62,17 @@ class Node(object):
     if "XDG_SESSION_TYPE" in os.environ and "wayland" in os.environ["XDG_SESSION_TYPE"]:
         session_type = "wayland"
 
-    # I do not understand this well enough. TODO
-    def register_event(self, client, *names):
+    # I understand this a little better now.
+    def register_event_listener(self, client, *names):
         """
         Register an event listener.
+        In the future we might need to register all event listeners to get updates.
         """
 
         try:
             listener = self.event_listeners[client]
         except Exception:
-            self.event_listeners[client] = Atspi.EventListener.new(self._dummy_listener)
+            self.event_listeners[client] = Atspi.EventListener.new(self.dummy_callback)
             listener = self.event_listeners[client]
 
         for name in names:
@@ -81,8 +82,8 @@ class Node(object):
             Atspi.EventListener.register(listener, name)
 
 
-    # I do not understand this well enough. TODO
-    def deregister_event(self, client, *names):
+    # I understand this a little better now.
+    def deregister_event_listener(self, client, *names):
         """
         Register an event listener.
         """
@@ -99,13 +100,31 @@ class Node(object):
             Atspi.EventListener.deregister(listener, name)
 
 
-    # I do not understand this well enough. TODO
-    def _dummy_listener(self):
+    # I understand this a little better now.
+    def dummy_callback(self, event):
         """
-        I do not understand this well enough yet.
+        Define what to do when a registered event is fired.
+        In this case it will print what event was fired and what source was the cause.
         """
 
-        LOGGING.debug("Dummy listener.")
+        LOGGING.debug("Dummy callback.")
+
+        # The Atspi object.
+        source = event.source
+
+        if isinstance(source, Atspi.Accessible):
+            try:
+                name = Atspi.Accessible.get_name(source)
+                role_name = Atspi.Accessible.get_role_name(source)
+                source_description = f"source: [ {role_name} | {name} ]"
+            except Exception as e:
+                source_description = f"[DEAD] - '{e}'"
+        else:
+            source_description = ""
+
+        # Not printing any unnamed objects, which will flood the log.
+        if "| ]" not in source_description:
+            print(f"Event: '{event.type}' '{source_description}'")
 
 
     @property

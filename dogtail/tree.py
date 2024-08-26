@@ -62,6 +62,7 @@ class Node(object):
     if "XDG_SESSION_TYPE" in os.environ and "wayland" in os.environ["XDG_SESSION_TYPE"]:
         session_type = "wayland"
 
+
     # I understand this a little better now.
     def register_event_listener(self, client, *names):
         """

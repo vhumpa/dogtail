@@ -10,6 +10,7 @@ Event listener demo.
 # pylint: disable=broad-exception-caught
 
 # ruff: noqa: E402
+# ruff: noqa: E501
 
 __author__ = "David Malcolm <dmalcolm@redhat.com>"
 
@@ -21,14 +22,19 @@ from gi.repository import GLib
 from time import sleep
 
 
-# Explicit list of all events, taken from at-spi/test/event-listener-test.c:
+# Explicit list of selected events:
+# https://gitlab.gnome.org/GNOME/at-spi2-core/-/blob/HEAD/atspi/atspi-event-listener.c#L479
+
+# Under Wayland the mouse events are not captured, possibly by design.
+
 EVENT_NAMES = [
     "focus:",
     "mouse:rel",
-    "mouse:button",
+    "mouse:b1p",
     "mouse:abs",
     "keyboard:modifiers",
-    "object:property-change",
+    # The property-change event will trigger together with the sub-event, leaving it out for now.
+    #"object:property-change",
     "object:property-change:accessible-name",
     "object:property-change:accessible-description",
     "object:property-change:accessible-parent",
@@ -49,7 +55,8 @@ EVENT_NAMES = [
     "object:row-deleted",
     "object:model-changed",
     "object:link-selected",
-    #"object:bounds-changed", # avoid swamping log
+    # Avoid swamping the log. Does not seem to do so on Wayland.
+    #"object:bounds-changed",
     "window:minimize",
     "window:maximize",
     "window:restore",
@@ -76,8 +83,8 @@ def callback(event):
     """
     Event listener callback to be called when event is fired.
 
-    :param event: _description_
-    :type event: _type_
+    :param event: Atspi Event.
+    :type event: Atspi.Event
     """
 
     # Event given to callback is of type Atspi.Event.
@@ -103,13 +110,13 @@ def callback(event):
 
 EVENT_LISTENERS = {}
 for event_name in EVENT_NAMES:
+
     try:
         listener = EVENT_LISTENERS[event_name]
     except Exception:
-        print(f"Creating new event listener: '{event_name}'")
+        print(f"Creating new event listener: '{event_name}' and registering it.")
         EVENT_LISTENERS[event_name] = Atspi.EventListener.new(callback)
         listener = EVENT_LISTENERS[event_name]
-
 
     Atspi.EventListener.register(listener, event_name)
 
@@ -140,6 +147,17 @@ try:
         raise KeyboardInterrupt(release_global_interpreter_lock.keyboard_exception)
 
 except KeyboardInterrupt as error:
+
+    # Deregister the event.
+    for event_name in EVENT_NAMES:
+
+        try:
+            listener = EVENT_LISTENERS[event_name]
+        except Exception:
+            pass
+
+        print(f"Deregister event listener for event: '{event_name}'")
+        Atspi.EventListener.deregister(listener, event_name)
 
     import sys
     print(f"Keyboard interrupt caught. Exiting script.\n{error}")

@@ -21,11 +21,12 @@ class GenericPredicate:
     Simple predicate class, providing easy way to compare nodes.
     """
 
-    def __init__(self, name=None, role_name=None, description=None, label=None):
+    def __init__(self, name=None, role_name=None, description=None, label=None, identifier=None):
         self.name = name
         self.role_name = role_name
         self.description = description
         self.label = label
+        self.identifier = identifier
         self.showing_only = None
         self.satisfied_by_node = self._get_compare_function()
 
@@ -72,6 +73,27 @@ class GenericPredicate:
                     if self.description != node.description:
                         return False
 
+                # Check if user wants to check identifier.
+                if self.identifier:
+                    # The method get_attributes is from Atspi.Accessible.
+                    atspi_accessible_attributes = node.get_attributes()
+
+                    # Check if the wanted id's are present.
+                    id_present = "id" in atspi_accessible_attributes
+                    accessible_id_present = "accessibleID" in dir(node)
+
+                    # Compare identifier with the given node's "id".
+                    if id_present and self.identifier != atspi_accessible_attributes["id"]:
+                        return False
+
+                    # Compare identifier with the given node's "accessibleID".
+                    elif accessible_id_present and self.identifier != node.accessibleID:
+                        return False
+
+                    # No "id" or "accessibleID to check against.
+                    else:
+                        return False
+
                 # Check if user wants to match showing only.
                 if self.showing_only:
                     # Compare description of self with the given node.
@@ -109,6 +131,7 @@ class GenericPredicate:
         string_to_represent_object += f"role_name:'{self.role_name if self.role_name else 'None'}' "
         string_to_represent_object += f"description:'{self.description if self.description else 'None'}' "
         string_to_represent_object += f"label:'{self.label if self.label else 'None'}' "
+        string_to_represent_object += f"id:'{self.identifier if self.identifier else 'None'}' "
         string_to_represent_object += f"showing_only:'{self.showing_only if self.showing_only else 'None'}'"
         return string_to_represent_object
 

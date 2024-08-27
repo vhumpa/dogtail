@@ -538,21 +538,61 @@ class Node(object):
 
         LOGGING.debug(logging_class.get_func_params_and_values())
 
+        using_identifier = None
         using_role_name = role_name
-        # === Backward compatibility for 'roleName' usage ===
+        # === Backward compatibility and extra parameters ===
         for key, val in kwargs.items():
             if "roleName" in str(key):
                 using_role_name = val
+
+            if "identifier" in str(key):
+                using_identifier = val
         # ===================================================
 
         predicate = GenericPredicate(
             name=name,
             role_name=using_role_name,
             description=description,
-            label=label
+            label=label,
+            identifier=using_identifier
         )
 
         return AccessibleObject.find_descendant(self, predicate, **kwargs)
+
+
+    def is_child(self, name=None, role_name=None, description=None, label=None, **kwargs):
+        """
+        Determines whether a child satisfying the given criteria exists.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        using_identifier = None
+        using_role_name = role_name
+        # === Backward compatibility and extra parameters ===
+        for key, val in kwargs.items():
+            if "roleName" in str(key):
+                using_role_name = val
+
+            if "identifier" in str(key):
+                using_identifier = val
+        # ===================================================
+
+        predicate = GenericPredicate(
+            name=name,
+            role_name=using_role_name,
+            description=description,
+            label=label,
+            identifier=using_identifier
+        )
+
+        # Execute the search.
+        try:
+            # We do not care about a result here, just existence.
+            AccessibleObject.find_descendant(self, predicate, **kwargs)
+            return True
+        except RuntimeError:
+            return False
 
 
     def find_child(self, predicate, **kwargs):
@@ -855,6 +895,19 @@ class Node(object):
 
         return self.index_in_parent
 
+
+    def isChild(self, name=None, roleName=None, description=None, label=None, **kwargs): # pylint: disable=invalid-name
+        """
+        For backwards compatibility reasons. Wrapper for self.is_child.
+        """
+
+        return self.is_child(
+            name=name,
+            role_name=roleName,
+            description=description,
+            label=label,
+            **kwargs
+        )
 
     def findChild(self, predicate, retry=True): # pylint: disable=invalid-name
         """

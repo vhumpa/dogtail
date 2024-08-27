@@ -1478,12 +1478,27 @@ class Node(object):
         showingOnly=None,
     ):
         """
-        Finds a child satisying the given criteria.
+        Finds a child satisfying the given criteria.
 
         This is implemented using findChild, and hence will automatically retry
         if no such child is found, and will eventually raise an exception. It
         also logs the search.
         """
+
+        debug_log(
+            "child(self, name=%s, roleName=%s, description=%s, label=%s, recursive=%s, retry=%s, debugName=%s, showingOnly=%s)"
+            % (
+                str(name),
+                str(roleName),
+                str(description),
+                str(label),
+                str(recursive),
+                str(retry),
+                str(debugName),
+                str(showingOnly),
+            )
+        )
+
         return self.findChild(
             predicate.GenericPredicate(
                 name=name,
@@ -1548,6 +1563,7 @@ class Node(object):
                 debugName=debugName,
                 showingOnly=showingOnly,
             )
+            return True
         except SearchError:
             return False
 

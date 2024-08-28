@@ -59,36 +59,37 @@ def session_file():
     result = ['scripts/gnome-dogtail-headless.session']
     return result
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+with open("README.rst", "r") as fh:
+    long_desc = fh.read()
 
 setup(
     name='dogtail',
-    version='0.9.11',
+    version='1.0.0',
     description="GUI test tool and automation framework " +
     "that uses Accessibility (a11y) technologies to " +
     "communicate with desktop applications.",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
+    long_description_content_type="text/x-rst",
+    long_description=long_desc,
     author="""Zack Cerza <zcerza@redhat.com>,
 Ed Rousseau <rousseau@redhat.com>,
 David Malcolm <dmalcolm@redhat.com>,
-Vitezslav Humpa <vhumpa@redhat.com>""",
+Vitezslav Humpa <vhumpa@redhat.com>,
+Michal Odehnal <modehnal@redhat.com>""",
     author_email='dogtail-list@gnome.org',
     url='https://gitlab.com/dogtail/dogtail',
     packages=['dogtail'],
     scripts=scripts(),
     data_files=[
-        ('EGG-INFO/share/doc/dogtail/examples',
+        ('share/doc/dogtail/examples',
         examples()),
-        ('EGG-INFO/share/doc/dogtail/examples/data',
+        ('share/doc/dogtail/examples/data',
         examples_data()),
-        ('EGG-INFO/share/doc/dogtail/tests',
+        ('share/doc/dogtail/tests',
         tests()),
-        ('EGG-INFO/share/dogtail/glade', ['sniff/sniff.ui']),
-        ('EGG-INFO/share/dogtail/icons', sniff_icons()),
-        ('EGG-INFO/share/applications', ['sniff/sniff.desktop']),
-        ('EGG-INFO/share/icons/hicolor/scalable/apps', icons('svg'))
+        ('share/dogtail/glade', ['sniff/sniff.ui']),
+        ('share/dogtail/icons', sniff_icons()),
+        ('share/applications', ['sniff/sniff.desktop']),
+        ('share/icons/hicolor/scalable/apps', icons('svg'))
     ],
     options = {
     'build_scripts': {

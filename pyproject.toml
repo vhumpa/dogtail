@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dogtail"
+version = "1.0.0"
+description = "GUI test tool and automation framework that uses Accessibility (a11y) technologies to communicate with desktop applications."
+readme = { file = "README.rst", content-type = "text/x-rst" }
+requires-python = ">=3.6"
+authors = [
+    {name = "Zack Cerza", email = "zcerza@redhat.com"},
+    {name = "Ed Rousseau", email = "rousseau@redhat.com"},
+    {name = "David Malcolm", email = "dmalcolm@redhat.com"},
+    {name = "Vitezslav Humpa", email = "vhumpa@redhat.com"},
+    {name = "Michal Odehnal", email = "modehnal@redhat.com"}
+]
+urls = { "Homepage" = "https://gitlab.com/dogtail/dogtail" }

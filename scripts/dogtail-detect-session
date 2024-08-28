@@ -1,6 +1,8 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
+import sys
+from dogtail.procedural import focus, FocusError
+
 """
 dogtail-detect session
 
@@ -21,29 +23,29 @@ Author: Zack Cerza <zcerza@redhat.com>
 
 __author__ = "Zack Cerza <zcerza@redhat.com>"
 
-from dogtail.procedural import *
-import sys
-
 
 def GNOME():
     """
     "Is an accessibility-enabled GNOME session running?"
     """
+
     running = False
     try:
         assert focus.desktop
         assert focus.desktop.children
 
-        focus.application('gnome-panel')
+        focus.application("gnome-panel")
         assert focus.application.children
 
-        focus.application('metacity')
+        focus.application("metacity")
         print(focus.application.node)
         assert focus.application.node
         running = True
         print("GNOME Session detected.")
-    except AttributeError or AssertionError or FocusError:
+
+    except (AttributeError or AssertionError or FocusError):
         print("ERROR: No session found.")
+
     return running
 
 
@@ -51,6 +53,7 @@ def KDE():
     """
     "Is an accessibility-enabled KDE session running?"
     """
+
     running = False
     return running
 
@@ -59,8 +62,10 @@ def JustSomeApps():
     """
     "Is at least one accessibility-enabled application running?"
     """
+
     assert focus.desktop
     assert focus.desktop.children
+
 
 if GNOME() or KDE() or JustSomeApps():
     sys.exit()

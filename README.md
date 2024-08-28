@@ -1,14 +1,57 @@
-dogtail is a GUI test tool and automation framework written in Python. It uses Accessibility (a11y) technologies to communicate with desktop applications. dogtail scripts are written in Python and executed like any other Python program.
+dogtail is a GUI test tool and UI automation framework written in Python. It uses Accessibility (a11y) technologies to communicate with desktop applications. dogtail scripts are written in Python and executed like any other Python program.
+
+Dogtails works great in combination with behave and qecore (based on behave and dogtail) (not only) if you're interested in using it with modern wayland-based GNOME. Please see this article for more details on how we mainly use it: https://fedoramagazine.org/automation-through-accessibility/
+
+Other than that, dogtail should work with any desktop environment that still runs atspi with Xorg.
 
 
 News
 ====
+# dogtail 1.0
 
-See NEWS file.
+After more than five years of continuous experimentation and development, we are excited to finally release Dogtail 1.0—a Wayland-enabled version of Dogtail! How did we achieve this? It was made possible by the `gnome-ponytail-daemon`, originally crafted by Olivier Fourdan: https://gitlab.gnome.org/ofourdan/gnome-ponytail-daemon. This tool allows us to perform actions in a Wayland GNOME session in a similar way to how we have been doing so with X functions.
+
+## How does it work in brief?
+
+The core functionality relies on the Screen Cast and Remote Desktop API, enabling us to "connect" to either a specific window or the entire screen to simulate user input actions like key presses, typing, and—most importantly—mouse actions on specific coordinates. Ponytail uses the window list from `org.gnome.Shell.Introspect` to identify windows. Dogtail then ensures the correct window is connected via the Remote Desktop API, allowing input actions to be accurately executed within it.
+
+On the AT-SPI tree and accessibility's "introspection" side, not much has changed—input has primarily been the challenge on Wayland. The main difference is that only "local" window coordinates are known for UI items. To address this, we always connect to the specific window we're working with, and Ponytail's `connectWindow` ensures these local coordinates are translated to global ones internally.
+
+## What does this mean for users?
+
+Dogtail handles all of this logic seamlessly, so in practical use, the user doesn't need to worry about coordinate types or window connections. In fact, the vast majority of our tests work identically in both X and Wayland sessions using the Dogtail API. When running on an X session, Dogtail will use the traditional X functions to handle input and operate as it always has.
+
+## A long journey to 1.0
+
+We began working on the Wayland-enabled version over five years ago (originally available in the `devel/wayland` branch). It has taken all this time to ensure the solution is robust and reliable enough to warrant a 1.0 release. This version includes all the Wayland-related developments and other changes (like the GTK4 support tweaks mentioned below) and has been extensively tested. Importantly, it is backward compatible with the entire Dogtail API that has been available so far. This release includes all modules from the 0.9.x series, most notably the "procedural" module, which we plan to deprecate in favor of a completely "tree-based" approach in Dogtail 2.0.
+
+That release will also involve significant cleanup, major code refactoring, and a transition from `pyatspi` to directly introspected `atspi`. It will also contain up date code examples and dogtail's unittests should pass with gitlab pipelines re-enabled.
+
+For more details on these upcoming changes, see issue #29.
+
+## 1.0+ Important: Handling GTK4 Application Windows in Dogtail
+
+For GTK4 applications, disabling window shadows is essential to ensure accurate positioning by Dogtail. With shadows disabled, we encounters a consistent coordinate offset, which we've preconfigured as `dogtail.config.gtk4Offset`. In case of working with fullscreen windows, the offset is 0, and we manage to detect that
+on-the-fly both in x11 and wayland sessions. However this process requires `python-xlib`, even for Wayland sessions, leveraging Xwayland to ascertain resolution information, as no more direct method we've found currently available for Wayland.
+
+When window shadows are active, the perceived offset can vary significantly, influenced by factors such as the specific application, window size, and scaling settings. To ensure consistent behavior across applications, disabling shadows is recommended.
+
+Disabling Shadows in GTK4:
+
+To disable window shadows, add the following CSS to your GTK4 configuration (`~/.config/gtk-4.0/gtk.css`):
+
+window, .popover, .tooltip {
+    box-shadow: none;
+}
+
 
 
 Installation
 ============
+Dogtail is available with PIP! (1.0 inclusion pending). If you'd like to use it with Wayland GNOME,
+you also need to get the dogtail-ponytail-daemon: https://gitlab.gnome.org/ofourdan/gnome-ponytail-daemon
+We do not have that as DEP in PIP as it compiles C code.
+- todo Complete info of getting it from copr and compiling with meson
 
 Check your distro for packages! If not at the latest version, we also have
 relased tarballs for download: https://gitlab.com/dogtail/dogtail/tree/released
@@ -25,29 +68,25 @@ PyGObject and GNOME-Python
 Applications to test, e.g. from the GNOME desktop:
     http://gnome.org/
 
-Xvfb and xinit:
-    http://xorg.freedesktop.org/
 
 Using
 =====
 
-Currently GNOME and GTK+ applications are supported. Thanks to qt-at-spi
-KDE4 and QT applications are now available too.
+Currently GNOME and GTK+ applications are supported. Both Xorg and Wayland sessions.
+See examples for direct dogtail use or check: https://fedoramagazine.org/automation-through-accessibility/
+
+If you are using KDE instead, set QT_LINUX_ACCESSIBILITY_ALWAYS_ON=1 when launching the respective program. (You can put 'export QT_LINUX_ACCESSIBILITY_ALWAYS_ON=1' to your profile file). Depending on the version, QT_ACCESSIBILITY=1 may be needed instead.
+
+For very old KDE/QT versions (approximately 4.8.3 to 5.0), you have to install the 'qt-at-spi' QT plugin and set the environment variable QT_ACCESSIBILITY to 1.
 
 First, enable accessibility support in your GNOME session with:
   gsettings set org.gnome.desktop.interface toolkit-accessibility true
 This only affects newly-started applications, so you may want to log out and
 log back in again.
 
-Then, look at some of the example scripts. Run them, tweak them, write your own.
+Should you run "sniff" first, or be using 'dogtail-run-headless-next' or 'qecore-headless'
+scripts to handle your sessions, the accessibility will be auto enabled for you.
 
-I suggest starting with gedit-test-utf8-procedural-api.py, as it's updated the
-most often.
-
-If you are using KDE instead, install the 'qt-at-spi' QT plugin and make sure
-you QT_ACCESSIBILITY set to 1 throughout your environment (you can put
-'export QT_ACCESSIBILITY=1' to your profile file). QT accessibility should
-be stable from QT 4.8.3 onward.
 
 Bugs
 ====
@@ -62,22 +101,22 @@ Contact
 Website:
     https://gitlab.com/dogtail/dogtail/
 
+Issue tracker:
+    https://gitlab.com/dogtail/dogtail/issues
+
 API Documentation:
     http://fedorapeople.org/~vhumpa/dogtail/epydoc/
 
-IRC:
-    #dogtail on irc.freenode.net
-
-Mailing list for users:
-    dogtail-list@gnome.org
-
-Mailing list for developers:
-    dogtail-devel-list@gnome.org
-
+We have deprecated our mailing lists as well as IRC channel. Please use our GITLAB for issues and merge requests! (Or possibly https://github.com/vhumpa/dogtail perhaps for your pull requests should
+you prefer to use github, but gitlab.com is preferred)
 
 -----
 
-    News
+    News summary - for details see NEWS
+
+    August-20-2024
+
+    Dogtail 1.0 - Wayland enabled release after 5 years of prep and testing! See the top of the page.
 
     November-9-2018
 

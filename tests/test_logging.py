@@ -25,8 +25,9 @@ class TestLogging(unittest.TestCase):
 
     def test_correct_error_if_log_dir_does_not_exist(self):
         import shutil
+        dogtail.logging.Logger(logName="test_logging").createFile()
         shutil.rmtree(dogtail.config.config.logDir)
-        self.assertRaises(IOError, dogtail.logging.Logger, "log", file=True)
+        self.assertRaises(OSError, dogtail.logging.Logger, "log", file=True)
 
     def test_unique_name(self):
         logger1 = dogtail.logging.Logger("log", file=True)

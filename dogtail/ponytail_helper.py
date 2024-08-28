@@ -190,9 +190,12 @@ class PonytailHelper(metaclass=Singleton):
                     if bool(window["has-focus"]) is True:
                         ponytail_interface.connectWindow(window["id"])
                         LOGGING.debug("Connected active window.")
+                        break
+
+                ponytail_interface.connectMonitor()
+                LOGGING.debug("No active window, connecting monitor.")
 
             elif ponytail_interface.connected is not None and window_id is None:
-                LOGGING.debug("Re-connected active window.")
                 for window in window_list:
                     if bool(window["has-focus"]) is True:
                         if ponytail_interface.connected != window["id"]:

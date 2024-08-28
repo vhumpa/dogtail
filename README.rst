@@ -75,12 +75,22 @@ Applications to test, e.g. from the GNOME desktop: http://gnome.org/
 Using
 =====
 
-Currently GNOME and GTK+ applications are supported, in both Xorg and Wayland sessions. See examples for direct dogtail use or check:
+Currently, GNOME and GTK+ applications are supported, in both Xorg and Wayland sessions.
+See examples for direct dogtail use or check the following article for more information: 
 `Automation through accessibility <https://fedoramagazine.org/automation-through-accessibility/>`_.
 
-Thanks to ``qt-at-spi``, KDE4 and QT applications are now available too. Feel free to try, but it's no longer supported by us, so it might be better to check KDE's native solutions.
+If you are using KDE instead, set the environment variable ``QT_LINUX_ACCESSIBILITY_ALWAYS_ON=1`` when launching the respective program. 
+You can add this line to your profile file:
 
-First, enable accessibility support in your GNOME session with:
+.. code-block:: bash
+
+    export QT_LINUX_ACCESSIBILITY_ALWAYS_ON=1
+
+Depending on the version, ``QT_ACCESSIBILITY=1`` may be needed instead.
+
+For very old KDE/QT versions (approximately 4.8.3 to 5.0), you have to install the ``qt-at-spi`` QT plugin and set the environment variable ``QT_ACCESSIBILITY`` to 1.
+
+First, enable accessibility support in your GNOME session with the following command:
 
 .. code-block:: bash
 

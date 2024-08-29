@@ -694,6 +694,17 @@ class Node(object):
         return AccessibleComponent.get_position(self)
 
 
+    @property
+    def center(self):
+        """
+        A tuple containing the center of the Accessible: (x, y).
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.get_center(self)
+
+
     def select_all(self):
         """
         Selects all children.

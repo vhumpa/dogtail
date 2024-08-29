@@ -216,3 +216,26 @@ class AccessibleComponent:
                     position = atspi_point
 
         return (position.x, position.y)
+
+
+    @staticmethod
+    def get_center(acc_object):
+        """
+        A tuple containing the the center of the Accessible: (x, y)
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_component(acc_object):
+            LOGGING.debug("Accessible object does not have a Component interface.")
+            return (-1, -1)
+
+        # Getting it this way already checks for Newton, no check here needed.
+        accessible_position = AccessibleComponent.get_position(acc_object)
+        accessible_size = AccessibleComponent.get_size(acc_object)
+
+        atspi_point = Atspi.Point()
+        atspi_point.x = int(accessible_position[0] + accessible_size[0] / 2)
+        atspi_point.y = int(accessible_position[1] + accessible_size[1] / 2)
+
+        return (atspi_point.x, atspi_point.y)

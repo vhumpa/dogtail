@@ -174,16 +174,18 @@ class TestDogtailNode(Gtk3DemoTest):
         # Gtk3.
         try:
             self.run_demo("Dialog and Message Boxes")
-            window = self.demo.find_children(
+            window = self.demo.find_child(
                 lambda x: x.name == "Dialog and Message Boxes" and
-                x.role_name == "frame"
+                x.role_name == "frame",
+                retry=False
             )
         # Gtk4.
         except RuntimeError:
             self.run_demo("Dialog")
-            window = self.demo.find_children(
+            window = self.demo.find_child(
                 lambda x: x.name == "Dialogs" and
-                x.role_name == "frame"
+                x.role_name == "frame",
+                retry=False
             )
 
         entry_one = window.child(name="Entry 1", role_name="text")
@@ -201,16 +203,18 @@ class TestDogtailNode(Gtk3DemoTest):
         # Gtk3.
         try:
             self.run_demo("Dialog and Message Boxes")
-            window = self.demo.find_children(
+            window = self.demo.find_child(
                 lambda x: x.name == "Dialog and Message Boxes" and
-                x.role_name == "frame"
+                x.role_name == "frame",
+                retry=False
             )
         # Gtk4.
         except RuntimeError:
             self.run_demo("Dialog")
-            window = self.demo.find_children(
+            window = self.demo.find_child(
                 lambda x: x.name == "Dialogs" and
-                x.role_name == "frame"
+                x.role_name == "frame",
+                retry=False
             )
 
         entry_one = window.child(name="Entry 1", role_name="text")
@@ -249,16 +253,18 @@ class TestDogtailNode(Gtk3DemoTest):
         # Gtk3.
         try:
             self.run_demo("Dialog and Message Boxes")
-            window = self.demo.find_children(
+            window = self.demo.find_child(
                 lambda x: x.name == "Dialog and Message Boxes" and
-                x.role_name == "frame"
+                x.role_name == "frame",
+                retry=False
             )
         # Gtk4.
         except RuntimeError:
             self.run_demo("Dialog")
-            window = self.demo.find_children(
+            window = self.demo.find_child(
                 lambda x: x.name == "Dialogs" and
-                x.role_name == "frame"
+                x.role_name == "frame",
+                retry=False
             )
 
         entry_one = window.child(name="Entry 1", role_name="label")
@@ -282,16 +288,18 @@ class TestDogtailNode(Gtk3DemoTest):
         # Gtk3.
         try:
             self.run_demo("Dialog and Message Boxes")
-            window = self.demo.find_children(
+            window = self.demo.find_child(
                 lambda x: x.name == "Dialog and Message Boxes" and
-                x.role_name == "frame"
+                x.role_name == "frame",
+                retry=False
             )
         # Gtk4.
         except RuntimeError:
             self.run_demo("Dialog")
-            window = self.demo.find_children(
+            window = self.demo.find_child(
                 lambda x: x.name == "Dialogs" and
-                x.role_name == "frame"
+                x.role_name == "frame",
+                retry=False
             )
 
         entry_one = window.child(name="Entry 1", role_name="text")

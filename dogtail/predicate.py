@@ -118,7 +118,17 @@ class GenericPredicate:
         if not isinstance(self, type(other)):
             return False
 
-        return self.__dict__ == other.__dict__
+        # Since the compare function will have different hexadecimal,
+        # lets remove it from the comparison.
+        # predicate_satisfied_by_node at 0x7fdb99f787c0>
+        # predicate_satisfied_by_node at 0x7fdb96683060>
+
+        exclude_key = {"satisfied_by_node"}
+
+        self_dict = {key: self.__dict__[key] for key in set(list(self.__dict__.keys())) - set(exclude_key)}
+        other_dict = {key: other.__dict__[key] for key in set(list(other.__dict__.keys())) - set(exclude_key)}
+
+        return self_dict == other_dict
 
 
     def __str__(self):
@@ -134,6 +144,21 @@ class GenericPredicate:
         string_to_represent_object += f"id:'{self.identifier if self.identifier else 'None'}' "
         string_to_represent_object += f"showing_only:'{self.showing_only if self.showing_only else 'None'}'"
         return string_to_represent_object
+
+
+class IsAnApplicationNamed(GenericPredicate):
+    """
+    Predicate subclass that looks for a application by name.
+    """
+
+    def __init__(self, name=None):
+        self.name = name
+
+        if not self.name:
+            LOGGER.info("You did not provide any 'name' to match.")
+            self.name = "__invalid__"
+
+        super().__init__(name=self.name, role_name="application")
 
 
 class IsATabNamed(GenericPredicate):

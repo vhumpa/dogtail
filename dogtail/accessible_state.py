@@ -278,6 +278,25 @@ class AccessibleState:
 
 
     @staticmethod
+    def get_armed(acc_object):
+        """
+        Get armed state.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_valid(acc_object):
+            LOGGING.debug("Object is not valid Accessible.")
+            return False
+
+        if AccessibleObject.is_newton(acc_object):
+            # return acc_object.get_state_set(acc_object).contains(Newton.StateType.ARMED)
+            return False # TODO, figure out how Newton defines it.
+
+        return Atspi.Accessible.get_state_set(acc_object).contains(Atspi.StateType.ARMED)
+
+
+    @staticmethod
     def get_accessible_states(acc_object):
         """
         Get states as Accessible objects.

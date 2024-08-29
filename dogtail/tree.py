@@ -467,6 +467,17 @@ class Node(object):
         return AccessibleState.get_editable(self)
 
 
+    @property
+    def armed(self):
+        """
+        Indicates that the object is armed.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleState.get_armed(self)
+
+
     def get_states(self):
         """
         Get states.

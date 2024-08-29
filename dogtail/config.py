@@ -116,6 +116,7 @@ class _Config:
         "search_cut_off_limit": Value(_default.search_cut_off_limit, [int]),
         "search_showing_only": Value(_default.search_showing_only, [bool]),
 
+        # TODO do we need children limit? never saw a use case that would need this
         "children_limit": Value(_default.children_limit, [int]),
 
         "run_interval": Value(_default.run_interval, [float, int]),

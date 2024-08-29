@@ -42,7 +42,13 @@ class Logging(metaclass=Singleton):
         import configparser
         config_parser = configparser.ConfigParser()
         config_parser.read("dogtail_config.ini")
-        self.debug_file = config_parser.get("config", "debug_file", fallback=None)
+        self.debug_file = config_parser.get(
+            "config",
+            "debug_file",
+            fallback="/tmp/dogtail_debug.log"
+        )
+        # Validate the debug file value.
+        self.debug_file = None if self.debug_file == "None" else self.debug_file
 
         if not self.logger:
             call(f"sudo rm -rf {self.debug_file}", shell=True, stderr=STDOUT)

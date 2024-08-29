@@ -7,7 +7,7 @@ import pyatspi
 from dogtail.rawinput import absoluteMotion, relativeMotion, doubleClick, press, drag, dragWithTrajectory, \
     pressKey, absoluteMotionWithTrajectory, release, checkCoordinates, click, keyCombo, typeText
 from dogtail.tree import SearchError
-from gtkdemotest import GtkDemoTest
+from tests._to_remove_gtkdemotest import GtkDemoTest
 
 dogtail.config.config.logDebugToFile = False
 dogtail.config.config.logDebugToStdOut = True

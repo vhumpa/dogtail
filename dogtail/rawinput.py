@@ -303,12 +303,18 @@ def absolute_motion_with_trajectory(
 
     difference_x = difference_x / max_length
     difference_y = difference_y / max_length
+
+    LOGGING.debug(f"Moving with difference of ({difference_x}, {difference_y})")
+
     act_x = float(source_x)
     act_y = float(source_y)
 
     for _ in range(0, int(max_length)):
+
         act_x += difference_x
         act_y += difference_y
+
+        LOGGING.debug(f"Absolute motion with trajectory in progress ({act_x}, {act_y})")
 
         if mouse_delay:
             do_delay(mouse_delay)
@@ -421,8 +427,8 @@ def drag_with_trajectory(  # pylint: disable=invalid-name
 
     (to_x, to_y) = toXY
     absolute_motion_with_trajectory(
-        source_x=fromXY[0],
-        source_y=fromXY[1],
+        source_x=from_x,
+        source_y=from_y,
         destination_x=to_x,
         destination_y=to_y,
         mouse_delay=mouse_delay,
@@ -460,7 +466,9 @@ def drag_with_trajectory_global(fromXY, toXY, button=1):  # pylint: disable=inva
         do_delay(config.action_delay)
 
         ponytail_interface.generateButtonPress(1)
-        do_delay(config.action_delay)
+
+        # We cannot do delay here or the behavior will change on long press.
+        # do_delay(config.action_delay)
 
         (to_x, to_y) = toXY
         absolute_motion_with_trajectory(
@@ -547,7 +555,8 @@ def key_name_to_key_sym(key_name):
                 actual_key_sym = getattr(Gdk, f"KEY_{actual_key_sym}")
 
             except AttributeError as attribute_error:
-                raise AttributeError(key_name) from attribute_error
+                # Caught Attribute Error is in reality a Key Error of user.
+                raise KeyError(key_name) from attribute_error
 
     return actual_key_sym
 

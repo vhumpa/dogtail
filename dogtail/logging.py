@@ -5,6 +5,8 @@ This file provides loggers.
 
 # pylint: disable=broad-exception-caught
 # pylint: disable=protected-access
+# pylint: disable=import-outside-toplevel
+
 
 import sys
 import logging
@@ -35,8 +37,15 @@ class Logging(metaclass=Singleton):
         """
         Initiating logger class with some basic logging setup.
         """
+
+        # Preventing circular import, we only need one value for logging.
+        import configparser
+        config_parser = configparser.ConfigParser()
+        config_parser.read("dogtail_config.ini")
+        self.debug_file = config_parser.get("config", "debug_file", fallback=None)
+
         if not self.logger:
-            call("sudo rm -rf /tmp/dogtail_logger.log", shell=True, stderr=STDOUT)
+            call(f"sudo rm -rf {self.debug_file}", shell=True, stderr=STDOUT)
 
         self.logger = logging.getLogger("__dogtail_logger__")
         self.logger.setLevel(logging.DEBUG)
@@ -54,10 +63,14 @@ class Logging(metaclass=Singleton):
 
         # Setup of file handler.
         # All DEBUG and higher level logs will be going to the file.
-        file_handler = logging.FileHandler("/tmp/dogtail_logger.log")
-        file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(formatter)
-        file_handler.set_name("file_handler")
+        if self.debug_file:
+            file_handler = logging.FileHandler(self.debug_file)
+            file_handler.setLevel(logging.DEBUG)
+            file_handler.setFormatter(formatter)
+            file_handler.set_name("file_handler")
+
+            # Add file handler only if file is defined.
+            self.logger.addHandler(file_handler)
 
         # Setup of console handler.
         # All INFO and higher level logs will be going to the console.
@@ -66,7 +79,7 @@ class Logging(metaclass=Singleton):
         console_handler.setFormatter(formatter)
         console_handler.set_name("console_handler")
 
-        self.logger.addHandler(file_handler)
+        # Add console handler.
         self.logger.addHandler(console_handler)
 
         self.logger.addFilter(FuncFilter())

@@ -60,13 +60,15 @@ class LoadDefaultConfiguration:
 
         # Debug section.
         self.debug_dogtail = self.cfg.get(section, "debug_dogtail", fallback="False") not in NO_VALUES
+        self.debug_file = self.cfg.get(section, "debug_file", fallback="/tmp/dogtail_debug.log")
+
+        # Other debug section.
         self.debug_searching = self.cfg.get(section, "debug_searching", fallback="False") not in NO_VALUES
         self.debug_sleep = self.cfg.get(section, "debug_sleep", fallback="False") not in NO_VALUES
         self.debug_search_paths = self.cfg.get(section, "debug_search_paths", fallback="False") not in NO_VALUES
 
-        # Debug section.
-        self.log_debug_to_std_out = self.cfg.get(section, "log_debug_to_std_out", fallback="True") not in NO_VALUES
-        self.log_debug_to_file = self.cfg.get(section, "log_debug_to_file", fallback="False") not in NO_VALUES
+        # Debug section. ?
+        #self.log_debug_to_std_out = self.cfg.get(section, "log_debug_to_std_out", fallback="True") not in NO_VALUES
         self.absolute_node_paths = self.cfg.get(section, "absolute_node_paths", fallback="False") not in NO_VALUES
         self.ensure_sensitivity = self.cfg.get(section, "ensure_sensitivity", fallback="False") not in NO_VALUES
         self.fatal_errors = self.cfg.get(section, "fatal_errors", fallback="False") not in NO_VALUES
@@ -120,12 +122,13 @@ class _Config:
         "gtk4_offset": Value(_default.offset, [list, tuple]),
 
         "debug_dogtail": Value(_default.debug_dogtail, [bool]),
+        "debug_file": Value(_default.debug_file, [str, None]),
+
         "debug_searching": Value(_default.debug_searching, [bool]),
         "debug_sleep": Value(_default.debug_sleep, [bool]),
         "debug_search_paths": Value(_default.debug_search_paths, [bool]),
 
-        "log_debug_to_std_out": Value(_default.log_debug_to_std_out, [bool]),
-        "log_debug_to_file": Value(_default.log_debug_to_file, [bool]),
+        #"log_debug_to_std_out": Value(_default.log_debug_to_std_out, [bool]),
         "absolute_node_paths": Value(_default.absolute_node_paths, [bool]),
         "ensure_sensitivity": Value(_default.ensure_sensitivity, [bool]),
         "fatal_errors": Value(_default.fatal_errors, [bool]),

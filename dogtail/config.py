@@ -9,6 +9,8 @@ Experimental dogtail changes for 2.0 release.
 import configparser
 from configparser import NoSectionError
 
+import copy
+
 from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 
@@ -122,7 +124,7 @@ class _Config:
         "gtk4_offset": Value(_default.offset, [list, tuple]),
 
         "debug_dogtail": Value(_default.debug_dogtail, [bool]),
-        "debug_file": Value(_default.debug_file, [str, None]),
+        "debug_file": Value(_default.debug_file, [str]),
 
         "debug_searching": Value(_default.debug_searching, [bool]),
         "debug_sleep": Value(_default.debug_sleep, [bool]),
@@ -134,6 +136,9 @@ class _Config:
         "fatal_errors": Value(_default.fatal_errors, [bool]),
         "check_for_a11y": Value(_default.check_for_a11y, [bool]),
     }
+
+    # Create a deep copy instead of shallow copy to keep values for reset method.
+    _default_values_storage = copy.deepcopy(options)
 
     # User configuration.
     section = "user_config"
@@ -154,6 +159,16 @@ class _Config:
         raise RuntimeError("Unexpected exception caught.") from error
 
 
+    def reset_configuration(self):
+        """
+        Reset configuration to default values.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        self.options.update(self._default_values_storage)
+
+
     def adjust_casing(self, string_to_fix):
         """
         Transforms a string to snake_case.
@@ -164,6 +179,8 @@ class _Config:
         :return: Transformed string.
         :rtype: str
         """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         string_in_snake_case = ""
         for character in string_to_fix:
@@ -213,7 +230,7 @@ class _Config:
             # Type was checked, keep the defined types.
             self.options[set_option_id] = Value(value_to_set, _defined_types)
 
-            if config.debug_dogtail:
+            if value_to_set == "debug_dogtail" and config.debug_dogtail:
                 LOGGING.info("Debugging dogtail to console.")
                 logging_class.debug_to_console()
 

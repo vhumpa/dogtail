@@ -124,7 +124,7 @@ class Node(object):
 
 
     @property
-    def get_toolkit(self):
+    def toolkit(self):
         """
         Return string description of the toolkit we are using.
         """

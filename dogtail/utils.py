@@ -46,7 +46,6 @@ def do_delay(delay=None):
         LOGGING.debug(f"Default Delay: Sleeping for '{delay}'")
 
     if config.debug_sleep:
-        delay = config.debug_sleep
         LOGGING.debug(f"Debug Sleep: Sleeping for '{delay}'")
 
     sleep(float(delay))

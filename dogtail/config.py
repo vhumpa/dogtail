@@ -72,6 +72,10 @@ class LoadDefaultConfiguration:
         self.fatal_errors = self.cfg.get(section, "fatal_errors", fallback="False") not in NO_VALUES
         self.check_for_a11y = self.cfg.get(section, "check_for_a11y", fallback="True") not in NO_VALUES
 
+        if self.debug_dogtail:
+            LOGGING.info("Debugging dogtail to console.")
+            logging_class.debug_to_console()
+
 
 class _Config:
     """
@@ -205,6 +209,10 @@ class _Config:
 
             # Type was checked, keep the defined types.
             self.options[set_option_id] = Value(value_to_set, _defined_types)
+
+            if config.debug_dogtail:
+                LOGGING.info("Debugging dogtail to console.")
+                logging_class.debug_to_console()
 
     def __getattr__(self, option_id):
         LOGGING.debug(logging_class.get_func_params_and_values())

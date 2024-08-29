@@ -41,7 +41,6 @@ from dogtail.accessible_value import AccessibleValue
 from dogtail.predicate import GenericPredicate
 from dogtail.ponytail_helper import ponytail_helper
 from dogtail.rawinput import click, point, double_click
-from dogtail.config import config
 
 
 class Node(object):
@@ -50,10 +49,6 @@ class Node(object):
     """
 
     LOGGING.debug("Initiating dogtail api.")
-
-    if config.debug_dogtail:
-        LOGGING.info("Debugging dogtail to console.")
-        logging_class.debug_to_console()
 
     event_listeners = {}
 

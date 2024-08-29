@@ -186,14 +186,18 @@ class PonytailHelper(metaclass=Singleton):
                 window_id = ""
 
             if ponytail_interface.connected is None and window_id is None:
+                # There is a corner case when using unit tests.
+                window_was_connected = False
                 for window in window_list:
                     if bool(window["has-focus"]) is True:
                         ponytail_interface.connectWindow(window["id"])
+                        window_was_connected = True
                         LOGGING.debug("Connected active window.")
-                        break
 
-                ponytail_interface.connectMonitor()
-                LOGGING.debug("No active window, connecting monitor.")
+                # Attempt to connect monitor only in cases when window was not found.
+                if not window_was_connected:
+                    ponytail_interface.connectMonitor()
+                    LOGGING.debug("No active window, connecting monitor.")
 
             elif ponytail_interface.connected is not None and window_id is None:
                 for window in window_list:

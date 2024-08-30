@@ -57,6 +57,7 @@ class TestGnomeShellOverviewRawinput(unittest.TestCase):
 
         self.assertTrue("org.gnome.Nautilus" in [x.name for x in root.applications()])
         os.system("killall nautilus > /dev/null 2>&1")
+        pressKey("Esc")
 
 
     def test_drag_with_trajectory_in_overview(self):
@@ -93,6 +94,7 @@ class TestGnomeShellOverviewRawinput(unittest.TestCase):
 
         self.assertTrue("org.gnome.Nautilus" in [x.name for x in root.applications()])
         os.system("killall nautilus > /dev/null 2>&1")
+        pressKey("Esc")
 
 
 if __name__ == "__main__":

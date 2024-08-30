@@ -73,7 +73,7 @@ def run(string, timeout=None, interval=None, desktop=None, dumb=False, app_name=
 
     args = shlex.split(string)
     os.environ["GTK_MODULES"] = "gail:atk-bridge"
-    pid = subprocess.Popen(args, env=os.environ).pid
+    process = subprocess.Popen(args, env=os.environ)
 
     # === Backward compatibility for 'appName' usage ===
     validated_application_name = app_name
@@ -100,14 +100,14 @@ def run(string, timeout=None, interval=None, desktop=None, dumb=False, app_name=
                 application = root.application(validated_application_name)
                 assert application.child(role_name="frame")
                 do_delay(validated_interval)
-                return pid
+                return process
 
             except Exception:
                 pass
 
             do_delay(validated_interval)
 
-    return pid
+    return process
 
 
 

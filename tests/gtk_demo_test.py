@@ -34,7 +34,7 @@ class Gtk3DemoTest(unittest.TestCase):
         calling the test method
         """
 
-        self.pid = dogtail.utils.run("gtk3-demo")
+        self.process = dogtail.utils.run("gtk3-demo")
 
         # Let time application start properly.
         sleep(1)
@@ -49,9 +49,8 @@ class Gtk3DemoTest(unittest.TestCase):
         recorded
         """
 
-        os.kill(self.pid, signal.SIGKILL)
-        os.system("killall gtk3-demo-application > /dev/null 2>&1")
-        os.system("killall gtk3-demo > /dev/null 2>&1")
+        self.process.kill()
+        self.process.wait()
 
         # Sleep just enough to let the app actually die.
         # AT-SPI doesn't like being hammered too fast.

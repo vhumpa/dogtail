@@ -126,6 +126,44 @@ class AccessibleState:
 
 
     @staticmethod
+    def get_selected(acc_object):
+        """
+        Get selected state.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_valid(acc_object):
+            LOGGING.debug("Object is not valid Accessible.")
+            return False
+
+        if AccessibleObject.is_newton(acc_object):
+            # return acc_object.get_state_set(acc_object).contains(Newton.StateType.SELECTED)
+            return False # TODO, figure out how Newton defines it.
+
+        return Atspi.Accessible.get_state_set(acc_object).contains(Atspi.StateType.SELECTED)
+
+
+    @staticmethod
+    def get_selectable(acc_object):
+        """
+        Get selectable state.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_valid(acc_object):
+            LOGGING.debug("Object is not valid Accessible.")
+            return False
+
+        if AccessibleObject.is_newton(acc_object):
+            # return acc_object.get_state_set(acc_object).contains(Newton.StateType.SELECTABLE)
+            return False # TODO, figure out how Newton defines it.
+
+        return Atspi.Accessible.get_state_set(acc_object).contains(Atspi.StateType.SELECTABLE)
+
+
+    @staticmethod
     def get_sensitive(acc_object):
         """
         Get sensitive state.

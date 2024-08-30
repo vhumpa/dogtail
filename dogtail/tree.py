@@ -391,6 +391,28 @@ class Node(object):
 
 
     @property
+    def selected(self):
+        """
+        Indicates this object is selected..
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleState.get_selected(self)
+
+
+    @property
+    def selectable(self):
+        """
+        Indicates this object is selected..
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleState.get_selectable(self)
+
+
+    @property
     def sensitive(self):
         """
         Indicates this object is sensitive, e.g. to user interaction.
@@ -495,7 +517,8 @@ class Node(object):
         return AccessibleState.get_armed(self)
 
 
-    def get_states(self):
+    @property
+    def states(self):
         """
         Get states.
         """
@@ -1003,7 +1026,7 @@ class Node(object):
         if index < 0 or index >= length:
             raise IndexError
 
-        return AccessibleObject.get_child_at_index(self, index)
+        return AccessibleObject.get_index(self, index)
 
 
     def __bool__(self):

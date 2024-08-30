@@ -518,7 +518,7 @@ class Node(object):
 
 
     @property
-    def states(self):
+    def state_set(self):
         """
         Get states.
         """

@@ -81,14 +81,14 @@ class AccessibleComponent:
                 acc_rect = acc_object.get_extents(COORD_TYPE_SCREEN)
 
             else:
-                acc_rect = Atspi.Accessible.get_extents(acc_object, Atspi.CoordType.SCREEN)
+                acc_rect = Atspi.Component.get_extents(acc_object, Atspi.CoordType.SCREEN)
 
             # If not, usually by being 0, 0 attempt to get window coordinates.
             if (acc_rect.x, acc_rect.y) == (0, 0):
                 if AccessibleObject.is_newton(acc_object):
                     acc_rect = acc_object.get_extents(COORD_TYPE_WINDOW)
                 else:
-                    acc_rect = Atspi.Accessible.get_extents(acc_object, Atspi.CoordType.WINDOW)
+                    acc_rect = Atspi.Component.get_extents(acc_object, Atspi.CoordType.WINDOW)
 
             # Return the tuple of 4 value from Atspi.Rect
             return (acc_rect.x, acc_rect.y, acc_rect.width, acc_rect.height)
@@ -157,7 +157,7 @@ class AccessibleComponent:
             position = Atspi.Component.get_position(acc_object, Atspi.CoordType.SCREEN)
 
         # Check if the toolkit is GTK4.
-        if "GTK" in acc_object.get_toolkit and acc_object.get_toolkit["GTK"][0] == "4":
+        if "GTK" in acc_object.toolkit and acc_object.toolkit["GTK"][0] == "4":
             #gtk4_offset = (12, 12)
             gtk4_offset = config.gtk4Offset
 

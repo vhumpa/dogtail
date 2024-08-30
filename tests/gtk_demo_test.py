@@ -8,7 +8,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 import sys
-import signal
 
 from io import StringIO
 
@@ -52,6 +51,9 @@ class Gtk3DemoTest(unittest.TestCase):
         self.process.kill()
         self.process.wait()
 
+        # This one can be started in test, kill it after gtk3-demo too.
+        os.system("killall gtk3-demo-application > /dev/null 2>&1")
+
         # Sleep just enough to let the app actually die.
         # AT-SPI doesn't like being hammered too fast.
 
@@ -82,7 +84,7 @@ class Gtk4DemoTest(unittest.TestCase):
         calling the test method
         """
 
-        self.pid = dogtail.utils.run("gtk4-demo")
+        self.process = dogtail.utils.run("gtk4-demo")
 
         # Let time application start properly.
         sleep(1)
@@ -96,9 +98,11 @@ class Gtk4DemoTest(unittest.TestCase):
         recorded
         """
 
-        os.kill(self.pid, signal.SIGKILL)
+        self.process.kill()
+        self.process.wait()
+
+        # This one can be started in test, kill it after gtk3-demo too.
         os.system("killall gtk4-demo-application > /dev/null 2>&1")
-        os.system("killall gtk4-demo > /dev/null 2>&1")
 
         # Sleep just enough to let the app actually die.
         # AT-SPI doesn't like being hammered too fast.

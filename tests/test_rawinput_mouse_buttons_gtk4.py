@@ -1,0 +1,81 @@
+#!/usr/bin/python3
+"""
+Unit tests for the dogtail.rawinput mouse buttons.
+"""
+
+# pylint: disable=import-outside-toplevel
+
+# TODO revisit what these are needed for.
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import os
+import unittest
+
+# TODO revisit and figure out why this import has a problem
+from gtk_demo_test import Gtk4DemoTest # pylint: disable=import-error
+from dogtail.rawinput import (
+    click,
+    double_click,
+    press,
+    release,
+)
+
+
+@unittest.skipIf(os.path.isfile("/usr/bin/gtk4-demo"), "Skipping, no gtk4-demo.")
+class TestGtk3DemoRawinputMouse(Gtk4DemoTest):
+    """
+    Class to test dogtail's rawinput mouse buttons.
+    """
+
+
+    def test_click_in_demo(self):
+        """
+        Testing click.
+        """
+
+        builder_button = self.demo.child("Builder")
+        self.assertFalse(builder_button.focused)
+
+        click(*builder_button.center)
+        self.assertTrue(builder_button.focused)
+
+
+    def test_double_click_in_demo(self):
+        """
+        Testing double_click.
+        """
+
+        builder_button = self.demo.child("Builder")
+
+        # At first it is not focused so the frame is named differently.
+        self.assertEqual(len([x for x in self.demo.children if x.name == "Builder"]), 0)
+
+        # Upon clicking the Builder will appear in the main frame too.
+        click(*builder_button.center)
+        self.assertEqual(len([x for x in self.demo.children if x.name == "Builder"]), 1)
+
+        double_click(*builder_button.center)
+
+        # Upon double click the new frame will open with the same name.
+        self.assertEqual(len([x for x in self.demo.children if x.name == "Builder"]), 2)
+
+
+    def test_press_release_in_demo(self):
+        """
+        Testing press and release.
+        """
+
+        self.run_demo("Builder")
+
+        save_button = self.demo.child("Save", showing_only=True)
+        self.assertFalse(save_button.armed)
+
+        press(*save_button.center)
+        self.assertTrue(save_button.armed)
+
+        release(*save_button.center)
+        self.assertFalse(save_button.armed)
+
+
+if __name__ == "__main__":
+    unittest.main()

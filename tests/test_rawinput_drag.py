@@ -1,0 +1,99 @@
+#!/usr/bin/python3
+"""
+Unit tests for the dogtail.rawinput drag method's via gnome shell overview.
+"""
+
+# pylint: disable=import-outside-toplevel
+
+# TODO revisit what these are needed for.
+from __future__ import absolute_import, division, print_function, unicode_literals
+import os
+import unittest
+from time import sleep
+from dogtail.tree import root
+from dogtail.rawinput import (
+    drag,
+    drag_with_trajectory,
+    pressKey,
+)
+
+
+class TestGnomeShellOverviewRawinput(unittest.TestCase):
+    """
+    Class to test dogtail's rawinput drag methods.
+    """
+
+
+    def test_drag_in_overview(self):
+        """
+        Testing drag.
+        """
+
+        os.system("killall nautilus > /dev/null 2>&1")
+
+        gnome_shell = root.application("gnome-shell")
+
+        pressKey("Esc")
+        sleep(1)
+        pressKey("Super")
+        sleep(1)
+
+        print("This test assumes Nautilus - Files to be Pinned")
+
+        # Search for Files - assuming Files are Pinned.
+        file_button = gnome_shell.child("Files", "push button")
+
+        start_run_button_x = file_button.center[0]
+        start_run_button_y = file_button.center[1]
+
+        # SHould be enough, lets not assume resolution.
+        end_run_button_x = 300
+        end_run_button_y = 300
+
+        drag(
+            (start_run_button_x, start_run_button_y),
+            (end_run_button_x, end_run_button_y),
+        )
+
+        self.assertTrue("org.gnome.Nautilus" in [x.name for x in root.applications()])
+        os.system("killall nautilus > /dev/null 2>&1")
+
+
+    def test_drag_with_trajectory_in_overview(self):
+        """
+        Testing drag with trajectory.
+        """
+
+        os.system("killall nautilus > /dev/null 2>&1")
+
+        gnome_shell = root.application("gnome-shell")
+
+        pressKey("Esc")
+        sleep(1)
+        pressKey("Super")
+        sleep(1)
+
+        print("This test assumes Nautilus - Files to be Pinned")
+
+        # Search for Files - assuming Files are Pinned.
+        file_button = gnome_shell.child("Files", "push button")
+
+        start_run_button_x = file_button.center[0]
+        start_run_button_y = file_button.center[1]
+
+        # SHould be enough, lets not assume resolution.
+        end_run_button_x = 300
+        end_run_button_y = 300
+
+        drag_with_trajectory(
+            (start_run_button_x, start_run_button_y),
+            (end_run_button_x, end_run_button_y),
+            mouse_delay=0
+        )
+
+        self.assertTrue("org.gnome.Nautilus" in [x.name for x in root.applications()])
+        os.system("killall nautilus > /dev/null 2>&1")
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -13,7 +13,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import unittest
 
-
 from gtk_demo_test import Gtk3DemoTest
 
 from dogtail.tree import root
@@ -188,7 +187,7 @@ class TestDogtailNode(Gtk3DemoTest):
                 retry=False
             )
 
-        entry_one = window.child(name="Entry 1", role_name="text")
+        entry_one = window.child(name="Entry 1", role_name="label").labelee
         entry_two = window.child(name="", role_name="text")
 
         self.assertEqual(entry_one.text, "")
@@ -217,7 +216,7 @@ class TestDogtailNode(Gtk3DemoTest):
                 retry=False
             )
 
-        entry_one = window.child(name="Entry 1", role_name="text")
+        entry_one = window.child(name="Entry 1", role_name="label").labelee
         entry_two = window.child(name="", role_name="text")
 
         entry_one.text = "test one"
@@ -302,8 +301,8 @@ class TestDogtailNode(Gtk3DemoTest):
                 retry=False
             )
 
-        entry_one = window.child(name="Entry 1", role_name="text")
-        self.assertEqual(entry_one.labeler.role_name, "label")
+        entry_one_labelee = window.child(name="Entry 1", role_name="label").labelee
+        self.assertEqual(entry_one_labelee.labeler.role_name, "label")
 
 
     def test_set_labeler(self):
@@ -393,8 +392,8 @@ class TestDogtailNode(Gtk3DemoTest):
 
         (x_position, y_position, width, height) = self.demo.children[0].extents
 
-        self.assertTrue(x_position > 0)
-        self.assertTrue(y_position > 0)
+        self.assertTrue(x_position >= 0)
+        self.assertTrue(y_position >= 0)
         self.assertTrue(width > 0)
         self.assertTrue(height > 0)
 

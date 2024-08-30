@@ -1026,7 +1026,7 @@ class Node(object):
         if index < 0 or index >= length:
             raise IndexError
 
-        return AccessibleObject.get_index(self, index)
+        return AccessibleObject.get_child_at_index(self, index)
 
 
     def __bool__(self):

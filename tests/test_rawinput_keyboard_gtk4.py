@@ -13,7 +13,7 @@ from time import sleep
 
 import unittest
 # TODO revisit and figure out why this import has a problem
-from gtk_demo_test import Gtk4DemoTest # pylint: disable=import-error
+from tests.gtk_demo_test import Gtk4DemoTest # pylint: disable=import-error
 from dogtail.rawinput import (
     press_key,
     key_combo,
@@ -21,7 +21,7 @@ from dogtail.rawinput import (
 )
 
 
-@unittest.skipIf(os.path.isfile("/usr/bin/gtk4-demo"), "Skipping, no gtk4-demo.")
+@unittest.skipIf(not os.path.isfile("/usr/bin/gtk4-demo"), "Skipping, no gtk4-demo.")
 class TestGtk3DemoRawinputKeyboard(Gtk4DemoTest):
     """
     Class to test dogtail's rawinput keyboard methods.

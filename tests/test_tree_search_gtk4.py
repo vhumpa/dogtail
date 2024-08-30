@@ -21,10 +21,10 @@ from gi.repository import Atspi
 from dogtail.predicate import GenericPredicate
 
 # TODO revisit and figure out why this import has a problem
-from gtk_demo_test import Gtk4DemoTest # pylint: disable=import-error
+from tests.gtk_demo_test import Gtk4DemoTest # pylint: disable=import-error
 
 
-@unittest.skipIf(os.path.isfile("/usr/bin/gtk4-demo"), "Skipping, no gtk4-demo.")
+@unittest.skipIf(not os.path.isfile("/usr/bin/gtk4-demo"), "Skipping, no gtk4-demo.")
 class TestDogtailNodeSearch(Gtk4DemoTest):
     """
     Class to test dogtail's Node Search.

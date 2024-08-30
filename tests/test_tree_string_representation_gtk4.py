@@ -15,7 +15,7 @@ import os
 import unittest
 
 # TODO revisit and figure out why this import has a problem
-from gtk_demo_test import Gtk4DemoTest, trap_stdout # pylint: disable=import-error
+from tests.gtk_demo_test import Gtk4DemoTest, trap_stdout # pylint: disable=import-error
 
 
 SOURCE_DUMP_STRING = """[ 'Source' | 'page tab' | '' ]
@@ -31,7 +31,7 @@ SOURCE_TREE_STRING = """└──[ 'Source' | 'page tab' | '' ]
          └──[ '' | 'scroll bar' | '' ]"""
 
 
-@unittest.skipIf(os.path.isfile("/usr/bin/gtk4-demo"), "Skipping, no gtk4-demo.")
+@unittest.skipIf(not os.path.isfile("/usr/bin/gtk4-demo"), "Skipping, no gtk4-demo.")
 class TestDogtailNodeValue(Gtk4DemoTest):
     """
     Class to test dogtail's Node String Representation.

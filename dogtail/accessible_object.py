@@ -52,6 +52,27 @@ class AccessibleObject:
 
 
     @staticmethod
+    def is_dead(acc_object):
+        """
+        Returns True if we know for certain this object is not valid.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        # Either empty or not Atspi.Accessible type.
+        if not AccessibleObject.is_valid(acc_object):
+            return True
+
+        # Good indicator of dead object, no children and no parent.
+        empty_children_list = AccessibleObject.get_children(acc_object) == []
+        no_parent = AccessibleObject.get_parent(acc_object) is None
+        if empty_children_list and no_parent:
+            return True
+
+        return False
+
+
+    @staticmethod
     def is_valid(acc_object):
         """
         Returns False if we know for certain this object is invalid.
@@ -60,7 +81,7 @@ class AccessibleObject:
         # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
         #LOGGING.debug(logging_class.get_func_params_and_values())
 
-        return acc_object is not None
+        return acc_object is not None and isinstance(acc_object, Atspi.Accessible)
 
 
     @staticmethod
@@ -523,6 +544,27 @@ class AccessibleObject:
             return -1
 
         return process_id
+
+
+    @staticmethod
+    def get_id(acc_object):
+        """
+        Returns a 'id' for Accessible object.
+        """
+
+        # TODO verbose logging?
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_valid(acc_object):
+            return None
+
+        if AccessibleObject.is_newton(acc_object):
+            return acc_object.get_id()
+
+        try:
+            return Atspi.Accessible.get_id(acc_object)
+        except Exception as error:
+            raise RuntimeError("Get Id function failed.") from error
 
 
     @staticmethod

@@ -161,6 +161,17 @@ class Node(object):
 
 
     @property
+    def id(self):
+        """
+        Define a 'id' property for Atspi object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.get_id(self)
+
+
+    @property
     def name(self):
         """
         Define a 'name' property for Atspi object.
@@ -307,6 +318,17 @@ class Node(object):
         LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleComponent.grab_focus(self)
+
+
+    @property
+    def dead(self):
+        """
+        Is the node dead (defunct)?
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.is_dead(self)
 
 
     @property

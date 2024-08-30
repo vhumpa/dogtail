@@ -646,9 +646,19 @@ class Node(object):
             return False
 
 
+    def find_ancestor(self, predicate, **kwargs):
+        """
+        Find a single ancestor satisfying the predicate.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.find_ancestor(self, predicate, **kwargs)
+
+
     def find_child(self, predicate, **kwargs):
         """
-        Find a single child satisfying th predicate.
+        Find a single child satisfying the predicate.
         """
 
         LOGGING.debug(logging_class.get_func_params_and_values())

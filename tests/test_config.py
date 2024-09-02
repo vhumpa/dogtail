@@ -63,6 +63,10 @@ class TestConfig(unittest.TestCase):
         Testing resetting the configuration.
         """
 
+        # When running unit tests we manipulate the config, reset it first.
+        config.reset_configuration()
+
+
         original_action_delay = config.action_delay
         self.assertEqual(config.action_delay, original_action_delay)
         original_default_delay = config.default_delay

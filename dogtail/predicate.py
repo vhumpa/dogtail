@@ -44,7 +44,7 @@ class GenericPredicate:
             """
 
             # First lets check if user wants to check label.
-            if self.label:
+            if self.label is not None:
                 # If so, check if labeler labeler is present.
                 if node.labeler:
                     # Try to match either text or name of the labeler.
@@ -56,25 +56,25 @@ class GenericPredicate:
 
             try:
                 # Check if user wants to check name.
-                if self.name:
+                if self.name is not None:
                     # Compare name of self with the given node.
                     if self.name != node.name:
                         return False
 
                 # Check if user wants to check role_name.
-                if self.role_name:
+                if self.role_name is not None:
                     # Compare role_name of self with the given node.
                     if self.role_name != node.role_name:
                         return False
 
                 # Check if user wants to check description.
-                if self.description:
+                if self.description is not None:
                     # Compare description of self with the given node.
                     if self.description != node.description:
                         return False
 
                 # Check if user wants to check identifier.
-                if self.identifier:
+                if self.identifier is not None:
                     # The method get_attributes is from Atspi.Accessible.
                     atspi_accessible_attributes = node.get_attributes()
 

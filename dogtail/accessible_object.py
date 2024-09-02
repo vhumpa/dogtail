@@ -369,7 +369,8 @@ class AccessibleObject:
 
         # Unknown/unsupported way to compare nodes.
         else:
-            LOGGING.info("Unknown/unsupported way to compare nodes.")
+            predicate_type = type(given_predicate)
+            LOGGING.info(f"Unknown/unsupported way '{predicate_type}' to compare nodes.")
             raise RuntimeError("No match.")
 
         # Debug description of what user is searching for.

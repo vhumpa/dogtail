@@ -766,7 +766,7 @@ class AccessibleObject:
             if AccessibleObject.is_newton(acc_object):
                 relation_type = None # TODO, learn how Newton defines it.
             else:
-                relation_type =  Atspi.RelationType.LABELLED_BY
+                relation_type = Atspi.RelationType.LABELLED_BY
 
             if relation.get_relation_type() == relation_type:
                 if relation.get_n_targets() == 1:
@@ -805,7 +805,7 @@ class AccessibleObject:
             if AccessibleObject.is_newton(acc_object):
                 relation_type = None # TODO, learn how Newton defines it.
             else:
-                relation_type =  Atspi.RelationType.LABEL_FOR
+                relation_type = Atspi.RelationType.LABEL_FOR
 
             if relation.get_relation_type() == relation_type:
                 if relation.get_n_targets() == 1:

@@ -19,6 +19,14 @@ python3 -m build
 sudo pip3 install dist/dogtail-2.0-py3-none-any.whl --force-reinstall
 ```
 
+## Something is missing in dogtail 2.0 that was present in 1.0
+
+In quest for a better and maintainable code we went over everything and removed what we deemed not useful or redundant. A lot of what we removed can be replaced with other parts, no longer works or was never used by our team.
+
+We are not perfect, something we have removed could have been useful to you, in such cases let us know in the [Issues](https://gitlab.com/dogtail/dogtail/issues). While a lot of stuff was removed deliberately, and we can show you how to do things better, something could have slipped through, and we could have removed a very useful part.
+
+We have chosen the approach to remove what we can, and return it on request if it is valid enough as apposed to dragging a code with us that we have never seen in use.
+
 
 # dogtail 1.0
 

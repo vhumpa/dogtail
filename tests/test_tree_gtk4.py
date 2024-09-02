@@ -230,12 +230,12 @@ class TestGtk4DogtailNode(Gtk4DemoTest):
         # entry_two.text = "test two"
 
         # Coordinates are wrong, offset it.
-        entry_one.click(offset_x=150, offset_y=210)
+        entry_one.click()
         type_text("test one")
 
 
         # Coordinates are wrong, offset it.
-        entry_two.click(offset_x=150, offset_y=210)
+        entry_two.click()
         type_text("test two")
 
 

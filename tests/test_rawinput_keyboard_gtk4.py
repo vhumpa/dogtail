@@ -82,7 +82,10 @@ class TestGtk4DemoRawinputKeyboard(Gtk4DemoTest):
 
         # Another example of wrong coordinates.
         # So I locate a know node and just offset from it.
-        self.demo.child("Copy").click(offset_y=190)
+        self.demo.child("Copy").click()
+        sleep(0.2)
+
+        self.demo.child("Text Drag Source").click()
 
         key_combo("<Ctrl><A>")
         sleep(0.2)
@@ -125,7 +128,10 @@ class TestGtk4DemoRawinputKeyboard(Gtk4DemoTest):
 
         # Another example of wrong coordinates.
         # So I locate a know node and just offset from it.
-        self.demo.child("Copy").click(offset_y=190)
+        self.demo.child("Copy").click()
+        sleep(0.2)
+
+        self.demo.child("Text Drag Source").click()
 
         key_combo("<Ctrl><A>")
 
@@ -134,11 +140,11 @@ class TestGtk4DemoRawinputKeyboard(Gtk4DemoTest):
 
         # Another example of wrong coordinates.
         copy_button = clipboard_window.child("Copy")
-        copy_button.click(offset_x=200, offset_y=180)
+        copy_button.click()
 
         # Another example of wrong coordinates.
         paste_button = clipboard_window.child("Paste")
-        paste_button.click(offset_x=200, offset_y=180)
+        paste_button.click()
 
         number_of_text_fields = self.demo.find_children(
             lambda x:

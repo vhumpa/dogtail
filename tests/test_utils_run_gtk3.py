@@ -16,7 +16,7 @@ from dogtail.tree import root
 
 
 @unittest.skipIf(not os.path.isfile("/usr/bin/gtk3-demo"), "Skipping, no gtk3-demo.")
-class TestRun(unittest.TestCase):
+class TestGtk3Run(unittest.TestCase):
     """
     Class to test dogtail's utils run method.
     """

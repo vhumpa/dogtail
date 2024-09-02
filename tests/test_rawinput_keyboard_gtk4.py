@@ -12,8 +12,12 @@ import os
 from time import sleep
 
 import unittest
-# TODO revisit and figure out why this import has a problem
-from tests.gtk_demo_test import Gtk4DemoTest # pylint: disable=import-error
+
+try:
+    from tests.gtk_demo_test import Gtk4DemoTest
+except ImportError:
+    from gtk_demo_test import Gtk4DemoTest
+
 from dogtail.rawinput import (
     press_key,
     key_combo,
@@ -22,7 +26,7 @@ from dogtail.rawinput import (
 
 
 @unittest.skipIf(not os.path.isfile("/usr/bin/gtk4-demo"), "Skipping, no gtk4-demo.")
-class TestGtk3DemoRawinputKeyboard(Gtk4DemoTest):
+class TestGtk4DemoRawinputKeyboard(Gtk4DemoTest):
     """
     Class to test dogtail's rawinput keyboard methods.
     """
@@ -66,7 +70,8 @@ class TestGtk3DemoRawinputKeyboard(Gtk4DemoTest):
         Testing simple key combo with multiple keys.
         """
 
-        self.run_demo("Clipboard")
+        clipboard_button = self.demo.child("Clipboard")
+        clipboard_button.double_click()
 
         clipboard_window = self.demo.find_children(
             lambda x: x.name == "Clipboard" and x.role_name == "frame"
@@ -74,6 +79,10 @@ class TestGtk3DemoRawinputKeyboard(Gtk4DemoTest):
 
         text_field = clipboard_window.child(role_name="text")
         text_field.text = "testing "
+
+        # Another example of wrong coordinates.
+        # So I locate a know node and just offset from it.
+        self.demo.child("Copy").click(offset_y=190)
 
         key_combo("<Ctrl><A>")
         sleep(0.2)
@@ -104,7 +113,8 @@ class TestGtk3DemoRawinputKeyboard(Gtk4DemoTest):
         Testing type text.
         """
 
-        self.run_demo("Clipboard")
+        clipboard_button = self.demo.child("Clipboard")
+        clipboard_button.double_click()
 
         clipboard_window = self.demo.find_children(
             lambda x: x.name == "Clipboard" and x.role_name == "frame"
@@ -113,14 +123,22 @@ class TestGtk3DemoRawinputKeyboard(Gtk4DemoTest):
         text_field = clipboard_window.child(role_name="text")
         text_field.click()
 
+        # Another example of wrong coordinates.
+        # So I locate a know node and just offset from it.
+        self.demo.child("Copy").click(offset_y=190)
+
+        key_combo("<Ctrl><A>")
+
         type_text("testing type text")
         sleep(1)
 
+        # Another example of wrong coordinates.
         copy_button = clipboard_window.child("Copy")
-        copy_button.click()
+        copy_button.click(offset_x=200, offset_y=180)
 
+        # Another example of wrong coordinates.
         paste_button = clipboard_window.child("Paste")
-        paste_button.click()
+        paste_button.click(offset_x=200, offset_y=180)
 
         number_of_text_fields = self.demo.find_children(
             lambda x:

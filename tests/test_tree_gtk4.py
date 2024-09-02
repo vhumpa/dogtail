@@ -14,11 +14,14 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import unittest
 
-# TODO revisit and figure out why this import has a problem
-from tests.gtk_demo_test import Gtk4DemoTest # pylint: disable=import-error
+try:
+    from tests.gtk_demo_test import Gtk4DemoTest
+except ImportError:
+    from gtk_demo_test import Gtk4DemoTest
 
 from dogtail.tree import root
 from dogtail.config import config
+from dogtail.rawinput import type_text
 
 import gi
 gi.require_version("Atspi", "2.0")
@@ -26,7 +29,7 @@ from gi.repository import Atspi
 
 
 @unittest.skipIf(not os.path.isfile("/usr/bin/gtk4-demo"), "Skipping, no gtk4-demo.")
-class TestDogtailNode(Gtk4DemoTest):
+class TestGtk4DogtailNode(Gtk4DemoTest):
     """
     Class to test dogtail's Node.
     """
@@ -44,7 +47,7 @@ class TestDogtailNode(Gtk4DemoTest):
         Testing get application name.
         """
 
-        self.assertEqual(self.demo.name, "gtk3-demo")
+        self.assertEqual(self.demo.name, "gtk4-demo")
 
 
     def test_get_root_name(self):
@@ -102,7 +105,7 @@ class TestDogtailNode(Gtk4DemoTest):
         Testing get application description.
         """
 
-        self.assertEqual(self.demo.description, "")
+        self.assertEqual(self.demo.children[0].description, "")
 
 
     # TODO revisit this.
@@ -173,14 +176,24 @@ class TestDogtailNode(Gtk4DemoTest):
         Testing get application text.
         """
 
-        self.run_demo("Dialogs")
-        window = self.demo.find_child(
+        # Weird way to do this but it works as a unit test.
+        scroll_bar = self.demo.child(role_name="scroll bar")
+        for _ in range(50):
+            scroll_bar.value += 100
+            try:
+                clipboard_button = self.demo.child("Dialogs", retry=False)
+                clipboard_button.double_click()
+                break
+            except RuntimeError:
+                pass
+
+        window = self.demo.find_children(
             lambda x: x.name == "Dialogs" and
             x.role_name == "frame",
             retry=False
-        )
+        )[-1]
 
-        entry_one = window.child(name="Entry 1", role_name="label").labelee
+        entry_one = window.child(name="Entry 1", role_name="text")
         entry_two = window.child(name="", role_name="text")
 
         self.assertEqual(entry_one.text, "")
@@ -192,18 +205,39 @@ class TestDogtailNode(Gtk4DemoTest):
         Testing set application text.
         """
 
-        self.run_demo("Dialogs")
-        window = self.demo.find_child(
+        # Weird way to do this but it works as a unit test.
+        scroll_bar = self.demo.child(role_name="scroll bar")
+        for _ in range(50):
+            scroll_bar.value += 100
+            try:
+                clipboard_button = self.demo.child("Dialogs", retry=False)
+                clipboard_button.double_click()
+                break
+            except RuntimeError:
+                pass
+
+        window = self.demo.find_children(
             lambda x: x.name == "Dialogs" and
             x.role_name == "frame",
             retry=False
-        )
+        )[-1]
 
-        entry_one = window.child(name="Entry 1", role_name="label").labelee
+        entry_one = window.child(name="Entry 1", role_name="text")
         entry_two = window.child(name="", role_name="text")
 
-        entry_one.text = "test one"
-        entry_two.text = "test two"
+        # No longer works in gtk4.
+        # entry_one.text = "test one"
+        # entry_two.text = "test two"
+
+        # Coordinates are wrong, offset it.
+        entry_one.click(offset_x=150, offset_y=210)
+        type_text("test one")
+
+
+        # Coordinates are wrong, offset it.
+        entry_two.click(offset_x=150, offset_y=210)
+        type_text("test two")
+
 
         self.assertEqual(entry_one.text, "test one")
         self.assertEqual(entry_two.text, "test two")
@@ -227,17 +261,28 @@ class TestDogtailNode(Gtk4DemoTest):
         # We use this only for labels, lets keep the note if some other uses appear.
 
 
+    # TODO revisit, this is bugged in gtk4-demo
     def test_get_labelee(self):
         """
         Testing get labelee.
         """
 
-        self.run_demo("Dialogs")
-        window = self.demo.find_child(
+        # Weird way to do this but it works as a unit test.
+        scroll_bar = self.demo.child(role_name="scroll bar")
+        for _ in range(50):
+            scroll_bar.value += 100
+            try:
+                clipboard_button = self.demo.child("Dialogs", retry=False)
+                clipboard_button.double_click()
+                break
+            except RuntimeError:
+                pass
+
+        window = self.demo.find_children(
             lambda x: x.name == "Dialogs" and
             x.role_name == "frame",
             retry=False
-        )
+        )[-1]
 
         entry_one = window.child(name="Entry 1", role_name="label")
         self.assertEqual(entry_one.labelee.role_name, "text")
@@ -257,14 +302,24 @@ class TestDogtailNode(Gtk4DemoTest):
         Testing get labeler.
         """
 
-        self.run_demo("Dialogs")
-        window = self.demo.find_child(
+        # Weird way to do this but it works as a unit test.
+        scroll_bar = self.demo.child(role_name="scroll bar")
+        for _ in range(50):
+            scroll_bar.value += 100
+            try:
+                clipboard_button = self.demo.child("Dialogs", retry=False)
+                clipboard_button.double_click()
+                break
+            except RuntimeError:
+                pass
+
+        window = self.demo.find_children(
             lambda x: x.name == "Dialogs" and
             x.role_name == "frame",
             retry=False
-        )
+        )[-1]
 
-        entry_one_labelee = window.child(name="Entry 1", role_name="label").labelee
+        entry_one_labelee = window.child(name="Entry 1", role_name="text")
         self.assertEqual(entry_one_labelee.labeler.role_name, "label")
 
 

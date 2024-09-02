@@ -11,8 +11,11 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import unittest
 
-# TODO revisit and figure out why this import has a problem
-from tests.gtk_demo_test import Gtk3DemoTest # pylint: disable=import-error
+try:
+    from tests.gtk_demo_test import Gtk3DemoTest
+except ImportError:
+    from gtk_demo_test import Gtk3DemoTest
+
 from dogtail.rawinput import (
     click,
     double_click,

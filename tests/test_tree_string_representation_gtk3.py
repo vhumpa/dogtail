@@ -14,8 +14,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import unittest
 
-# TODO revisit and figure out why this import has a problem
-from tests.gtk_demo_test import Gtk3DemoTest, trap_stdout # pylint: disable=import-error
+try:
+    from tests.gtk_demo_test import Gtk3DemoTest, trap_stdout
+except ImportError:
+    from gtk_demo_test import Gtk3DemoTest, trap_stdout
 
 
 SOURCE_DUMP_STRING = """[ 'Source' | 'page tab' | '' ]
@@ -32,7 +34,7 @@ SOURCE_TREE_STRING = """└──[ 'Source' | 'page tab' | '' ]
 
 
 @unittest.skipIf(not os.path.isfile("/usr/bin/gtk3-demo"), "Skipping, no gtk3-demo.")
-class TestDogtailNodeValue(Gtk3DemoTest):
+class TestGtk3DogtailNodeValue(Gtk3DemoTest):
     """
     Class to test dogtail's Node String Representation.
     """

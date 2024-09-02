@@ -14,8 +14,9 @@ import unittest
 from dogtail.utils import run
 from dogtail.tree import root
 
+
 @unittest.skipIf(not os.path.isfile("/usr/bin/gtk4-demo"), "Skipping, no gtk4-demo.")
-class TestRun(unittest.TestCase):
+class TestGtk4Run(unittest.TestCase):
     """
     Class to test dogtail's utils run method.
     """

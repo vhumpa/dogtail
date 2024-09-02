@@ -110,6 +110,15 @@ class Gtk4DemoTest(unittest.TestCase):
         sleep(1)
 
 
+    def run_demo(self, demo_name, retry=True):
+        """
+        Activate the named demo within the gtk3-demo app.
+        """
+
+        tree = self.demo.child(roleName="tree table")
+        tree.child(demo_name, retry=retry).do_action_named("activate")
+
+
 def trap_stdout(function, args=None):
     """
     Grab stdout output during function execution.

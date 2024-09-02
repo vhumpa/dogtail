@@ -309,12 +309,18 @@ class PonytailHelper(metaclass=Singleton):
 
         # If user provides a window that is not focused, refocus.
         elif self._window_id is not None and not self.get_window_has_focus():
-            LOGGING.debug("Attempt to click on not focused window, refocusing.")
+            LOGGING.debug("Attempt to do an action on unfocused window, refocusing.")
             self._window_id = [x["id"] for x in window_list if bool(x["has-focus"])][0]
             window_id_return_value = self._window_id
 
         else:
             LOGGING.debug("Window ID provided.")
+            window_id_return_value = self._window_id
+
+        # Final check for focus.
+        if not self.get_window_has_focus():
+            LOGGING.debug("Window ID provided led to unfocused window, refocusing.")
+            self._window_id = [x["id"] for x in window_list if bool(x["has-focus"])][0]
             window_id_return_value = self._window_id
 
         LOGGING.debug(f"Window ID to use '{window_id_return_value}'")

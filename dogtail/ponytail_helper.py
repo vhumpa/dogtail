@@ -317,8 +317,9 @@ class PonytailHelper(metaclass=Singleton):
             LOGGING.debug("Window ID provided.")
             window_id_return_value = self._window_id
 
-        # Final check for focus.
-        if not self.get_window_has_focus():
+        # Final check for focus on existing window.
+        if window_id_return_value != "" and not self.get_window_has_focus():
+            LOGGING.debug(f"Attempting to use window_id '{window_id_return_value}'")
             LOGGING.debug("Window ID provided led to unfocused window, refocusing.")
             self._window_id = [x["id"] for x in window_list if bool(x["has-focus"])][0]
             window_id_return_value = self._window_id

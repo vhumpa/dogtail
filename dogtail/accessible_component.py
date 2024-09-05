@@ -30,6 +30,9 @@ SESSION_TYPE = "x11"
 if "XDG_SESSION_TYPE" in os.environ and "wayland" in os.environ["XDG_SESSION_TYPE"]:
     SESSION_TYPE = "wayland"
 
+COORD_TYPE_SCREEN = 0
+COORD_TYPE_WINDOW = 1
+COORD_TYPE_PARENT = 2
 
 class AccessibleComponent:
     """
@@ -38,9 +41,13 @@ class AccessibleComponent:
     """
 
     @staticmethod
-    def grab_focus(acc_object):
+    def contains(acc_object, x_coordinate, y_coordinate, coordinate_type=None):
         """
-        Grab focus.
+        Queries whether a given Atspi.Component contains a particular point.
+
+        Atspi.CoordType.SCREEN = 0
+        Atspi.CoordType.WINDOW = 1
+        Atspi.CoordType.PARENT = 2
         """
 
         LOGGING.debug(logging_class.get_func_params_and_values())
@@ -49,20 +56,119 @@ class AccessibleComponent:
             LOGGING.debug("Accessible object does not have a Component interface.")
             return False
 
-        try:
-            if AccessibleObject.is_newton(acc_object):
-                return acc_object.grab_focus()
-
-            return Atspi.Component.grab_focus(acc_object)
-        except Exception as error:
-            LOGGING.debug(f"Exception when grabbing focus: '{error}'")
+        if coordinate_type not in (0, 1, 2):
+            LOGGING.debug(f"Not a valid coordinate type '{coordinate_type}'.")
             return False
+
+        # Provide an option for user to set their own coord type.
+        if coordinate_type:
+            valid_coord_type = coordinate_type
+
+        else:
+            if SESSION_TYPE == "x11":
+                valid_coord_type = coordinate_type if coordinate_type else COORD_TYPE_SCREEN
+
+            if SESSION_TYPE == "wayland":
+                valid_coord_type = coordinate_type if coordinate_type else COORD_TYPE_WINDOW
+
+        if not valid_coord_type:
+            LOGGING.debug("Unexpected session type and coordinate type not provided.")
+            return False
+
+        if AccessibleObject.is_newton(acc_object):
+            return acc_object.contains(
+                acc_object,
+                x_coordinate,
+                y_coordinate,
+                valid_coord_type
+            )
+
+        action_result = Atspi.Component.contains(
+            acc_object,
+            x_coordinate,
+            y_coordinate,
+            valid_coord_type
+        )
+
+        return action_result
+
+
+    @staticmethod
+    def get_accessible_at_point(acc_object, x_coordinate, y_coordinate, coordinate_type=None):
+        """
+        Gets the accessible child at a given coordinate within an Atspi.Component.
+
+        Atspi.CoordType.SCREEN = 0
+        Atspi.CoordType.WINDOW = 1
+        Atspi.CoordType.PARENT = 2
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_component(acc_object):
+            LOGGING.debug("Accessible object does not have a Component interface.")
+            return False
+
+        if coordinate_type not in (0, 1, 2):
+            LOGGING.debug(f"Not a valid coordinate type '{coordinate_type}'.")
+            return False
+
+        # Provide an option for user to set their own coord type.
+        if coordinate_type:
+            valid_coord_type = coordinate_type
+
+        else:
+            if SESSION_TYPE == "x11":
+                valid_coord_type = coordinate_type if coordinate_type else COORD_TYPE_SCREEN
+
+            if SESSION_TYPE == "wayland":
+                valid_coord_type = coordinate_type if coordinate_type else COORD_TYPE_WINDOW
+
+        if not valid_coord_type:
+            LOGGING.debug("Unexpected session type and coordinate type not provided.")
+            return False
+
+        if AccessibleObject.is_newton(acc_object):
+            return acc_object.get_accessible_at_point(
+                acc_object,
+                x_coordinate,
+                y_coordinate,
+                valid_coord_type
+            )
+
+        action_result = Atspi.Component.get_accessible_at_point(
+            acc_object,
+            x_coordinate,
+            y_coordinate,
+            valid_coord_type
+        )
+
+        return action_result
+
+
+    @staticmethod
+    def get_alpha(acc_object):
+        """
+        Gets the opacity/alpha value of a component, if alpha blending is in use.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_component(acc_object):
+            LOGGING.debug("Accessible object does not have a Component interface.")
+            return False
+
+        if AccessibleObject.is_newton(acc_object):
+            return acc_object.get_alpha()
+
+        return Atspi.Component.get_alpha(acc_object)
 
 
     @staticmethod
     def get_extents(acc_object):
         """
-        A tuple containing the location and size of the Accessible: (x, y, w, h)
+        Gets the bounding box of the specified Atspi.Component. The returned values are
+        meaningful only if the Component has both STATE_VISIBLE and STATE_SHOWING.
         """
 
         LOGGING.debug(logging_class.get_func_params_and_values())
@@ -72,8 +178,6 @@ class AccessibleComponent:
 
         # Atspi.CoordType.SCREEN = 0
         # Atspi.CoordType.WINDOW = 1
-        COORD_TYPE_SCREEN = 0
-        COORD_TYPE_WINDOW = 1
 
         try:
             # First lets check if screen coordinates are valid.
@@ -97,39 +201,43 @@ class AccessibleComponent:
             LOGGING.debug(f"Exception when getting position or size: '{error}'")
             return None
 
+
     @staticmethod
-    def get_size(acc_object):
+    def get_layer(acc_object):
         """
-        A tuple containing the size of the Accessible: (w, h)
+        Queries which layer the component is painted into, to help determine its
+        visibility in terms of stacking order.
         """
 
-        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
         LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_component(acc_object):
             LOGGING.debug("Accessible object does not have a Component interface.")
-            return (-1, -1)
-
-
-        if SESSION_TYPE == "wayland":
-            if acc_object.role_name in ("window", "dialog", "frame"):
-                ponytail_interface = ponytail_helper.get_ponytail_interface()
-
-                window_list = ponytail_interface.window_list
-                window_id = acc_object.window_id
-
-                for window in window_list:
-                    if window["id"] == window_id:
-                        return (int(window["width"]), int(window["height"]))
-
+            return False
 
         if AccessibleObject.is_newton(acc_object):
-            atspi_point = acc_object.get_size()
+            return acc_object.get_layer()
 
-        else:
-            atspi_point = Atspi.Component.get_size(acc_object)
+        return Atspi.Component.get_layer(acc_object)
 
-        return (atspi_point.x, atspi_point.y)
+
+    @staticmethod
+    def get_mdi_z_order(acc_object):
+        """
+        Queries the z stacking order of a component which is in the MDI or window layer.
+        (Bigger z-order numbers mean nearer the top)
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_component(acc_object):
+            LOGGING.debug("Accessible object does not have a Component interface.")
+            return False
+
+        if AccessibleObject.is_newton(acc_object):
+            return acc_object.get_mdi_z_order()
+
+        return Atspi.Component.get_mdi_z_order(acc_object)
 
 
     @staticmethod
@@ -147,8 +255,6 @@ class AccessibleComponent:
 
         # Atspi.CoordType.SCREEN = 0
         # Atspi.CoordType.WINDOW = 1
-        COORD_TYPE_SCREEN = 0
-        COORD_TYPE_WINDOW = 1
 
         # The variable 'position' is of type Atspi.Point.
         if AccessibleObject.is_newton(acc_object):
@@ -216,6 +322,214 @@ class AccessibleComponent:
                     position = atspi_point
 
         return (position.x, position.y)
+
+
+    @staticmethod
+    def get_size(acc_object):
+        """
+        A tuple containing the size of the Accessible: (w, h)
+        """
+
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_component(acc_object):
+            LOGGING.debug("Accessible object does not have a Component interface.")
+            return (-1, -1)
+
+
+        if SESSION_TYPE == "wayland":
+            if acc_object.role_name in ("window", "dialog", "frame"):
+                ponytail_interface = ponytail_helper.get_ponytail_interface()
+
+                window_list = ponytail_interface.window_list
+                window_id = acc_object.window_id
+
+                for window in window_list:
+                    if window["id"] == window_id:
+                        return (int(window["width"]), int(window["height"]))
+
+
+        if AccessibleObject.is_newton(acc_object):
+            atspi_point = acc_object.get_size()
+
+        else:
+            atspi_point = Atspi.Component.get_size(acc_object)
+
+        return (atspi_point.x, atspi_point.y)
+
+
+    @staticmethod
+    def grab_focus(acc_object):
+        """
+        Grab focus.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_component(acc_object):
+            LOGGING.debug("Accessible object does not have a Component interface.")
+            return False
+
+        try:
+            if AccessibleObject.is_newton(acc_object):
+                return acc_object.grab_focus()
+
+            return Atspi.Component.grab_focus(acc_object)
+        except Exception as error:
+            LOGGING.debug(f"Exception when grabbing focus: '{error}'")
+            return False
+
+
+
+    @staticmethod
+    def scroll_to(acc_object, scroll_type):
+        """
+        Scrolls whatever container of the Atspi.Component object so it becomes visible
+        on the screen.
+
+        Atspi.ScrollType.TOP_LEFT = 0
+        Atspi.ScrollType.BOTTOM_RIGHT  = 1
+        Atspi.ScrollType.TOP_EDGE  = 2
+        Atspi.ScrollType.BOTTOM_EDGE  = 3
+        Atspi.ScrollType.LEFT_EDGE  = 4
+        Atspi.ScrollType.RIGHT_EDGE  = 5
+        Atspi.ScrollType.ANYWHERE  = 6
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_component(acc_object):
+            LOGGING.debug("Accessible object does not have a Component interface.")
+            return False
+
+        if scroll_type not in (0, 1, 2, 3, 4, 5, 6):
+            LOGGING.debug(f"Not a valid scroll type '{scroll_type}'.")
+            return False
+
+        if AccessibleObject.is_newton(acc_object):
+            return acc_object.scroll_to(scroll_type)
+
+        return Atspi.Component.scroll_to(acc_object, scroll_type)
+
+
+    @staticmethod
+    def scroll_to_point(acc_object, coordinate_type, x_coordinate, y_coordinate):
+        """
+        Scrolls whatever container of the Atspi.Component object so it becomes visible
+        on the screen at a given position.
+
+        Atspi.CoordType.SCREEN = 0
+        Atspi.CoordType.WINDOW = 1
+        Atspi.CoordType.PARENT = 2
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_component(acc_object):
+            LOGGING.debug("Accessible object does not have a Component interface.")
+            return False
+
+        if coordinate_type not in (0, 1, 2):
+            LOGGING.debug(f"Not a valid coordinate type '{coordinate_type}'.")
+            return False
+
+        if AccessibleObject.is_newton(acc_object):
+            return acc_object.scroll_to_point(coordinate_type, x_coordinate, y_coordinate)
+
+        return Atspi.Component.scroll_to_point(acc_object, coordinate_type, x_coordinate, y_coordinate)
+
+
+    @staticmethod
+    def set_extents(acc_object, x_coordinate, y_coordinate, width, height, coordinate_type):
+        """
+        Moves and resizes the specified component.
+
+        Atspi.CoordType.SCREEN = 0
+        Atspi.CoordType.WINDOW = 1
+        Atspi.CoordType.PARENT = 2
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_component(acc_object):
+            LOGGING.debug("Accessible object does not have a Component interface.")
+            return False
+
+        if coordinate_type not in (0, 1, 2):
+            LOGGING.debug(f"Not a valid coordinate type '{coordinate_type}'.")
+            return False
+
+        if AccessibleObject.is_newton(acc_object):
+            return acc_object.set_extents(
+                x_coordinate,
+                y_coordinate,
+                width,
+                height,
+                coordinate_type
+            )
+
+        return Atspi.Component.set_extents(
+            acc_object,
+            x_coordinate,
+            y_coordinate,
+            width,
+            height,
+            coordinate_type
+        )
+
+
+    @staticmethod
+    def set_position(acc_object, x_coordinate, y_coordinate, coordinate_type):
+        """
+        Moves the component to the specified position.
+
+        Atspi.CoordType.SCREEN = 0
+        Atspi.CoordType.WINDOW = 1
+        Atspi.CoordType.PARENT = 2
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_component(acc_object):
+            LOGGING.debug("Accessible object does not have a Component interface.")
+            return False
+
+        if coordinate_type not in (0, 1, 2):
+            LOGGING.debug(f"Not a valid coordinate type '{coordinate_type}'.")
+            return False
+
+        if AccessibleObject.is_newton(acc_object):
+            return acc_object.set_position(
+                x_coordinate,
+                y_coordinate,
+                coordinate_type
+            )
+
+        return Atspi.Component.set_position(
+            acc_object,
+            x_coordinate,
+            y_coordinate,
+            coordinate_type
+        )
+
+
+    @staticmethod
+    def set_size(acc_object, width, height):
+        """
+        Resizes the specified component to the given pixel dimensions.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_component(acc_object):
+            LOGGING.debug("Accessible object does not have a Component interface.")
+            return False
+
+        if AccessibleObject.is_newton(acc_object):
+            return acc_object.set_extents(width, height)
+
+        return Atspi.Component.set_extents(acc_object, width, height)
 
 
     @staticmethod

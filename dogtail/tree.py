@@ -194,6 +194,244 @@ class Node(object):
         return AccessibleActions.do_action_named(self, named_action)
 
 
+    def contains(self, x_coordinate, y_coordinate, coordinate_type=None):
+        """
+        Queries whether a given Atspi.Component contains a particular point.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.contains(self, x_coordinate, y_coordinate, coordinate_type)
+
+
+    def get_accessible_at_point(self, x_coordinate, y_coordinate, coordinate_type=None):
+        """
+        Gets the accessible child at a given coordinate within an Atspi.Component.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.get_accessible_at_point(self, x_coordinate, y_coordinate, coordinate_type)
+
+
+    def get_alpha(self):
+        """
+        Gets the opacity/alpha value of a component, if alpha blending is in use.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.get_alpha(self)
+
+
+    def get_extents(self):
+        """
+        Gets the bounding box of the specified Atspi.Component. The returned values are
+        meaningful only if the Component has both STATE_VISIBLE and STATE_SHOWING.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.get_extents(self)
+
+
+    @property
+    def extents(self):
+        """
+        Gets the bounding box of the specified Atspi.Component. The returned values are
+        meaningful only if the Component has both STATE_VISIBLE and STATE_SHOWING.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return self.extents()
+
+
+    def get_layer(self):
+        """
+        Queries which layer the component is painted into, to help determine its
+        visibility in terms of stacking order.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.get_layer(self)
+
+
+    def get_mdi_z_order(self):
+        """
+        Queries the z stacking order of a component which is in the MDI or window layer.
+        (Bigger z-order numbers mean nearer the top)
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.get_mdi_z_order(self)
+
+
+    def get_position(self):
+        """
+        A tuple containing the position of the Accessible: (x, y).
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.get_position(self)
+
+
+    @property
+    def position(self):
+        """
+        A tuple containing the position of the Accessible: (x, y).
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return self.get_position()
+
+
+    def get_size(self):
+        """
+        A tuple containing the size of the Accessible: (w, h)
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.get_size(self)
+
+
+    @property
+    def size(self):
+        """
+        A tuple containing the size of the Accessible: (w, h).
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return self.get_size()
+
+
+    def grab_focus(self):
+        """
+        Grab focus.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.grab_focus(self)
+
+
+    def scroll_to(self, scroll_type):
+        """
+        Scrolls whatever container of the Atspi.Component object so it becomes visible
+        on the screen.
+
+        Atspi.ScrollType.TOP_LEFT = 0
+        Atspi.ScrollType.BOTTOM_RIGHT  = 1
+        Atspi.ScrollType.TOP_EDGE  = 2
+        Atspi.ScrollType.BOTTOM_EDGE  = 3
+        Atspi.ScrollType.LEFT_EDGE  = 4
+        Atspi.ScrollType.RIGHT_EDGE  = 5
+        Atspi.ScrollType.ANYWHERE  = 6
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.scroll_to(self, scroll_type)
+
+
+    def scroll_to_point(self, coordinate_type, x_coordinate, y_coordinate):
+        """
+        Scrolls whatever container of the Atspi.Component object so it becomes visible
+        on the screen.
+
+        Atspi.CoordType.SCREEN = 0
+        Atspi.CoordType.WINDOW = 1
+        Atspi.CoordType.PARENT = 2
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.scroll_to_point(
+            self,
+            coordinate_type,
+            x_coordinate,
+            y_coordinate
+        )
+
+
+    def set_extents(self, x_coordinate, y_coordinate, width, height, coordinate_type):
+        """
+        Moves and resizes the specified component.
+
+        Atspi.CoordType.SCREEN = 0
+        Atspi.CoordType.WINDOW = 1
+        Atspi.CoordType.PARENT = 2
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.set_extents(
+            self,
+            x_coordinate,
+            y_coordinate,
+            width,
+            height,
+            coordinate_type
+        )
+
+
+    def set_position(self, x_coordinate, y_coordinate, coordinate_type):
+        """
+        Moves the component to the specified position.
+
+        Atspi.CoordType.SCREEN = 0
+        Atspi.CoordType.WINDOW = 1
+        Atspi.CoordType.PARENT = 2
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.set_position(
+            self,
+            x_coordinate,
+            y_coordinate,
+            coordinate_type
+        )
+
+
+    def set_size(self,width, height):
+        """
+        Resizes the specified component to the given pixel dimensions.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.set_size(self, width, height)
+
+
+    def get_center(self):
+        """
+        A tuple containing the center of the Accessible: (x, y).
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.get_center(self)
+
+
+    @property
+    def center(self):
+        """
+        A tuple containing the center of the Accessible: (x, y).
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return self.get_center()
+
+
+
     @property
     def toolkit(self):
         """
@@ -346,16 +584,6 @@ class Node(object):
         LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleText.set_text(self, content)
-
-
-    def grab_focus(self):
-        """
-        Grab focus.
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleComponent.grab_focus(self)
 
 
     @property
@@ -771,48 +999,6 @@ class Node(object):
         return AccessibleObject.get_labelee(self)
 
 
-    @property
-    def extents(self):
-        """
-        A tuple containing the location and size of the Accessible: (x, y, w, h).
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleComponent.get_extents(self)
-
-
-    @property
-    def size(self):
-        """
-        A tuple containing the size of the Accessible: (w, h).
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleComponent.get_size(self)
-
-
-    @property
-    def position(self):
-        """
-        A tuple containing the position of the Accessible: (x, y).
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleComponent.get_position(self)
-
-
-    @property
-    def center(self):
-        """
-        A tuple containing the center of the Accessible: (x, y).
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleComponent.get_center(self)
 
 
     def select_all(self):
@@ -1105,8 +1291,6 @@ class Node(object):
 
 Atspi.Accessible.__bases__ = (
     Node,
-    AccessibleActions,
-    AccessibleComponent,
     AccessibleObject,
     AccessibleRoot,
     AccessibleSelection,

@@ -30,6 +30,7 @@ LOGGING = logging_class.logger
 
 from dogtail.accessible_actions import AccessibleActions
 from dogtail.accessible_component import AccessibleComponent
+from dogtail.accessible_editable_text import AccessibleEditableText
 from dogtail.accessible_object import AccessibleObject
 from dogtail.accessible_root import AccessibleRoot
 from dogtail.accessible_selection import AccessibleSelection
@@ -430,6 +431,73 @@ class Node(object):
 
         return self.get_center()
 
+
+    def copy_text(self, start_position=None, end_position=None):
+        """
+        Copies text from an Atspi.EditableText object into the system clipboard.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleEditableText.copy_text(self, start_position, end_position)
+
+
+    def cut_text(self, start_position=None, end_position=None):
+        """
+        Deletes text from an Atspi.EditableText object, copying the excised portion into
+        the system clipboard.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleEditableText.cut_text(self, start_position, end_position)
+
+
+    def delete_text(self, start_position=None, end_position=None):
+        """
+        Deletes text from an Atspi.EditableText object, without copying the excised
+        portion into the system clipboard.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleEditableText.delete_text(self, start_position, end_position)
+
+
+    def insert_text(self, text, position=0, length=0):
+        """
+        Inserts text into an Atspi.EditableText object. As with all character offsets,
+        the specified position may not be the same as the resulting byte offset, since
+        the text is in a variable-width encoding.
+
+        Deliberately moving parameters around so that the text is first.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleEditableText.insert_text(self, text, position, length)
+
+
+    def paste_text(self, position):
+        """
+        Inserts text from the system clipboard into an Atspi.EditableText object. As
+        with all character offsets, the specified position may not be the same as the
+        resulting byte offset, since the text is in a variable-width encoding.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleEditableText.paste_text(self, position)
+
+
+    def set_text_contents(self, new_contents):
+        """
+        Replace the entire text contents of an Atspi.EditableText object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleEditableText.set_text_contents(self, new_contents)
 
 
     @property

@@ -123,6 +123,77 @@ class Node(object):
             print(f"Event: '{event.type}' '{source_description}'")
 
 
+    def do_action(self, index):
+        """
+        Invoke the action indicated by index on the object implementing Atspi.Action.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleActions.do_action(self, index)
+
+
+    def get_action_description(self, index):
+        """
+        Get the description of the index-th Action on the object implementing Atspi.Action.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleActions.get_action_description(self, index)
+
+
+    def get_action_name(self, index):
+        """
+        Get the name of the index-th Action on the object implementing Atspi.Action.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleActions.get_action_description(self, index)
+
+
+    def get_key_binding(self, index):
+        """
+        Get the keybindings of the index-th Action on the object implementing Atspi.Action.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleActions.get_key_binding(self, index)
+
+
+    def get_localized_name(self, index):
+        """
+        Get the localized name of the index-th Action on the object implementing Atspi.Action.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleActions.get_localized_name(self, index)
+
+
+    @property
+    def actions(self):
+        """
+        Get dictionary of actions.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleActions.get_actions(self)
+
+
+    def do_action_named(self, named_action):
+        """
+        Invoke the action indicated by its name on the object implementing Atspi.Action.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleActions.do_action_named(self, named_action)
+
+
     @property
     def toolkit(self):
         """
@@ -275,39 +346,6 @@ class Node(object):
         LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleText.set_text(self, content)
-
-
-    @property
-    def actions(self):
-        """
-        Get dictionary of actions.
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleActions.get_actions(self)
-
-
-    def do_action_named(self, named_action):
-        """
-        Do an Action.
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleActions.do_action_named(self, named_action)
-
-
-    def action_key_bind(self, named_action):
-        """
-        Get key bind of an action.
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        action_index = self.actions[named_action]
-
-        return AccessibleActions.get_key_binding(self, action_index)
 
 
     def grab_focus(self):

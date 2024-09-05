@@ -31,9 +31,31 @@ class AccessibleActions:
     """
 
     @staticmethod
-    def get_n_actions(acc_object):
+    def do_action(acc_object, index):
         """
-        Get number of invocable actions.
+        Invoke the action indicated by index on the object implementing Atspi.Action.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_action(acc_object):
+            LOGGING.debug("Accessible object does not have an Action interface.")
+            return False
+
+        if AccessibleObject.is_newton(acc_object):
+            return acc_object.do_action(acc_object, index)
+
+        action_result = Atspi.Action.do_action(acc_object, index)
+
+        do_delay(config.action_delay)
+
+        return action_result
+
+
+    @staticmethod
+    def get_action_description(acc_object, index):
+        """
+        Get the description of the index-th Action on the object implementing Atspi.Action.
         """
 
         LOGGING.debug(logging_class.get_func_params_and_values())
@@ -44,9 +66,10 @@ class AccessibleActions:
 
         try:
             if AccessibleObject.is_newton(acc_object):
-                invocable_actions = acc_object.get_n_actions()
+                invocable_actions = acc_object.get_action_description(index)
             else:
-                invocable_actions = Atspi.Action.get_n_actions(acc_object)
+                invocable_actions = Atspi.Action.get_action_description(acc_object, index)
+
         except Exception as error:
             LOGGING.debug(f"Exception getting actions: '{error}'")
             return 0
@@ -57,7 +80,7 @@ class AccessibleActions:
     @staticmethod
     def get_action_name(acc_object, index):
         """
-        Get an invocable action located on index.
+        Get the name of the index-th Action on the object implementing Atspi.Action.
         """
 
         LOGGING.debug(logging_class.get_func_params_and_values())
@@ -79,11 +102,84 @@ class AccessibleActions:
         return invocable_actions
 
 
+    @staticmethod
+    def get_key_binding(acc_object, action_index):
+        """
+        Get the keybindings of the index-th Action on the object implementing Atspi.Action.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_action(acc_object):
+            LOGGING.debug("Accessible object does not have an Action interface.")
+            return None
+
+        try:
+            if AccessibleObject.is_newton(acc_object):
+                action_key_bind = acc_object.get_key_binding(action_index)
+            else:
+                action_key_bind = Atspi.Action.get_key_binding(acc_object, action_index)
+
+        except Exception as error:
+            LOGGING.debug(f"Exception getting action key bind: '{error}'")
+            return None
+
+        return action_key_bind
+
+
+    @staticmethod
+    def get_localized_name(acc_object, index):
+        """
+        Get the localized name of the index-th Action on the object implementing Atspi.Action.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_action(acc_object):
+            LOGGING.debug("Accessible object does not have an Action interface.")
+            return 0
+
+        try:
+            if AccessibleObject.is_newton(acc_object):
+                invocable_actions = acc_object.get_localized_name(index)
+            else:
+                invocable_actions = Atspi.Action.get_localized_name(acc_object, index)
+
+        except Exception as error:
+            LOGGING.debug(f"Exception getting actions: '{error}'")
+            return 0
+
+        return invocable_actions
+
+
+    @staticmethod
+    def get_n_actions(acc_object):
+        """
+        Get the number of the actions invocable on the object implementing Atspi.Action.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_action(acc_object):
+            LOGGING.debug("Accessible object does not have an Action interface.")
+            return 0
+
+        try:
+            if AccessibleObject.is_newton(acc_object):
+                invocable_actions = acc_object.get_n_actions()
+            else:
+                invocable_actions = Atspi.Action.get_n_actions(acc_object)
+        except Exception as error:
+            LOGGING.debug(f"Exception getting actions: '{error}'")
+            return 0
+
+        return invocable_actions
+
 
     @staticmethod
     def get_actions(acc_object):
         """
-        Dictionary of actions.
+        Get dictionary of actions.
         """
 
         LOGGING.debug(logging_class.get_func_params_and_values())
@@ -103,7 +199,7 @@ class AccessibleActions:
     @staticmethod
     def do_action_named(acc_object, named_action):
         """
-        Do an Action.
+        Invoke the action indicated by its name on the object implementing Atspi.Action.
         """
 
         LOGGING.debug(logging_class.get_func_params_and_values())
@@ -126,7 +222,7 @@ class AccessibleActions:
             if AccessibleObject.is_newton(acc_object):
                 return acc_object.do_action(acc_object, action_to_do)
 
-            action_result = Atspi.Action.do_action(acc_object, action_to_do)
+            action_result = AccessibleActions.do_action(acc_object, action_to_do)
 
             do_delay(config.search_back_off_delay)
 
@@ -135,28 +231,3 @@ class AccessibleActions:
         except Exception as error:
             LOGGING.debug(f"Exception when executing a named action: '{error}'")
             return False
-
-
-    @staticmethod
-    def get_key_binding(acc_object, action_index):
-        """
-        Get keybindings to the action_index-th action.
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        if not AccessibleObject.is_action(acc_object):
-            LOGGING.debug("Accessible object does not have an Action interface.")
-            return None
-
-        try:
-            if AccessibleObject.is_newton(acc_object):
-                action_key_bind = acc_object.get_key_binding(action_index)
-            else:
-                action_key_bind = Atspi.Action.get_key_binding(acc_object, action_index)
-
-        except Exception as error:
-            LOGGING.debug(f"Exception getting action key bind: '{error}'")
-            return None
-
-        return action_key_bind

@@ -715,171 +715,6 @@ class Node(object):
 
 
     @property
-    def toolkit(self):
-        """
-        Return string description of the toolkit we are using.
-        """
-
-        #LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleUtilities.get_toolkit(self)
-
-
-    @property
-    def window_id(self):
-        """
-        Return window_id of a node.
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return ponytail_helper.get_window_id(self)
-
-
-    @property
-    def window_has_focus(self):
-        """
-        Check if window is focused.
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        if self.session_type != "wayland":
-            LOGGING.info("Ponytail is not used in non Wayland session.")
-            return False
-
-        return ponytail_helper.get_window_has_focus()
-
-
-    @property
-    def id(self):
-        """
-        Define a 'id' property for Atspi object.
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleObject.get_id(self)
-
-
-    @property
-    def name(self):
-        """
-        Define a 'name' property for Atspi object.
-        """
-
-        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
-        #LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleObject.get_name(self)
-
-
-    @property
-    def role(self):
-        """
-        Define a 'role property for Atspi object.
-        """
-
-        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
-        #LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleObject.get_role(self)
-
-
-    @property
-    def role_name(self):
-        """
-        Define a 'role_name' property for Atspi object.
-        """
-        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
-        #LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleObject.get_role_name(self)
-
-
-    @property
-    def description(self):
-        """
-        Define a 'description' property for Atspi object.
-        """
-
-        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
-        #LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleObject.get_description(self)
-
-
-    @property
-    def parent(self):
-        """
-        Define a 'parent' property for Atspi object.
-        """
-
-        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
-        #LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleObject.get_parent(self)
-
-
-    @property
-    def index_in_parent(self):
-        """
-        Define a 'index_in_parent' property for Atspi object.
-        """
-
-        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
-        #LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleObject.get_index_in_parent(self)
-
-
-    @property
-    def children(self):
-        """
-        Creating children easy navigation when required.
-        """
-
-        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
-        #LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleObject.get_children(self)
-
-
-    @property
-    def text(self):
-        """
-        Define a 'text' property for Atspi object.
-        """
-
-        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
-        #LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleText.get_text(self)
-
-
-    @text.setter
-    def text(self, content):
-        """
-        Define a 'text' setter for Atspi.Text object.
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleText.set_text(self, content)
-
-
-    @property
-    def dead(self):
-        """
-        Is the node dead (defunct)?
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleObject.is_dead(self)
-
-
-    @property
     def active(self):
         """
         Indicates this object can accept keyboard focus, which means all events
@@ -1071,7 +906,7 @@ class Node(object):
         Indicates that the object is invalid.
         """
 
-        #LOGGING.debug(logging_class.get_func_params_and_values())
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleState.get_invalid(self)
 
@@ -1085,6 +920,176 @@ class Node(object):
         LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleState.get_accessible_states(self)
+
+
+
+
+
+    @property
+    def toolkit(self):
+        """
+        Return string description of the toolkit we are using.
+        """
+
+        # TODO revisit, this will flood logs on position query.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleUtilities.get_toolkit(self)
+
+
+    @property
+    def window_id(self):
+        """
+        Return window_id of a node.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return ponytail_helper.get_window_id(self)
+
+
+    @property
+    def window_has_focus(self):
+        """
+        Check if window is focused.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if self.session_type != "wayland":
+            LOGGING.info("Ponytail is not used in non Wayland session.")
+            return False
+
+        return ponytail_helper.get_window_has_focus()
+
+
+    @property
+    def id(self):
+        """
+        Define a 'id' property for Atspi object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.get_id(self)
+
+
+    @property
+    def name(self):
+        """
+        Define a 'name' property for Atspi object.
+        """
+
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.get_name(self)
+
+
+    @property
+    def role(self):
+        """
+        Define a 'role property for Atspi object.
+        """
+
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.get_role(self)
+
+
+    @property
+    def role_name(self):
+        """
+        Define a 'role_name' property for Atspi object.
+        """
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.get_role_name(self)
+
+
+    @property
+    def description(self):
+        """
+        Define a 'description' property for Atspi object.
+        """
+
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.get_description(self)
+
+
+    @property
+    def parent(self):
+        """
+        Define a 'parent' property for Atspi object.
+        """
+
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.get_parent(self)
+
+
+    @property
+    def index_in_parent(self):
+        """
+        Define a 'index_in_parent' property for Atspi object.
+        """
+
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.get_index_in_parent(self)
+
+
+    @property
+    def children(self):
+        """
+        Creating children easy navigation when required.
+        """
+
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.get_children(self)
+
+
+    @property
+    def text(self):
+        """
+        Define a 'text' property for Atspi object.
+        """
+
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_text(self)
+
+
+    @text.setter
+    def text(self, content):
+        """
+        Define a 'text' setter for Atspi.Text object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.set_text(self, content)
+
+
+    @property
+    def dead(self):
+        """
+        Is the node dead (defunct)?
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.is_dead(self)
+
 
 
     @property

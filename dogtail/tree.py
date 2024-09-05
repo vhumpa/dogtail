@@ -32,6 +32,7 @@ from dogtail.accessible_actions import AccessibleActions
 from dogtail.accessible_component import AccessibleComponent
 from dogtail.accessible_editable_text import AccessibleEditableText
 from dogtail.accessible_hypertext import AccessibleHypertext
+from dogtail.accessible_image import AccessibleImage
 from dogtail.accessible_object import AccessibleObject
 from dogtail.accessible_root import AccessibleRoot
 from dogtail.accessible_selection import AccessibleSelection
@@ -530,6 +531,62 @@ class Node(object):
         LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleHypertext.get_n_links(self)
+
+
+    def get_image_description(self):
+        """
+        Gets the description of the image displayed in an Atspi.Image object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleImage.get_image_description(self)
+
+
+    def get_image_extents(self, coordinate_type=None):
+        """
+        Gets the bounding box of the image displayed in a specified Atspi.Image
+        implementor. The returned values are meaningful only if the Image has both
+        STATE_VISIBLE and STATE_SHOWING.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleImage.get_image_extents(self, coordinate_type)
+
+
+    def get_image_locale(self):
+        """
+        Gets the locale associated with an image and its textual representation.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleImage.get_image_locale(self)
+
+
+    def get_image_position(self, coordinate_type=None):
+        """
+        Gets the minimum x and y coordinates of the image displayed in a specified
+        Atspi.Image implementor. The returned values are meaningful only if the Image
+        has both STATE_VISIBLE and STATE_SHOWING.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleImage.get_image_position(self, coordinate_type)
+
+
+    def get_image_size(self):
+        """
+        Gets the size of the image displayed in a specified Atspi.Image object.
+        The returned values are meaningful only if the Image has both STATE_VISIBLE and
+        STATE_SHOWING.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleImage.get_image_size(self)
 
 
     @property

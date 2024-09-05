@@ -31,6 +31,7 @@ LOGGING = logging_class.logger
 from dogtail.accessible_actions import AccessibleActions
 from dogtail.accessible_component import AccessibleComponent
 from dogtail.accessible_editable_text import AccessibleEditableText
+from dogtail.accessible_hypertext import AccessibleHypertext
 from dogtail.accessible_object import AccessibleObject
 from dogtail.accessible_root import AccessibleRoot
 from dogtail.accessible_selection import AccessibleSelection
@@ -498,6 +499,37 @@ class Node(object):
         LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleEditableText.set_text_contents(self, new_contents)
+
+
+    def get_link(self, link_index):
+        """
+        Gets the Atspi.Hyperlink object at a specified index.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleHypertext.get_link(self, link_index)
+
+
+    def get_link_index(self, character_offset):
+        """
+        Gets the index of the Atspi.Hyperlink object at a specified character offset.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleHypertext.get_link_index(self, character_offset)
+
+
+    def get_n_links(self):
+        """
+        Gets the total number of Atspi.Hyperlink objects that an Atspi.Hypertext
+        implementor has.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleHypertext.get_n_links(self)
 
 
     @property

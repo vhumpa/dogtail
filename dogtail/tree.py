@@ -589,6 +589,131 @@ class Node(object):
         return AccessibleImage.get_image_size(self)
 
 
+    def clear_selection(self):
+        """
+        Clears the current selection, removing all selected children from the specified
+        Atspi.Selection implementor's selection list.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleSelection.clear_selection(self)
+
+
+    def deselect_all(self):
+        """
+        Deselects all children.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return self.clear_selection()
+
+
+    def deselect_child(self, child_index):
+        """
+        Deselects a specific child of an Atspi.Selection. Note that child_index is the
+        index of the child in the parent container.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleSelection.deselect_child(self, child_index)
+
+
+    def deselect_selected_child(self, child_index):
+        """
+        Removes a child from the selected children list of an Atspi.Selection. Note that
+        selected_child_index is the index in the selected-children list, not the index
+        in the parent container. selected_child_index in this method, and child_index in
+        Atspi.Selection.select_child are asymmetric.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleSelection.deselect_selected_child(self, child_index)
+
+
+    def get_n_selected_children(self):
+        """
+        Gets the number of children of an Atspi.Selection implementor which are
+        currently selected.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleSelection.get_n_selected_children(self)
+
+
+    def get_selected_child(self, selected_child_index):
+        """
+        Gets the i-th selected Atspi.Accessible child of an Atspi.Selection. Note that
+        selected_child_index refers to the index in the list of 'selected' children and
+        generally differs from that used in Atspi.Accessible.get_child_at_index or
+        returned by Atspi.Accessible.get_index_in_parent. selected_child_index must lie
+        between 0 and Atspi.Selection.get_n_selected_children - 1, inclusive.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleSelection.get_selected_child(self, selected_child_index)
+
+
+    def is_child_selected(self, child_index):
+        """
+        Determines whether a particular child of an Atspi.Selection implementor is
+        currently selected. Note that child_index is the index into the standard
+        Atspi.Accessible container's list of children.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleSelection.is_child_selected(self, child_index)
+
+
+    def select_all(self):
+        """
+        Attempts to select all of the children of an Atspi.Selection implementor. Not
+        all Atspi.Selection implementors support this operation.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleSelection.select_all(self)
+
+
+    def select_child(self, child_index):
+        """
+        Adds a child to the selected children list of an Atspi.Selection. For
+        Atspi.Selection implementors that only allow single selections, this may replace
+        the (single) current selection.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleSelection.select_child(self, child_index)
+
+
+    def select(self):
+        """
+        Selects a child.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleSelection.select(self)
+
+
+    def deselect(self):
+        """
+        Deselects a child.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleSelection.deselect(self)
+
+
     @property
     def toolkit(self):
         """
@@ -1158,44 +1283,6 @@ class Node(object):
 
 
 
-    def select_all(self):
-        """
-        Selects all children.
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleSelection.select_all(self)
-
-
-    def deselect_all(self):
-        """
-        Deselects all children.
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleSelection.deselect_all(self)
-
-
-    def select(self):
-        """
-        Selects a child.
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleSelection.select(self)
-
-
-    def deselect(self):
-        """
-        Deselects a child.
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleSelection.deselect(self)
 
 
     def click(self, button=1, offset_x=0, offset_y=0):

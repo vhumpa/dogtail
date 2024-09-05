@@ -20,6 +20,7 @@ dogtail.config.config.logDebugToStdOut = True
 
 # There are so many ways and projects to get screenshot, why provide it in dogtail?
 
+# TODO re-add, we can provide it while not working.
 #class TestScreenshot(GtkDemoTest):
 #    def make_expected_and_compare(self, actual_path, jpg_tolerance=None):
 #        extension = actual_path.split('.')[-1]
@@ -66,73 +67,3 @@ dogtail.config.config.logDebugToStdOut = True
 #    def test_screenshot_unknown_format(self):
 #        self.assertRaises(ValueError, dogtail.utils.screenshot, "basename.dat")
 
-
-#class TestRun(unittest.TestCase):
-#    def setUp(self):
-#        self.pid = None
-#
-#
-#    def tearDown(self):
-#        import os
-#        import signal
-#        if self.pid:
-#            os.kill(self.pid, signal.SIGKILL)
-#        os.system('killall gtk3-demo-application > /dev/null 2>&1')
-#        # Sleep just enough to let the app actually die.
-#        # AT-SPI doesn't like being hammered too fast.
-#        time.sleep(0.5)
-#
-#
-#    def test_run(self):
-#        self.pid = dogtail.utils.run('gtk3-demo')
-#        dogtail.tree.root.application('gtk3-demo')
-#
-#
-#    def test_run_wrong(self):
-#        self.pid = None
-#        with self.assertRaises(OSError):
-#            self.pid = dogtail.utils.run('gtk3-virtual-nonexisting-demo')
-#
-#
-#    def test_run_dumb(self):
-#        self.pid = dogtail.utils.run('gtk3-demo', dumb=True)
-#        dogtail.tree.root.application('gtk3-demo')
-
-
-#class TestDelay(unittest.TestCase):
-#    def test_doDelay_implicit(self):
-#        dogtail.utils.config.defaultDelay = 2.0
-#        start = time.time()
-#        dogtail.utils.doDelay()
-#        self.assertTrue(time.time() - start >= 2.0)
-#
-#
-#    def test_doDelay_explicit(self):
-#        dogtail.utils.config.defaultDelay = 1.0
-#        start = time.time()
-#        dogtail.utils.doDelay(2.0)
-#        self.assertTrue(time.time() - start >= 2.0)
-#
-#
-#    def test_doDelay_logger(self):
-#        dogtail.utils.config.defaultDelay = 2.0
-#        dogtail.utils.config.debugSleep = True
-#        output = trap_stdout(dogtail.utils.doDelay).split()
-#        dogtail.utils.config.debugSleep = False
-#        self.assertEqual(len(output), 5)
-#        self.assertEqual(float(output[-1]), 2.0)
-
-
-#class TestA11Y(unittest.TestCase):
-#    def test_bail_when_a11y_disabled(self):
-#        self.assertRaises(SystemExit, dogtail.utils.bailBecauseA11yIsDisabled)
-#
-#
-#    def test_enable_a11y(self):
-#        dogtail.utils.enableA11y()
-
-
-#class TestI18N(unittest.TestCase):
-#    def test_load_all_translations_for_language(self):
-#        dogtail.i18n.loadAllTranslationsForLanguage('en_US')
-#

@@ -171,7 +171,7 @@ class AccessibleObject:
     @staticmethod
     def is_selection(acc_object):
         """
-        Return True if Atspi object is an EditableText else False.
+        Return True if Atspi object is an Selection else False.
         """
 
         LOGGING.debug(logging_class.get_func_params_and_values())
@@ -180,6 +180,20 @@ class AccessibleObject:
             return acc_object.get_selection_iface() is not None
 
         return Atspi.Accessible.get_selection_iface(acc_object) is not None
+
+
+    @staticmethod
+    def is_table(acc_object):
+        """
+        Return True if Atspi object is an Table else False.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if AccessibleObject.is_newton(acc_object):
+            return acc_object.get_table_iface() is not None
+
+        return Atspi.Accessible.get_table_iface(acc_object) is not None
 
 
     @staticmethod

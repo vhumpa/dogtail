@@ -56,7 +56,7 @@ class AccessibleComponent:
             LOGGING.debug("Accessible object does not have a Component interface.")
             return False
 
-        if coordinate_type not in (0, 1, 2):
+        if coordinate_type not in (0, 1, 2, None):
             LOGGING.debug(f"Not a valid coordinate type '{coordinate_type}'.")
             return False
 
@@ -109,7 +109,7 @@ class AccessibleComponent:
             LOGGING.debug("Accessible object does not have a Component interface.")
             return False
 
-        if coordinate_type not in (0, 1, 2):
+        if coordinate_type not in (0, 1, 2, None):
             LOGGING.debug(f"Not a valid coordinate type '{coordinate_type}'.")
             return False
 

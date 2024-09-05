@@ -127,6 +127,34 @@ class AccessibleObject:
 
 
     @staticmethod
+    def is_hypertext(acc_object):
+        """
+        Return True if Atspi object is an Hypertext else False.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if AccessibleObject.is_newton(acc_object):
+            return acc_object.get_hypertext_iface() is not None
+
+        return Atspi.Accessible.get_hypertext_iface(acc_object) is not None
+
+
+    @staticmethod
+    def is_image(acc_object):
+        """
+        Return True if Atspi object is an Image else False.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if AccessibleObject.is_newton(acc_object):
+            return acc_object.get_image_iface() is not None
+
+        return Atspi.Accessible.get_image_iface(acc_object) is not None
+
+
+    @staticmethod
     def is_component(acc_object):
         """
         Return True if Atspi object is a Component else False.

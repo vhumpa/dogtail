@@ -518,6 +518,17 @@ class Node(object):
 
 
     @property
+    def invalid(self):
+        """
+        Indicates that the object is invalid.
+        """
+
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleState.get_invalid(self)
+
+
+    @property
     def state_set(self):
         """
         Get states.

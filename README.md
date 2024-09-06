@@ -11,6 +11,13 @@ News
 
 After more than five years of continuous experimentation and development, we are excited to finally release Dogtail 1.0—a Wayland-enabled version of Dogtail! How did we achieve this? It was made possible by the `gnome-ponytail-daemon`, originally crafted by Olivier Fourdan: https://gitlab.gnome.org/ofourdan/gnome-ponytail-daemon. This tool allows us to perform actions in a Wayland GNOME session in a similar way to how we have been doing so with X functions.
 
+### dogtail 1.0.1
+
+Rebased with a number of contributions that were done to the master branch while we were working on Wayland and we have accidentaly not included them in 1.0.
+See https://gitlab.com/dogtail/dogtail/-/issues/31 
+
+Also returned couple of modules we thought were of no use (tc, wrapped) but were proved otherwise to keep 1.0 fully compatible with 0.x.
+
 ## How does it work in brief?
 
 The core functionality relies on the Screen Cast and Remote Desktop API, enabling us to "connect" to either a specific window or the entire screen to simulate user input actions like key presses, typing, and—most importantly—mouse actions on specific coordinates. Ponytail uses the window list from `org.gnome.Shell.Introspect` to identify windows. Dogtail then ensures the correct window is connected via the Remote Desktop API, allowing input actions to be accurately executed within it.
@@ -113,6 +120,14 @@ you prefer to use github, but gitlab.com is preferred)
 -----
 
     News summary - for details see NEWS
+
+    September-6-2024 
+    
+    dogtail 1.0.1
+
+    Rebased with a number of contributions that were done to the master branch while we were working on Wayland and we have accidentaly not included them in 1.0.
+    See https://gitlab.com/dogtail/dogtail/-/issues/31 
+    Also returned couple of modules we thought were of no use (tc, wrapped) but were proved otherwise to keep 1.0 fully compatible with 0.x.
 
     August-20-2024
 

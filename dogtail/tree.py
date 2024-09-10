@@ -38,6 +38,7 @@ from dogtail.accessible_root import AccessibleRoot
 from dogtail.accessible_selection import AccessibleSelection
 from dogtail.accessible_state import AccessibleState
 from dogtail.accessible_table import AccessibleTable
+from dogtail.accessible_table_cell import AccessibleTableCell
 from dogtail.accessible_text import AccessibleText
 from dogtail.accessible_utilities import AccessibleUtilities
 from dogtail.accessible_value import AccessibleValue
@@ -1227,6 +1228,92 @@ class Node(object):
         LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleTable.remove_row_selection(self, row)
+
+
+    def get_column_header_cells(self):
+        """
+        Returns the column headers as an array of cell accessibles.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTableCell.get_column_header_cells(self)
+
+
+    def get_column_index(self):
+        """
+        Returns the column index.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTableCell.get_column_index(self)
+
+
+    def get_column_span(self):
+        """
+        Returns the number of columns occupied by this cell accessible. The returned
+        values are meaningful only if the table cell has both STATE_VISIBLE and
+        STATE_SHOWING.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTableCell.get_column_span(self)
+
+
+    def get_cell_position(self):
+        """
+        Retrieves the tabular position of this cell.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTableCell.get_position(self)
+
+
+    def get_row_column_span(self):
+        """
+        Gets the row and column indexes and extents of this cell accessible.
+        The returned values are meaningful only if the table cell has both STATE_VISIBLE
+        and STATE_SHOWING.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTableCell.get_row_column_span(self)
+
+
+    def get_row_header_cells(self):
+        """
+        Returns the row headers as an array of cell accessibles.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTableCell.get_row_header_cells(self)
+
+
+    def get_row_span(self):
+        """
+        Returns the number of rows occupied by this cell accessible. The returned values
+        are meaningful only if the table cell has both STATE_VISIBLE and STATE_SHOWING.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTableCell.get_row_span(self)
+
+
+    def get_table(self):
+        """
+        Returns a reference to the accessible of the containing table.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTableCell.get_table(self)
+
 
 
     @property

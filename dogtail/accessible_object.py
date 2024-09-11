@@ -327,9 +327,13 @@ class AccessibleObject:
         LOGGING.debug(logging_class.get_func_params_and_values())
 
         # Pull values from kwargs here.
+        validated_recursive = True
         validated_showing_only = config.search_showing_only
         # ===================================================
         for key, val in kwargs.items():
+            if "recursive" == str(key):
+                validated_recursive = val
+
             if str(key) in ("showingOnly", "showing_only"):
                 validated_showing_only = val
         # ===================================================
@@ -357,7 +361,11 @@ class AccessibleObject:
             return None
 
         matches = []
-        AccessibleObject._find_all_descendants(acc_object, predicate, matches)
+        if not validated_recursive:
+            list(filter(predicate, acc_object.children))
+
+        else:
+            AccessibleObject._find_all_descendants(acc_object, predicate, matches)
         return matches
 
 
@@ -371,12 +379,16 @@ class AccessibleObject:
 
         # Pull values from kwargs here.
         validated_retry = True
+        validated_recursive = True
         validated_require_result = True
         validated_showing_only = config.search_showing_only
         # ===================================================
         for key, val in kwargs.items():
             if "retry" == str(key):
                 validated_retry = val
+
+            if "recursive" == str(key):
+                validated_recursive = val
 
             if str(key) in ("requireResult", "require_result"):
                 validated_require_result = val
@@ -423,9 +435,12 @@ class AccessibleObject:
                 LOGGING.info(f"Searching again (attempt '{number_of_attempts}')")
 
             try:
+                if not validated_recursive:
+                    success_match = list(filter(predicate, acc_object.children))
 
-                if depth_first:
+                elif depth_first:
                     success_match = AccessibleObject._find_descendant_depth_first(acc_object, predicate)
+
                 else:  # breadth_first
                     success_match = AccessibleObject._find_descendant_breadth_first(acc_object, predicate)
 

@@ -43,9 +43,22 @@ from dogtail.accessible_text import AccessibleText
 from dogtail.accessible_utilities import AccessibleUtilities
 from dogtail.accessible_value import AccessibleValue
 
-from dogtail.predicate import GenericPredicate
+from dogtail.predicate import (
+    GenericPredicate,
+    IsAMenuNamed,
+    IsAMenuItemNamed,
+    IsATextEntryNamed,
+    IsAButtonNamed,
+    IsLabelledAs,
+    IsNamed,
+    IsATabNamed,
+    IsAWindowNamed,
+    IsADialogNamed,
+)
+
 from dogtail.ponytail_helper import ponytail_helper
 from dogtail.rawinput import click, point, double_click
+from dogtail.utils import do_delay
 
 
 class Node(object):
@@ -2131,6 +2144,90 @@ class Node(object):
     ########################################
     # Backwards compatibility definitions. #
     ########################################
+    def __setupUserData(self): # pylint: disable=invalid-name
+        """
+        Setup user data dictionary.
+        """
+        try:
+            len(self.user_data)
+        except (AttributeError, TypeError):
+            self.user_data = {} # pylint: disable=attribute-defined-outside-init
+
+
+    @property
+    def debugName(self): # pylint: disable=invalid-name
+        """
+        Debug name assigned during search operations.
+        """
+
+        self.__setupUserData()
+        return self.user_data.get("debugName", None)
+
+
+    @debugName.setter
+    def debugName(self, debugName): # pylint: disable=invalid-name
+        """
+        Debug name setter.
+        """
+
+        self.__setupUserData()
+        self.user_data["debugName"] = debugName
+
+
+    @property
+    def combovalue(self):
+        """
+        The value (as a string) currently selected in the combo box.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return self.name
+
+
+    @combovalue.setter
+    def combovalue(self, value):
+        """
+        Set the value (as a string) in the combo box.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        self.childNamed(childName=value).doActionNamed("click")
+        do_delay()
+
+
+    @property
+    def isChecked(self): # pylint: disable=invalid-name
+        """
+        Is the Accessible a checked checkbox? Compatibility property, same as
+        Node.checked.
+        """
+
+        return self.checked
+
+
+    @property
+    def isSelected(self): # pylint: disable=invalid-name
+        """
+        Is the Accessible selected?
+        """
+
+        return self.selected
+
+
+    @property
+    def selectedChildren(self): # pylint: disable=invalid-name
+        """
+        Returns a list of children that are selected.
+        """
+
+        selected_children = []
+        for index in range(AccessibleSelection.get_n_selected_children(self)):
+            selected_children.append(AccessibleSelection.get_selected_child(self, index))
+        return selected_children
+
+
     @property
     def roleName(self): # pylint: disable=invalid-name
         """
@@ -2178,6 +2275,114 @@ class Node(object):
             **kwargs
         )
 
+
+    def menu(self, menuName, recursive=True, showingOnly=None): # pylint: disable=invalid-name
+        """
+        Search below this node for a menu with the given name.
+        """
+
+        return self.find_child(
+            IsAMenuNamed(name=menuName),
+            recursive=recursive,
+            showing_only=showingOnly
+        )
+
+
+    def menuItem(self, menuItemName, recursive=True, showingOnly=None): # pylint: disable=invalid-name
+        """
+        Search below this node for a menu item with the given name.
+        """
+
+        return self.find_child(
+            IsAMenuItemNamed(name=menuItemName),
+            recursive=recursive,
+            showing_only=showingOnly
+        )
+
+
+    def textentry(self, textEntryName, recursive=True, showingOnly=None): # pylint: disable=invalid-name
+        """
+        Search below this node for a text entry with the given name.
+        """
+
+        return self.find_child(
+            IsATextEntryNamed(name=textEntryName),
+            recursive=recursive,
+            showing_only=showingOnly
+        )
+
+
+    def button(self, buttonName, recursive=True, showingOnly=None): # pylint: disable=invalid-name
+        """
+        Search below this node for a button with the given name.
+        """
+
+        return self.find_child(
+            IsAButtonNamed(name=buttonName),
+            recursive=recursive,
+            showing_only=showingOnly
+        )
+
+
+    def childLabelled(self, labelText, recursive=True, showingOnly=None): # pylint: disable=invalid-name
+        """
+        Search below this node for a child labelled with the given text.
+        """
+
+        return self.find_child(
+            IsLabelledAs(label=labelText),
+            recursive=recursive,
+            showing_only=showingOnly
+        )
+
+
+    def childNamed(self, childName, recursive=True, showingOnly=None): # pylint: disable=invalid-name
+        """
+        Search below this node for a child with the given name.
+        """
+
+        return self.find_child(
+            IsNamed(name=childName),
+            recursive=recursive,
+            showing_only=showingOnly
+        )
+
+
+    def tab(self, childName, recursive=True, showingOnly=None): # pylint: disable=invalid-name
+        """
+        Search below this node for a tab with the given name.
+        """
+
+        return self.find_child(
+            IsATabNamed(name=childName),
+            recursive=recursive,
+            showing_only=showingOnly
+        )
+
+
+    def dialog(self, dialogName, recursive=True, showingOnly=None): # pylint: disable=invalid-name
+        """
+        Search below this node for a tab with the given name.
+        """
+
+        return self.find_child(
+            IsADialogNamed(name=dialogName),
+            recursive=recursive,
+            showing_only=showingOnly
+        )
+
+
+    def window(self, windowName, recursive=True, showingOnly=None): # pylint: disable=invalid-name
+        """
+        Search below this node for a tab with the given name.
+        """
+
+        return self.find_child(
+            IsAWindowNamed(name=windowName),
+            recursive=recursive,
+            showing_only=showingOnly
+        )
+
     def findChild(self, predicate, retry=True): # pylint: disable=invalid-name
         """
         For backwards compatibility reasons. Wrapper for self.find_child.
@@ -2215,6 +2420,58 @@ class Node(object):
         """
 
         return self.double_click(button=button)
+
+
+    @property
+    def link(self): # pylint: disable=invalid-name
+        """
+        Get Link from HyperText object.
+        """
+
+        try:
+            if AccessibleObject.is_newton(self):
+                # TODO
+                return None
+
+            for link_index in Atspi.HyperText.get_n_links(self):
+                return Atspi.HyperText.get_link(self, link_index)
+
+        except (NotImplementedError, AttributeError) as error:
+            raise RuntimeError from error
+
+
+    @property
+    def URI(self): # pylint: disable=invalid-name
+        """
+        Get Link Anchor from HyperLink object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        try:
+            if AccessibleObject.is_newton(self):
+                # TODO
+                return None
+
+            for link_index in Atspi.HyperText.get_n_links(self):
+                link = Atspi.HyperText.get_link(self, link_index)
+                for anchor_index in link.get_n_anchors(link_index):
+                    return link.get_uri(self, anchor_index)
+
+        except (NotImplementedError, AttributeError) as error:
+            raise RuntimeError from error
+
+
+    def satisfies(self, pred):
+        """
+        Does this node satisfy the given predicate?
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        assert isinstance(pred, GenericPredicate)
+        return pred.satisfied_by_node(self)
+
     ###############################################
     # End of backwards compatibility definitions. #
     ###############################################

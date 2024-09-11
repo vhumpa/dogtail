@@ -1315,6 +1315,300 @@ class Node(object):
         return AccessibleTableCell.get_table(self)
 
 
+    def add_selection(self, start_offset, end_offset):
+        """
+        Selects some text (adds a text selection) in an Atspi.Text object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.add_selection(self, start_offset, end_offset)
+
+
+    def get_attribute_run(self, offset, include_defaults):
+        """
+        Gets a set of attributes applied to a range of text from an Atspi.Text object,
+        optionally including its 'default' attributes.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_attribute_run(self, offset, include_defaults)
+
+
+    def get_bounded_ranges(self, x, y, width, height, coord_type, clip_type_x, clip_type_y):
+        """
+        Gets the ranges of text from an Atspi.Text object which lie within the bounds
+        defined by (x, y) and (x+'width', y+'height').
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_bounded_ranges(self, x, y, width, height, coord_type, clip_type_x, clip_type_y)
+
+
+    def get_caret_offset(self):
+        """
+        Gets the current offset of the text caret in an Atspi.Text object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_caret_offset(self)
+
+
+    def get_character_at_offset(self, offset):
+        """
+        Gets the character at a given offset for an Atspi.Text object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_character_at_offset(self, offset)
+
+
+    def get_character_count(self):
+        """
+        Gets the character count of an #AccessibleText object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_character_count(self)
+
+
+    def get_character_extents(self, offset, coord_type):
+        """
+        Gets a bounding box containing the glyph representing the character at a
+        particular text offset. The returned values are meaningful only if the Text has
+        both STATE_VISIBLE and STATE_SHOWING.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_character_extents(self, offset, coord_type)
+
+
+    def get_default_attributes(self):
+        """
+        Gets the default attributes applied to an Atspi.Text object. The text attributes
+        correspond to CSS attributes where possible. The combination of this attribute
+        set and the attributes reported by Atspi.Text.get_text_attributes describes the
+        entire set of text attributes over a range.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_default_attributes(self)
+
+
+    def get_n_selections(self):
+        """
+        Gets the number of active non-contiguous selections for an Atspi.Text object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_n_selections(self)
+
+
+    def get_offset_at_point(self, x, y, coord_type):
+        """
+        Gets the character offset into the text at a given point.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_offset_at_point(self, x, y, coord_type)
+
+
+    def get_range_extents(self, start_offset, end_offset, coord_type):
+        """
+        Gets the bounding box for text within a range in an Atspi.Text object.
+        The returned values are meaningful only if the Text has both STATE_VISIBLE and
+        STATE_SHOWING.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_range_extents(self, start_offset, end_offset, coord_type)
+
+
+    def get_selection(self, selection_num):
+        """
+        Gets the bounds of the selection_num-th active text selection for an Atspi.Text
+        object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_selection(self, selection_num)
+
+
+    def get_string_at_offset(self, offset, granularity):
+        """
+        Gets a portion of the text exposed through an Atspi.Text according to a given
+        offset and a specific granularity, along with the start and end offsets defining
+        the boundaries of such a portion of text.
+
+        New in version Atspi 2.9.90.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_string_at_offset(self, offset, granularity)
+
+
+    def get_text(self, start_offset, end_offset):
+        """
+        Gets a range of text from an Atspi.Text object. The number of bytes in the
+        returned string may exceed either end_offset or start_offset, since UTF-8 is a
+        variable-width encoding.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_text(self, start_offset, end_offset)
+
+
+    def get_text_after_offset(self, offset, coord_type):
+        """
+        Gets delimited text from an Atspi.Text object which follows a given text offset.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_text_after_offset(self, offset, coord_type)
+
+
+    def get_text_at_offset(self, offset, coord_type):
+        """
+        Gets delimited text from an Atspi.Text object which includes a given text
+        offset.
+
+        Deprecated since version 2.10. Use Atspi.Text.get_string_at_offset.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_text_at_offset(self, offset, coord_type)
+
+
+    def get_text_attribute_value(self, offset, attribute_name):
+        """
+        Gets the value of a named attribute at a given offset.
+
+        Deprecated since version 2.10: Use Atspi.Text.get_text_attribute_value instead.
+
+        Note: The deprecation note what to use seems wrong.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_text_attribute_value(self, offset, attribute_name)
+
+
+    def get_text_attributes(self, offset):
+        """
+        Gets the attributes applied to a range of text from an Atspi.Text object.
+        The text attributes correspond to CSS attributes where possible.
+
+        Deprecated since version 2.10: Use Atspi.Text.get_text_attributes instead.
+
+        Note: The deprecation note what to use seems wrong.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_text_attributes(self, offset)
+
+
+    def get_text_before_offset(self, offset, coord_type):
+        """
+        Gets delimited text from an Atspi.Text object which precedes a given text
+        offset.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_text_before_offset(self, offset, coord_type)
+
+
+    def remove_selection(self, selection_num):
+        """
+        De-selects a text selection.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.remove_selection(self, selection_num)
+
+
+    def scroll_substring_to(self, start_offset, end_offset, coord_type):
+        """
+        Scrolls whatever container of the Atspi.Text text range so it becomes visible
+        on the screen.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.scroll_substring_to(self, start_offset, end_offset, coord_type)
+
+
+    def scroll_substring_to_point(self, start_offset, end_offset, coord_type, x, y):
+        """
+        Scrolls whatever container of the Atspi.Text text range so it becomes visible
+        on the screen at a given position.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.scroll_substring_to_point(self, start_offset, end_offset, coord_type, x, y)
+
+
+    def set_caret_offset(self, new_offset):
+        """
+        Moves the text caret to a given position.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.set_caret_offset(self, new_offset)
+
+
+    def set_selection(self, selection_num, start_offset, end_offset):
+        """
+        Changes the bounds of an existing Atspi.Text text selection.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.set_selection(self, selection_num, start_offset, end_offset)
+
+
+    @property
+    def text(self):
+        """
+        Define a 'text' property for Atspi object.
+        """
+
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_all_text(self)
+
+
+    @text.setter
+    def text(self, content):
+        """
+        Define a 'text' setter for Atspi.Text object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleEditableText.set_text_contents(self, content)
+
+# TODO
 
     @property
     def toolkit(self):
@@ -1448,27 +1742,7 @@ class Node(object):
         return AccessibleObject.get_children(self)
 
 
-    @property
-    def text(self):
-        """
-        Define a 'text' property for Atspi object.
-        """
 
-        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
-        #LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleText.get_text(self)
-
-
-    @text.setter
-    def text(self, content):
-        """
-        Define a 'text' setter for Atspi.Text object.
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleText.set_text(self, content)
 
 
     @property
@@ -1933,9 +2207,6 @@ Atspi.Accessible.__bases__ = (
     Node,
     AccessibleObject,
     AccessibleRoot,
-    AccessibleSelection,
-    AccessibleState,
-    AccessibleText,
     AccessibleUtilities,
     AccessibleValue,
 ) + Atspi.Accessible.__bases__

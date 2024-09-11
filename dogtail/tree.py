@@ -1344,7 +1344,16 @@ class Node(object):
 
         LOGGING.debug(logging_class.get_func_params_and_values())
 
-        return AccessibleText.get_bounded_ranges(self, x, y, width, height, coord_type, clip_type_x, clip_type_y)
+        return AccessibleText.get_bounded_ranges(
+            self,
+            x,
+            y,
+            width,
+            height,
+            coord_type,
+            clip_type_x,
+            clip_type_y
+        )
 
 
     def get_caret_offset(self):
@@ -1563,7 +1572,14 @@ class Node(object):
 
         LOGGING.debug(logging_class.get_func_params_and_values())
 
-        return AccessibleText.scroll_substring_to_point(self, start_offset, end_offset, coord_type, x, y)
+        return AccessibleText.scroll_substring_to_point(
+            self,
+            start_offset,
+            end_offset,
+            coord_type,
+            x,
+            y
+        )
 
 
     def set_caret_offset(self, new_offset):
@@ -1608,7 +1624,101 @@ class Node(object):
 
         return AccessibleEditableText.set_text_contents(self, content)
 
-# TODO
+
+    def get_current_value(self):
+        """
+        Gets the current value for an Atspi.Value.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleValue.get_current_value(self)
+
+
+    @property
+    def value(self):
+        """
+        Gets the current value for an Atspi.Value.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return self.get_current_value()
+
+
+    @value.setter
+    def value(self, new_value):
+        """
+        Gets the current value for an Atspi.Value.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleValue.set_current_value(self, new_value)
+
+
+    def get_maximum_value(self):
+        """
+        Gets the maximum allowed value for an Atspi.Value.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleValue.get_maximum_value(self)
+
+
+    @property
+    def max_value(self):
+        """
+        Gets the maximum allowed value for an Atspi.Value.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return self.get_maximum_value()
+
+
+    def get_minimum_increment(self):
+        """
+        Gets the minimum increment by which an Atspi.Value can be adjusted.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleValue.get_minimum_increment(self)
+
+
+    @property
+    def min_value_increment(self):
+        """
+        Gets the minimum increment by which an Atspi.Value can be adjusted.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return self.get_minimum_increment()
+
+
+    def get_minimum_value(self):
+        """
+        Gets the minimum allowed value for an Atspi.Value.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleValue.get_minimum_value(self)
+
+
+    @property
+    def min_value(self):
+        """
+        Gets the minimum allowed value for an Atspi.Value.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return self.get_minimum_value()
+
 
     @property
     def toolkit(self):
@@ -1742,9 +1852,6 @@ class Node(object):
         return AccessibleObject.get_children(self)
 
 
-
-
-
     @property
     def dead(self):
         """
@@ -1754,61 +1861,6 @@ class Node(object):
         LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleObject.is_dead(self)
-
-
-
-    @property
-    def value(self):
-        """
-        Gets the current value for an Atspi.Value.
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleValue.get_current_value(self)
-
-
-    @value.setter
-    def value(self, new_value):
-        """
-        Gets the current value for an Atspi.Value.
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleValue.set_current_value(self, new_value)
-
-
-    @property
-    def min_value(self):
-        """
-        Gets the minimum allowed value for an Atspi.Value.
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleValue.get_minimum_value(self)
-
-    @property
-    def max_value(self):
-        """
-        Gets the maximum allowed value for an Atspi.Value.
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleValue.get_maximum_value(self)
-
-
-    @property
-    def min_value_increment(self):
-        """
-        Gets the minimum increment by which an Atspi.Value can be adjusted.
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        return AccessibleValue.get_minimum_increment(self)
 
 
     def child(self, name=None, role_name=None, description=None, label=None, **kwargs):
@@ -1949,10 +2001,6 @@ class Node(object):
         LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleObject.get_labelee(self)
-
-
-
-
 
 
     def click(self, button=1, offset_x=0, offset_y=0):
@@ -2205,10 +2253,6 @@ class Node(object):
 
 Atspi.Accessible.__bases__ = (
     Node,
-    AccessibleObject,
-    AccessibleRoot,
-    AccessibleUtilities,
-    AccessibleValue,
 ) + Atspi.Accessible.__bases__
 
 

@@ -29,7 +29,7 @@ class AccessibleValue:
     @staticmethod
     def get_current_value(acc_object):
         """
-        Get the current value of an Accessible Value object.
+        Gets the current value for an Atspi.Value.
         """
 
         LOGGING.debug(logging_class.get_func_params_and_values())
@@ -46,6 +46,72 @@ class AccessibleValue:
             return acc_object.get_current_value()
 
         return Atspi.Value.get_current_value(acc_object)
+
+
+    @staticmethod
+    def get_maximum_value(acc_object):
+        """
+        Gets the maximum allowed value for an Atspi.Value.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_valid(acc_object):
+            LOGGING.debug("Object is not valid Accessible.")
+            return False
+
+        if not AccessibleObject.is_value(acc_object):
+            LOGGING.debug("Accessible object does not have a Value interface.")
+            return False
+
+        if AccessibleObject.is_newton(acc_object):
+            return acc_object.get_maximum_value()
+
+        return Atspi.Value.get_maximum_value(acc_object)
+
+
+    @staticmethod
+    def get_minimum_increment(acc_object):
+        """
+        Gets the minimum increment by which an Atspi.Value can be adjusted.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_valid(acc_object):
+            LOGGING.debug("Object is not valid Accessible.")
+            return False
+
+        if not AccessibleObject.is_value(acc_object):
+            LOGGING.debug("Accessible object does not have a Value interface.")
+            return False
+
+        if AccessibleObject.is_newton(acc_object):
+            return acc_object.get_minimum_increment()
+
+        return Atspi.Value.get_minimum_increment(acc_object)
+
+
+    @staticmethod
+    def get_minimum_value(acc_object):
+        """
+        Gets the minimum allowed value for an Atspi.Value.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_valid(acc_object):
+            LOGGING.debug("Object is not valid Accessible.")
+            return False
+
+        if not AccessibleObject.is_value(acc_object):
+            LOGGING.debug("Accessible object does not have a Value interface.")
+            return False
+
+        if AccessibleObject.is_newton(acc_object):
+            return acc_object.get_minimum_value()
+
+        return Atspi.Value.get_minimum_value(acc_object)
 
 
     @staticmethod
@@ -68,69 +134,3 @@ class AccessibleValue:
             return acc_object.set_current_value(set_value)
 
         return Atspi.Value.set_current_value(acc_object, set_value)
-
-
-    @staticmethod
-    def get_minimum_value(acc_object):
-        """
-        Get the current minimum value of an Accessible Value object.
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        if not AccessibleObject.is_valid(acc_object):
-            LOGGING.debug("Object is not valid Accessible.")
-            return False
-
-        if not AccessibleObject.is_value(acc_object):
-            LOGGING.debug("Accessible object does not have a Value interface.")
-            return False
-
-        if AccessibleObject.is_newton(acc_object):
-            return acc_object.get_minimum_value()
-
-        return Atspi.Value.get_minimum_value(acc_object)
-
-
-    @staticmethod
-    def get_maximum_value(acc_object):
-        """
-        Get the current maximum value of an Accessible Value object.
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        if not AccessibleObject.is_valid(acc_object):
-            LOGGING.debug("Object is not valid Accessible.")
-            return False
-
-        if not AccessibleObject.is_value(acc_object):
-            LOGGING.debug("Accessible object does not have a Value interface.")
-            return False
-
-        if AccessibleObject.is_newton(acc_object):
-            return acc_object.get_maximum_value()
-
-        return Atspi.Value.get_maximum_value(acc_object)
-
-
-    @staticmethod
-    def get_minimum_increment(acc_object):
-        """
-        Get the current min value increment of an Accessible Value object.
-        """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
-        if not AccessibleObject.is_valid(acc_object):
-            LOGGING.debug("Object is not valid Accessible.")
-            return False
-
-        if not AccessibleObject.is_value(acc_object):
-            LOGGING.debug("Accessible object does not have a Value interface.")
-            return False
-
-        if AccessibleObject.is_newton(acc_object):
-            return acc_object.get_minimum_increment()
-
-        return Atspi.Value.get_minimum_increment(acc_object)

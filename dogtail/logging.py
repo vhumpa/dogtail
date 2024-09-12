@@ -100,6 +100,16 @@ class Logging(metaclass=Singleton):
                 handler.setLevel(logging.DEBUG)
                 break
 
+    def disable_debug_to_console(self) -> None:
+        """
+        Set file handler level to INFO to get the output to console.
+        """
+
+        for handler in self.logger.handlers:
+            if handler.get_name() == "console_handler":
+                handler.setLevel(logging.INFO)
+                break
+
     def get_func_params_and_values(self):
         """
         Simple way to have logging data from the place it was called in.

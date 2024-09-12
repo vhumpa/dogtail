@@ -231,9 +231,13 @@ class _Config:
             # Type was checked, keep the defined types.
             self.options[set_option_id] = Value(value_to_set, _defined_types)
 
-            if value_to_set == "debug_dogtail" and config.debug_dogtail:
+            if set_option_id == "debug_dogtail" and self.options[set_option_id].value:
                 LOGGING.info("Debugging dogtail to console.")
                 logging_class.debug_to_console()
+
+            if set_option_id == "debug_dogtail" and not self.options[set_option_id].value:
+                LOGGING.info("Disabling debugging dogtail to console.")
+                logging_class.disable_debug_to_console()
 
     def __getattr__(self, option_id):
         LOGGING.debug(logging_class.get_func_params_and_values())

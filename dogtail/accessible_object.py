@@ -31,6 +31,12 @@ LOGGING = logging_class.logger
 # Most likely will do 2 levels, debug and debug_verbose and check method by method.
 
 
+class SearchError(Exception):
+    """
+    The widget was not found.
+    """
+
+
 class AccessibleObject:
     """
     Utility class for obtaining information about Accessible Objects.
@@ -425,7 +431,7 @@ class AccessibleObject:
         else:
             predicate_type = type(given_predicate)
             LOGGING.info(f"Unknown/unsupported way '{predicate_type}' to compare nodes.")
-            raise RuntimeError("No match.")
+            raise SearchError("No match.")
 
         # Debug description of what user is searching for.
         LOGGING.debug(f"Searching for '{description_to_use}'")
@@ -467,7 +473,7 @@ class AccessibleObject:
             do_delay(config.search_back_off_delay)
 
         if validated_require_result:
-            raise RuntimeError(f"No match for '{description_to_use}'")
+            raise SearchError(f"No match for '{description_to_use}'")
 
 
     @staticmethod

@@ -61,6 +61,13 @@ from dogtail.rawinput import click, point, double_click
 from dogtail.utils import do_delay
 
 
+# Defining here too to preserve backwards compatibility.
+class SearchError(Exception):
+    """
+    The widget was not found.
+    """
+
+
 class Node(object):
     """
     Main dogtail API definition.
@@ -1936,7 +1943,7 @@ class Node(object):
             # We do not care about a result here, just existence.
             AccessibleObject.find_descendant(self, predicate, **kwargs)
             return True
-        except RuntimeError:
+        except SearchError:
             return False
 
 

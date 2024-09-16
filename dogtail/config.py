@@ -213,8 +213,9 @@ class _Config:
 
         # In other cases check that the value exists.
         if set_option_id not in self.options:
-            #LOGGING.info("To define a custom value, use 'custom_' to prefix your value.")
-            raise AttributeError(f"Attempt to use invalid option '{set_option_id}'.")
+            #raise AttributeError(f"Attempt to use invalid option '{set_option_id}'.")
+            LOGGING.info(f"Attempt to use invalid option '{set_option_id}'.")
+            return
 
         # Set the value if the value is not already present.
         if self.options[set_option_id].value != value_to_set:
@@ -252,8 +253,9 @@ class _Config:
 
         try:
             return self.options[get_option_id].value
-        except KeyError as error:
-            raise AttributeError(f"Attempt to use invalid option '{get_option_id}'.") from error
+        except KeyError:
+            #raise AttributeError(f"Attempt to use invalid option '{get_option_id}'.") from error
+            LOGGING.info(f"Attempt to use invalid option '{get_option_id}'.")
 
 
 config = _Config()

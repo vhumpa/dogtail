@@ -33,7 +33,7 @@ from dogtail.accessible_component import AccessibleComponent
 from dogtail.accessible_editable_text import AccessibleEditableText
 from dogtail.accessible_hypertext import AccessibleHypertext
 from dogtail.accessible_image import AccessibleImage
-from dogtail.accessible_object import AccessibleObject
+from dogtail.accessible_object import AccessibleObject, SearchError
 from dogtail.accessible_root import AccessibleRoot
 from dogtail.accessible_selection import AccessibleSelection
 from dogtail.accessible_state import AccessibleState
@@ -59,13 +59,6 @@ from dogtail.predicate import (
 from dogtail.ponytail_helper import ponytail_helper
 from dogtail.rawinput import click, point, double_click
 from dogtail.utils import do_delay
-
-
-# Defining here too to preserve backwards compatibility.
-class SearchError(Exception):
-    """
-    The widget was not found.
-    """
 
 
 class Node(object):

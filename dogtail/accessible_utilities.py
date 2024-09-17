@@ -21,7 +21,7 @@ from dogtail.logging import logging_class
 
 LOGGING = logging_class.logger
 
-from dogtail.accessible_object import AccessibleObject
+from dogtail.accessible_object import AccessibleObject, SearchError
 
 
 class AccessibleUtilities:
@@ -171,7 +171,7 @@ class AccessibleUtilities:
 
             do_delay(config.search_back_off_delay)
 
-        raise RuntimeError(f"Application '{application_name}' was not found in desktop.")
+        raise SearchError(f"Application '{application_name}' was not found in desktop.")
 
 
     @staticmethod

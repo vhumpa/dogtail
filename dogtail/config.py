@@ -240,6 +240,7 @@ class _Config:
                 LOGGING.info("Disabling debugging dogtail to console.")
                 logging_class.disable_debug_to_console()
 
+
     def __getattr__(self, option_id):
         LOGGING.debug(logging_class.get_func_params_and_values())
 

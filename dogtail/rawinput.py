@@ -906,13 +906,12 @@ def keyCombo(comboString):  # pylint: disable=invalid-name
 
 
 # To keep backwards compatibility and allow users to import doDelay from here.
-def doDelay():  # pylint: disable=invalid-name
+def doDelay(delay=None):  # pylint: disable=invalid-name
     """
     Do Delay.
     """
 
-    do_delay(float(config.typing_delay))
-
+    do_delay(delay=delay)
 ###############################################
 # End of backwards compatibility definitions. #
 ###############################################

@@ -16,8 +16,14 @@ dogtail 1.0
 
 After more than five years of continuous experimentation and development, we are excited to finally release Dogtail 1.0—a Wayland-enabled version of Dogtail! How did we achieve this? It was made possible by the `gnome-ponytail-daemon <https://gitlab.gnome.org/ofourdan/gnome-ponytail-daemon>`_, originally crafted by Olivier Fourdan. This tool allows us to perform actions in a Wayland GNOME session in a similar way to how we have been doing so with X functions.
 
+dogtail 1.0.2 - Cummulated two updates - bugfixes - and releasing as minor release. 
+Update for sniff: Switched using XPM icons to PNG as the most recent gdk pixbug no longer supports them
+(fixes no icons in most recent system) - thanks to Jiri Prajzner
+Using specific configuration for the debug logger to prevent duplicit logging - MR#39 - thanks to Jiri Kortus
+
+
 dogtail 1.0.1 - Rebased with a number of contributions that were done to the master branch while we were working on Wayland and we have accidentaly not included them in 1.0.
-See https://gitlab.com/dogtail/dogtail/-/issues/31 
+See https://gitlab.com/dogtail/dogtail/-/issues/31
 
 Also returned couple of modules we thought were of no use (tc, wrapped) but were proved otherwise to keep 1.0 fully compatible with 0.x.
 

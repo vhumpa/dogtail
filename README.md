@@ -18,6 +18,13 @@ See https://gitlab.com/dogtail/dogtail/-/issues/31
 
 Also returned couple of modules we thought were of no use (tc, wrapped) but were proved otherwise to keep 1.0 fully compatible with 0.x.
 
+### dogtail 1.0.2
+
+Cummulated two updates - bugfixes - and releasing as minor release. 
+Update for sniff: Switched using XPM icons to PNG as the most recent gdk pixbug no longer supports them
+(fixes no icons in most recent system) - thanks to Jiri Prajzner
+Using specific configuration for the debug logger to prevent duplicit logging - MR#39 - thanks to Jiri Kortus
+
 ## How does it work in brief?
 
 The core functionality relies on the Screen Cast and Remote Desktop API, enabling us to "connect" to either a specific window or the entire screen to simulate user input actions like key presses, typing, and—most importantly—mouse actions on specific coordinates. Ponytail uses the window list from `org.gnome.Shell.Introspect` to identify windows. Dogtail then ensures the correct window is connected via the Remote Desktop API, allowing input actions to be accurately executed within it.

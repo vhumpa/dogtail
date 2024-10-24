@@ -226,12 +226,12 @@ class DebugLogger(metaclass=Singleton):
     logger = None
 
     def __init__(self):
-        logging.basicConfig(
-            level=logging.INFO,
-            format="%(message)s",
-            handlers=[logging.StreamHandler()])
-
+        # Using logging.basicConfig can negatively affect all other (3rd party)
+        # already instantiated loggers
         self.logger = logging.getLogger("debug")
+        streamHandler = logging.StreamHandler()
+        streamHandler.setFormatter(logging.Formatter("%(message)s"))
+        self.logger.addHandler(streamHandler)
 
 
     @staticmethod

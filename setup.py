@@ -34,7 +34,7 @@ def sniff_icons():
     list = os.listdir(os.curdir + '/sniff/icons/')
     result = []
     for file in list:
-        if file.split('.')[-1] in ('xpm'):
+        if file.split('.')[-1] in ('png'):
             result = result + ['sniff/icons/' + file]
     return result
 

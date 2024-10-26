@@ -478,9 +478,13 @@ def get_current_x_window_position():
     _display = display.Display()
     root = _display.screen().root
 
-    window_id = root.get_full_property(
+    prop = root.get_full_property(
         _display.intern_atom("_NET_ACTIVE_WINDOW"), X.AnyPropertyType
-    ).value[0]
+    )
+    if prop is None:
+        return 0, 0
+
+    window_id = prop.value[0]
 
     window = _display.create_resource_object("window", window_id)
 

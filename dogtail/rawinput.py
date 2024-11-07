@@ -31,6 +31,9 @@ from dogtail.config import config
 from dogtail.utils import do_delay
 
 from dogtail.ponytail_helper import ponytail_helper
+# To preserve API from dogtail-1.x lets provide ponytail here as well.
+ponytail = ponytail_helper._ponytail_dbus_interface # pylint: disable=protected-access
+
 from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 

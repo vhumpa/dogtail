@@ -21,9 +21,17 @@ class GenericPredicate:
     Simple predicate class, providing easy way to compare nodes.
     """
 
-    def __init__(self, name=None, role_name=None, description=None, label=None, identifier=None):
+    def __init__(self, name=None, role_name=None, description=None, label=None, identifier=None, **kwargs):
+
+        using_role_name = role_name
+        # === Backward compatibility and extra parameters ===
+        for key, val in kwargs.items():
+            if "roleName" in str(key):
+                using_role_name = val
+        # ===================================================
+
         self.name = name
-        self.role_name = role_name
+        self.role_name = using_role_name
         self.description = description
         self.label = label
         self.identifier = identifier

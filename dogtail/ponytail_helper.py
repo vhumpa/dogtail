@@ -136,6 +136,7 @@ class PonytailHelper(metaclass=Singleton):
             LOGGING.debug("Return focused window if no window_id was provided.")
             for window in window_list:
                 if bool(window["has-focus"]):
+                    LOGGING.debug(f"Returning client-type '{window['client-type']}'.")
                     return int(window["client-type"])
 
         # The window_id match was not successful, return window_if of gnome-shell: 0.
@@ -192,7 +193,7 @@ class PonytailHelper(metaclass=Singleton):
                     if bool(window["has-focus"]) is True:
                         ponytail_interface.connectWindow(window["id"])
                         window_was_connected = True
-                        LOGGING.debug("Connected active window.")
+                        LOGGING.debug(f"Connected active window '{window['id']}'.")
 
                 # Attempt to connect monitor only in cases when window was not found.
                 if not window_was_connected:
@@ -238,6 +239,8 @@ class PonytailHelper(metaclass=Singleton):
 
             elif ponytail_interface.connected == window_id:
                 LOGGING.debug("Window or monitor is already connected.")
+
+        LOGGING.debug(f"Working with window_id: '{ponytail_interface.connected}'.")
 
 
     def get_window_id(self, accessible_object):

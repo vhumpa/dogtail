@@ -262,7 +262,7 @@ class Node(object):
 
         LOGGING.debug(logging_class.get_func_params_and_values())
 
-        return self.extents()
+        return self.get_extents()
 
 
     def get_layer(self):

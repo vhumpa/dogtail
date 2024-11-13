@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dogtail"
-version = "1.0.2"
+version = "1.0.3"
 description = "GUI test tool and automation framework that uses Accessibility (a11y) technologies to communicate with desktop applications."
 readme = { file = "README.rst", content-type = "text/x-rst" }
 requires-python = ">=3.6"

@@ -13,17 +13,24 @@ After more than five years of continuous experimentation and development, we are
 
 ### dogtail 1.0.1
 
-Rebased with a number of contributions that were done to the master branch while we were working on Wayland and we have accidentaly not included them in 1.0.
+Sep 6 2024 - Rebased with a number of contributions that were done to the master branch while we were working on Wayland and we have accidentaly not included them in 1.0.
 See https://gitlab.com/dogtail/dogtail/-/issues/31 
 
 Also returned couple of modules we thought were of no use (tc, wrapped) but were proved otherwise to keep 1.0 fully compatible with 0.x.
 
 ### dogtail 1.0.2
 
-Cummulated two updates - bugfixes - and releasing as minor release. 
+Oct 24 2024 - Cummulated two updates - bugfixes - and releasing as minor release. 
 Update for sniff: Switched using XPM icons to PNG as the most recent gdk pixbug no longer supports them
 (fixes no icons in most recent system) - thanks to Jiri Prajzner
 Using specific configuration for the debug logger to prevent duplicit logging - MR#39 - thanks to Jiri Kortus
+
+### dogtail 1.0.3
+
+Nov 13 2024 - Minor release again containing two updates
+- utils: get_current_x_window_position: Support running without a wm
+- tree : Improve center property calculation in Node class
+Thanks Samuel Thibault and mikigo for the MR and discussion!
 
 ## How does it work in brief?
 

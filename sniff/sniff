@@ -113,7 +113,7 @@ class SniffApp(object):
             self.about.set_icon(self.app.get_icon())
             self.about.set_authors(self.appAuthors)
             self.about.set_comments('Explore your desktop with Dogtail')
-            self.about.set_website('http://dogtail.fedorahosted.org/')
+            self.about.set_website('https://gitlab.com/dogtail/')
             self.about.connect("response", self.hideAbout)
             self.about.set_transient_for(self.app)
         self.about.show_all()

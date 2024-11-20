@@ -592,7 +592,7 @@ class SniffModel(Gtk.TreeStore):
                         else:
                             # If it has no children now, give it a sec
                             # to come up with some.
-                            GObject.timeout_add(1000, self.__addNodeCB, iter, child)
+                            GLib.timeout_add(1000, self.__addNodeCB, iter, child)
             elif event.type.minor == 'remove':
                 self.__removeNodeCB(iter, node, path)
 
@@ -624,10 +624,10 @@ class SniffModel(Gtk.TreeStore):
                 # if wnckApp
                 try:
                     return theme.load_icon(node.name, 24, Gtk.IconLookupFlags.USE_BUILTIN)
-                except GObject.GError:
+                except GLib.GError:
                     try:
                         return theme.load_icon(node.name.lower(), 24, Gtk.IconLookupFlags.USE_BUILTIN)
-                    except GObject.GError:
+                    except GLib.GError:
                         return None
             elif node.parent:
                 return iconForRole[node.role]
@@ -654,7 +654,7 @@ class StateModel(Gtk.ListStore):
 def loadIcon(iconName):
     try:
         pixbuf = GdkPixbuf.Pixbuf.new_from_file('icons/' + iconName)
-    except GObject.GError:
+    except GLib.GError:
         import os
         path = os.path.abspath(
             os.path.join(__file__, os.path.pardir, os.path.pardir))

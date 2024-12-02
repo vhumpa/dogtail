@@ -29,7 +29,7 @@ def gedit_text_tree_api_demo():
 
 
     # Get a handle to gedit's Save button and click.
-    save_button = gedit.child("Save", "push button")
+    save_button = gedit.findChild(lambda x: x.name == "Save" and x.roleName in ("button", "push button"))
     save_button.click()
 
 

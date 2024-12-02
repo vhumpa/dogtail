@@ -502,7 +502,7 @@ class IsAButtonNamed(Predicate):
     def __init__(self, buttonName):
         self.buttonName = TranslatableString(buttonName)
         self.debugName = self.describeSearchResult()
-        self.satisfiedByNode = lambda node: node.roleName == "push button" and stringMatches(self.buttonName, node.name)
+        self.satisfiedByNode = lambda node: node.roleName in ("button", "push button") and stringMatches(self.buttonName, node.name)
 
 
     def describeSearchResult(self):

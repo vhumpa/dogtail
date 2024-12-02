@@ -103,7 +103,7 @@ class TestRawinput(GtkDemoTest):
     def test_drag(self):
         self.runDemo('Tool Palette')
         win = self.app.window('Tool Palette')
-        src = win.findChildren(lambda x: x.roleName == 'push button' and x.showing)[0]
+        src = win.findChildren(lambda x: x.roleName in ('button', 'push button') and x.showing)[0]
         dst = win.child(roleName='viewport')
         drag((src.position[0] + src.size[0] / 2, src.position[1] + src.size[1] / 2),
              (dst.position[0] + dst.size[0] / 2, dst.position[1] + dst.size[1] / 2))
@@ -111,7 +111,7 @@ class TestRawinput(GtkDemoTest):
     def test_drag_with_trajectory(self):
         self.runDemo('Tool Palette')
         win = self.app.window('Tool Palette')
-        src = win.findChildren(lambda x: x.roleName == 'push button' and x.showing)[0]
+        src = win.findChildren(lambda x: x.roleName in ('button', 'push button') and x.showing)[0]
         dst = win.child(roleName='viewport')
         dragWithTrajectory((src.position[0] + src.size[0] / 2, src.position[1] + src.size[1] / 2),
                            (dst.position[0] + dst.size[0] / 2, dst.position[1] + dst.size[1] / 2))

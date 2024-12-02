@@ -1236,6 +1236,8 @@ class Node(object):
             return (ancestor, predicate.IsAMenuItemNamed(self.name), isRecursive)
         elif self.roleName == "text":
             return (ancestor, predicate.IsATextEntryNamed(self.name), isRecursive)
+        elif self.roleName == "button":
+            return (ancestor, predicate.IsAButtonNamed(self.name), isRecursive)
         elif self.roleName == "push button":
             return (ancestor, predicate.IsAButtonNamed(self.name), isRecursive)
         elif self.roleName == "frame":

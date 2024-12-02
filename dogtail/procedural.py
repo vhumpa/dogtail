@@ -344,7 +344,7 @@ class Action(FocusWidget):
 
     def __call__(self, name="", roleName="", description="", delay=config.actionDelay):
         """
-        If name, roleName or description are specified, first search for 
+        If name, roleName or description are specified, first search for
         a widget that matches and refocus on it. Then execute the action.
         """
 
@@ -372,7 +372,10 @@ class Action(FocusWidget):
 
         debug_log("button(self, name=%s)" % str(name))
 
-        self.__call__(name=name, roleName="push button")
+        try:
+            self.__call__(name=name, roleName="push button")
+        except Exception:
+            self.__call__(name=name, roleName="button")
 
 
     def menu(self, name):
@@ -473,7 +476,7 @@ class Select(Action):
 
     def __call__(self, name="", roleName="", description="", delay=config.actionDelay):
         """
-        If name, roleName or description are specified, first search for 
+        If name, roleName or description are specified, first search for
         a widget that matches and refocus on it. Then execute the action.
         """
 

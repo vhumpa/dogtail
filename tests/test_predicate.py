@@ -84,6 +84,7 @@ class TestPredicate(unittest.TestCase):
         self.assertEqual(textNamedPredicate.makeScriptVariableName(), 'dummyEntry')
 
     def test_predicates_button_named(self):
+        # For Issue 35 - IsAButtonName checks 'button' as well.
         dummyButton = self.DummyNode("dummy", 'push button')
         buttonNamedPredicate = dogtail.predicate.IsAButtonNamed(dummyButton.name)
         self.assertTrue(buttonNamedPredicate.satisfiedByNode(dummyButton))

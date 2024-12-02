@@ -871,12 +871,16 @@ class TestUnicodeNames(unittest.TestCase):
     def test_unicode_char_in_name(self):
         self.app.child('Menu', roleName='toggle button').click()
         unicode_button = None
-        unicode_button = self.app.child(name=u'Find and Replace…', roleName='push button')
+        unicode_button = self.app.child(
+            lambda x: x.name == u'Find and Replace…' and x.roleName in ('button', 'push button')
+        )
         assert unicode_button is not None
 
     def test_unicode_char_in_name_click(self):
         self.app.child('Menu', roleName='toggle button').click()
-        unicode_button = self.app.child(name=u'Find and Replace…', roleName='push button')
+        unicode_button = self.app.child(
+            lambda x: x.name == u'Find and Replace…' and x.roleName in ('button', 'push button')
+        )
         unicode_button.click()
         dialog = None
         t_ver = tuple(map(int, (self.ver.split("."))))
@@ -889,7 +893,9 @@ class TestUnicodeNames(unittest.TestCase):
 
     def test_unicode_logging_nocrash(self):
         try:
-            self.app.child(name='…Other stuff…', roleName='push button')
+            self.app.child(
+                lambda x: x.name == '…Other stuff…' and x.roleName in ('button', 'push button')
+            )
             self.fail()
         except dogtail.tree.SearchError:
             pass

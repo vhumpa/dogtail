@@ -12,7 +12,7 @@ def gedit_stress_test_tree_api():
         gedit.child("Menu", "toggle button").click() # open
         gedit.child("Menu", "toggle button").click() # close
 
-        gedit.child("Save", "push button").click()
-        gedit.child("Cancel", "push button").click()
+        gedit.findChild(lambda x: x.name == "Save" and x.roleName in ("button", "push button")).click()
+        gedit.findChild(lambda x: x.name == "Cancel" and x.roleName in ("button", "push button")).click()
 
 gedit_stress_test_tree_api()

@@ -23,7 +23,7 @@ debug_message(message="Click Log Out.")
 shell.child(name="Log Out", roleName="label").click()
 
 debug_message(message="Confirm logging out.")
-shell.child(name="Log Out", roleName="push button").click()
+shell.findChild(lambda x: x.name == "Log Out" and x.roleName in ("button", "push button")).click()
 
 
 debug_message(message="Some sleep that wont get to the end as the session will end.")

@@ -32,6 +32,13 @@ Nov 13 2024 - Minor release again containing two updates
 - tree : Improve center property calculation in Node class
 Thanks Samuel Thibault and mikigo for the MR and discussion!
 
+### dogtail 1.0.4
+
+Dec 4 2024 -  Minor release again containing two updates!
+- sniff: Fixes in About dialog and getting rid of GObject deprecations  MR #43 
+- tree: Moving all matches of "push button" to check also "button" - Fixes issue #35
+
+
 ## How does it work in brief?
 
 The core functionality relies on the Screen Cast and Remote Desktop API, enabling us to "connect" to either a specific window or the entire screen to simulate user input actions like key presses, typing, and—most importantly—mouse actions on specific coordinates. Ponytail uses the window list from `org.gnome.Shell.Introspect` to identify windows. Dogtail then ensures the correct window is connected via the Remote Desktop API, allowing input actions to be accurately executed within it.

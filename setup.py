@@ -64,7 +64,7 @@ with open("README.rst", "r") as fh:
 
 setup(
     name='dogtail',
-    version='1.0.3',
+    version='1.0.4',
     description="GUI test tool and automation framework " +
     "that uses Accessibility (a11y) technologies to " +
     "communicate with desktop applications.",

@@ -2237,6 +2237,33 @@ class Node(object):
         return self.role_name
 
 
+    @property
+    def minValue(self): # pylint: disable=invalid-name
+        """
+        For backwards compatibility reasons. Wrapper for self.min_value.
+        """
+
+        return self.min_value
+
+
+    @property
+    def maxValue(self): # pylint: disable=invalid-name
+        """
+        For backwards compatibility reasons. Wrapper for self.max_value.
+        """
+
+        return self.max_value
+
+
+    @property
+    def minValueIncrement(self): # pylint: disable=invalid-name
+        """
+        For backwards compatibility reasons. Wrapper for self.min_value_increment.
+        """
+
+        return self.min_value_increment
+
+
     def doActionNamed(self, named_action): # pylint: disable=invalid-name
         """
         For backwards compatibility reasons. Wrapper for self.do_action_named.

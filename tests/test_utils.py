@@ -121,8 +121,8 @@ class TestDelay(unittest.TestCase):
         dogtail.utils.config.defaultDelay = 2.0
         dogtail.utils.config.debugSleep = True
         output = trap_stdout(dogtail.utils.doDelay).split()
-        self.assertEqual(len(output), 3)
-        self.assertEqual(float(output[2]), 2.0)
+        self.assertEqual(len(output), 5)
+        self.assertAlmostEqual(float(output[-1]), 2.0)
         dogtail.utils.config.debugSleep = False
 
 

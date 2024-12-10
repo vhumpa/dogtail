@@ -20,7 +20,7 @@ def warn(message, caller=True):
 
     frameRec = inspect.stack()[-1]
     message = "Warning: %s:%s: %s" % (frameRec[1], frameRec[2], message)
-    if caller and frameRec[1] != "<stdin>" and frameRec[1] != "<string>":
+    if caller and frameRec[1] != "<stdin>" and frameRec[1] != "<string>" and frameRec[4]:
         message = message + ":\n  " + frameRec[4][0]
     del frameRec
     debug_log("warn(message, caller=%s)" % str(caller))

@@ -13,7 +13,7 @@ Vita Humpa <vhumpa@redhat.com>
 """
 
 
-__version__ = "1.0.4"
+__version__ = "1.0.5"
 __copyright__ = "Copyright © 2005-2017 Red Hat, Inc."
 __license__ = "GPL"
 __all__ = ("config", "distro", "dump", "errors", "i18n", "logging", "path", "predicate",

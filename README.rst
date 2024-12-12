@@ -16,7 +16,10 @@ dogtail 1.0
 
 After more than five years of continuous experimentation and development, we are excited to finally release Dogtail 1.0—a Wayland-enabled version of Dogtail! How did we achieve this? It was made possible by the `gnome-ponytail-daemon <https://gitlab.gnome.org/ofourdan/gnome-ponytail-daemon>`_, originally crafted by Olivier Fourdan. This tool allows us to perform actions in a Wayland GNOME session in a similar way to how we have been doing so with X functions.
 
-Dogtail 1.0.4 -  Minor release again containing two updates! / Dec 4 2024
+dogtail 1.0.5 - Contains several fixes to unittests and adding support for / Dec 12 2024
+Arch Linux from Steffen Rehberg (thanks!)
+
+dogtail 1.0.4 -  Minor release again containing two updates! / Dec 4 2024
 - sniff: Fixes in About dialog and getting rid of GObject deprecations MR #43
 - tree: Moving all matches of "push button" to check also "button" - Fixes issue #35
 

@@ -38,6 +38,11 @@ Dec 4 2024 -  Minor release again containing two updates!
 - sniff: Fixes in About dialog and getting rid of GObject deprecations  MR #43 
 - tree: Moving all matches of "push button" to check also "button" - Fixes issue #35
 
+### dogtail 1.0.5
+
+Dec 11 2024 -  Contains several fixes to unittests and adding support for
+Arch Linux from Steffen Rehberg (thanks!)
+
 
 ## How does it work in brief?
 

@@ -64,6 +64,8 @@
     "killall",
     "labelee",
     "levelname",
+    "lockdir",
+    "lockname",
     "Nextcloud",
     "nmci",
     "opencv",

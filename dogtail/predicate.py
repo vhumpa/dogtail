@@ -186,6 +186,21 @@ class IsATabNamed(GenericPredicate):
 
 class IsAButtonNamed(GenericPredicate):
     """
+    Predicate subclass that looks for a button by name.
+    """
+
+    def __init__(self, name=None):
+        self.name = name
+
+        if not self.name:
+            LOGGER.info("You did not provide any 'name' to match.")
+            self.name = "__invalid__"
+
+        super().__init__(name=self.name, role_name="button")
+
+
+class IsAPushButtonNamed(GenericPredicate):
+    """
     Predicate subclass that looks for a push button by name.
     """
 

@@ -41,7 +41,9 @@ class TestGnomeShellOverviewRawinput(unittest.TestCase):
         print("This test assumes Nautilus - Files to be Pinned")
 
         # Search for Files - assuming Files are Pinned.
-        file_button = gnome_shell.child("Files", "push button")
+        file_button = gnome_shell.find_child(
+            lambda x: x.name == "Files" and x.role_name in ("button", "push button")
+        )
 
         start_run_button_x = file_button.center[0]
         start_run_button_y = file_button.center[1]
@@ -77,7 +79,9 @@ class TestGnomeShellOverviewRawinput(unittest.TestCase):
         print("This test assumes Nautilus - Files to be Pinned")
 
         # Search for Files - assuming Files are Pinned.
-        file_button = gnome_shell.child("Files", "push button")
+        file_button = gnome_shell.find_child(
+            lambda x: x.name == "Files" and x.role_name in ("button", "push button")
+        )
 
         start_run_button_x = file_button.center[0]
         start_run_button_y = file_button.center[1]

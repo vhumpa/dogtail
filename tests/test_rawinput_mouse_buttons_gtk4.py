@@ -74,10 +74,9 @@ class TestGtk4DemoRawinputMouse(Gtk4DemoTest):
         builder_button = self.demo.child("Builder")
         builder_button.double_click()
 
-        save_button = self.demo.child(
-            name="",
-            description="Save a file",
-            role_name="push button"
+        save_button = self.demo.find_child(
+            lambda x: x.name == "" and x.description == "Save a file"
+            and x.role_name in ("button","push button")
         )
         self.assertFalse(save_button.armed)
 

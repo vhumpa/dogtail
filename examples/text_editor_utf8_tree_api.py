@@ -84,14 +84,16 @@ def gnome_text_editor_text_tree_api_demo():
     print("EXAMPLE: Left click on Save push button in Save As dialog GNOME Text Editor.")
     save_as_button = editor.find_children(
         lambda x: x.name == "Save"
-        and x.role_name == "push button"
+        and x.role_name in ("button", "push button")
     )[-1]
     save_as_button.click()
     sleep(1)
 
     # Let's quit now.
     print("EXAMPLE: Left click on Close push button to close GNOME Text Editor.")
-    close_push_button = editor.child("Close", "push button")
+    close_push_button = editor.find_child(
+        lambda x: x.name == "Close" and x.role_name in ("button", "push button")
+    )
     close_push_button.click()
 
 gnome_text_editor_text_tree_api_demo()

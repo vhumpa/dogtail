@@ -110,16 +110,14 @@ def run(string, timeout=None, interval=None, desktop=None, dumb=False, app_name=
     return process
 
 
-
-# TODO Lock
-########################################################################################
-class Lock(object):
+class Lock:
     """
-    A known system-wide mutex implementation that uses atomicity of the mkdir operation in UNIX-like
-    systems. This should be used mainly to provide mutual exclusion in handling possible collisions
-    among multiple script instances. You can choose to make randomized single-script wise locks
-    or a more general locks if you do not choose to randomize the lock dir name. Set unLockOnExit
-    to True to enable automatic unlock when script process exits to avoid having to unlock manually.
+    A known system-wide mutex implementation that uses atomicity of the mkdir operation
+    in UNIX-like systems. This should be used mainly to provide mutual exclusion in
+    handling possible collisions among multiple script instances. You can choose to make
+    randomized single-script wise locks or a more general locks if you do not choose to
+    randomize the lock dir name. Set unLockOnExit to True to enable automatic unlock
+    when script process exits to avoid having to unlock manually.
     """
 
     LOGGING.debug(logging_class.get_func_params_and_values())
@@ -129,18 +127,26 @@ class Lock(object):
         location="/tmp",
         lockname="dogtail_lockdir_",
         randomize=True,
-        unlockOnExit=False,
+        unlock_on_exit=False,
+        **kwargs,
     ):
         """
         You can change the default lockdir location or name. Setting randomize to
-        False will result in no random string being appened to the lockdir name.
+        False will result in no random string being appended to the lockdir name.
         """
+
+        using_unlock_on_exit = unlock_on_exit
+        # === Backward compatibility and extra parameters ===
+        for key, val in kwargs.items():
+            if "unlockOnExit" in str(key):
+                using_unlock_on_exit = val
+        # ===================================================
 
         self.lockdir = os.path.join(os.path.normpath(location), lockname)
         if randomize:
             self.lockdir = "".join((self.lockdir, self.__getPostfix()))
 
-        self.unlockOnExit = unlockOnExit
+        self.unlock_on_exit = using_unlock_on_exit
 
     def __exit_unlock(self):
         """
@@ -162,9 +168,11 @@ class Lock(object):
         atomic on POSIX compliant systems.
         """
 
-        #debug_log(
-        #    "Create a lock directory. Raising the exception if the lock is already present."
-        #)
+        LOGGING.debug(" ".join((
+                "Create a lock directory."
+                "Raising the exception if the lock is already present."
+            ))
+        )
 
         locked_msg = "Dogtail lock: Already locked with the same lock."
 
@@ -173,7 +181,7 @@ class Lock(object):
                 os.mkdir(self.lockdir)
             except OSError as error:
                 if error.errno == errno.EEXIST and os.path.isdir(self.lockdir):
-                    raise OSError(locked_msg)
+                    raise OSError(locked_msg) from error
 
             if os.path.exists(self.lockdir):
                 if self.unlockOnExit:
@@ -191,17 +199,17 @@ class Lock(object):
         Should be atomic on POSIX compliant systems.
         """
 
-        #debug_log("Remove the lock. Raising the exception if the lock is not present.")
+        LOGGING.debug("Remove the lock. Raising the exception if the lock is not present.")
 
-        # if self.unlockOnExit:
-        #    raise Exception('Cannot unlock with unlockOnExit set to True!')
+        if self.unlock_on_exit:
+            raise RuntimeError("Cannot unlock with unlock_on_exit set to True!")
 
         if os.path.exists(self.lockdir):
             try:
                 os.rmdir(self.lockdir)
             except OSError as error:
                 if error.errno == errno.EEXIST:
-                    raise OSError("Dogtail unlock: lockdir removed elsewhere!")
+                    raise OSError("Dogtail unlock: lockdir removed elsewhere!") from error
         else:
             raise OSError("Dogtail unlock: not locked")
 
@@ -210,11 +218,13 @@ class Lock(object):
         Check if locked directory exists.
         """
 
-        #debug_log("Checking if locked directory exists.")
+        LOGGING.debug("Checking if locked directory exists.")
 
         return os.path.exists(self.lockdir)
 
-    def __getPostfix(self):
+
+    # More commonly used word as opposed to postfix.
+    def __get_suffix(self):
         """
         Generate a length of 5 random string that serves as file name suffix.
         """
@@ -222,12 +232,43 @@ class Lock(object):
         import random
         import string
 
-        #debug_log("Get random file suffix of length 5.")
+        LOGGING.debug("Get random file suffix of length 5.")
 
         return "".join(
             random.choice(string.ascii_letters + string.digits) for x in range(5)
         )
-########################################################################################
+
+
+    ########################################
+    # Backwards compatibility definitions. #
+    ########################################
+    def __getPostfix(self): # pylint: disable=invalid-name
+        """
+        Wrapper over __get_suffix.
+        """
+
+        return self.__get_suffix()
+
+    @property
+    def unlockOnExit(self): # pylint: disable=invalid-name
+        """
+        Making a property in case users would like to access it and change it.
+        """
+
+        return self.unlock_on_exit
+
+    @unlockOnExit.setter
+    def unlockOnExit(self, value_to_set): # pylint: disable=invalid-name
+        """
+        Setter for unlockOnExit.
+        """
+
+        assert isinstance(value_to_set, bool), "unlockOnExit has to be of type 'bool'."
+        self.unlock_on_exit = value_to_set
+
+    ###############################################
+    # End of backwards compatibility definitions. #
+    ###############################################
 
 
 def bail_because_accessibility_is_disabled():

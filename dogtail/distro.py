@@ -2,7 +2,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import os
 import re
-from subprocess import check_output, STDOUT
+from subprocess import check_output
 from dogtail.version import Version
 from dogtail.logging import debugLogger as logger
 from dogtail.logging import debug_log
@@ -22,7 +22,7 @@ class DistributionNotSupportedError(Exception):  # pragma: no cover
     This distribution is not supported.
     """
 
-    PATCH_MESSAGE = "Please open merge requests at https://gitlab.com/dogtail/dogtail"
+    PATCH_MESSAGE = "Please send patches to dogtail-devel-list@gnome.org"
 
     def __init__(self, distro):
         self.distro = distro
@@ -302,45 +302,6 @@ class _ContinuousPackageDb(PackageDb):
         return []
 
 
-class _ArchPackageDb(PackageDb):
-
-    def __init__(self):
-        PackageDb.__init__(self)
-
-    def _pacman(self, option, packageName):
-        if option == "v":
-            cmd = "i %s | grep Version | cut -d: -f2-"
-        elif option == "f":
-            cmd = "l %s | cut -d' ' -f2-"
-        elif option == "d":
-            cmd = "i %s | grep 'Depends On' | cut -d: -f2-"
-        else:
-            cmd = ""
-        cmd = "LC_ALL=C COLUMNS=1000 pacman -Q" + cmd
-        out = check_output(cmd % packageName,
-                  stderr=STDOUT,
-                  shell=True).decode("UTF-8")
-        if out.startswith("error:"):
-            raise PackageNotFoundError(packageName)
-        else:
-            return out.strip()
-
-
-    def getVersion(self, packageName):
-        version = self._pacman("v", packageName)
-        return Version.fromString(version)
-
-
-    def getFiles(self, packageName):
-        files = self._pacman("f", packageName)
-        return [f for f in files.split() if not f.endswith('/')]
-
-
-    def getDependencies(self, packageName):
-        deps = self._pacman("d", packageName)
-        return [d for d in deps.split() if d != "None"]
-
-
 class Distro:
     """
     Class representing a distribution.
@@ -405,11 +366,6 @@ class GnomeContinuous(Distro):  # pragma: no cover
         self.packageDb = _ContinuousPackageDb()
 
 
-class Arch(Distro):  # pragma: no cover
-    def __init__(self):
-        self.packageDb = _ArchPackageDb()
-
-
 def detectDistro():  # pragma: no cover
     logger.log("Detecting distribution:", newline=False)
     debug_log("detectDistro()")
@@ -432,8 +388,6 @@ def detectDistro():  # pragma: no cover
         raise DistributionNotSupportedError("Slackware")
     elif os.path.exists("/var/lib/conarydb/conarydb"):
         distro = Conary()
-    elif os.path.exists("/etc/arch-release"):
-        distro = Arch()
     elif os.path.exists("/etc/release") and \
             re.match(".*Solaris", open("/etc/release").readline()):
         distro = Solaris()
@@ -442,10 +396,10 @@ def detectDistro():  # pragma: no cover
         distro = GnomeContinuous()
     else:
         raise DistributionNotSupportedError("Unknown")
-    
+
     logger.log(distro.__class__.__name__)
     debug_log(distro.__class__.__name__)
-    
+
     return distro
 
 distro = detectDistro()

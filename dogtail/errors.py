@@ -1,16 +1,20 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/python3
+"""
+Experimental dogtail changes for 2.0 release.
+Handles General exceptions, not overly module-specific.
+"""
+
+# pylint: disable=line-too-long
+# ruff: noqa: E501
+
+# TODO revisit what these are needed for.
 from __future__ import absolute_import, division, print_function, unicode_literals
 import inspect
-from dogtail.logging import debug_log
-from dogtail.logging import debugLogger as logger
 
-"""
-General exceptions; not overly module-specific
-"""
+from dogtail.logging import logging_class
+LOGGING = logging_class.logger
 
-__author__ = """
-Zack Cerza <zcerza@redhat.com>
-"""
+__author__ = "Zack Cerza <zcerza@redhat.com>"
 
 
 def warn(message, caller=True):
@@ -18,13 +22,21 @@ def warn(message, caller=True):
     Generate a warning, and pass it to the debug logger.
     """
 
-    frameRec = inspect.stack()[-1]
-    message = "Warning: %s:%s: %s" % (frameRec[1], frameRec[2], message)
-    if caller and frameRec[1] != "<stdin>" and frameRec[1] != "<string>" and frameRec[4]:
-        message = message + ":\n  " + frameRec[4][0]
-    del frameRec
-    debug_log("warn(message, caller=%s)" % str(caller))
-    logger.log(message)
+    last_frame_info_object = inspect.stack()[-1]
+
+    # frame = last_frame_info_object[0]
+    file_name = last_frame_info_object[1]
+    lineno = last_frame_info_object[2]
+    #function = last_frame_info_object[3]
+    code_context = last_frame_info_object[4]
+    # index = last_frame_info_object[5]
+
+    new_message = f"Warning: {file_name}:{lineno}: {message}"
+    if caller and file_name != "<stdin>" and file_name != "<string>" and code_context:
+        new_message = new_message + ":\n  " + code_context[0]
+    del last_frame_info_object
+
+    LOGGING.debug(new_message)
 
 
 class DependencyNotFoundError(Exception):

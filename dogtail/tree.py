@@ -28,20 +28,20 @@ from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 
 
-from dogtail.accessible_actions import AccessibleActions
-from dogtail.accessible_component import AccessibleComponent
-from dogtail.accessible_editable_text import AccessibleEditableText
-from dogtail.accessible_hypertext import AccessibleHypertext
-from dogtail.accessible_image import AccessibleImage
-from dogtail.accessible_object import AccessibleObject, SearchError
-from dogtail.accessible_root import AccessibleRoot
-from dogtail.accessible_selection import AccessibleSelection
-from dogtail.accessible_state import AccessibleState
-from dogtail.accessible_table import AccessibleTable
-from dogtail.accessible_table_cell import AccessibleTableCell
-from dogtail.accessible_text import AccessibleText
-from dogtail.accessible_utilities import AccessibleUtilities
-from dogtail.accessible_value import AccessibleValue
+from dogtail.accessibles.accessible_actions import AccessibleActions
+from dogtail.accessibles.accessible_component import AccessibleComponent
+from dogtail.accessibles.accessible_editable_text import AccessibleEditableText
+from dogtail.accessibles.accessible_hypertext import AccessibleHypertext
+from dogtail.accessibles.accessible_image import AccessibleImage
+from dogtail.accessibles.accessible_object import AccessibleObject, SearchError
+from dogtail.accessibles.accessible_root import AccessibleRoot
+from dogtail.accessibles.accessible_selection import AccessibleSelection
+from dogtail.accessibles.accessible_state import AccessibleState
+from dogtail.accessibles.accessible_table import AccessibleTable
+from dogtail.accessibles.accessible_table_cell import AccessibleTableCell
+from dogtail.accessibles.accessible_text import AccessibleText
+from dogtail.accessibles.accessible_utilities import AccessibleUtilities
+from dogtail.accessibles.accessible_value import AccessibleValue
 
 from dogtail.predicate import (
     GenericPredicate,

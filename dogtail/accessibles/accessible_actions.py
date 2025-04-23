@@ -22,7 +22,7 @@ LOGGING = logging_class.logger
 from dogtail.config import config
 from dogtail.utils import do_delay
 
-from dogtail.accessible_object import AccessibleObject
+from dogtail.accessibles.accessible_object import AccessibleObject
 
 class AccessibleActions:
     """

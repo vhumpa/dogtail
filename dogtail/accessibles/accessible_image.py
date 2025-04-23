@@ -20,7 +20,7 @@ from gi.repository import Atspi
 from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 
-from dogtail.accessible_object import AccessibleObject
+from dogtail.accessibles.accessible_object import AccessibleObject
 
 SESSION_TYPE = "x11"
 if "XDG_SESSION_TYPE" in os.environ and "wayland" in os.environ["XDG_SESSION_TYPE"]:

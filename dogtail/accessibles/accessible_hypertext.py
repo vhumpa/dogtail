@@ -18,7 +18,7 @@ from gi.repository import Atspi
 from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 
-from dogtail.accessible_object import AccessibleObject
+from dogtail.accessibles.accessible_object import AccessibleObject
 
 
 class AccessibleHypertext:

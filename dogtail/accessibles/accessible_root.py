@@ -13,7 +13,7 @@ Experimental dogtail changes for 2.0 release.
 from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 
-from dogtail.accessible_utilities import AccessibleUtilities
+from dogtail.accessibles.accessible_utilities import AccessibleUtilities
 
 
 class AccessibleRoot:

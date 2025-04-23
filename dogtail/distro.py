@@ -41,10 +41,6 @@ class PackageNotFoundError(Exception):
     """
 
 
-global packageDb
-global DISTRO
-
-
 class PackageDb:
     """
     Class to abstract the details of whatever software package database is in

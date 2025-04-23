@@ -638,7 +638,7 @@ def get_screen_resolution():
     except Exception as error:
         resolution = f"The resolution retrieval failed for: {error}"
         LOGGING.info(f"resolution error: '{resolution}'")
-        resolution (0,0)
+        return (0,0)
 
 
 ########################################

@@ -43,6 +43,10 @@ Dec 4 2024 -  Minor release again containing two updates!
 Dec 11 2024 -  Contains several fixes to unittests and adding support for
 Arch Linux from Steffen Rehberg (thanks!)
 
+### dogtail 1.0.6
+
+June 3 2025 -  Added support for LightDM systems to dogtail-run-headless-next
+Enables simple session management on primarily non-GNOME distros
 
 ## How does it work in brief?
 

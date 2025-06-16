@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 __author__ = "Zack Cerza <zcerza@redhat.com>"
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 def examples():
     import os
@@ -77,7 +77,7 @@ Vitezslav Humpa <vhumpa@redhat.com>,
 Michal Odehnal <modehnal@redhat.com>""",
     author_email='dogtail-list@gnome.org',
     url='https://gitlab.com/dogtail/dogtail',
-    packages=['dogtail'],
+    packages=find_packages(),
     scripts=scripts(),
     data_files=[
         ("share/doc/dogtail/examples",

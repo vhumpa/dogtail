@@ -24,24 +24,24 @@ import warnings
 
 warnings.filterwarnings("ignore", "g_object_unref")
 
-from dogtail.logging import logging_class
+from .logging import logging_class
 LOGGING = logging_class.logger
 
 
-from dogtail.accessibles.accessible_actions import AccessibleActions
-from dogtail.accessibles.accessible_component import AccessibleComponent
-from dogtail.accessibles.accessible_editable_text import AccessibleEditableText
-from dogtail.accessibles.accessible_hypertext import AccessibleHypertext
-from dogtail.accessibles.accessible_image import AccessibleImage
-from dogtail.accessibles.accessible_object import AccessibleObject, SearchError
-from dogtail.accessibles.accessible_root import AccessibleRoot
-from dogtail.accessibles.accessible_selection import AccessibleSelection
-from dogtail.accessibles.accessible_state import AccessibleState
-from dogtail.accessibles.accessible_table import AccessibleTable
-from dogtail.accessibles.accessible_table_cell import AccessibleTableCell
-from dogtail.accessibles.accessible_text import AccessibleText
-from dogtail.accessibles.accessible_utilities import AccessibleUtilities
-from dogtail.accessibles.accessible_value import AccessibleValue
+from .accessibles.accessible_actions import AccessibleActions
+from .accessibles.accessible_component import AccessibleComponent
+from .accessibles.accessible_editable_text import AccessibleEditableText
+from .accessibles.accessible_hypertext import AccessibleHypertext
+from .accessibles.accessible_image import AccessibleImage
+from .accessibles.accessible_object import AccessibleObject, SearchError
+from .accessibles.accessible_root import AccessibleRoot
+from .accessibles.accessible_selection import AccessibleSelection
+from .accessibles.accessible_state import AccessibleState
+from .accessibles.accessible_table import AccessibleTable
+from .accessibles.accessible_table_cell import AccessibleTableCell
+from .accessibles.accessible_text import AccessibleText
+from .accessibles.accessible_utilities import AccessibleUtilities
+from .accessibles.accessible_value import AccessibleValue
 
 from dogtail.predicate import (
     GenericPredicate,

@@ -66,7 +66,7 @@ def run_verbose(command) -> tuple:
         return (error.output, error.returncode, error)
 
 
-def get_initial_environment_dictionary(term=None) -> dict:
+def get_initial_environment_dictionary(binary="gnome-session-binary", term=None) -> dict:
     """
     Lets assume initial state of the machine is with already running display manager.
     We need to get environment variables from the session to check correct configuration.
@@ -74,10 +74,10 @@ def get_initial_environment_dictionary(term=None) -> dict:
     Returns environment as dictionary.
     """
 
-    return get_environment_dictionary(verbose=False, term=term)
+    return get_environment_dictionary(binary=binary, verbose=False, term=term)
 
 
-def get_environment_dictionary(verbose=True, term=None) -> dict:
+def get_environment_dictionary(binary="gnome-session-binary", verbose=True, term=None) -> dict:
     """
     Targeting the gnome-session-binary process to get all environment variables.
     Returns environment as dictionary.
@@ -89,13 +89,13 @@ def get_environment_dictionary(verbose=True, term=None) -> dict:
     gnome_session_binary_pid = None
 
     try:
-        gnome_session_binary_pid = run(f"pgrep -u {user_id} gnome-session").split("\n")[0]
+        gnome_session_binary_pid = run(f"pgrep -fAu {user_id} {binary}").split("\n")[0]
     except CalledProcessError:
         if verbose:
-            print_info("Failed to retrieve gnome-session-binary pid from pgrep:")
+            print_info(f"Failed to retrieve {binary} pid from pgrep:")
             print_info(f"\n{traceback.format_exc()}")
 
-    # Use the gnome-session-binary pid to get its environment variables.
+    # Use a given binary pid to get its environment variables.
     if gnome_session_binary_pid:
         environment_process_path = f"/proc/{gnome_session_binary_pid}/environ"
 
@@ -144,7 +144,7 @@ def get_environment_dictionary(verbose=True, term=None) -> dict:
                 # Iterate over the files.
                 for _file in os.scandir(run_user_dir):
                     # Check for the file we need.
-                    if _file.is_file() and "Xwaylandauth" in _file.path:
+                    if _file.is_file() and "Xwaylandauth" in _file.path or "xauth" in _file.path:
                         # Set the file to the variable.
                         xwaylandauth = _file.path
                         break
@@ -242,7 +242,7 @@ def parse():
                         required=False,
                         help="\n".join((
                             "What display manager to use for spawning session.",
-                            "Supported: 'gdm' (default), 'kdm', or 'lightdm'."
+                            "Supported: 'gdm' (default), 'sddm', or 'lightdm'."
                         ))
     )
     parser.add_argument(
@@ -356,11 +356,12 @@ class DisplayManager:
         "user":    "AutomaticLogin"
     }
 
-    kdm_options = {
-        "config": "/etc/kde/kdmrc",
-        "section": "X-:0-Core",
-        "enable":  "AutoLoginEnable",
-        "user":    "AutoLoginUser"
+    sddm_options = {
+        "config": "/etc/sddm.conf",
+        "section": "Autologin",
+        "relogin": "Relogin",
+        "session":  "Session",
+        "user":    "User"
     }
 
     lightdm_options = {
@@ -374,7 +375,7 @@ class DisplayManager:
     def __init__(
         self,
         session="gnome",
-        session_binary="/usr/libexec/gnome-session-binary",
+        session_binary="/usr/bin/gnome-shell",
         display_manager="gdm",
         session_type=None,
         session_desktop=None,
@@ -404,8 +405,8 @@ class DisplayManager:
         if self.display_manager == "gdm":
             self.options = self.gdm_options
 
-        elif self.display_manager == "kdm":
-            self.options = self.kdm_options
+        elif self.display_manager == "sddm":
+            self.options = self.sddm_options
 
         elif self.display_manager == "lightdm":
             self.options = self.lightdm_options
@@ -456,6 +457,9 @@ class DisplayManager:
         config_parser.remove_option(self.options["section"], self.options["enable"])
         config_parser.remove_option(self.options["section"], self.options["user"])
         config_parser.remove_option(self.options["section"], self.options["timeout"])
+        config_parser.remove_option(self.options["section"], self.options["session"])
+        config_parser.remove_option(self.options["section"], self.options["relogin"])
+
         config_parser.remove_option(self.options["section"], "WaylandEnable")
 
         with open(self.temporary_config_file, "w", encoding="utf-8") as _file:
@@ -498,12 +502,19 @@ class DisplayManager:
             time.sleep(1)
 
         else:
-            if self.display_manager in ("gdm", "kdm"):
+            if self.display_manager == "gdm":
                 config_parser.set(self.options["section"], self.options["enable"], "true")
                 config_parser.set(self.options["section"], self.options["user"], self.user)
+
+            elif self.display_manager == "sddm":
+                config_parser.set(self.options["section"], self.options["relogin"], "false")
+                config_parser.set(self.options["section"], self.options["session"], "plasma")
+                config_parser.set(self.options["section"], self.options["user"], self.user)
+
             else: # lightdm
                 config_parser.set(self.options["section"], self.options["user"], self.user)
                 config_parser.set(self.options["section"], self.options["timeout"], "0")
+
                 if self.session:
                     config_parser.set(self.options["section"], self.options["session"], self.session)
 
@@ -518,7 +529,7 @@ class DisplayManager:
             if "WaylandEnable" in config_parser.options(self.options["section"]):
                 # Set xorg only if there is WaylandEnable=false.
                 # Wayland should be default everywhere.
-                if config_parser.get(self.options["section"], self.options["enable"]) == "false":
+                if config_parser.get(self.options["section"], "WaylandEnable") == "false":
                     self.session_type = "xorg"
                 else:
                     self.session_type = "wayland"
@@ -690,6 +701,10 @@ class DisplayManager:
             unsafe_config = self.unsafe_mode_config_file_kiosk
             unsafe_config_etc = self.unsafe_mode_config_file_kiosk_etc
             unsafe_temporary_config = self.temporary_unsafe_mode_config_file_kiosk
+
+        # No point of checking unsafe mode of gnome-shell if there is no gnome-shell.
+        if self.session != "gnome":
+            return
 
         # If the gnome-shell or kiosk has no unsafe mode, do not use it.
         unsafe_mode_present = run_verbose(f"/usr/bin/{desktop} --unsafe-mode --help")
@@ -1205,13 +1220,13 @@ class Headless:
 
         # Troubleshooting gnome-session-binary upon failure.
         user_id = str(os.geteuid())
-        gnome_session_binary_pid = run(f"pgrep -u {user_id} gnome-session").split("\n")[0]
-        ps_command = "ps ax -o uid,gid,pid,tname,command | grep gnome-session"
+        gnome_session_binary_pid = run(f"pgrep -fAu {user_id} {self.session_binary}").split("\n")[0]
+        ps_command = f"ps ax -o uid,gid,pid,tname,command | grep {self.session_binary}"
         ps_command_result = run(ps_command)
 
-        print_info("Troubleshooting gnome-session-binary:")
-        print("Target file for environment is '/usr/libexec/gnome-session-binary'")
-        print(f"Search was done with 'pgrep -u {user_id} gnome-session'.")
+        print_info(f"Troubleshooting '{self.session_binary}':")
+        print(f"Target file for environment is '{self.session_binary}'")
+        print(f"Search was done with 'pgrep -fAu {user_id} {self.session_binary}'.")
         print(f"With result '{str(gnome_session_binary_pid)}'\n")
 
         print_info("Actual running processes:")
@@ -1319,15 +1334,13 @@ class Headless:
             self.session = self.session or "mate"
             self.session_binary = self.session_binary or "/usr/bin/mate-session"
 
-        elif self.session is None or "gnome" in self.session:
+        elif self.display_manager == "sddm":
+            self.session = self.session or "kde"
+            self.session_binary = self.session_binary or "/usr/bin/plasmashell"
+
+        elif self.display_manager in (None, "gdm"):
             self.display_manager = "gdm"
             self.session_binary = self.session_binary or "/usr/bin/gnome-session"
-
-        elif self.display_manager == "kdm":
-            if "kde" in self.session:
-                self.session_binary = self.session_binary or "/usr/bin/kwin"
-                if self.session == "kde":
-                    self.session = "kde-plasma"
 
         else:
             print(f"Unknown Display Manager '{self.display_manager}'!")
@@ -1598,12 +1611,12 @@ class Headless:
             self.handle_nested_dogtail_process()
 
         # Before the Display Manager handling, check if the session is running already.
-        environment_dictionary = get_initial_environment_dictionary()
+        environment_dictionary = get_initial_environment_dictionary(binary=self.session_binary)
         if environment_dictionary:
             os.environ = environment_dictionary
 
         # Display manager setup and handling.
-        print_info(f"Using display manager: {self.display_manager}")
+        print_info(f"Using Display Manager: '{self.display_manager}'")
         self.display_manager_control = DisplayManager(
             session=self.session,
             session_binary=self.session_binary,
@@ -1655,7 +1668,7 @@ class Headless:
             self.display_manager_control.start_display_manager()
 
         # Environment handling.
-        environment_dictionary = get_environment_dictionary(term=self.term)
+        environment_dictionary = get_environment_dictionary(binary=self.session_binary, term=self.term)
         if environment_dictionary:
             os.environ = environment_dictionary
         else:

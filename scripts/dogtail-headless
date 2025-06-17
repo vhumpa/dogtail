@@ -352,22 +352,22 @@ class DisplayManager:
     gdm_options = {
         "config": "/etc/gdm/custom.conf",
         "section": "daemon",
-        "enable":  "AutomaticLoginEnable",
-        "user":    "AutomaticLogin"
+        "enable": "AutomaticLoginEnable",
+        "user": "AutomaticLogin"
     }
 
     sddm_options = {
         "config": "/etc/sddm.conf",
         "section": "Autologin",
         "relogin": "Relogin",
-        "session":  "Session",
-        "user":    "User"
+        "session": "Session",
+        "user": "User"
     }
 
     lightdm_options = {
         "config": "/etc/lightdm/lightdm.conf",
         "section": "Seat:*",
-        "user":    "autologin-user",
+        "user": "autologin-user",
         "timeout": "autologin-user-timeout",
         "session": "autologin-session"
     }

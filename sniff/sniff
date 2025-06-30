@@ -139,6 +139,8 @@ class SniffController(object):
         self.descTextLabel.set_text('')
         self.actionsTextLabel = self.builder.get_object('actionsTextLabel')
         self.actionsTextLabel.set_text('')
+        self.attributesListTextLabel= self.builder.get_object('attributesListTextLabel')
+        self.attributesListTextLabel.set_text('')
         self.textTextView = self.builder.get_object('textTextView')
         self.textTextViewBufferCallbackID = self.invalidBufferCallbackID
         self.textTextView.set_sensitive(False)
@@ -352,6 +354,9 @@ class SniffController(object):
         if node.actions:
             str = ' '.join(list(node.actions.keys()))
         self.actionsTextLabel.set_text(str)
+        if node.attributesList:
+            str = ' '.join(node.attributesList)
+        self.attributesListTextLabel.set_text(str)
 
         # Have we connected this signal yet?
         # If so, disconnect it before proceeding.

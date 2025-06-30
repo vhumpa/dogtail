@@ -337,6 +337,7 @@ class Node(object):
     name = property(Accessibility.Accessible.name)
     parent = property(Accessibility.Accessible.parent)
     indexInParent = property(Accessibility.Accessible.getIndexInParent)
+    attributesList = property(Accessibility.Accessible.getAttributes)
     __window_id = None
 
 

@@ -1854,6 +1854,24 @@ class Node(object):
 
 
     @property
+    def attributes(self):
+        """
+        Define a 'attributes' property for Atspi object.
+        """
+
+        return AccessibleObject.get_attributes(self)
+
+
+    @property
+    def attributes_as_array(self):
+        """
+        Define a 'attributes_as_array' property for Atspi object.
+        """
+
+        return AccessibleObject.get_attributes_as_array(self)
+
+
+    @property
     def children(self):
         """
         Creating children easy navigation when required.

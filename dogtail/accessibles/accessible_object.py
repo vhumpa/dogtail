@@ -756,6 +756,44 @@ class AccessibleObject:
 
 
     @staticmethod
+    def get_attributes(acc_object):
+        """
+        Returns 'attributes' for Accessible object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_valid(acc_object):
+            return None
+
+        if AccessibleObject.is_newton(acc_object):
+            attributes = acc_object.get_attributes()
+        else:
+            attributes = Atspi.Accessible.get_attributes(acc_object)
+
+        return attributes
+
+
+    @staticmethod
+    def get_attributes_as_array(acc_object):
+        """
+        Returns 'attributes_as_array' for Accessible object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not AccessibleObject.is_valid(acc_object):
+            return None
+
+        if AccessibleObject.is_newton(acc_object):
+            attributes_as_array = acc_object.get_attributes_as_array()
+        else:
+            attributes_as_array = Atspi.Accessible.get_attributes_as_array(acc_object)
+
+        return attributes_as_array
+
+
+    @staticmethod
     def get_children(acc_object):
         """
         Returns a 'parent' for Accessible object.

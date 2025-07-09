@@ -72,7 +72,10 @@ class GenericPredicate:
                 # Check if user wants to check role_name.
                 if self.role_name is not None:
                     # Compare role_name of self with the given node.
-                    if self.role_name != node.role_name:
+                    # If 'push button' is wanted, attempt to match also 'button'
+                    if (self.role_name != node.role_name) or (
+                        self.role_name == "push button" and "button" != node.role_name
+                    ):
                         return False
 
                 # Check if user wants to check description.

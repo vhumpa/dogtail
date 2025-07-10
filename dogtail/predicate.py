@@ -203,7 +203,7 @@ class GenericPredicate(Predicate):
                         if not stringMatches(self.name, node.name):
                             return False
                     if self.roleName:
-                        if (self.roleName != node.roleName) or (self.roleName == "push button" and "button" != node.roleName):
+                        if self.roleName != node.roleName:
                             return False
                     if self.description:
                         if self.description != node.description:

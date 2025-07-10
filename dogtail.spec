@@ -5,7 +5,7 @@
 Summary: GUI test tool and automation framework
 Name: dogtail
 Version: 1.0.7
-Release: 0.1%{?dist}
+Release: 0.2%{?dist}
 License: GPLv2
 URL: https://gitlab.com/dogtail/dogtail/
 Source0: https://gitlab.com/dogtail/dogtail/raw/released/%{name}-%{version}.tar.gz
@@ -96,6 +96,16 @@ pushd %{py3dir}
 rm -rf $RPM_BUILD_ROOT/%{_docdir}/dogtail
 rm -rf $RPM_BUILD_ROOT/%{python3_sitelib}/%{name}-%{version}-py%{python3_version}.egg-info
 popd
+
+# Create dogtail system configuration directory
+mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/dogtail
+
+# Install RHEL-specific configuration for buttonRoleCompat
+cat > $RPM_BUILD_ROOT/%{_sysconfdir}/dogtail/config << 'EOF'
+# System-wide dogtail configuration for RHEL
+# Set buttonRoleCompat to True for backwards compatibility
+buttonRoleCompat=True
+EOF
 %endif # with_python3
 
 find examples -type f -exec chmod 0644 \{\} \;
@@ -128,6 +138,7 @@ fi
 %{python3_sitelib}/dogtail/
 %{_datadir}/dogtail/
 %{_datadir}/icons/hicolor/*/apps/%{name}*.*
+%config(noreplace) %{_sysconfdir}/dogtail/config
 %doc COPYING
 %doc README.md
 %doc NEWS

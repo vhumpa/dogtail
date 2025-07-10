@@ -4,6 +4,7 @@ import locale
 import os
 import sys
 import pwd
+import json
 
 """
 The configuration module.
@@ -182,6 +183,8 @@ class _Config:
         self.__createDir(self.defaults["scratchDir"])
         self.__createDir(self.defaults["logDir"])
         self.__createDir(self.defaults["dataDir"])
+        # Load system-wide configuration files
+        self.__loadSystemConfig()
 
 
     def __setattr__(self, name, value):
@@ -226,6 +229,66 @@ class _Config:
             umask = os.umask(0)
             os.makedirs(dirName, perms)
             os.umask(umask)
+
+    def __loadSystemConfig(self):
+        """
+        Loads system-wide configuration files from standard locations.
+        Checks for config files in this order:
+        1. /etc/dogtail/config
+        2. /etc/dogtail/config.json
+        """
+        config_paths = [
+            "/etc/dogtail/config",
+            "/etc/dogtail/config.json"
+        ]
+        
+        for config_path in config_paths:
+            if os.path.isfile(config_path):
+                try:
+                    self.__loadConfigFile(config_path)
+                    break  # Only load the first config file found
+                except Exception:
+                    # Silently continue if config file can't be loaded
+                    continue
+
+    def __loadConfigFile(self, config_path):
+        """
+        Loads configuration from a file.
+        Supports both JSON format and simple key=value format.
+        """
+        with open(config_path, 'r') as f:
+            content = f.read().strip()
+            
+        if config_path.endswith('.json'):
+            # JSON format
+            config_data = json.loads(content)
+        else:
+            # Simple key=value format
+            config_data = {}
+            for line in content.split('\n'):
+                line = line.strip()
+                if line and not line.startswith('#'):
+                    if '=' in line:
+                        key, value = line.split('=', 1)
+                        key = key.strip()
+                        value = value.strip()
+                        
+                        # Convert boolean strings
+                        if value.lower() in ('true', 'yes', '1'):
+                            value = True
+                        elif value.lower() in ('false', 'no', '0'):
+                            value = False
+                        elif value.isdigit():
+                            value = int(value)
+                        elif value.replace('.', '', 1).isdigit():
+                            value = float(value)
+                        
+                        config_data[key] = value
+        
+        # Only load valid config options
+        valid_config = {k: v for k, v in config_data.items() if k in self.defaults}
+        if valid_config:
+            self.load(valid_config)
 
 
     def load(self, dictt):

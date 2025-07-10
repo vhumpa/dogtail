@@ -4,8 +4,8 @@
 
 Summary: GUI test tool and automation framework
 Name: dogtail
-Version: 1.0.6
-Release: 1%{?dist}
+Version: 1.0.7
+Release: 0.1%{?dist}
 License: GPLv2
 URL: https://gitlab.com/dogtail/dogtail/
 Source0: https://gitlab.com/dogtail/dogtail/raw/released/%{name}-%{version}.tar.gz

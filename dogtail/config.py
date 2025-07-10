@@ -111,6 +111,10 @@ class _Config:
     Whether to check if accessibility is enabled. If not, just assume it is
     (default True).
 
+    buttonRoleCompat (boolean):
+    Whether to convert "button" role names to "push button" for backwards
+    compatibility (default False).
+
     logDebugToFile (boolean):
     Whether to write debug output to a log file.
 
@@ -163,6 +167,7 @@ class _Config:
         "blinkOnActions": False,
         "fatalErrors": False,
         "checkForA11y": True,
+        "buttonRoleCompat": False,
 
         # Logging
         "logDebugToFile": True

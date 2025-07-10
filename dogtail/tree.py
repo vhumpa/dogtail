@@ -332,7 +332,15 @@ class Node(object):
         return children_list
 
 
-    roleName = property(Accessibility.Accessible.getRoleName)
+    @property
+    def roleName(self):
+        """
+        Return the role name of the node, with optional button compatibility.
+        """
+        role_name = Accessibility.Accessible.getRoleName(self)
+        if config.buttonRoleCompat and role_name == "button":
+            return "push button"
+        return role_name
     role = property(Accessibility.Accessible.getRole)
     name = property(Accessibility.Accessible.name)
     parent = property(Accessibility.Accessible.parent)

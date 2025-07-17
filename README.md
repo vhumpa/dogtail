@@ -48,6 +48,15 @@ Arch Linux from Steffen Rehberg (thanks!)
 June 3 2025 -  Added support for LightDM systems to dogtail-run-headless-next
 Enables simple session management on primarily non-GNOME distros
 
+### dogtail 1.0.7
+
+July 17 2025
+- Add support for retrieving name‑value attribute arrays from AtspiAccessible objects (thx to Andreï Basdereff)
+- Added system-wide configuration file support. Support for loading config from /etc/dogtail/config
+and /etc/dogtail/config.json
+- Added configurable compatibility override for at-spi2-core changes from "push button" to "button"
+roleName in version 2.53 (disabled by default, when enabled, "button" gets overriden back to "push button")
+
 ## How does it work in brief?
 
 The core functionality relies on the Screen Cast and Remote Desktop API, enabling us to "connect" to either a specific window or the entire screen to simulate user input actions like key presses, typing, and—most importantly—mouse actions on specific coordinates. Ponytail uses the window list from `org.gnome.Shell.Introspect` to identify windows. Dogtail then ensures the correct window is connected via the Remote Desktop API, allowing input actions to be accurately executed within it.

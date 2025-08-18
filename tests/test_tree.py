@@ -97,8 +97,7 @@ class TestNode(GtkDemoTest):
         """
         Node.role should be read-only
         """
-        # FIXME should be AttributeError?
-        self.assertRaises(RuntimeError, self.app.__setattr__, "role", pyatspi.Atspi.Role(1))
+        self.assertRaises((AttributeError, RuntimeError), self.app.__setattr__, "role", pyatspi.Atspi.Role(1))
 
     # 'description' (read-only string):
     def test_get_description(self):

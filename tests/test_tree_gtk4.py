@@ -13,9 +13,9 @@ import os
 import unittest
 
 try:
-    from tests.gtk_demo_test import Gtk4DemoTest
+    from tests.test_gtk_demo import Gtk4DemoTest
 except ImportError:
-    from gtk_demo_test import Gtk4DemoTest
+    from test_gtk_demo import Gtk4DemoTest
 
 from dogtail.tree import root
 from dogtail.config import config

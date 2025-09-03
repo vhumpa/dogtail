@@ -17,7 +17,7 @@ class TestConfig(unittest.TestCase):
         Testing set value.
         """
 
-        self.assertEqual(config.action_delay, 0.5)
+        self.assertEqual(config.action_delay, 1.0)
         config.action_delay = 2.0
         self.assertEqual(config.action_delay, 2.0)
 
@@ -45,7 +45,7 @@ class TestConfig(unittest.TestCase):
         Testing get value.
         """
 
-        self.assertEqual(config.action_delay, 0.5)
+        self.assertEqual(config.action_delay, 1.0)
 
 
     def test_get_incorrect_value(self):

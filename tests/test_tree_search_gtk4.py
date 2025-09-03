@@ -19,9 +19,9 @@ from gi.repository import Atspi
 from dogtail.predicate import GenericPredicate
 
 try:
-    from tests.gtk_demo_test import Gtk4DemoTest
+    from tests.test_gtk_demo import Gtk4DemoTest
 except ImportError:
-    from gtk_demo_test import Gtk4DemoTest
+    from test_gtk_demo import Gtk4DemoTest
 
 
 @unittest.skipIf(not os.path.isfile("/usr/bin/gtk4-demo"), "Skipping, no gtk4-demo.")

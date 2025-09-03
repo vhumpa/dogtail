@@ -13,9 +13,9 @@ import os
 import unittest
 
 try:
-    from tests.gtk_demo_test import Gtk4DemoTest, trap_stdout
+    from tests.test_gtk_demo import Gtk4DemoTest, trap_stdout
 except ImportError:
-    from gtk_demo_test import Gtk4DemoTest, trap_stdout
+    from test_gtk_demo import Gtk4DemoTest, trap_stdout
 
 
 SOURCE_DUMP_STRING = """[ 'Source' | 'page tab' | '' ]

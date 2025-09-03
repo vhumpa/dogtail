@@ -10,9 +10,9 @@ import os
 import unittest
 
 try:
-    from tests.gtk_demo_test import Gtk3DemoTest
+    from tests.test_gtk_demo import Gtk3DemoTest
 except ImportError:
-    from gtk_demo_test import Gtk3DemoTest
+    from test_gtk_demo import Gtk3DemoTest
 
 from dogtail.rawinput import (
     click,

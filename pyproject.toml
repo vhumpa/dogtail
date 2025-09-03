@@ -1,11 +1,12 @@
 [build-system]
-requires = ["setuptools>=42", "wheel"]
+requires = ["setuptools>=80", "setuptools-scm[simple]>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "dogtail"
 version = "2.0"
 description = "GUI test tool and automation framework that uses Accessibility (a11y) technologies to communicate with desktop applications."
+license = "GPL-2.0"
 readme = { file = "README.rst", content-type = "text/x-rst" }
 requires-python = ">=3.6"
 authors = [
@@ -16,3 +17,15 @@ authors = [
     {name = "Michal Odehnal", email = "modehnal@redhat.com"}
 ]
 urls = { "Homepage" = "https://gitlab.com/dogtail/dogtail" }
+dependencies = [
+    "PyGObject",
+]
+
+[tool.setuptools.packages.find]
+include = ["dogtail"]
+
+## TODO: scripts need to be moved to entrypoints
+[project.scripts]
+# dogtail-create-config = ...
+# dogtail-get-config = ...
+# dogtail-headless = ...

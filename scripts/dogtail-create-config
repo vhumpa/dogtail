@@ -9,10 +9,10 @@ import os
 import sys
 from dogtail.config import config
 
-directory = os.path.realpath(os.getcwd())
+def main():
+    directory = os.path.realpath(os.getcwd())
 
 
-if __name__ == "__main__":
     # Print the retrieved values
 
     configuration = ""
@@ -26,18 +26,21 @@ if __name__ == "__main__":
     configuration += "user_value_y = user_value_y\n"
     configuration += "user_value_z = user_value_z\n"
 
-try:
-    if os.path.isfile("dogtail_config.ini"):
-        print("Configuration file already exists.")
-        sys.exit(0)
+    try:
+        if os.path.isfile("dogtail_config.ini"):
+            print("Configuration file already exists.")
+            sys.exit(0)
 
-    with open(directory + "/dogtail_config.ini", "w", encoding="utf-8") as _file:
-        _file.write(configuration)
+        with open(directory + "/dogtail_config.ini", "w", encoding="utf-8") as _file:
+            _file.write(configuration)
 
-    print(" ".join((
-        "File was successfully created.",
-        os.path.abspath(os.path.join(directory, "dogtail_config.ini")),
-    )))
+        print(" ".join((
+            "File was successfully created.",
+            os.path.abspath(os.path.join(directory, "dogtail_config.ini")),
+        )))
 
-except IOError as error:
-    raise IOError("File creation of 'dogtail_config.ini' failed.") from error
+    except IOError as error:
+        raise IOError("File creation of 'dogtail_config.ini' failed.") from error
+
+if __name__ == "__main__":
+    main()

@@ -5,9 +5,12 @@ Print default configuration.
 
 from dogtail.config import config
 
-if __name__ == "__main__":
+def main():
     # Print the retrieved values
 
     print("Default Configuration.")
     for key, value in config.options.items():
         print(f"{key:25}: {value.value} {value.defined_types}")
+
+if __name__ == "__main__":
+    main()

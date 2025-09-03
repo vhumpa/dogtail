@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dogtail"
-version = "2.0"
+dynamic = ["version"]
 description = "GUI test tool and automation framework that uses Accessibility (a11y) technologies to communicate with desktop applications."
 license = "GPL-2.0"
 readme = { file = "README.rst", content-type = "text/x-rst" }
@@ -29,3 +29,7 @@ include = ["dogtail", "dogtail.scripts"]
 dogtail-create-config = "dogtail.scripts.dogtail_create_config:main"
 dogtail-get-config = "dogtail.scripts.dogtail_get_config:main"
 dogtail-headless = "dogtail.scripts.dogtail_headless:main"
+
+[tool.setuptools_scm]
+# can be empty if no extra settings are needed, presence enables setuptools-scm
+#tag_regex = "^DOGTAIL_(?P<version>[0-9]+_[0-9]+_[0-9]+)$"

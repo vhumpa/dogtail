@@ -19,13 +19,13 @@ authors = [
 urls = { "Homepage" = "https://gitlab.com/dogtail/dogtail" }
 dependencies = [
     "PyGObject",
+    "psutil",
 ]
 
 [tool.setuptools.packages.find]
-include = ["dogtail"]
+include = ["dogtail", "dogtail.scripts"]
 
-## TODO: scripts need to be moved to entrypoints
 [project.scripts]
-# dogtail-create-config = ...
-# dogtail-get-config = ...
-# dogtail-headless = ...
+dogtail-create-config = "dogtail.scripts.dogtail_create_config:main"
+dogtail-get-config = "dogtail.scripts.dogtail_get_config:main"
+dogtail-headless = "dogtail.scripts.dogtail_headless:main"

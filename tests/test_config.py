@@ -3,8 +3,6 @@
 Unit tests for the dogtail.config.
 """
 
-# TODO revisit what these are needed for.
-from __future__ import absolute_import, division, print_function, unicode_literals
 import unittest
 from dogtail.config import config
 

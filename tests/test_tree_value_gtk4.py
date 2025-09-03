@@ -8,8 +8,6 @@ Unit tests for the dogtail.tree Node Values.
 # pylint: disable=wrong-import-order
 # ruff: noqa: E402
 
-# TODO revisit what these are needed for.
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
 import unittest

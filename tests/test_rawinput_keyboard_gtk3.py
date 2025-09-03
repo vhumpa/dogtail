@@ -5,8 +5,6 @@ Unit tests for the dogtail.rawinput keyboard methods.
 
 # pylint: disable=import-outside-toplevel
 
-# TODO revisit what these are needed for.
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
 from time import sleep

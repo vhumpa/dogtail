@@ -4,7 +4,6 @@ Dogtails works great in combination with behave and qecore (based on behave and 
 
 Other than that, dogtail should work with any desktop environment that still runs atspi with Xorg.
 
-
 News
 ====
 # dogtail 1.0
@@ -90,10 +89,9 @@ window, .popover, .tooltip {
     box-shadow: none;
 }
 
-
-
 Installation
 ============
+
 Dogtail is available with PIP! (1.0 inclusion pending). If you'd like to use it with Wayland GNOME,
 you also need to get the dogtail-ponytail-daemon: https://gitlab.gnome.org/ofourdan/gnome-ponytail-daemon
 We do not have that as DEP in PIP as it compiles C code.
@@ -114,7 +112,6 @@ PyGObject and GNOME-Python
 Applications to test, e.g. from the GNOME desktop:
     http://gnome.org/
 
-
 Using
 =====
 
@@ -133,13 +130,11 @@ log back in again.
 Should you run "sniff" first, or be using 'dogtail-run-headless-next' or 'qecore-headless'
 scripts to handle your sessions, the accessibility will be auto enabled for you.
 
-
 Bugs
 ====
 
 Please report any bugs at:
     https://gitlab.com/dogtail/dogtail/issues
-
 
 Contact
 =======
@@ -200,29 +195,29 @@ you prefer to use github, but gitlab.com is preferred)
 
     Dec-08-2015
 
-    We have accumulated a good number of enhancements since the last version, and are also working on making our first python3 ready release. All from one single code base. See ​https://fedorahosted.org/dogtail/ticket/63
+    We have accumulated a good number of enhancements since the last version, and are also working on making our first python3 ready release. All from one single code base. See https://fedorahosted.org/dogtail/ticket/63
     Dogtail 0.9.0 is out!
 
-    Over the last year we've made a good number of fixes, added some new features and got overall stability to the point where we can make a new 'major minor' release. With 0.9 we're finally getting only a step away from what we'd like to get done with 1.0. Also thanks to you all who helped us out by sending patches. For details on what's new, check the ​NEWS.
+    Over the last year we've made a good number of fixes, added some new features and got overall stability to the point where we can make a new 'major minor' release. With 0.9 we're finally getting only a step away from what we'd like to get done with 1.0. Also thanks to you all who helped us out by sending patches. For details on what's new, check the NEWS.
 
-    Also, if looking for offline api docs, you can download the latest ​here
+    Also, if looking for offline api docs, you can download the latest here
     Dogtail 0.8.2 is out!
 
-    Second update to the 0.8 series containing several fixes and improvements (notably new dogtail-run-headless-next) is out. Check ​NEWS
+    Second update to the 0.8 series containing several fixes and improvements (notably new dogtail-run-headless-next) is out. Check NEWS
     Dogtail 0.8.1 is out
 
     A first update to the 0.8.x branch is out, containing several fixes as well as some sniff improvements.
     Dogtail 0.8.0 Final is out!
 
-    See what's new: ​NEWS!
+    See what's new: NEWS!
 
         Dogtail 0.8.0 Release Candidate is out!
         After more then two years a 0.7.x branch update containing several fixes, version 0.7.1, is now out!
-        Thanks to ​qt-at-spi project, QT can now be used with dogtail!
+        Thanks to qt-at-spi project, QT can now be used with dogtail!
 
     What is it?
 
-    dogtail is a GUI test tool and automation framework written in ​Python. It uses Accessibility (a11y) technologies to communicate with desktop applications. dogtail scripts are written in Python and executed like any other Python program.
+    dogtail is a GUI test tool and automation framework written in Python. It uses Accessibility (a11y) technologies to communicate with desktop applications. dogtail scripts are written in Python and executed like any other Python program.
     Features
 
         It's Just Python™: If you can do it in Python, you can do it with dogtail.
@@ -243,18 +238,18 @@ you prefer to use github, but gitlab.com is preferred)
 
     yum install dogtail
 
-    If you use RHEL7/Centos or some other Red Hat based system, you can try the latest distribution-less rpm from over ​here or, you can use the EL7 epel.
+    If you use RHEL7/Centos or some other Red Hat based system, you can try the latest distribution-less rpm from over here or, you can use the EL7 epel.
 
-    If you don't use Fedora, just grab the latest tarball from: ​https://fedorahosted.org/released/dogtail/
+    If you don't use Fedora, just grab the latest tarball from: https://fedorahosted.org/released/dogtail/
     Dogtail 0.7.x - for "Gnome 2 systems"
 
     For all Fedora releases until 14, RHEL6, CentOS6, pre-Unity Ubuntu or simply all systems still having Gnome 2 - get version 0.7.1.1:
 
-    If you use Fedora, have RHEL ​Epel etc., you can simply do:
+    If you use Fedora, have RHEL Epel etc., you can simply do:
 
     yum install dogtail
 
-    Or you can download the latest released tarball: ​dogtail-0.7.1.1.tar.gz
+    Or you can download the latest released tarball: dogtail-0.7.1.1.tar.gz
     Git repository
 
     If you want to check out our source code repository, do:
@@ -278,13 +273,13 @@ you prefer to use github, but gitlab.com is preferred)
 
     You may also want to look at the dogtail recorder (/usr/bin/dogtail-recorder or "Dogtail Script Recorder" in your menu; only in 0.7.x for now), which can actually do much of the work of script writing for you.
 
-    If you're familiar with Python, you may want to start with the ​dogtail.tree module - specifically, dogtail.tree.root.
+    If you're familiar with Python, you may want to start with the dogtail.tree module - specifically, dogtail.tree.root.
 
-    If you are new to Python and/or programming in general, you may want to look at ​The Python Tutorial and the dogtail.procedural module.
+    If you are new to Python and/or programming in general, you may want to look at The Python Tutorial and the dogtail.procedural module.
 
-    And then, there's always the ​example scripts.
+    And then, there's always the example scripts.
     API Documentation
 
-    dogtail's API tries to be ​self-documented, but also uses ​docstrings whenever possible. If you prefer to read your documentation in a web browser, head over to the ​HTML API docs (​tarball) for 0.8.x forward and ​here for 0.7.x branch.
+    dogtail's API tries to be self-documented, but also uses docstrings whenever possible. If you prefer to read your documentation in a web browser, head over to the HTML API docs (tarball) for 0.8.x forward and here for 0.7.x branch.
 
-    NOTE: We try to keep compatible, thus so far the only change between GNOME2-ish and GNOME3-ish branches on the side of API provided is that ​tree.doAction has been renamed to ​tree.doActionNamed
+    NOTE: We try to keep compatible, thus so far the only change between GNOME2-ish and GNOME3-ish branches on the side of API provided is that tree.doAction has been renamed to tree.doActionNamed

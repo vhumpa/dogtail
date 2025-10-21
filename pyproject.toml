@@ -23,7 +23,7 @@ dependencies = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["dogtail", "dogtail.scripts"]
+include = ["dogtail", "dogtail.accessibles", "dogtail.scripts", "tests"]
 
 [project.scripts]
 dogtail-create-config = "dogtail.scripts.dogtail_create_config:main"

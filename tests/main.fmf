@@ -6,7 +6,7 @@
 
         # Used when running by hand to specify branches.
         # url: https://gitlab.com/dogtail/dogtail.git
-        # ref: devel/ci_pipeline_experimentation
+        # ref: <branch>
 
     provision:
         how: virtual

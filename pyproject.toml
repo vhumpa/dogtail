@@ -33,3 +33,4 @@ dogtail-headless = "dogtail.scripts.dogtail_headless:main"
 [tool.setuptools_scm]
 # can be empty if no extra settings are needed, presence enables setuptools-scm
 #tag_regex = "^DOGTAIL_(?P<version>[0-9]+_[0-9]+_[0-9]+)$"
+fallback_version = "2.0.dev0"

@@ -27,6 +27,8 @@ from gi.repository import Atspi
 import warnings
 warnings.filterwarnings("ignore", "g_object_unref")
 
+from time import sleep
+
 from dogtail.config import config
 from dogtail.utils import do_delay
 
@@ -94,6 +96,7 @@ def click(x, y, button=1, check=True, window_id=None):
         # TODO Newton if condition.
         Atspi.generate_mouse_event(_x, _y, name=f"b{button}c")
     else:
+        ponytail_helper._ponytail_dbus_interface.disconnect()
         ponytail_helper.ponytail_check_connection(window_id)
         ponytail_interface = ponytail_helper.get_ponytail_interface()
 
@@ -126,6 +129,7 @@ def point(x, y, check=True, window_id=None):
         # TODO Newton if condition.
         Atspi.generate_mouse_event(_x, _y, name="abs")
     else:
+        ponytail_helper._ponytail_dbus_interface.disconnect()
         ponytail_helper.ponytail_check_connection(window_id)
         ponytail_interface = ponytail_helper.get_ponytail_interface()
         ponytail_interface.generateMotionEvent(_x, _y)
@@ -153,6 +157,7 @@ def double_click(x, y, button=1, check=True, window_id=None):
         # TODO Newton if condition.
         Atspi.generate_mouse_event(x, y, name=f"b{button}d")
     else:
+        ponytail_helper._ponytail_dbus_interface.disconnect()
         ponytail_helper.ponytail_check_connection(window_id)
         ponytail_interface = ponytail_helper.get_ponytail_interface()
         ponytail_interface.generateButtonEvent(button, _x, _y)
@@ -164,7 +169,11 @@ def double_click(x, y, button=1, check=True, window_id=None):
         if ponytail_interface.connected:
             ponytail_interface.generateButtonRelease(button)
         else: # not ponytail.connected:
+
+            ponytail_interface.disconnect()
+            sleep(1)
             ponytail_interface.connectMonitor()
+
             ponytail_interface.generateButtonRelease(button)
 
     do_delay(config.action_delay)
@@ -196,6 +205,7 @@ def press(x, y, button=1, check=True, window_id=None, delay=None):
         Atspi.generate_mouse_event(_x, _y, name=f"b{button}p")
 
     else:
+        ponytail_helper._ponytail_dbus_interface.disconnect()
         ponytail_helper.ponytail_check_connection(window_id)
         ponytail_interface = ponytail_helper.get_ponytail_interface()
         ponytail_interface.generateMotionEvent(_x, _y)
@@ -224,6 +234,7 @@ def release(x, y, button=1, check=True, window_id=None):
         Atspi.generate_mouse_event(_x, _y, name=f"b{button}r")
 
     else:
+        ponytail_helper._ponytail_dbus_interface.disconnect()
         ponytail_helper.ponytail_check_connection(window_id)
         ponytail_interface = ponytail_helper.get_ponytail_interface()
         ponytail_interface.generateMotionEvent(_x, _y)
@@ -404,7 +415,7 @@ def drag_with_trajectory(  # pylint: disable=invalid-name
         toXY,
         button=1,
         check=True,
-        press_delay=0.5,
+        press_delay=0.2,
         mouse_delay=0.01
     ):
     """
@@ -462,6 +473,7 @@ def drag_with_trajectory_global(fromXY, toXY, button=1):  # pylint: disable=inva
 
     if SESSION_TYPE == "wayland":
         (from_x, from_y) = fromXY
+        ponytail_helper._ponytail_dbus_interface.disconnect()
         ponytail_helper.ponytail_check_connection(window_id="")
         ponytail_interface = ponytail_helper.get_ponytail_interface()
 

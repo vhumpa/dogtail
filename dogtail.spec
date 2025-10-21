@@ -4,8 +4,8 @@
 
 Summary: GUI test tool and automation framework
 Name: dogtail
-Version: 1.0.0
-Release: 1.%{?dist}
+Version: 2.0.dev0
+Release: 2%{?dist}
 License: GPLv2
 URL: https://gitlab.com/dogtail/dogtail/
 Source0: https://gitlab.com/dogtail/dogtail/raw/released/%{name}-%{version}.tar.gz
@@ -60,7 +60,7 @@ Requires: python3-cairo
 #Requires: xorg-x11-xinit
 #Requires: xorg-x11-xinit
 Requires: hicolor-icon-theme
-Requires: python3-dogtail >= 1.0.0
+Requires: python3-dogtail >= 2.0
 
 %description -n python3-dogtail-scripts
 GUI test tool and automation framework that uses assistive technologies to

@@ -68,6 +68,9 @@ class TestGtk3DemoRawinputKeyboard(Gtk3DemoTest):
         Testing simple key combo with multiple keys.
         """
 
+        press_key("Esc")
+        sleep(1)
+
         self.run_demo("Clipboard")
 
         clipboard_window = self.demo.find_children(
@@ -105,6 +108,9 @@ class TestGtk3DemoRawinputKeyboard(Gtk3DemoTest):
         """
         Testing type text.
         """
+
+        press_key("Esc")
+        sleep(1)
 
         self.run_demo("Clipboard")
 

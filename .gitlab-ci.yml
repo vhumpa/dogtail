@@ -1,11 +1,78 @@
 image: python:3
 
 stages:
-  - test
-  - deploy
+  - lint
+  - deploy_to_git
+  - check_version
+  - build
+  # - upload_testpypi
+  - automatic_release
+
+variables:
+  PACKAGE_DIR: "dist"
+
+
+lint_code:
+  stage: lint
+  script:
+    - pip install ruff
+    - ruff check .
+    - python -m compileall dogtail/ scripts/
+  only:
+    - tags
+    - branches
+
+check_version:
+  stage: check_version
+  script:
+    - export SETUP_VERSION=$(python setup.py --version)
+    - 'echo "Setup.py version: $SETUP_VERSION"'
+    - 'echo "Git tag: $CI_COMMIT_TAG"'
+    - if [ "$SETUP_VERSION" != "$CI_COMMIT_TAG" ]; then echo "Version mismatch!"; exit 1; fi
+  only:
+    - tags
+    # Only relevant if pushing to test.pypi is wanted.
+    # - branches
+
+build_package:
+  stage: build
+  script:
+    - python -m build
+  artifacts:
+    paths:
+      - $PACKAGE_DIR
+  only:
+    - tags
+    # Only relevant if pushing to test.pypi is wanted.
+    #- branches
+  dependencies:
+    - check_version
+
+  #upload_to_testpypi:
+  #  stage: upload_testpypi
+  #  script:
+  #    - twine upload --repository-url https://test.pypi.org/legacy/ -u "$TWINE_USERNAME_TESTPYPI" -p "$TWINE_PASSWORD_TESTPYPI" $PACKAGE_DIR/* --verbose
+  #  only:
+  #    - tags
+  #    # Only relevant if pushing to test.pypi is wanted.
+  #    #- branches
+  #  dependencies:
+  #    - build_package
+  #  when: manual
+
+# Will not work until I add TWINE_USERNAME/PASSWORD to the dogtail project.
+upload_to_pypi:
+  stage: automatic_release
+  script:
+    - python --version
+    - pip install --upgrade pip setuptools wheel twine
+    - twine upload -u "$TWINE_USERNAME" -p "$TWINE_PASSWORD" $PACKAGE_DIR/* --verbose
+  only:
+    - tags
+  dependencies:
 
 publish-index:
-  stage: deploy
+  stage: deploy_to_git
 #  only:
 #    refs:
 #      - master

@@ -684,6 +684,8 @@ class DisplayManager:
         :type use_unsafe_mode: bool, optional
         """
 
+        print_info("Handling --unsafe-mode.")
+
         if desktop not in ("gnome-shell", "gnome-kiosk"):
             print_info("Unknown desktop, unable to set unsafe mode.")
             return
@@ -703,8 +705,9 @@ class DisplayManager:
             unsafe_temporary_config = self.temporary_unsafe_mode_config_file_kiosk
 
         # No point of checking unsafe mode of gnome-shell if there is no gnome-shell.
-        if self.session != "gnome":
-            return
+        #if self.session != "gnome":
+        #    print_info(f"GNOME not detected at this point: session is '{self.session}'")
+        #    return
 
         # If the gnome-shell or kiosk has no unsafe mode, do not use it.
         unsafe_mode_present = run_verbose(f"/usr/bin/{desktop} --unsafe-mode --help")
@@ -716,6 +719,7 @@ class DisplayManager:
 
         # Handling unsafe mode setup.
         if not os.path.isfile(unsafe_config):
+            print_info("Defined unsafe mode config file not detected.")
             # File is not present on rhel-8 so it will not be executed.
             return
 
@@ -833,8 +837,8 @@ class DisplayManager:
 
             # Stopping display manager to reload session type.
             self.stop_display_manager()
-            # Stopping these services to reload session desktop changed via busctl call.
-            run("sudo systemctl stop accounts-daemon systemd-logind")
+            # A little delay to prevent races.
+            time.sleep(1)
 
         list_of_systemd_processes = (
             run(f"pgrep -u {os.geteuid()} -f '/usr/lib/systemd/systemd --user'")
@@ -1260,6 +1264,11 @@ class Headless:
         print(f"DISPLAY = '{display}'")
         print(f"XAUTHORITY = '{xauthority}'")
         print(f"DBUS_SESSION_BUS_ADDRESS = '{dbus_session_bus_address}'\n")
+
+
+        session_result = "ps ax | grep -E 'gdm|gnome-shell|gnome-session'"
+        session_run_result = run(session_result)
+        print(f"SESSION DEBUG:\n'{session_run_result}'")
 
         journal_run = run_verbose(" ".join((
             "sudo journalctl --all",

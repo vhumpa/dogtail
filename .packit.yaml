@@ -1,0 +1,11 @@
+jobs:
+
+- job: tests
+  packit_instances: ["stg"]
+  use_internal_tf: true
+  trigger: pull_request
+  targets:
+    #- fedora-rawhide
+    - centos-stream-10-x86_64
+  skip_build: true
+  manual_trigger: true

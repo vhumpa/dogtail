@@ -12,7 +12,10 @@ Unit tests for the dogtail.tree Node Selection.
 import os
 import unittest
 
-from dogtail.rawinput import pressKey
+from time import sleep
+
+from dogtail.tree import SearchError
+from dogtail.rawinput import press_key
 
 try:
     from tests.test_gtk_demo import Gtk3DemoTest
@@ -50,7 +53,7 @@ class TestGtk3DogtailNodeSelection(Gtk3DemoTest):
 
         # Weird way to do this but it works as a unit test.
         self.demo.child("Icon View").click()
-        pressKey("+")
+        press_key("+")
         self.run_demo("Icon View Basics")
 
         window = self.demo.find_children(
@@ -70,10 +73,23 @@ class TestGtk3DogtailNodeSelection(Gtk3DemoTest):
         Testing deselect.
         """
 
+        press_key("Esc")
+        sleep(1)
+
         # Weird way to do this but it works as a unit test.
-        self.demo.child("Icon View").click()
-        pressKey("+")
-        self.run_demo("Icon View Basics")
+        scroll_bar = self.demo.find_child(lambda x: x.role_name == "scroll bar" and x.showing)
+        for _ in range(20):
+            scroll_bar.value += 100
+
+            self.demo.child("Icon View").click()
+            sleep(0.5)
+            press_key("+")
+
+            try:
+                self.run_demo("Icon View Basics")
+                break
+            except (RuntimeError, SearchError):
+                sleep(1)
 
         window = self.demo.find_children(
             lambda x: x.name == "Icon View Basics" and
@@ -96,7 +112,7 @@ class TestGtk3DogtailNodeSelection(Gtk3DemoTest):
 
         # Weird way to do this but it works as a unit test.
         self.demo.child("Icon View").click()
-        pressKey("+")
+        press_key("+")
         self.run_demo("Icon View Basics")
 
         window = self.demo.find_children(
@@ -124,7 +140,7 @@ class TestGtk3DogtailNodeSelection(Gtk3DemoTest):
 
         # Weird way to do this but it works as a unit test.
         self.demo.child("Icon View").click()
-        pressKey("+")
+        press_key("+")
         self.run_demo("Icon View Basics")
 
         window = self.demo.find_children(

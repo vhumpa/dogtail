@@ -68,6 +68,9 @@ class TestGtk4DemoRawinputKeyboard(Gtk4DemoTest):
         Testing simple key combo with multiple keys.
         """
 
+        press_key("Esc")
+        sleep(1)
+
         clipboard_button = self.demo.child("Clipboard")
         clipboard_button.double_click()
 
@@ -113,6 +116,9 @@ class TestGtk4DemoRawinputKeyboard(Gtk4DemoTest):
         """
         Testing type text.
         """
+
+        press_key("Esc")
+        sleep(1)
 
         clipboard_button = self.demo.child("Clipboard")
         clipboard_button.double_click()

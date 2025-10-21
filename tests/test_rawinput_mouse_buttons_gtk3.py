@@ -9,6 +9,8 @@ Unit tests for the dogtail.rawinput mouse buttons.
 import os
 import unittest
 
+from time import sleep
+
 try:
     from tests.test_gtk_demo import Gtk3DemoTest
 except ImportError:
@@ -19,6 +21,7 @@ from dogtail.rawinput import (
     double_click,
     press,
     release,
+    press_key
 )
 
 
@@ -34,10 +37,14 @@ class TestGtk3DemoRawinputMouse(Gtk3DemoTest):
         Testing click.
         """
 
+        press_key("Esc")
+        sleep(1)
+
         builder_button = self.demo.child("Builder")
         self.assertFalse(builder_button.focused)
 
         click(*builder_button.center)
+        sleep(1)
         self.assertTrue(builder_button.focused)
 
 
@@ -45,6 +52,9 @@ class TestGtk3DemoRawinputMouse(Gtk3DemoTest):
         """
         Testing double_click.
         """
+
+        press_key("Esc")
+        sleep(1)
 
         builder_button = self.demo.child("Builder")
 
@@ -65,6 +75,9 @@ class TestGtk3DemoRawinputMouse(Gtk3DemoTest):
         """
         Testing press and release.
         """
+
+        press_key("Esc")
+        sleep(1)
 
         self.run_demo("Builder")
 

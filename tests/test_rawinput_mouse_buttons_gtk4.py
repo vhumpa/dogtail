@@ -20,6 +20,7 @@ from dogtail.rawinput import (
     double_click,
     press,
     release,
+    press_key
 )
 
 
@@ -35,6 +36,9 @@ class TestGtk4DemoRawinputMouse(Gtk4DemoTest):
         Testing click.
         """
 
+        press_key("Esc")
+        sleep(1)
+
         builder_button = self.demo.child("Builder")
         self.assertFalse(builder_button.focused)
 
@@ -46,6 +50,9 @@ class TestGtk4DemoRawinputMouse(Gtk4DemoTest):
         """
         Testing double_click.
         """
+
+        press_key("Esc")
+        sleep(1)
 
         builder_button = self.demo.child("Builder")
 
@@ -68,6 +75,9 @@ class TestGtk4DemoRawinputMouse(Gtk4DemoTest):
         """
         Testing press and release.
         """
+
+        press_key("Esc")
+        sleep(1)
 
         builder_button = self.demo.child("Builder")
         builder_button.double_click()

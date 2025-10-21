@@ -170,6 +170,8 @@ class PonytailHelper(metaclass=Singleton):
 
         if input_source == "keyboard" and ponytail_interface.connected is None:
             LOGGING.debug("Keyboard event, connecting monitor.")
+            ponytail_interface.disconnect()
+            sleep(1)
             ponytail_interface.connectMonitor()
 
         elif input_source == "keyboard" and ponytail_interface.connected is not None:
@@ -177,7 +179,14 @@ class PonytailHelper(metaclass=Singleton):
                 LOGGING.debug("Keyboard event, monitor request, forcing monitor.")
                 ponytail_interface.disconnect()
                 sleep(1)
-                ponytail_interface.connectMonitor()
+
+                try:
+                    ponytail_interface.connectMonitor()
+                except Exception:
+                    ponytail_interface.disconnect()
+                    sleep(1)
+                    ponytail_interface.connectMonitor()
+
             else:
                 LOGGING.debug("Any window/monitor already connected for keyboard event.")
 
@@ -191,14 +200,19 @@ class PonytailHelper(metaclass=Singleton):
                 window_was_connected = False
                 for window in window_list:
                     if bool(window["has-focus"]) is True:
+                        ponytail_interface.disconnect()
+                        sleep(1)
                         ponytail_interface.connectWindow(window["id"])
                         window_was_connected = True
                         LOGGING.debug(f"Connected active window '{window['id']}'.")
 
                 # Attempt to connect monitor only in cases when window was not found.
                 if not window_was_connected:
-                    ponytail_interface.connectMonitor()
                     LOGGING.debug("No active window, connecting monitor.")
+                    ponytail_interface.disconnect()
+                    sleep(1)
+                    ponytail_interface.connectMonitor()
+
 
             elif ponytail_interface.connected is not None and window_id is None:
                 for window in window_list:
@@ -211,10 +225,14 @@ class PonytailHelper(metaclass=Singleton):
 
             elif ponytail_interface.connected is None:
                 if isinstance(window_id, int):
+                    ponytail_interface.disconnect()
+                    sleep(1)
                     ponytail_interface.connectWindow(window_id)
                     LOGGING.debug("Connected window by window_id.")
 
                 elif isinstance(window_id, str):
+                    ponytail_interface.disconnect()
+                    sleep(1)
                     ponytail_interface.connectMonitor(window_id)
                     LOGGING.debug("Connected monitor (Xwayland?) by window_id.")
 
@@ -284,7 +302,8 @@ class PonytailHelper(metaclass=Singleton):
             for ancestor in parent_list:
                 # Ancestors parent is None
                 if ancestor.parent is None:
-                    self._window_id = [x["id"] for x in window_list if bool(x["has-focus"])][0]
+                    window_list_node_with_focus = [x["id"] for x in window_list if bool(x["has-focus"])]
+                    self._window_id = window_list_node_with_focus[0] if window_list_node_with_focus else None
                     window_id_return_value = self._window_id
                     break
 
@@ -295,13 +314,15 @@ class PonytailHelper(metaclass=Singleton):
 
                 # Ancestors parent is an application and ancestor is a window.
                 if (ancestor.parent.role_name == "application" and ancestor.role_name == "window" and ancestor.name == ""):
-                    self._window_id = [x["id"] for x in window_list if bool(x["has-focus"])][0]
+                    window_list_node_with_focus = [x["id"] for x in window_list if bool(x["has-focus"])]
+                    self._window_id = window_list_node_with_focus[0] if window_list_node_with_focus else None
                     window_id_return_value = self._window_id
                     break
 
                 # Ancestors parent is an application and ancestors name is in the list.
                 if ancestor.parent.role_name == "application" and ancestor.name in [x["title"] for x in window_list]:
-                    self._window_id = [x["id"] for x in window_list if x["title"] == ancestor.name][0]
+                    window_list_node_with_title = [x["id"] for x in window_list if x["title"] == ancestor.name]
+                    self._window_id = window_list_node_with_title[0] if window_list_node_with_title else None
                     window_id_return_value = self._window_id
                     break
 
@@ -313,7 +334,8 @@ class PonytailHelper(metaclass=Singleton):
         # If user provides a window that is not focused, refocus.
         elif self._window_id is not None and not self.get_window_has_focus():
             LOGGING.debug("Attempt to do an action on unfocused window, refocusing.")
-            self._window_id = [x["id"] for x in window_list if bool(x["has-focus"])][0]
+            window_list_node_with_focus = [x["id"] for x in window_list if bool(x["has-focus"])]
+            self._window_id = window_list_node_with_focus[0] if window_list_node_with_focus else None
             window_id_return_value = self._window_id
 
         else:
@@ -324,7 +346,8 @@ class PonytailHelper(metaclass=Singleton):
         if window_id_return_value != "" and not self.get_window_has_focus():
             LOGGING.debug(f"Attempting to use window_id '{window_id_return_value}'")
             LOGGING.debug("Window ID provided led to unfocused window, refocusing.")
-            self._window_id = [x["id"] for x in window_list if bool(x["has-focus"])][0]
+            window_list_node_with_focus = [x["id"] for x in window_list if bool(x["has-focus"])]
+            self._window_id = window_list_node_with_focus[0] if window_list_node_with_focus else None
             window_id_return_value = self._window_id
 
         LOGGING.debug(f"Window ID to use '{window_id_return_value}'")

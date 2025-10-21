@@ -1,19 +1,18 @@
-#!/usr/bin/python3
-"""
-Unit tests for the dogtail.rawinput drag method's via gnome shell overview.
-"""
-
 # pylint: disable=import-outside-toplevel
 
 import os
 import unittest
 from time import sleep
+
 from dogtail.tree import root
 from dogtail.rawinput import (
     drag,
     drag_with_trajectory,
-    pressKey,
+    press_key,
 )
+from dogtail.logging import logging_class
+LOGGING = logging_class.logger
+
 
 
 class TestGnomeShellOverviewRawinput(unittest.TestCase):
@@ -21,22 +20,29 @@ class TestGnomeShellOverviewRawinput(unittest.TestCase):
     Class to test dogtail's rawinput drag methods.
     """
 
-
+    # Skipping for now, breaking testing-farm somehow, probably too many events generated?
+    #@unittest.SkipTest
     def test_drag_in_overview(self):
+
         """
         Testing drag.
         """
+
+        press_key("Esc")
+        sleep(1)
 
         os.system("killall nautilus > /dev/null 2>&1")
 
         gnome_shell = root.application("gnome-shell")
 
-        pressKey("Esc")
-        sleep(1)
-        pressKey("Super")
+        print("This test assumes Nautilus - Files to be Pinned")
+        os.system("gsettings set org.gnome.shell favorite-apps \"['org.gnome.Nautilus.desktop']\"")
         sleep(1)
 
-        print("This test assumes Nautilus - Files to be Pinned")
+        press_key("Esc")
+        sleep(1)
+        press_key("Super")
+        sleep(1)
 
         # Search for Files - assuming Files are Pinned.
         file_button = gnome_shell.find_child(
@@ -57,7 +63,7 @@ class TestGnomeShellOverviewRawinput(unittest.TestCase):
 
         self.assertTrue("org.gnome.Nautilus" in [x.name for x in root.applications()])
         os.system("killall nautilus > /dev/null 2>&1")
-        pressKey("Esc")
+        press_key("Esc")
 
 
     def test_drag_with_trajectory_in_overview(self):
@@ -65,16 +71,21 @@ class TestGnomeShellOverviewRawinput(unittest.TestCase):
         Testing drag with trajectory.
         """
 
+        press_key("Esc")
+        sleep(1)
+
         os.system("killall nautilus > /dev/null 2>&1")
 
         gnome_shell = root.application("gnome-shell")
 
-        pressKey("Esc")
-        sleep(1)
-        pressKey("Super")
+        print("This test assumes Nautilus - Files to be Pinned")
+        os.system("gsettings set org.gnome.shell favorite-apps \"['org.gnome.Nautilus.desktop']\"")
         sleep(1)
 
-        print("This test assumes Nautilus - Files to be Pinned")
+        press_key("Esc")
+        sleep(1)
+        press_key("Super")
+        sleep(1)
 
         # Search for Files - assuming Files are Pinned.
         file_button = gnome_shell.find_child(
@@ -91,12 +102,12 @@ class TestGnomeShellOverviewRawinput(unittest.TestCase):
         drag_with_trajectory(
             (start_run_button_x, start_run_button_y),
             (end_run_button_x, end_run_button_y),
-            mouse_delay=0
+            mouse_delay=0.02
         )
 
         self.assertTrue("org.gnome.Nautilus" in [x.name for x in root.applications()])
         os.system("killall nautilus > /dev/null 2>&1")
-        pressKey("Esc")
+        press_key("Esc")
 
 
 if __name__ == "__main__":

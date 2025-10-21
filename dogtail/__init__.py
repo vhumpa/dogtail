@@ -11,7 +11,7 @@ Vita Humpa <vhumpa@redhat.com>,
 Michal Odehnal <modehnal@redhat.com>
 """
 
-__version__ = "2.0.dev0"
+__version__ = "v2.0.dev0"
 __copyright__ = "Copyright © 2005-2026 Red Hat, Inc."
 __license__ = "GPLv2"
 __all__ = (

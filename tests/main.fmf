@@ -32,6 +32,7 @@
           - python3-gnome-ponytail-daemon
           - python3-pip
           - python3-psutil
+          - python3-devel
 
     # Debugging logind issues.
     #  - name: logind_debug_setup

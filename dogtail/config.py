@@ -27,6 +27,12 @@ class Value:
         self.value = set_value
         self.defined_types = defined_types
 
+    def __str__(self):
+        return f"Default Value: '{self.value}'. Defined Types: '{str(self.defined_types)}'"
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class LoadDefaultConfiguration:
     """
@@ -116,7 +122,6 @@ class _Config:
         "search_cut_off_limit": Value(_default.search_cut_off_limit, [int]),
         "search_showing_only": Value(_default.search_showing_only, [bool]),
 
-        # TODO do we need children limit? never saw a use case that would need this
         "children_limit": Value(_default.children_limit, [int]),
 
         "run_interval": Value(_default.run_interval, [float, int]),
@@ -214,8 +219,8 @@ class _Config:
         # In other cases check that the value exists.
         if set_option_id not in self.options:
             raise AttributeError(f"Attempt to use invalid option '{set_option_id}'.")
-            #LOGGING.info(f"Attempt to use invalid option '{set_option_id}'.")
-            return
+            # LOGGING.info(f"Attempt to use invalid option '{set_option_id}'.")
+            # return
 
         # Set the value if the value is not already present.
         if self.options[set_option_id].value != value_to_set:
@@ -256,7 +261,7 @@ class _Config:
             return self.options[get_option_id].value
         except KeyError as error:
             raise AttributeError(f"Attempt to use invalid option '{get_option_id}'.") from error
-            #LOGGING.info(f"Attempt to use invalid option '{get_option_id}'.")
+            # LOGGING.info(f"Attempt to use invalid option '{get_option_id}'.")
 
 
 config = _Config()

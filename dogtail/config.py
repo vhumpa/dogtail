@@ -96,17 +96,7 @@ class _Config:
     config_parser = configparser.ConfigParser()
 
     # Read the configuration file.
-    # TODO Figure out where the file will be.
-    # Currently think about having it placed/looked for in current user directory.
-    # Or perhaps having it in $HOME?
     successful_file_parsed = config_parser.read("dogtail_config.ini")
-
-    if not successful_file_parsed:
-        LOGGING.debug("\n".join((
-            "Configuration file 'dogtail_config.ini' was not found, using default values.",
-            "You can create the configuration file with '$ dogtail-create-config'.",
-        )))
-
     _default = LoadDefaultConfiguration(config_parser)
 
     # Return a dictionary with the retrieved values.
@@ -247,8 +237,6 @@ class _Config:
 
 
     def __getattr__(self, option_id):
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         # Set a variable to use for the getter logic.
         get_option_id = option_id
 

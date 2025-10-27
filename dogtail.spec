@@ -98,15 +98,6 @@ pushd %{py3dir}
 rm -rf $RPM_BUILD_ROOT/%{_docdir}/dogtail
 rm -rf $RPM_BUILD_ROOT/%{python3_sitelib}/%{name}-%{version}-py%{python3_version}.egg-info
 popd
-# Create dogtail system configuration directory
-mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/dogtail
-
-# Install RHEL-specific configuration for buttonRoleCompat
-cat > $RPM_BUILD_ROOT/%{_sysconfdir}/dogtail/config << 'EOF'
-# System-wide dogtail configuration for RHEL
-# Set buttonRoleCompat to True for backwards compatibility
-# Default is False - API should not be setting things for the user, leaving it in though.
-buttonRoleCompat=False
 
 %endif # with_python3
 
@@ -149,7 +140,6 @@ fi
 %files -n python3-dogtail-scripts
 %{_bindir}/*
 %{_datadir}/applications/*
-%config(noreplace) %{_sysconfdir}/dogtail/config
 %doc COPYING
 %doc README.md
 %doc NEWS

@@ -8,7 +8,7 @@ from dogtail.config import config
 def main():
     # Print the retrieved values
 
-    print("Default Configuration.")
+    print("Configuration.")
     for key, value in config.options.items():
         print(f"{key:25}: {value.value} {value.defined_types}")
 

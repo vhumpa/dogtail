@@ -1,6 +1,34 @@
+2024-10-29 Michal Odehnal <modehnal@redhat.com>
+
+	dogtail 2.0.dev2
+	================
+	Tracked in Issue #29
+	Remove obsolete and legacy code that I have not observed in usage for many years while working with dogtail and automation in general.
+	Improve Wayland support, iron out some wrinkles in very specific corner cases.
+	Improving code structure and moving specific parts to its own files to improve readability in high level Node.
+	Remove all pyatspi2 usage, switching to only Atspi usage.
+	Adding accessibility classes, which were heavily inspired by Orca.
+	Logging was rewritten to be more useful.
+	The ponytail handling was rewritten and added to its own file, so it is not implemented in several files.
+	Printing Accessibility Structure Representation with dump and tree was improved in readability and efficiency.
+	Configuration handling was improved and ability to have config file per project was added.
+	Changing casing to snake_case, but still have backwards compatibility to camelCase.
+	Custom keys and values - users can define their own config values in .ini file.
+	Type checking: users will get ValueError when trying to set e.g. bool to value defined as float in config.ini.
+	Unittests were rewritten and their execution have been validated with testing-farm. These will now execute before every MR.
+	Examples were updated.
+	Removing Sniff, I will not release dogtail with Sniff in a broken state. It is not working well under Wayland and effort to rewrite it would be great. If someone is willing to rewrite it and improve it I will accept MR with it. Until then there are better tools that fullfil the same role.
+	Preparation for Newton was added to Accessible classes, currently switched off.
+	Preparation for documentation is also present as docstring in class methods, but not executed upon yet. For now one of my colleagues said he will take a look, if not, I will do it myself later.
+	README file was updated with up to date information.
+	Released version 2.0.dev2 to pypi which is ready to be used by wider audience.
+	Metadata updated where possible.
+	The dogtail.spec and Makefile remain mostly untouched. I have never used those, adapting those should come from someone more knowledgeable.
+
+
 2024-12-31 Michal Odehnal <modehnal@redhat.com>
 
-	dogtail 2.0
+	dogtail 2.x
 	===========
 	See the NEWS file for all changes.
 

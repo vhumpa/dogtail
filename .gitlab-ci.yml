@@ -101,3 +101,5 @@ publish-index:
     paths:
       - dist
     when: always
+  # Maybe lets only do this manually, not sure if this is needed for every commit.
+  when: manual

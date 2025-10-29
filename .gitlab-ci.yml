@@ -24,15 +24,24 @@ lint_code:
 
 check_version:
   stage: check_version
+  rules:
+    - if: '$CI_COMMIT_TAG'  # Only run on tag pushes.
   script:
-    - export SETUP_VERSION=$(python setup.py --version)
-    - 'echo "Setup.py version: $SETUP_VERSION"'
-    - 'echo "Git tag: $CI_COMMIT_TAG"'
-    - if [ "$SETUP_VERSION" != "$CI_COMMIT_TAG" ]; then echo "Version mismatch!"; exit 1; fi
-  only:
-    - tags
-    # Only relevant if pushing to test.pypi is wanted.
-    # - branches
+    - pip install build setuptools-scm  # or whatever dynamic version plugin you use
+    # Get the version that pyproject-build will produce
+    - VERSION=$(python -m setuptools_scm)
+    - echo "Detected version from setuptools-scm: $VERSION"
+    # Strip 'v' prefix from tag if present
+    - TAG_VERSION=${CI_COMMIT_TAG#v}
+    - echo "Git tag version: $TAG_VERSION"
+    # Compare
+    - |
+      if [ "$VERSION" != "$TAG_VERSION" ]; then
+        echo "❌ Tag ($TAG_VERSION) does not match project version ($VERSION)"
+        exit 1
+      else
+        echo "✅ Tag matches project version."
+      fi
 
 build_package:
   stage: build
@@ -60,7 +69,6 @@ build_package:
   #    - build_package
   #  when: manual
 
-# Will not work until I add TWINE_USERNAME/PASSWORD to the dogtail project.
 upload_to_pypi:
   stage: automatic_release
   script:
@@ -70,6 +78,10 @@ upload_to_pypi:
   only:
     - tags
   dependencies:
+    - build_package
+# Considered the version to be released manually after all checks are done.
+# But once the tag is pushed, we want the version to be released always. Lets not wait for user.
+#  when: manual
 
 publish-index:
   stage: deploy_to_git

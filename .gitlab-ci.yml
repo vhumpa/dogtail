@@ -48,7 +48,7 @@ check_version:
 build_package:
   stage: build
   script:
-    - python -m build
+    - pyproject-build
   artifacts:
     paths:
       - $PACKAGE_DIR

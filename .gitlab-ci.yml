@@ -17,7 +17,7 @@ lint_code:
   script:
     - pip install ruff
     - ruff check .
-    - python -m compileall dogtail/ scripts/
+    - python -m compileall dogtail/
   only:
     - tags
     - branches

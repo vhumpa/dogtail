@@ -154,6 +154,6 @@ API Documentation:
 We have deprecated our mailing lists as well as IRC channel. Please use our GitLab for issues and merge requests! (Or possibly https://github.com/vhumpa/dogtail perhaps for your pull requests should you prefer to use github, but gitlab.com is preferred)
 
 
-## Version dogtail-1.x
+# Version dogtail-1.x
 
-The dogtail-1.x is still available and if required will be updated and new versions will released.
+The [dogtail-1.x](https://gitlab.com/dogtail/dogtail/-/tree/dogtail-1.x) is still available and if required will be updated and new versions will be released.

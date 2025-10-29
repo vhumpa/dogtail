@@ -2,11 +2,11 @@ image: python:3
 
 stages:
   - lint
-  - deploy_to_git
   - check_version
   - build
   # - upload_testpypi
   - automatic_release
+  - deploy_to_git
 
 variables:
   PACKAGE_DIR: "dist"

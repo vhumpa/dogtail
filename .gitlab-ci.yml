@@ -73,16 +73,16 @@ build_package:
   #    - build_package
   #  when: manual
 
-upload_to_pypi:
-  stage: automatic_release
-  script:
-    - python --version
-    - pip install --upgrade pip setuptools wheel twine
-    - twine upload -u "$TWINE_USERNAME" -p "$TWINE_PASSWORD" $PACKAGE_DIR/* --verbose
-  only:
-    - tags
-  dependencies:
-    - build_package
+#upload_to_pypi:
+#  stage: automatic_release
+#  script:
+#    - python --version
+#    - pip install --upgrade pip setuptools wheel twine
+#    - twine upload -u "$TWINE_USERNAME" -p "$TWINE_PASSWORD" $PACKAGE_DIR/* --verbose
+#  only:
+#    - tags
+#  dependencies:
+#    - build_package
 # Considered the version to be released manually after all checks are done.
 # But once the tag is pushed, we want the version to be released always. Lets not wait for user.
 #  when: manual

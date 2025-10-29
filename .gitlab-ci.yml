@@ -30,10 +30,12 @@ check_version:
     - pip install build setuptools-scm  # or whatever dynamic version plugin you use
     # Get the version that pyproject-build will produce
     - VERSION=$(python -m setuptools_scm)
-    - echo "Detected version from setuptools-scm: $VERSION"
+    - |
+      echo "Detected version from setuptools-scm: $VERSION"
     # Strip 'v' prefix from tag if present
     - TAG_VERSION=${CI_COMMIT_TAG#v}
-    - echo "Git tag version: $TAG_VERSION"
+    - |
+      echo "Git tag version: $TAG_VERSION"
     # Compare
     - |
       if [ "$VERSION" != "$TAG_VERSION" ]; then

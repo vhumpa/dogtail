@@ -1,6 +1,5 @@
-
-dogtail 2.0 - current work-in-progress
-======================================
+dogtail-2.0
+===========
 
 - Remove obsolete and legacy code that was never used in my several years of heavy dogtail usage.
 - Improving code structure and moving specific parts to its own files to improve readability in high level Node.
@@ -14,6 +13,8 @@ dogtail 2.0 - current work-in-progress
 - Custom keys and values - users can define their own config values in .ini file.
 - Type checking: users will get ValueError when trying to set e.g. bool to value defined as float in config.ini.
 - Release to pypi.
+
+
 
 dogtail 1.0
 ===========

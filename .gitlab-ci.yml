@@ -92,14 +92,14 @@ publish-index:
 #  only:
 #    refs:
 #      - master
-  variables:
-    TWINE_USERNAME: gitlab-ci-token
-    TWINE_PASSWORD: $CI_JOB_TOKEN
+#  variables:
+#    TWINE_USERNAME: gitlab-ci-token
+#    TWINE_PASSWORD: $CI_JOB_TOKEN
   before_script:
     - pip install build twine
   script:
     - pyproject-build
-    - python -m twine upload --repository-url ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi dist/* --verbose
+    - python -m twine upload --repository-url ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi dist/* -u $PACKAGE_REGISTRY_USERNAME -p $PACKAGE_REGISTRY_PASSWORD --verbose
   artifacts:
     paths:
       - dist

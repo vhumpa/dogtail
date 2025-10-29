@@ -9,7 +9,6 @@ Other than that, dogtail should work with any desktop environment that still run
 
 # News
 
-
 ## Release of dogtail-2.x
 
 Detailed information can be found in issue https://gitlab.com/dogtail/dogtail/-/issues/29.
@@ -153,6 +152,21 @@ API Documentation:
 
 We have deprecated our mailing lists as well as IRC channel. Please use our GitLab for issues and merge requests! (Or possibly https://github.com/vhumpa/dogtail perhaps for your pull requests should you prefer to use github, but gitlab.com is preferred)
 
+
+# Contributing
+
+- **Bug Reports**: If you find a bug, check if an [issue](https://gitlab.com/dogtail/dogtail/issues) already exists. If not, please open one with a clear description and steps to reproduce it.
+
+- **Feature Ideas**: Have a great idea? Open an [issue](https://gitlab.com/dogtail/dogtail/issues) to discuss it. This helps us align on the goal before you write any code.
+
+- **Ready to Help**? Look for existing [issues](https://gitlab.com/dogtail/dogtail/issues). If you see one you'd like to work on, just leave a comment to let us know!
+
+There are a few ways I would like to preserve the readability of the code.
+
+- For functions and methods, use docstring to explain what it does, this way we can be sure it gets in the documentation.
+- Use correct casing for classes, methods and variables. Most of the code base uses *snake_case*.
+- Use full names for variables where possible. Single letter variables are not acceptable.
+- Comments are sentences, they start with a capital letter and end with a dot.
 
 # Version dogtail-1.x
 

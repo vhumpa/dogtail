@@ -107,10 +107,11 @@ Disabling Shadows in GTK4:
 
 To disable window shadows, add the following CSS to your GTK4 configuration (`~/.config/gtk-4.0/gtk.css`):
 
+```
 window, .popover, .tooltip {
     box-shadow: none;
 }
-
+```
 
 # Using
 

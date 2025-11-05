@@ -2587,3 +2587,15 @@ try:
 except AttributeError:
     # Might be already deleted.
     pass
+
+try:
+    del Atspi.Accessible.description
+except AttributeError:
+    # Might be already deleted.
+    pass
+
+try:
+    del Atspi.Accessible.attributes
+except AttributeError:
+    # Might be already deleted.
+    pass

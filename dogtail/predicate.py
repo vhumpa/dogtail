@@ -148,12 +148,12 @@ class GenericPredicate:
         """
 
         string_to_represent_object = ""
-        string_to_represent_object += f"name:'{self.name if self.name else 'None'}' "
-        string_to_represent_object += f"role_name:'{self.role_name if self.role_name else 'None'}' "
-        string_to_represent_object += f"description:'{self.description if self.description else 'None'}' "
-        string_to_represent_object += f"label:'{self.label if self.label else 'None'}' "
-        string_to_represent_object += f"id:'{self.identifier if self.identifier else 'None'}' "
-        string_to_represent_object += f"showing_only:'{self.showing_only if self.showing_only else 'None'}'"
+        string_to_represent_object += f"name:'{repr(self.name)}' "
+        string_to_represent_object += f"role_name:'{repr(self.role_name)}' "
+        string_to_represent_object += f"description:'{repr(self.description)}' "
+        string_to_represent_object += f"label:'{repr(self.label)}' "
+        string_to_represent_object += f"id:'{repr(self.identifier)}' "
+        string_to_represent_object += f"showing_only:'{repr(self.showing_only)}'"
         return string_to_represent_object
 
 

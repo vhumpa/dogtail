@@ -2428,6 +2428,15 @@ class Node(object):
             showing_only=showingOnly
         )
 
+
+    def findAncestor(self, predicate, retry=True): # pylint: disable=invalid-name
+        """
+        For backwards compatibility reasons. Wrapper for self.find_ancestor.
+        """
+
+        return self.find_ancestor(predicate, retry=retry)
+
+
     def findChild(self, predicate, retry=True): # pylint: disable=invalid-name
         """
         For backwards compatibility reasons. Wrapper for self.find_child.

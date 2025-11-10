@@ -263,7 +263,8 @@ class AccessibleComponent:
             position = Atspi.Component.get_position(acc_object, Atspi.CoordType.SCREEN)
 
         # Check if the toolkit is GTK4.
-        if "GTK" in acc_object.toolkit and acc_object.toolkit["GTK"][0] == "4":
+        gtk_value = acc_object.toolkit.get("GTK", None)
+        if gtk_value and gtk_value[0] == "4":
             #gtk4_offset = (12, 12)
             gtk4_offset = config.gtk4Offset
 

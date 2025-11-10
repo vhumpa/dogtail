@@ -148,12 +148,12 @@ class GenericPredicate:
         """
 
         string_to_represent_object = ""
-        string_to_represent_object += f"name:'{repr(self.name)}' "
-        string_to_represent_object += f"role_name:'{repr(self.role_name)}' "
-        string_to_represent_object += f"description:'{repr(self.description)}' "
-        string_to_represent_object += f"label:'{repr(self.label)}' "
-        string_to_represent_object += f"id:'{repr(self.identifier)}' "
-        string_to_represent_object += f"showing_only:'{repr(self.showing_only)}'"
+        string_to_represent_object += f"name:{repr(self.name)} "
+        string_to_represent_object += f"role_name:{repr(self.role_name)} "
+        string_to_represent_object += f"description:{repr(self.description)} "
+        string_to_represent_object += f"label:{repr(self.label)} "
+        string_to_represent_object += f"id:{repr(self.identifier)} "
+        string_to_represent_object += f"showing_only:{repr(self.showing_only)}"
         return string_to_represent_object
 
 

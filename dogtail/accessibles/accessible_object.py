@@ -532,7 +532,7 @@ class AccessibleObject:
 
 
     @staticmethod
-    def find_ancestor(acc_object, pred):
+    def find_ancestor(acc_object, given_predicate, **kwargs):
         """
         Find a single ancestor satisfying the predicate.
         """
@@ -542,22 +542,97 @@ class AccessibleObject:
         if not AccessibleObject.is_valid(acc_object):
             return None
 
+        # Pull values from kwargs here.
+        validated_retry = True
+        validated_require_result = True
+        validated_showing_only = config.search_showing_only
+        # ===================================================
+        for key, val in kwargs.items():
+            if "retry" == str(key):
+                validated_retry = val
+
+            if str(key) in ("requireResult", "require_result"):
+                validated_require_result = val
+
+            if str(key) in ("showingOnly", "showing_only"):
+                validated_showing_only = val
+        # ===================================================
+
+        # User is using lambdas.
+        if isinstance(given_predicate, LambdaType):
+            predicate = given_predicate
+
+            _description = inspect.getsource(predicate).strip("\n")
+            formatted_description = _description.replace("  ", "").replace("\n", " ")
+            description_to_use = formatted_description
+
+            # Showing only handling.
+            if validated_showing_only:
+                def extend_predicate(x):
+                    return predicate(x) and x.showing
+                predicate = extend_predicate
+                description_to_use += " and x.showing"
+
+        # User is using a GenericPredicate.
+        elif isinstance(given_predicate, type(GenericPredicate())):
+            # Showing only handling for predicates.
+            given_predicate.showing_only = validated_showing_only
+
+
+            description_to_use = str(given_predicate)
+
+        # Unknown/unsupported way to compare nodes.
+        else:
+            predicate_type = type(given_predicate)
+            LOGGING.info(f"Unknown/unsupported way '{predicate_type}' to compare nodes.")
+            raise SearchError("No match.")
+
+        # Debug description of what user is searching for.
+        LOGGING.debug(f"Searching for '{description_to_use}'")
+
         # Keep track of objects we've encountered in order to handle broken trees.
-        objects = [acc_object]
-        parent = AccessibleObject.get_parent_checked(acc_object)
-        while parent:
-            if parent in objects:
-                LOGGING.debug(f"Circular tree suspected, {parent} was found already.")
-                return None
 
-            if pred(parent):
-                return parent
+        for number_of_attempts in range(1, config.search_cut_off_limit + 1):
+            if number_of_attempts >= config.search_warning_threshold or config.debug_searching:
+                LOGGING.info(f"Searching again (attempt '{number_of_attempts}')")
 
-            objects.append(parent)
-            parent = AccessibleObject.get_parent_checked(parent)
+            try:
+                objects = [acc_object]
+                parent = AccessibleObject.get_parent_checked(acc_object)
+                while parent:
+                    if parent in objects:
+                        LOGGING.debug(f"Circular tree suspected, {parent} was found already.")
+                        return None
+
+                    if predicate(parent):
+                        return parent
+
+                    objects.append(parent)
+                    parent = AccessibleObject.get_parent_checked(parent)
+
+                if not validated_retry:
+                    break
+
+            except GLib.GError as error:
+                if number_of_attempts == config.search_cut_off_limit:
+                    LOGGING.info(f"GLib Error caught from a11y tree: '{error}'")
+                    raise RuntimeError(" ".join((
+                        "Error: Session has probably broken a11y!",
+                        "Exiting allowing session re-runs",
+                    ))) from error
+
+                do_delay(config.search_back_off_delay)
+
+            except TypeError as error:
+                LOGGING.info(f"Unexpected TypeError from a11y tree search: '{error}'")
+                do_delay(config.search_back_off_delay)
+
+            do_delay(config.search_back_off_delay)
+
+        if validated_require_result:
+            raise SearchError(f"No match for '{description_to_use}'")
 
         return None
-
 
     @staticmethod
     def get_parent_checked(acc_object):

@@ -578,6 +578,7 @@ class AccessibleObject:
             # Showing only handling for predicates.
             given_predicate.showing_only = validated_showing_only
 
+            predicate = given_predicate.satisfied_by_node
 
             description_to_use = str(given_predicate)
 

@@ -953,7 +953,7 @@ class AccessibleObject:
                 # Using set to avoid duplicates.
                 for i in range(relation.get_n_targets()):
                     targets.add(relation.get_target(i))
-                return targets
+                return list(targets)
 
         # Convert set to list.
         return list(targets)
@@ -992,7 +992,7 @@ class AccessibleObject:
                 # Using set to avoid duplicates.
                 for i in range(relation.get_n_targets()):
                     targets.add(relation.get_target(i))
-                return targets
+                return list(targets)
 
         # Convert set to list.
         return list(targets)

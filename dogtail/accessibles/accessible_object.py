@@ -442,7 +442,7 @@ class AccessibleObject:
 
             try:
                 if not validated_recursive:
-                    success_match = list(filter(predicate, acc_object.children))
+                    success_match = next(filter(predicate, acc_object.children))
 
                 elif depth_first:
                     success_match = AccessibleObject._find_descendant_depth_first(acc_object, predicate)

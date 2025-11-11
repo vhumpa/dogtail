@@ -24,8 +24,9 @@ class AccessibleStructureRepresentation:
     def _get_label_string(self, acc_object):
         labeler_string = ""
         if self.labels and acc_object.labeler:
-            labeler_string += f" (labeler.text='{acc_object.labeler.text}') "
-            labeler_string += f" (labeler.name='{acc_object.labeler.name}') "
+            for iteration, labeler in enumerate(acc_object.labeler):
+                labeler_string += f" (labeler_{iteration}.text='{labeler.text}') "
+                labeler_string += f" (labeler_{iteration}.name='{labeler.name}') "
 
         if self.labels and not acc_object.labeler:
             labeler_string += " (No labeler) "

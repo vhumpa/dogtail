@@ -64,7 +64,7 @@ class LoadDefaultConfiguration:
         self.run_timeout = int(self.cfg.get(section, "run_timeout", fallback=30))
 
         # GTK4Offset section.
-        self.offset = list(self.cfg.get(section, "offset", fallback=(12, 12)))
+        self.gtk4_offset = list(self.cfg.get(section, "gtk4_offset", fallback=(12, 12)))
 
         # Debug section.
         self.debug_dogtail = self.cfg.get(section, "debug_dogtail", fallback="False") not in NO_VALUES
@@ -117,7 +117,7 @@ class _Config:
         "run_interval": Value(_default.run_interval, [float, int]),
         "run_timeout": Value(_default.run_timeout, [float, int]),
 
-        "gtk4_offset": Value(_default.offset, [list, tuple]),
+        "gtk4_offset": Value(_default.gtk4_offset, [list, tuple]),
 
         "debug_dogtail": Value(_default.debug_dogtail, [bool]),
         "debug_file": Value(_default.debug_file, [str]),

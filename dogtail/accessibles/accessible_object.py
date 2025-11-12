@@ -407,9 +407,12 @@ class AccessibleObject:
         if isinstance(given_predicate, LambdaType):
             predicate = given_predicate
 
-            _description = inspect.getsource(predicate).strip("\n")
-            formatted_description = _description.replace("  ", "").replace("\n", " ")
-            description_to_use = formatted_description
+            try:
+                # Text of the source code, which in this case is lambda.
+                source = inspect.getsource(predicate).strip("\n")
+                description_to_use = source.replace("  ", "").replace("\n", " ")
+            except OSError:
+                description_to_use = "child satisfying a custom lambda function"
 
             # Showing only handling.
             if validated_showing_only:
@@ -562,9 +565,12 @@ class AccessibleObject:
         if isinstance(given_predicate, LambdaType):
             predicate = given_predicate
 
-            _description = inspect.getsource(predicate).strip("\n")
-            formatted_description = _description.replace("  ", "").replace("\n", " ")
-            description_to_use = formatted_description
+            try:
+                # Text of the source code, which in this case is lambda.
+                source = inspect.getsource(predicate).strip("\n")
+                description_to_use = source.replace("  ", "").replace("\n", " ")
+            except OSError:
+                description_to_use = "parent satisfying a custom lambda function"
 
             # Showing only handling.
             if validated_showing_only:

@@ -930,13 +930,19 @@ class AccessibleObject:
         """
         'labeller' (read-only list of Node instances):
         The node(s) that is/are a label for this node. Generated from 'relations'.
+
+        Return possibilities:
+          None - if no labeler is found.
+          Atspi.Accessible - if a single labeler is found.
+          [Atspi.Accessible, Atspi.Accessible, ...] - if multiple labelers are found.
+
         """
 
         # TODO verbose logging?
         #LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
-            return []
+            return None
 
         targets = set()
 
@@ -959,10 +965,11 @@ class AccessibleObject:
                 # Using set to avoid duplicates.
                 for i in range(relation.get_n_targets()):
                     targets.add(relation.get_target(i))
-                return list(targets)
+
+                return list(targets) if targets else None
 
         # Convert set to list.
-        return list(targets)
+        return list(targets) if targets else None
 
 
     @staticmethod
@@ -970,12 +977,18 @@ class AccessibleObject:
         """
         'labelee' (read-only list of Node instances):
         The node(s) that this node is a label for. Generated from 'relations'.
+
+        Return possibilities:
+          None - if no labelee is found.
+          Atspi.Accessible - if a single labelee is found.
+          [Atspi.Accessible, Atspi.Accessible, ...] - if multiple labelees are found.
+
         """
 
         LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
-            return []
+            return None
 
         targets = set()
 
@@ -998,7 +1011,8 @@ class AccessibleObject:
                 # Using set to avoid duplicates.
                 for i in range(relation.get_n_targets()):
                     targets.add(relation.get_target(i))
-                return list(targets)
+
+                return list(targets) if targets else None
 
         # Convert set to list.
-        return list(targets)
+        return list(targets) if targets else None

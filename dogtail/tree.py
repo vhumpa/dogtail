@@ -2526,6 +2526,16 @@ class Node(object):
         assert isinstance(pred, GenericPredicate)
         return pred.satisfied_by_node(self)
 
+
+    @property
+    def labellee(self): # pylint: disable=invalid-name
+        """
+        'labelee' (read-only list of Node instances):
+        The node(s) that this node is a label for. Generated from 'relations'.
+        """
+
+        return self.labelee()
+
     ###############################################
     # End of backwards compatibility definitions. #
     ###############################################

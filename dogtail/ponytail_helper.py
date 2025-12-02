@@ -274,7 +274,7 @@ class PonytailHelper(metaclass=Singleton):
 
         if accessible_object.session_type == "x11":
             LOGGING.debug(f"Session type: '{accessible_object.session_type}'")
-            window_id_return_value = None
+            return None
 
         # Save window_list to work through.
         ponytail_interface = self.get_ponytail_interface()

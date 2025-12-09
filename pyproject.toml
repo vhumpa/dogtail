@@ -4,6 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dogtail"
+#version = "v2.0.dev0"
 dynamic = ["version"]
 description = "GUI test tool and automation framework that uses Accessibility (AT-SPI) technologies to communicate with desktop applications."
 license = "GPL-2.0"

@@ -7,24 +7,18 @@ Create configuration in your current directory.
 
 import os
 import sys
-from dogtail.config import config
+from dogtail.config import CONFIG_SCHEMA as schema
 
 def main():
     directory = os.path.realpath(os.getcwd())
 
-
-    # Print the retrieved values
-
     configuration = ""
-    configuration += "[config]\n"
 
-    for key, value in config.options.items():
-        configuration += f"{key} = {value.value}\n"
-
-    configuration += "[user_config]\n"
-    configuration += "user_value_x = user_value_x\n"
-    configuration += "user_value_y = user_value_y\n"
-    configuration += "user_value_z = user_value_z\n"
+    for section in schema.keys():
+        configuration += f"[{section}]\n"
+        for key, scheme_value in schema[section].items():
+            _, raw_value = scheme_value
+            configuration += f"{key} = {raw_value}\n"
 
     try:
         if os.path.isfile("dogtail_config.ini"):

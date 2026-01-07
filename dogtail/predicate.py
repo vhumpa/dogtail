@@ -86,23 +86,8 @@ class GenericPredicate:
 
                 # Check if user wants to check identifier.
                 if self.identifier is not None:
-                    # The method get_attributes is from Atspi.Accessible.
-                    atspi_accessible_attributes = node.get_attributes()
-
-                    # Check if the wanted id's are present.
-                    id_present = "id" in atspi_accessible_attributes
-                    accessible_id_present = "accessibleID" in dir(node)
-
-                    # Compare identifier with the given node's "id".
-                    if id_present and self.identifier != atspi_accessible_attributes["id"]:
-                        return False
-
-                    # Compare identifier with the given node's "accessibleID".
-                    elif accessible_id_present and self.identifier != node.accessibleID:
-                        return False
-
-                    # No "id" or "accessibleID to check against.
-                    else:
+                    # Compare identifier with the given node's "id" or "accessible_id".
+                    if self.identifier not in (node.id, node.accessible_id):
                         return False
 
                 # Check if user wants to match showing only.

@@ -1783,6 +1783,17 @@ class Node(object):
 
 
     @property
+    def accessible_id(self):
+        """
+        Define a 'accessible_id' property for Atspi object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.get_accessible_id(self)
+
+
+    @property
     def name(self):
         """
         Define a 'name' property for Atspi object.

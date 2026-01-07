@@ -714,6 +714,24 @@ class AccessibleObject:
 
 
     @staticmethod
+    def get_accessible_id(acc_object):
+        """
+        Returns an 'accessible_id' for Accessible object.
+        """
+
+        if not AccessibleObject.is_valid(acc_object):
+            return None
+
+        if AccessibleObject.is_newton(acc_object):
+            return acc_object.get_accessible_id()
+
+        try:
+            return Atspi.Accessible.get_accessible_id(acc_object)
+        except Exception as error:
+            raise RuntimeError("Get Accessible Id function failed.") from error
+
+
+    @staticmethod
     def get_name(acc_object):
         """
         Returns a 'name' for Accessible object.

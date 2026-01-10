@@ -28,7 +28,7 @@ class TestScreenshot(GtkDemoTest):
         expected_path = actual_path.replace(extension, "expected." + extension)
 
         import os
-        os.system("gnome-screenshot -f %s" % expected_path)
+        os.system("import -window root %s" % expected_path)
 
         command = ["compare", "-metric", "MAE",
                    actual_path, expected_path, "output"]

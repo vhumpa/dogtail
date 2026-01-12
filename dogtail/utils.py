@@ -15,6 +15,8 @@ Various Utilities
 
 
 from time import sleep
+from pathlib import Path
+
 import os
 import sys
 import errno
@@ -32,6 +34,72 @@ from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 
 from dogtail.config import config
+
+
+def screenshot(file="" , time_stamp=True, datetime_string = "%Y%m%d-%H:%M:%S"):
+    """
+    Screenshot using the DBus.
+
+    :param file: File to save the screenshot as, defaults to "screenshot.png"
+    :type file: str, optional
+
+    :param time_stamp: Option to include time stamp or not, defaults to True
+    :type time_stamp: bool, optional
+
+    :param datetime_string: _description_, defaults to "%Y%m%d-%H:%M:%S"
+    :type datetime_string: str, optional
+
+    :raises TypeError: File must be string or Path
+    :raises TypeError: Time Stamp must be True or False
+    :raises TypeError: Currently supporting only PNG.
+
+    :return: Set of True or False based on success or failure and file location string.
+    :rtype: Tuple(bool, str)
+    """
+
+    LOGGING.debug("Capturing Screenshot via DBus.")
+
+    save_file_as = None
+
+    if not isinstance(file, str) and not isinstance(file, Path):
+        raise TypeError("file name must be string or Path*")
+
+    if not isinstance(time_stamp, bool):
+        raise TypeError("time_stamp must be True or False")
+
+    try:
+        from dasbus.connection import SessionMessageBus
+        import datetime
+
+        if file:
+            save_file_as = file
+        else:
+            save_file_as = "screenshot.png"
+
+        if ".png" not in str(save_file_as):
+            raise TypeError("Currently supporting only PNG format.")
+
+        if time_stamp:
+            time_stamp_string = datetime.datetime.now().strftime(datetime_string)
+
+            base_name, extension = save_file_as.rsplit(".", 1)
+            save_file_as = base_name + "-" + time_stamp_string + "." + extension
+
+        user_id = str(os.geteuid())
+        os.environ["DBUS_SESSION_BUS_ADDRESS"] = f"unix:path=/run/user/{user_id}/bus"
+
+        bus = SessionMessageBus()
+        proxy = bus.get_proxy(
+            "org.gnome.Shell.Screenshot", "/org/gnome/Shell/Screenshot"
+        )
+        screenshot_call = proxy.Screenshot(
+            True, False, save_file_as
+        )
+
+        return screenshot_call
+
+    except Exception as error:
+        LOGGING.info(f"Capturing Screenshot via DBus failed with error: '{error}'.")
 
 
 def do_delay(delay=None):

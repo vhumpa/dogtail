@@ -72,11 +72,11 @@ def screenshot(file="" , time_stamp=True, datetime_string = "%Y%m%d-%H:%M:%S"):
         import datetime
 
         if file:
-            save_file_as = file
+            save_file_as = str(file)
         else:
             save_file_as = "screenshot.png"
 
-        if ".png" not in str(save_file_as):
+        if ".png" not in save_file_as:
             raise TypeError("Currently supporting only PNG format.")
 
         if time_stamp:

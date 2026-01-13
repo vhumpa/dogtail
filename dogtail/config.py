@@ -36,6 +36,7 @@ CONFIG_SCHEMA = {
         "gtk4_offset": ([list[int], tuple[int]], [12, 12]),
         "debug_dogtail": (bool, False),
         "debug_file": (str, "/tmp/dogtail_debug.log"),
+        "debug_file_persistence": (bool, False),
         "debug_searching": (bool, False),
         "debug_sleep": (bool, False),
         "debug_search_paths": (bool, False),

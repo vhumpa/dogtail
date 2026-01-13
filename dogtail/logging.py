@@ -8,9 +8,9 @@ This file provides loggers.
 # pylint: disable=import-outside-toplevel
 
 
+import os
 import sys
 import logging
-from subprocess import call, STDOUT
 
 # Singleton solution provided by https://stackoverflow.com/a/54209647
 
@@ -32,6 +32,7 @@ class Logging(metaclass=Singleton):
     """
 
     logger = None
+    default_log_file = "/tmp/dogtail_debug.log"
 
     def __init__(self) -> None:
         """
@@ -45,13 +46,22 @@ class Logging(metaclass=Singleton):
         self.debug_file = config_parser.get(
             "config",
             "debug_file",
-            fallback="/tmp/dogtail_debug.log"
+            fallback=self.default_log_file
         )
         # Validate the debug file value.
         self.debug_file = None if self.debug_file == "None" else self.debug_file
 
-        if not self.logger:
-            call(f"sudo rm -rf {self.debug_file}", shell=True, stderr=STDOUT)
+        self.debug_file_persistence = config_parser.get(
+            "config",
+            "debug_file_persistence",
+            fallback=False
+        )
+        # Validate the debug file persistence value.
+        self.debug_file_persistence = True if self.debug_file_persistence == "True" else False
+
+        # Nulling the file based persistence config value.
+        if not self.debug_file_persistence:
+            self.dogtail_truncate_the_logger_file()
 
         self.logger = logging.getLogger("__dogtail_logger__")
         self.logger.setLevel(logging.DEBUG)
@@ -66,6 +76,10 @@ class Logging(metaclass=Singleton):
                 "%(func_name)s: %(message)s"
             ))
         )
+
+        # Default umask is 0o022 which turns off permissions for groups and others.
+        # We need the logger file to be readable and modifiable by anyone.
+        os.umask(0)
 
         # Setup of file handler.
         # All DEBUG and higher level logs will be going to the file.
@@ -136,6 +150,30 @@ class Logging(metaclass=Singleton):
         except Exception as error:
             self.logger.error("Error in get_func_params_and_values: %s", error)
             return ""
+
+    def dogtail_truncate_the_logger_file(self) -> None:
+        """
+        If the Logging class is used from multiple files or scripts especially when
+        running one script from another, the logger would not be found and file is
+        deleted, making previous logs disappear.
+
+        Lets just null the file only on request.
+        """
+
+        # Null the file only if it exists.
+        # If it does not, no problem, do nothing.
+        if os.path.isfile(self.debug_file):
+            # Default umask is 0o022 which turns off permissions for groups and others.
+            os.umask(0)
+
+            # Create a specific file descriptor for our needs with proper permissions.
+            descriptor = os.open(
+                path=self.debug_file,
+                flags=(os.O_CREAT | os.O_TRUNC),  # Create if not existing, truncate.
+                mode=0o666,
+            )
+            # Close the file descriptor.
+            os.close(descriptor)
 
 class FuncFilter(logging.Filter):
     """

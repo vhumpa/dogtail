@@ -478,10 +478,13 @@ class DisplayManager:
         try:
             config_parser.read(self.temporary_config_file)
         except configparser.Error:
-            print_info(f"Unable to parse '{self.options["config"]}'.")
+            # Adding this to its own variable as f-strings do not handle nested quotes well.
+            options_config = self.options["config"]
+
+            print_info(f"Unable to parse '{options_config}'.")
             print(str(traceback.format_exc()))
 
-            print_info(f"Content of '{self.options["config"]}' file:")
+            print_info(f"Content of '{options_config}' file:")
             print(run(f"cat {self.temporary_config_file}") + "\n")
 
             print_info("Exiting headless.")

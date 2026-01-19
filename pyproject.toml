@@ -36,3 +36,5 @@ dogtail-headless = "dogtail.scripts.dogtail_headless:main"
 fallback_version = "v2.0.dev0"
 version_scheme = "guess-next-dev"
 local_scheme = "no-local-version"
+write_to = "dogtail/_version.py"
+

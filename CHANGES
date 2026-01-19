@@ -1,6 +1,6 @@
 2025-10-29 Michal Odehnal <modehnal@redhat.com>
 
-	dogtail 2.0.dev2
+	dogtail 2.0
 	================
 	Tracked in Issue #29
 	Remove obsolete and legacy code that I have not observed in usage for many years while working with dogtail and automation in general.

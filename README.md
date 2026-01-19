@@ -25,21 +25,24 @@ The easiest solution seemed to redo the project from the scratch. Thoughts were 
 I believe we now have a dogtail with a refactored code base that is more approachable, readable and maintainable. If another Accessibility architecture would be created in the future, including it in dogtail would be simple.
 
 
+## Version dogtail-1.x
+
+The [dogtail-1.x](https://gitlab.com/dogtail/dogtail/-/tree/dogtail-1.x) is still available and if required will be updated and new versions will be released.
+
 # Installation
 
 ## Installation from GitLab, clone and install:
 ```
 git clone https://gitlab.com/dogtail/dogtail.git
 cd dogtail
-git checkout devel/release-2.0 # Will become 'main' in the future. #TODO change before merge to main.
 python3 -m build
-sudo pip3 install dist/dogtail-2.*-py3-none-any.whl --force-reinstall
+sudo pip3 install dist/dogtail-2.*-py3-none-any.whl
 ```
 
 ## Installation from GitLab, pip install:
 ```
 sudo dnf install python3-pip
-sudo python3 -m pip install git+https://gitlab.com/dogtail/dogtail@devel/release-2.0 #TODO change before merge to main.
+sudo python3 -m pip install git+https://gitlab.com/dogtail/dogtail@master
 ```
 
 ## Installation from pypi:
@@ -169,6 +172,3 @@ There are a few ways I would like to preserve the readability of the code.
 - Use full names for variables where possible. Single letter variables are not acceptable.
 - Comments are sentences, they start with a capital letter and end with a dot.
 
-# Version dogtail-1.x
-
-The [dogtail-1.x](https://gitlab.com/dogtail/dogtail/-/tree/dogtail-1.x) is still available and if required will be updated and new versions will be released.

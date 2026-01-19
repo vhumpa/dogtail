@@ -1,9 +1,0 @@
-Installation on Red-Hat-like systems:
-	make rpm
-	rpm -Uvh ./dist/dogtail-*.noarch.rpm
-
-Installation on other systems:
-	./setup.py install --prefix=/usr
-	
-	(or /usr/local, $HOME/local, etc...)
-

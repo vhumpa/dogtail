@@ -1,310 +1,316 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
-import locale
-import os
-import sys
-import pwd
-import json
-
+#!/usr/bin/python3
 """
-The configuration module.
+Experimental dogtail changes for 2.0 release.
 """
 
-__author__ = """
-Zack Cerza <zcerza@redhat.com>,
-David Malcolm <dmalcolm@redhat.com>
-"""
+# pylint: disable=line-too-long
+# ruff: noqa: E501
+
+import configparser
+
+from typing import get_origin, get_args
+
+import copy
+
+from dogtail.logging import logging_class
+LOGGING = logging_class.logger
 
 
-def _userTmpDir(baseName):
-    # i.e. /tmp/dogtail-foo
-    logname = os.getenv("LOGNAME", default=pwd.getpwuid(os.getuid())[0])
-    return "-".join(("/".join(("/tmp", baseName)), logname))
+YES_VALUES = ["y", "yes", "t", "true", "True", "1"]
+NO_VALUES = ["", "n", "no", "f", "false", "False", "0"]
+
+
+CONFIG_SCHEMA = {
+    "config": {
+        "action_delay": ([float, int], 1),
+        "typing_delay": ([float, int], 0.1),
+        "default_delay":([float, int], 0.5),
+        "double_click_delay": ([float, int], 0.1),
+        "search_back_off_delay": ([float, int], 0.5),
+        "search_warning_threshold": (int, 3),
+        "search_cut_off_limit": (int, 20),
+        "search_showing_only": (bool, False),
+        "children_limit": (int, 100),
+        "run_interval": ([float, int], 0.5),
+        "run_timeout": ([float, int], 30),
+        "gtk4_offset": ([list[int], tuple[int]], [12, 12]),
+        "debug_dogtail": (bool, False),
+        "debug_file": (str, "/tmp/dogtail_debug.log"),
+        "debug_file_persistence": (bool, False),
+        "debug_searching": (bool, False),
+        "debug_sleep": (bool, False),
+        "debug_search_paths": (bool, False),
+        "absolute_node_paths": (bool, False),
+        "ensure_sensitivity": (bool, False),
+        "fatal_errors": (bool, False),
+        "check_for_a11y": (bool, True),
+    },
+    "user_config": {
+        "user_value_x": (object, "user_value_x"),
+    },
+}
+
+
+class ConfigValidationError(Exception):
+    pass
+
+
+def cast_basic(value: str, expected_type):
+    """
+    Casts primitive types.
+    """
+
+    if isinstance(value, str) and expected_type is bool:
+        lower = value.lower()
+
+        if lower in YES_VALUES:
+            return True
+
+        if lower in NO_VALUES:
+            return False
+
+        raise ValueError(f"Invalid boolean: {value}")
+
+    return expected_type(value)
+
+
+def cast_sequence(value: str, expected_container):
+    """
+    Casts comma-separated values into list[...] or tuple[...].
+    """
+
+    origin = get_origin(expected_container)
+    (item_type,) = get_args(expected_container)
+
+    # Strip optional list/tuple brackets like [1,2,3] or (1,2,3).
+    cleaned = value.strip()
+    if (cleaned.startswith("[") and cleaned.endswith("]")) or \
+       (cleaned.startswith("(") and cleaned.endswith(")")):
+        cleaned = cleaned[1:-1].strip()
+
+    # Split by comma.
+    items = [x.strip() for x in cleaned.split(",") if x.strip()]
+
+    casted = [cast_value(x, item_type) for x in items]
+
+    if origin is list:
+        return casted
+
+    if origin is tuple:
+        return tuple(casted)
+
+    raise ValueError(f"Unsupported sequence type: {origin}")
+
+
+def cast_value(value, expected_type):
+    # --- Union-of-types support ---
+    if isinstance(expected_type, list):
+        errors = []
+        for t in expected_type:
+            try:
+                return cast_value(value, t)
+            except Exception as e:
+                errors.append(str(e))
+        raise ValueError(" | ".join(errors))
+
+    origin = get_origin(expected_type)
+    args = get_args(expected_type)
+
+    # --- Handle sequences ---
+    if origin in (list, tuple):
+        # If value is already the correct container type, just validate inner types
+        if isinstance(value, origin):
+            if args:
+                item_type = args[0]
+                for i, item in enumerate(value):
+                    if not isinstance(item, item_type):
+                        raise ValueError(f"Element '{i}' in '{value}' is not of type '{item_type}'.")
+            return value
+        # Otherwise parse string into sequence
+        return cast_sequence(value, expected_type)
+
+    # --- Handle simple types ---
+    # If value is already of correct type, return.
+    if isinstance(value, expected_type):
+        return value
+
+    # If the value is object.
+    if expected_type is object:
+        return value
+
+    # Otherwise, cast string to type
+    return cast_basic(value, expected_type)
+
+
+def load_and_validate_config(path: str, schema: dict):
+    config = configparser.ConfigParser()
+    config.read(path)
+
+    validated = {}
+
+    # We do not care about config sections in dogtail, just set the variables to a dict.
+
+    # Step 1: Process all sections found in the file, even if not in schema.
+    LOGGING.debug("Process all variables.")
+    for section in config.sections():
+
+        for key, raw_value in config[section].items():
+            # If schema defines type → validate
+            if section in schema and key in schema[section]:
+                expected_type, default_value = schema[section][key]
+
+                try:
+                    value = cast_value(raw_value, expected_type)
+                except Exception as e:
+                    raise ConfigValidationError(
+                        f"Type error in [{section}].{key}: {e}"
+                    )
+
+                validated[key] = value
+                LOGGING.debug(f"Set Validated key '{key}' to value '{value}'")
+
+            else:
+                # Unknown key → keep raw value as string
+                validated[key] = raw_value
+                LOGGING.debug(f"Set Validated key '{key}' to raw value '{raw_value}'")
+
+    LOGGING.debug("Process default variables.")
+    # Step 2: Ensure missing schema sections & keys get default values.
+    for section, fields in schema.items():
+        for key, (expected_type, default_value) in fields.items():
+            if key not in validated:
+                validated[key] = default_value
+                LOGGING.debug(f"Set Default key '{key}' to value '{default_value}'")
+
+    return validated
 
 
 class _Config:
-
     """
-    Contains configuration parameters for the dogtail run.
-
-    scratchDir(str):
-    Directory where things like screenshots are stored.
-
-    dataDir(str):
-    Directory where related data files are located.
-
-    logDir(str):
-    Directory where dogtail.tc.TC*-generated logs are stored.
-
-    scriptName(str) [Read-Only]:
-    The name of the script being run.
-
-    encoding(str)
-    The encoding for text, used by dogtail.tc.TCString .
-
-    actionDelay(float):
-    The delay after an action is executed.
-
-    typingDelay(float):
-    The delay after a character is typed on the keyboard.
-
-    runInterval(float):
-    The interval at which dogtail.utils.run() and dogtail.procedural.run()
-    check to see if the application has started up.
-
-    runTimeout(int):
-    The timeout after which dogtail.utils.run() and dogtail.procedural.run()
-    give up on looking for the newly-started application.
-
-    searchBackoffDuration (float):
-    Time in seconds for which to delay when a search fails.
-
-    searchWarningThreshold (int):
-    Number of retries before logging the individual attempts at a search.
-
-    searchCutoffCount (int):
-    Number of times to retry when a search fails.
-
-    searchShowingOnly (boolean):
-    Whether to only search among nodes that are currently being shown.
-
-    defaultDelay (float):
-    Default time in seconds to sleep when delaying.
-
-    childrenLimit (int):
-    When there are a very large number of children of a node, only return
-    this many, starting with the first.
-
-    debugSearching (boolean):
-    Whether to write info on search backoff and retry to the debug log.
-
-    debugSleep (boolean):
-    Whether to log whenever we sleep to the debug log.
-
-    debugSearchPaths (boolean):
-    Whether we should write out debug info when running the SearchPath
-    routines.
-
-    absoluteNodePaths (boolean):
-    Whether we should identify nodes in the logs with long 'abcolute paths', or
-    merely with a short 'relative path'.
-
-    ensureSensitivity (boolean):
-    Should we check that ui nodes are sensitive (not 'greyed out') before
-    performing actions on them? If this is True (the default) it will raise
-    an exception if this happens. Can set to False as a workaround for apps
-    and toolkits that don't report sensitivity properly.
-
-    debugTranslation (boolean):
-    Whether we should write out debug information from the translation/i18n
-    subsystem.
-
-    blinkOnActions (boolean):
-    Whether we should blink a rectangle around a Node when an action is
-    performed on it.
-
-    fatalErrors (boolean):
-    Whether errors encountered in dogtail.procedural should be considered
-    fatal. If True, exceptions will be raised. If False, warnings will be
-    passed to the debug logger.
-
-    checkForA11y (boolean):
-    Whether to check if accessibility is enabled. If not, just assume it is
-    (default True).
-
-    buttonRoleCompat (boolean):
-    Whether to convert "button" role names to "push button" for backwards
-    compatibility (default False).
-
-    logDebugToFile (boolean):
-    Whether to write debug output to a log file.
-
-    logDebugToStdOut (boolean):
-    Whether to print log output to console or not (default True).
+    Config class to keep backwards compatibility and to have getters and setters.
     """
 
-    @property
-    def scriptName(self):
-        return os.path.basename(sys.argv[0]).replace(".py", "")
+    validated_config = load_and_validate_config("dogtail_config.ini", CONFIG_SCHEMA)
+    LOGGING.debug(f"Validated config: '{validated_config}'")
+
+    # Create a deep copy instead of shallow copy to keep values for reset method.
+    _default_values_storage = copy.deepcopy(validated_config)
+
+    # Handle dogtail debug logging.
+    if validated_config["debug_dogtail"]:
+        LOGGING.info("Debugging dogtail to console.")
+        logging_class.debug_to_console()
 
 
-    @property
-    def encoding(self):
-        return locale.getpreferredencoding().lower()
+    def reset_configuration(self):
+        """
+        Reset configuration to default values.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        self.validated_config.update(self._default_values_storage)
 
 
-    defaults = {
-        # Storage
-        "scratchDir": '/'.join((_userTmpDir("dogtail"), "")),
-        "dataDir": '/'.join((_userTmpDir("dogtail"), "data", "")),
-        "logDir": '/'.join((_userTmpDir("dogtail"), "logs", "")),
-        "scriptName": scriptName.fget(None),
-        "encoding": encoding.fget(None),
-        "configFile": None,
-        "baseFile": None,
+    def adjust_casing(self, string_to_fix):
+        """
+        Transforms a string to snake_case.
 
-        # Timing and Limits
-        "actionDelay": 1.0,
-        "typingDelay": 0.1,
-        "runInterval": 0.5,
-        "runTimeout": 30,
-        "doubleClickDelay": 0.1,
-        "searchBackoffDuration": 0.5,
-        "searchWarningThreshold": 3,
-        "searchCutoffCount": 20,
-        "searchShowingOnly": False,
-        "defaultDelay": 0.5,
-        "childrenLimit": 100,
-        "gtk4Offset": (12, 12), # offset to add to ui element position with shadows DISABLED (bigger and variable offset present otherwise, disable shadows!)
+        :param string_to_fix: String to transform to snake_case
+        :type string_to_fix: str
 
-        # Debug
-        "debugSearching": False,
-        "debugSleep": False,
-        "debugSearchPaths": False,
-        "logDebugToStdOut": True,
-        "absoluteNodePaths": False,
-        "ensureSensitivity": False,
-        "debugTranslation": False,
-        "blinkOnActions": False,
-        "fatalErrors": False,
-        "checkForA11y": True,
-        "buttonRoleCompat": False,
+        :return: Transformed string.
+        :rtype: str
+        """
 
-        # Logging
-        "logDebugToFile": True
-    }
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
-    options = {}
+        string_in_snake_case = ""
+        for character in string_to_fix:
+            if character.isalpha and character.isupper():
+                string_in_snake_case += "_" + character.lower()
+            else:
+                string_in_snake_case += character
 
-    invalidValue = "__INVALID__"
+        return string_in_snake_case
 
 
-    def __init__(self):
-        self.__createDir(self.defaults["scratchDir"])
-        self.__createDir(self.defaults["logDir"])
-        self.__createDir(self.defaults["dataDir"])
-        # Load system-wide configuration files
-        self.__loadSystemConfig()
+    def __setattr__(self, option_id, value_to_set):
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
+        # Set a variable to use for the setter logic.
+        set_option_id = option_id
 
-    def __setattr__(self, name, value):
-        if name not in config.defaults:
-            raise AttributeError(name + " is not a valid option.")
+        # Attempt to have some backwards compatibility and support camelCase.
+        if any(char.isupper() for char in set_option_id):
+            set_option_id = self.adjust_casing(set_option_id)
+            LOGGING.debug(f"Config variable was transformed to '{set_option_id}'.")
 
-        if self.defaults[name] != value or \
-                self.options.get(name, self.invalidValue) != value:
-            if "Dir" in name:
-                self.__createDir(value)
-                value = value.rstrip("/") + os.path.sep
+        # Set custom user value to use in dogtail run.
+        # Current logic will fail on any attempt not set in config.ini.
+        # Should we allow setting values during a dogtail execution?
+        # if "custom_" in set_option_id:
+        #     LOGGING.info(f"Setting a custom user value '{set_option_id}'.")
+        #     self.options[set_option_id] = value_to_set
 
-            elif name == "logDebugToFile":
-                from dogtail import logging
-                logging.debugLogger = logging.Logger("debug", value)
+        # In other cases check that the value exists.
+        if set_option_id not in self.validated_config:
+            raise AttributeError(f"Attempt to use invalid option '{set_option_id}'.")
+            # LOGGING.info(f"Attempt to use invalid option '{set_option_id}'.")
+            # return
 
-            self.options[name] = value
+        # Set the value if the value is not already present.
+        if self.validated_config[set_option_id] != value_to_set:
 
+            validated_expected_type = None
 
-    def __getattr__(self, name):
-        try:
-            return self.options[name]
-        except KeyError:
+            # First attempt to get defaults from the schema.
+            for section in CONFIG_SCHEMA.keys():
+                if set_option_id in CONFIG_SCHEMA[section]:
+                    validated_expected_type, default_value = CONFIG_SCHEMA[section][set_option_id]
+
+            # If unsuccessful mark the expected type as anything.
+            if not validated_expected_type:
+                LOGGING.debug("Setting expected type to object.")
+                validated_expected_type = object
+
             try:
-                return self.defaults[name]
-            except KeyError:
-                raise AttributeError("%s is not a valid option." % name)
+                # Set the value.
+                self.validated_config[set_option_id] = cast_value(value_to_set, validated_expected_type)
+            except Exception:
+                # Log the message but do not end, use the default.
+                LOGGING.info(" ".join((
+                    f"Attempt to set value of type '{type(value_to_set)}'",
+                    f"to key with accepted types '{validated_expected_type}'",
+                )))
+                # Setting the value.
+                LOGGING.info(f"Fallback of config option '{set_option_id}' to '{default_value}'.")
+                self.validated_config[set_option_id] = default_value
+
+            if set_option_id == "debug_dogtail" and self.validated_config[set_option_id]:
+                LOGGING.info("Debugging dogtail to console.")
+                logging_class.debug_to_console()
+
+            if set_option_id == "debug_dogtail" and not self.validated_config[set_option_id]:
+                LOGGING.info("Disabling debugging dogtail to console.")
+                logging_class.disable_debug_to_console()
 
 
-    @classmethod
-    def __createDir(cls, dirName, perms=0o777):
-        """
-        Creates a directory (if it doesn't currently exist), creating any
-        parent directories it needs.
+    def __getattr__(self, option_id):
+        # Set a variable to use for the getter logic.
+        get_option_id = option_id
 
-        If perms is None, create with python's default permissions.
-        """
+        # Attempt to have some backwards compatibility and support camelCase.
+        if any(char.isupper() for char in get_option_id):
+            get_option_id = self.adjust_casing(get_option_id)
+            LOGGING.debug(f"Config variable was transformed to '{get_option_id}'.")
+            LOGGING.debug(f"Its value is '{self.validated_config[get_option_id]}'.")
 
-        dirName = os.path.abspath(dirName)
-
-        if not os.path.isdir(dirName):
-            umask = os.umask(0)
-            os.makedirs(dirName, perms)
-            os.umask(umask)
-
-    def __loadSystemConfig(self):
-        """
-        Loads system-wide configuration files from standard locations.
-        Checks for config files in this order:
-        1. /etc/dogtail/config
-        2. /etc/dogtail/config.json
-        """
-        config_paths = [
-            "/etc/dogtail/config",
-            "/etc/dogtail/config.json"
-        ]
-        
-        for config_path in config_paths:
-            if os.path.isfile(config_path):
-                try:
-                    self.__loadConfigFile(config_path)
-                    break  # Only load the first config file found
-                except Exception:
-                    # Silently continue if config file can't be loaded
-                    continue
-
-    def __loadConfigFile(self, config_path):
-        """
-        Loads configuration from a file.
-        Supports both JSON format and simple key=value format.
-        """
-        with open(config_path, 'r') as f:
-            content = f.read().strip()
-            
-        if config_path.endswith('.json'):
-            # JSON format
-            config_data = json.loads(content)
-        else:
-            # Simple key=value format
-            config_data = {}
-            for line in content.split('\n'):
-                line = line.strip()
-                if line and not line.startswith('#'):
-                    if '=' in line:
-                        key, value = line.split('=', 1)
-                        key = key.strip()
-                        value = value.strip()
-                        
-                        # Convert boolean strings
-                        if value.lower() in ('true', 'yes', '1'):
-                            value = True
-                        elif value.lower() in ('false', 'no', '0'):
-                            value = False
-                        elif value.isdigit():
-                            value = int(value)
-                        elif value.replace('.', '', 1).isdigit():
-                            value = float(value)
-                        
-                        config_data[key] = value
-        
-        # Only load valid config options
-        valid_config = {k: v for k, v in config_data.items() if k in self.defaults}
-        if valid_config:
-            self.load(valid_config)
-
-
-    def load(self, dictt):
-        """
-        Loads values from dict, preserving any options already set that are not overridden.
-        """
-
-        self.options.update(dictt)
-
-
-    def reset(self):
-        """
-        Resets all settings to their defaults.
-        """
-
-        _Config.options = {}
+        try:
+            return self.validated_config[get_option_id]
+        except KeyError as error:
+            raise AttributeError(f"Attempt to use invalid option '{get_option_id}'.") from error
+            # LOGGING.info(f"Attempt to use invalid option '{get_option_id}'.")
 
 
 config = _Config()

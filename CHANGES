@@ -1,0 +1,2978 @@
+2025-10-29 Michal Odehnal <modehnal@redhat.com>
+
+	dogtail 2.0.dev2
+	================
+	Tracked in Issue #29
+	Remove obsolete and legacy code that I have not observed in usage for many years while working with dogtail and automation in general.
+	Improve Wayland support, iron out some wrinkles in very specific corner cases.
+	Improving code structure and moving specific parts to its own files to improve readability in high level Node.
+	Remove all pyatspi2 usage, switching to only Atspi usage.
+	Adding accessibility classes, which were heavily inspired by Orca.
+	Logging was rewritten to be more useful.
+	The ponytail handling was rewritten and added to its own file, so it is not implemented in several files.
+	Printing Accessibility Structure Representation with dump and tree was improved in readability and efficiency.
+	Configuration handling was improved and ability to have config file per project was added.
+	Changing casing to snake_case, but still have backwards compatibility to camelCase.
+	Custom keys and values - users can define their own config values in .ini file.
+	Type checking: users will get ValueError when trying to set e.g. bool to value defined as float in config.ini.
+	Unittests were rewritten and their execution have been validated with testing-farm. These will now execute before every MR.
+	Examples were updated.
+	Removing Sniff, I will not release dogtail with Sniff in a broken state. It is not working well under Wayland and effort to rewrite it would be great. If someone is willing to rewrite it and improve it I will accept MR with it. Until then there are better tools that fullfil the same role.
+	Preparation for Newton was added to Accessible classes, currently switched off.
+	Preparation for documentation is also present as docstring in class methods, but not executed upon yet. For now one of my colleagues said he will take a look, if not, I will do it myself later.
+	README file was updated with up to date information.
+	Released version 2.0.dev2 to pypi which is ready to be used by wider audience.
+	Metadata updated where possible.
+	The dogtail.spec and Makefile remain mostly untouched. I have never used those, adapting those should come from someone more knowledgeable.
+
+
+2024-12-31 Michal Odehnal <modehnal@redhat.com>
+
+	dogtail 2.x
+	===========
+	See the NEWS file for all changes.
+
+
+2024-12-31 Vita Humpa <vhumpa@redhat.com>
+
+	dogtail 1.0
+	===========
+	Releasing version with Wayland support to PYPI
+
+
+
+2018-11-09 Vita Humpa <vhumpa@redhat.com>
+
+	dogtail 1.0
+	==============
+	After more than five years of continuous experimentation and development, we are excited to finally release Dogtail 1.0—a Wayland-enabled version of Dogtail! How did we achieve this? It was made possible by the `gnome-ponytail-daemon`, originally crafted by Olivier Fourdan: https://gitlab.gnome.org/ofourdan/gnome-ponytail-daemon. This tool allows us to perform actions in a Wayland GNOME session in a similar way to how we have been doing so with X functions. See NEWS or README.md for more details!
+
+2018-11-09 Vita Humpa <vhumpa@redhat.com>
+
+	dogtail 0.9.11
+	==============
+	A number of fixes related mainly to python3 and bilingual nature of dogtail.
+	Scripts (sniff and scripts/) get /usr/bin/python3 shebangs, so distros can
+	consider splitting those to subpackage.
+
+2017-05-01 Vita Humpa <vhumpa@redhat.com>
+
+	dogtail 0.9.10
+	==============
+
+	There has been a good deal of fixes and improvements since last year's release. We're not really ready for 1.0
+	yet, which is why we release this important cumulative release as 0.9.10. We have also moved our homesite to
+	gitlab (fedoraproject has been discontinued). For the list of changes, simply go to:
+	https://gitlab.com/dogtail/dogtail/commits/master
+
+2016-01-18 Vita Humpa <vhumpa@redhat.com>
+
+	dogtail 0.9.9
+	=============
+	A 1.0 pre-release. Contains a big number of fixes and changes done
+	since 0.9.0. Most important of these is framework's compatibility with
+	Python3. We've modified the code everywhere to run with both Python 2.7
+	and 3.3+. This means that from now on we maintain the same codebase and
+	are releasing the same tarball, which can be used to package both py2 and
+	py3 installations downstream. A complete list of fixes and changes will
+	be present here, when we release 1.0 after 0.9.9 has been thouroughly tested.
+
+	Though considered a pre-release, don'worry! 0.9.9 is considered stable and
+	have gone through some rigorious testing already. Thanks to newly extended
+	unit-test-set, it is actually the most self-tested release so far.
+
+2014-04-16 Vita Humpa <vhumpa@redhat.com>
+
+	dogtail 0.9.0
+	=============
+	Over the last year we've made a good number of fixes, added some new features
+	and got overall stability to the point where we can make a new 'major minor'
+	release. With 0.9 we're finally getting only a step away from what we'd like
+	to get done with 1.0.
+
+
+	 * Added a fix for situations when a previously crashed application
+	   still registered with at-spi blocks search ('Broken' session problem)
+	   Fixed for root.application(), root.applications() and for whenever
+	   GeneralPredicate is used (.child()). Also done for Sniff. RHBZ 972257
+
+	 * Added a support for gnome-continuous build-api (#36)
+
+	 * Added a direct lambda support in the findChildren method, that allows
+	   using non-predicate lambdas to create search properties. These can be
+	   all pure dogtail Node properties (i.e. showing), not limiting to just
+	   pyatspi ones as is when using Predicate.
+
+	 * Added a GnomeShell 'helper' class into utils module allowing to work
+	   with the new top-panel application menu.
+
+	 * With GTK3.10+ Gdk changes, needed to tune the keyNameToKeyCode function
+	   so that it provides valid keySym in as many cases possible - with both
+	   pre-GTK3.10 as well as GTK3.11+ having the same behavior in typeText and
+	   pressKey
+
+	 * Sniff ui update: the info pane now stays down on resizing
+
+	 * Got rid of some deprecated GObject calls
+
+	 * Several updates to the dogtail-run-headless-next
+	    - Any kind of session can now be used in any combination with both gdm/kdm
+	      --session can be used to specify any xsession desktop file, 'kde' defaults
+	        to 'kde-plasma' too keep pre-updated compatibility; default is now the previous user session
+	      --dm - new param to pick either gdm (default) or kdm
+	      --session-binary - new param to specify any in-session binary to grab script env from
+	                       - to be used with non gnome/kde session (lxde, ubuntu)
+	                       - do not confuse with session execs like gnome-session and starkde, that may
+	                         actually exit after session loadup; it should be everpresent (kwin, shell...)
+	    - Added a --restart switch to force restart the previously running (often left-over) session before proceeding
+	    - More logging of script execution (start/stop/PID), and some cleanups
+
+	 * Trap GErrors in findAllDescendants and retry if it occurs: This fixes crashes in findChildren if elements are being added/removed quickly
+
+	 * Unicode handling updates:
+	    - Make sure safeDecode is not skipping any strings
+	    - Don't crash when logging message contains unicode
+
+	 * Error Handling for Attribute Error
+
+	 * Fixed utils.run issue when having whitespace containing binary by
+	   using shlex shell-like parsing split.
+
+	 * Removed an always true if condition in i18n
+
+	 * Log child description when clicking. The log will now print the element description when it will be clicked
+
+	 * Trap TypeError in findAllDescendants: Sometimes pytaspi returns None as a Node if children are being removed too fast.
+	   We should retry search in this case
+
+	 * Extended the default TypingDelay from 0.075 to 0.1 seconds (helps working with certain high unicode charactes)
+
+	 * Fixed an bug in sniff discovered by jmolet that made sniff crash when
+	   run from /bin/sniff not /usr/bin/sniff
+
+	 * Generate a better script method call for labels
+
+	 * Fix for failing 'focus.application.node' seting
+
+	 * Derive all classes from object explicitely
+
+	 * Changed icons used in sniff that got moved to the gnome-icon-theme-legacy
+	   recently for the ones from non-legacy package.
+
+	 * Unified the 'isSth' vs. 'sth' properties for only 'sth' - added 'selected', but also introduced
+	   'isChecked' property for 0.7.x compatibility
+
+	 * Added instructions on how to enable accessibility into utils.bailBecauseA11yIsDisabled()
+
+	 * Added a 'retry' option to the tree.root.application()
+
+	 * Fixed the concurrent creation of sniff_refresh lock from both tree and procedural
+
+	 * Switched to use environ value to get user in config. os.getlogin breaks when run scheduled from a testing system with no terminal.
+
+	 * Patched the mouse related rawinput methods to prevent using negative coordinates
+
+	 * Updated and added more unittests
+
+2013-07-09 Vita Humpa <vhumpa@redhat.com>
+
+	dogtail 0.8.2
+	=============
+	Second update to the 0.8 series containing several fixes and improvements
+
+	 * Added the dogtail-run-headless-next to replace the dogtail-run-headless in future.
+	  -next, uses a diplay manager (kdm or gdm) for session management, should be used instead of older
+	  headless on systemd systems already
+
+	 * Unittests vastly improved and updated
+
+	 * Fixed a missing reset of FocusWindow to None on application refocus
+
+	 * Fixed the dogtail-logout to use gnome-shell instead of old gnome-panel
+
+2012-09-07 Vita Humpa <vhumpa@redhat.com>
+
+    dogtail 0.8.1
+    =============
+	A first update to the new GNOME3 / KDE4 compatible release containing several fixes:
+
+	* Sniff's autorefresh made togglable, to help avoid collisions with potential
+	  running dogtail scripts. Sniff checks at startup whether some script is running
+	  and sets up the autorefresh off if it is.
+
+	* Added a locking mechanism into utils that can be used to solve situations when
+	  multiple dogtail processes/thread are running (applied in tree/procedural and sniff
+	  already)
+
+	* Removed the deprecated dependency on CORBA
+
+	* Icons no longer use absolute pathing in sniff (thx roignac)
+
+	* Deprecated  .has_key() operator replaced with 'in'.
+
+	* Removed .svg inside sniff's .desktop file
+
+
+2012-05-30 Vita Humpa <vhumpa@redhat.com>
+
+	dogtail 0.8.0
+	=============
+	Finally a big release updating dogtail after more than 2 years ! Dogtail
+	is developed and maintained now again.
+
+	Simply put, ported to be compatible with the new GNOME 3 and to work well in major
+	GNOME 3 (GTK3) distributions.
+
+	We'd like to make the 0.8.x version onward the GNOME 3 compatible branch usable
+	for Fedora, RHEL7 and others, while keeping 0.7.x releases for fixes in older GNOME2
+	systems.
+
+	--- What was done ---
+
+	Notably, Sniff's UI needed to ported completely to GTK3, yet there are
+	also several places in dogtail 'itself' that needed to be rewritten to go ahead
+	with the new technologies. Those were all the modules where the old pygtk was
+	used for various reasons (rawinput, utils, tree...). Incompatibilites were also
+	present due to the new version of pyatspi (notably with the doAction method).
+
+	Release highlights:
+
+	* A great number of fixes everywhere related to GTK/GNOME/At-Spi updates
+
+	* The dogtail-recorder was dropped for now, but might return in RC or 0.8.1
+
+	* Thanks to the qt-at-spi project, dogtail now works out-of-the-box for QT!
+
+	* Headless supports KDE sessions
+
+	* Headless working with full 3D-Accelerated GNOME session (no fallback anymore)
+
+	* Highlight used in sniff completely re-written and made toggleable (of by default)
+
+	* Makefile updated, 'make run' builds packages in homedir/rpmbuld now
+
+	* Several examples fixed for updated gedit
+
+	* Added tree.isChild() convenience method
+
+	* Renamed doAction to doActionNamed due to conflict with doAction inside pyatspi namespace
+
+	* Delay made configurable in absoluteMotion and relativeMotion functions
+
+	* Changed at-spi activation to use DConf instead of GConf
+
+	* A bit of code clean-up and modernization (using @property now etc.)
+
+2009-12-07  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Add a little more error checking to avoid some cases
+	where sniff, if left running for long periods of time, would crash.
+
+2009-10-27  Zack Cerza <zcerza@redhat.com>
+
+	* tests/Node.py: Add tests for getting labeler/labelee.
+
+2009-10-27  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Refactor all Node properties, to clean up namespace
+	pollution.
+
+2009-10-27  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Rewrite the Node.value property in a way that's
+	compatible with python 2.4 while still avoiding namespace pollution.
+	Add docstrings for the AccessibleValue-related properties.
+
+2009-10-23  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Rewrite Node.findChildren() using
+	pyatspi.utils.findAllDescendants(). It's around 10% faster now and
+	allows you to use any kind of predicate you wish.
+
+	* tests/Node.py: Make one of the Node.findChildren() tests use
+	non-recursive mode.
+
+2009-10-23  Zack Cerza <zcerza@redhat.com>
+
+	* tests/Node.py: Add another unit test for Node.findChildren(). Add
+	docs for the rest.
+
+2009-10-23  Zack Cerza <zcerza@redhat.com>
+
+	* tests/Node.py: Add several unit tests for AccessibleValue-related
+	properties, since they were all broken a long time ago without anyone
+	noticing.
+
+	* dogtail/tree.py: Fix all the AccessibleValue-related properties.
+
+2009-10-22  Zack Cerza <zcerza@redhat.com>
+
+	* tests/Node.py: Add another unit test for Node.findChildren().
+
+2009-10-22  Zack Cerza <zcerza@redhat.com>
+
+	* tests/Node.py: Add unit test for Node.findChildren(), since I'm
+	going to rewrite it using the more-optimized
+	pyatspi.utils.findAllDescendants().
+
+2009-10-20  Zack Cerza <zcerza@redhat.com>
+
+	* tests/procedural.py: Add more tests, make miscellaneous tweaks.
+
+	* dogtail/procedural.py: Fix a bug found by unit tests.
+
+2009-10-19  Zack Cerza <zcerza@redhat.com>
+
+	* tests/procedural.py: Add some unit tests for the procedural
+	interface.
+
+2009-10-19  Zack Cerza <zcerza@redhat.com>
+
+	* tests/Node.py: Add tests for Node.caretOffset and Node.combovalue;
+	minor tweaks to other tests.
+
+2009-10-08  Zack Cerza <zcerza@redhat.com>
+
+	* setup.py, dogtail/__init__.py: Post-release version bump.
+
+2009-10-08  Zack Cerza <zcerza@redhat.com>
+
+	* setup.py, dogtail/__init__.py: Bump version to 0.7.0. Remove
+	references to .svn directory. Reflect new site.
+
+2009-10-08  Zack Cerza <zcerza@redhat.com>
+
+	* NEWS, README: Add notes about API docs.
+
+2009-10-08  Zack Cerza <zcerza@redhat.com>
+
+	* NEWS: Update.
+
+2009-10-08  Zack Cerza <zcerza@redhat.com>
+
+	* tests/Node.py: Remove tests for Node.version. This actually comes
+	straight from pyatspi, and is just plain not useful. It is also
+	inconsistent. For example, on RHEL5 it gives you the gail version,
+	while on Fedora 12 it gives you the gtk2 version.
+
+2009-10-06  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/__init__.py: Don't import pyatspi so early.
+
+2009-10-06  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py: Make sure that binaries (at least those with
+	absolute or relative paths specified) exist and are executable long
+	before we try to execute them.
+
+2009-10-06  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Catch LookupErrors (e.g. quitting an app)
+
+2009-09-30  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Disable debug logging... again.
+
+2009-09-29  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Remove an unused set object. Trying to stay compatible
+	with older pythons...
+
+2009-09-29  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Add Node.contains(), which can be used to determine
+	if a given point onscreen lies inside a Node's extents. Also add
+	Node.getAccessibleAtPoint(), which tries to find the Node at a given
+	point on screen.
+
+	* recorder/dogtail-recorder: Use the new Node methods to reimplement
+	most of the click detection; the old method was too expensive and
+	fragile. Also turn on pyatspi's caching.
+
+2009-09-24  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Add FocusWindow class, and corresponding
+	focus.window() API. I think eventually I want focus.window() calls to
+	raise the window to the foreground.
+
+2009-09-23  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Fix a bug in Node.typetext(). Actually, change its
+	behavior significantly: if we can't grab keyboard focus, fall back to
+	inserting text via the editabletext interface at the current caret
+	location. old behavior was to replace contents entirely, which doesn't
+	scale at all.
+
+2009-09-11  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Use specific Predicate subclasses where
+	available.
+
+2009-09-11  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Keyboard recording had been disabled by
+	accident. Reenable it.
+
+2009-09-04  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Simplify Node.click(); add Node.doubleClick().
+
+	* tests/Node.py: Make GtkDemoTest.runDemo() use Node.doubleClick()
+	instead of the activate action, since gtk-demo doesn't appear to use
+	that action anymore. This will be backward-compatible anyway.
+
+2009-09-04  Zack Cerza <zcerza@redhat.com>
+
+	* tests/Node.py: Look for at-spi instead of gail in testGetVersion
+	since Fedora no longer has a package called gail.
+
+2009-09-04  Zack Cerza <zcerza@redhat.com>
+
+	* INSTALL: Update.
+
+2009-09-04  Zack Cerza <zcerza@redhat.com>
+
+	* README: Update.
+
+2009-09-04  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py, dogtail/tree.py: Fix some formatting that epydoc
+	doesn't like.
+
+2009-09-04  Zack Cerza <zcerza@redhat.com>
+
+	* NEWS: Update.
+
+2009-08-26  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Tweak usage output.
+
+2009-08-26  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Require a script argument to be run!
+
+2009-08-03  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Refactor eventlistener (de)registration
+	code. Also move some logEvent calls.
+
+2009-07-24  Zack Cerza <zcerza@redhat.com>
+
+	* examples/test-events.py: Update to pyatspi. Disable some events as
+	they just flood the terminal.
+
+2009-05-08  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-logout: Work with RHEL5.
+
+2009-05-05  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py: Use os.kill() instead of Popen.terminate(),
+	since the latter doesn't exist before python 2.6...
+
+2009-05-05  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py: Oops, don't close() the xinitrc object!
+
+2009-05-05  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py: Let scratch files be deleted upon closing. Keep
+	Session.xinitrcFileOBj around until its start() method is next called,
+	so it can be read in the meantime.
+
+2009-05-05  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-logout: Don't use raw clicks. Also add a little more
+	documentation.
+
+2009-05-05  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py: Fix path to dogtail-logout
+
+2009-05-05  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py: Remove/comment some debug output.
+
+2009-05-05  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py: Make scriptCmdList an optional argument to
+	Session.init()
+
+2009-05-01  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Fix option application.
+
+2009-05-01  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py: Tweak the way we find the correct environment
+	for the script.
+
+2009-05-01  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py, scripts/dogtail-run-headless: Refactor most of
+	dogtail.sessions.
+
+2009-04-30  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py: Merge Session and GNOMESession; refactor
+	Session; add Script.
+
+2009-04-29  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-logout: Add a note about the script still "working"
+	if gnome-session doesn't end up being accessible.
+
+2009-04-29  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Give a choice of X servers.
+
+2009-04-29  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-logout: Add a sleep(1), something's wrong...
+
+2009-04-28  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Actually instantiate the session
+	object.
+
+2009-04-28  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py: Properly report exit code.
+
+2009-04-28  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Draft of a rewrite using
+	dogtail.sessions
+
+2009-04-28  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-logout: Add a new script, dogtail-logout. This is
+	for use with headless sessions. Currently doesn't work yet.
+
+2009-04-28  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/sessions.py: Add a sessions module. This will become the
+	basis for a rewritten dogtail-run-headless.
+
+2009-03-21  Zack Cerza <zcerza@redhat.com>
+
+	* epydoc.conf: Add the Epydoc config file.
+
+2009-03-21  Zack Cerza <zcerza@redhat.com>
+
+	* Makefile: Add proper targets for generating/uploading API docs.
+	We're using Epydoc now.
+
+2009-03-21  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/utils.py: If we're running under pydoc or epydoc, don't bail
+	if accessibility is disabled.
+
+2008-12-31  Zack Cerza <zcerza@redhat.com>
+
+	* examples/appstartup.py: Add a new example that launches a given
+	application, then checks to see that it started correctly by looking
+	for a Node with the given roleName.
+
+2008-08-18  Zack Cerza <zcerza@redhat.com>
+
+	* examples/gedit-test-utf8-procedural-api.py: Actually, handle the
+	file chooser's expander widget more gracefully by looking to see if it
+	has the 'checked' state before expanding it - apparently 'checked'
+	means it is expanded. Go figure.
+
+2008-08-18  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Make Click.__call__() work without arguments
+	again.
+
+2008-08-11  Zack Cerza <zcerza@redhat.com>
+
+	* tests/Node.py: Don't import pyatspi unnecessarily.
+
+2008-08-11  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/rawinput.py: Use config.actionDelay for click().
+
+2008-08-11  Zack Cerza <zcerza@redhat.com>
+
+	* examples/gedit-test-utf8-procedural-api.py: Collapse the file
+	chooser's expander widget when we're done using it.
+
+2008-08-11  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Don't log giant messages to the debug log if we're
+	setting a Node's text to a very large value. Also, use
+	config.actionDelay for Node.click().
+
+2008-08-11  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tc.py: Put a timestamp on TCImage's diff.png.
+
+2008-08-08  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tc.py: Eliminate double slashes in TCImage.diff. Also remove
+	do-nothing TCImage.__init__().
+
+2008-08-08  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tc.py: Rewrite TCImage to use PIL instead of ImageMagick.
+	Update unit tests to reflect this rewrite.
+
+2008-08-08  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tc.py: Make TC a new-style class. No particular reason.
+
+2008-08-08  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/logging.py: Make ResultsLogger log to a file no matter what.
+
+2008-07-24  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Update to reflect API change in rawinput.
+
+2008-02-19  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/config.py: Add new parameter: checkForA11y, which defaults
+	to True. If set to False, we assume accessibility is enabled.
+
+	* dogtail/utils.py: Don't import gconf until necessary.
+
+	* dogtail/tree.py, sniff/sniff: Don't check for accessibility unless
+	config.config.checkForA11y is True.
+
+2008-02-19  Zack Cerza <zcerza@redhat.com>
+
+	* examples/gedit-test-utf8-procedural-api.py: Use click() instead of
+	activate().
+
+2008-02-19  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tc.py: Add TCBool and TCNode.
+
+2008-02-19  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py, dogtail/dump.py: Allow tree.Node.dump() to output
+	to a file instead of stdout.
+
+2008-02-19  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/utils.py: Use subprocess.Popen() instead of os.spawnvpe().
+
+	* dogtail/procedural.py: Make run() return the PID.
+
+2008-02-19  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/i18n.py: Add loadAllTranslationsForLanguage().
+
+2008-02-19  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py: Make distribution detection code a little less
+	ugly. Remove docstrings from the Distro subclasses. Clean up some other
+	documentation.
+
+	* dogtail/i18n.py: Don't import the distro module until we actually
+	need it.
+
+	* dogtail/logging.py: Add an optional 'newline' arg to Logger.log(),
+	which defaults to True. Passing False will cause the logger to not
+	print or write a newline at the end of the message. Also stop catching
+	some IOErrors, as that made the code awkward for no good reason.
+
+2008-02-06  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/dump.py: Properly print Node.actions; ditch "xml" output as
+	it was not even really a good start.
+
+	* dogtail/tree.py: Strip some useless information of out
+	Action.__str__().
+
+2008-02-06  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/__init__.py: Fix inconsistent version number.
+
+2008-02-06  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py: Fix minor inconsistency.
+
+2008-01-31  Zack Cerza <zcerza@redhat.com>
+
+	* setup.py, dogtail/__init__.py: Bump version to 0.6.90.
+
+2008-01-31  Zack Cerza <zcerza@redhat.com>
+
+	* Makefile, MANIFEST.in: Remove mentions of debian/ and dogtail.spec.
+
+2008-01-31  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail.spec: Remove; see Fedora CVS for the canonical spec file.
+
+2008-01-31  Zack Cerza <zcerza@redhat.com>
+
+	* debian/: Remove as it's so out-of-date it's probably dangerous, and
+	Debian doesn't use it anyway.
+
+2008-01-31  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/rawinput.py: Refactor keyname <-> keysym conversion code.
+	Remove unnecessary code, including the ctypes/xlib-based
+	keyStringToKeyCode in favor of the gtk.gdk version. This completely
+	removes the ctypes dependency.
+
+2008-01-21  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Use a real GNOME session instead of a
+	"fake" one.
+
+2008-01-21  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/wrapped.py: Add dogtail.wrapped module, with superclasses
+	for Node and Application wrappers to use in custom application
+	wrappers. We need this because dogtail.tree.{Node,Application} are no
+	longer wrapper classes, and thus can't be subclasses directly.
+
+2008-01-15  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Change Node.valueMin and valueMax to Node.minValue
+	and maxValue; add minValueIncrement.
+
+2008-01-15  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Remove SniffModel.checkNodes() and
+	SniffModel.addDeadNode() as we're not using them now that we have
+	events working. While there are applications that don't have proper
+	event support, the performance hit on constantly crawling over nodes
+	is too large.
+
+2008-01-15  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Make rows in the main TreeView expand/collapse on
+	pressing Enter.
+
+2008-01-15  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff, sniff.glade: Add a new tab to the bottom pane that
+	lists the present states (just the ones supported by dogtail).
+
+2008-01-14  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff, sniff/sniff.glade: Make the relation buttons only
+	visible when a target exists. Also prepare
+	SniffController.showRelationTarget() more prepared for when we add
+	more relations to dogtail and sniff.
+
+2008-01-14  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Fix a stupid error in the Node.dead check.
+
+2008-01-10  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/glade, sniff/sniff: Split bottom pane into tabs: first is
+	name, roleName, description, actions; second is (editable)text; third
+	is relations. Currently there are only two relations: labeler and
+	labelee. Relations in sniff are currently represented as buttons,
+	which, when clicked, call the relation targets' blink() method. Also
+	fix a minor bug in SniffController.setUpTable() where sometimes we
+	would try to disconnect a signal handler multiple times.
+
+2008-01-10  Zack Cerza <zcerza@redhat.com>
+
+	* NEWS: Add a note about a broken unit test due to #498563.
+
+2008-01-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Add Node.dead property; useful if you're unsure if
+	the accessible you're about to poke at is still valid, and don't feel
+	like trying to catch 3 or more different exceptions.
+
+2008-01-10  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Call SniffController.setUpTable() inside
+	selectionChanged() instead of buttonPress().
+
+2008-01-10  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Instead of processing events synchronously, put them in
+	a queue to be processed during an idle function. Rewrite
+	SniffModel.getPath().
+
+2007-12-18  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/logging.py: Remove IconLogger. Make Logger not create
+	logfiles until its log() method is called. This means sniff won't be
+	creating empty logs all the time.
+
+	* dogtail/config.py: Clean up some cruft and remove IconLogger stuff.
+
+	* dogtail/trayicon.py: Removed.
+
+2007-12-18  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Remove the 'finally' from a try-except-finally, since
+	that would be the first time we broke compatibility with python 2.4,
+	and it's far from worth it :)
+
+2007-12-17  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Overhaul sniff to use pyatspi events to be notified
+	when a node is renamed or gains/loses children. As a result,
+	SniffModel does not use its addDeadNode() and checkNodes() methods.
+	Those methods have not yet been removed, however. This change will
+	result in properly-written applications working far better than before
+	in sniff. Improperly-written apps (e.g. Firefox, but they know this)
+	will behave better than sniff in 0.6.1; checkNodes() was causing
+	serious slowdowns in some cases since it's fairly heavy code that
+	needs to be looped continuously. Since sniff now has to do a lot less
+	work than it did ever before, it should be somewhat faster in all
+	cases.
+
+2007-12-11  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff, sniff/glade: Add 'Set Root' and 'Unset Root' menu items
+	to Sniff's View menu. Useful if you want to dig into a single app and
+	want to reduce the amount of scrolling around necessary slightly.
+
+2007-12-11  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Improve the removal of dead nodes from SniffModel,
+	mainly by removing the highest-level dead node in the case that an
+	entire subtree is found to be dead. Thanks to Michal Babej for the
+	initial patch. Closes: #503056.
+
+2007-12-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Make Action.__node public (i.e. rename to
+	Action.node).
+
+2007-12-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Force Node._getChildren() to return an empty list
+	if the node's parent is a hyper link.
+
+2007-12-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Er, fix typo in last commit.
+
+2007-12-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Add AccessibleValue support. Thanks to Pelya for
+	submitting a patch before the port was merged.
+
+2007-12-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Fix typo.
+
+2007-12-10  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Show lines interconnecting TreeView rows.
+
+2007-12-10  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Expand the root node of the TreeView on startup.
+
+2007-12-10  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Move SniffModel.getNodeAttr() to SniffController, modify
+	it to be specific to the 'name' property of a node. That function is
+	now called nameDataFunc(). The behavior of nameDataFunc() has also
+	been changed: instead of changing the text of the TreeView cell
+	representing a defunct Node to '(broken node)', it now flags the row
+	for removal by adding a reference to it to SniffModel.deadNodes. Every
+	1000ms SniffModel will prune such rows from itself. In my tests, this
+	caused no extra measurable increase in CPU utilization.	Also, remove
+	all columns in SniffModel other than the node column, as the rest were
+	not being used anyway.
+
+2007-12-10  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Refactor sniff. Organize into 3 classes: SniffApp with
+	methods	for setting up the application; SniffModel as a subclass of
+	gtk.TreeStore; SniffController for poking at the SniffModel and
+	gtk.TreeView instances.
+
+2007-12-07  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/rawinput.py: Fall back to using a gtk.gdk.Keymap
+	implementation of keyStringToKeyCode() if ctypes is not available.
+	This will probably become the default implementation.
+
+2007-12-07  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Add a patch from Michal Babej to fix a python 2.4
+	compatibility issue. Closes: #502324.
+
+2007-12-06  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Only write the script preamble once.
+
+2007-12-06  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Make the Close button in sniff's About dialog actually
+	close the dialog.
+
+2007-11-30  Zack Cerza <zcerza@redhat.com>
+
+	* Makefile: Minor update.
+
+2007-11-30  Zack Cerza <zcerza@redhat.com>
+
+	* NEWS: Add a note about a broken unit test due to #498557.
+
+2007-11-30  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Port Accessible.Hypertext and Hyperlink support.
+	tree.Link is now called LinkAnchor and is no longer a subclass of
+	Node. The new behavior is now that when a Hypertext interface is found
+	on a Node, that node will have one extra child Node per
+	Hyperlink/anchor pair. The child Nodes will have a role name of 'hyper
+	link' and the 'URL' property. Also, remove much dead code.
+
+2007-10-31  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Add a patch from Cole Robinson to both make
+	all focus.*() queries return a Boolean based on their success and to
+	make the failure warning more verbose.
+
+	* dogtail/config.py, dogtail/logging.py: Add a patch from Cole
+	Robinson to allow the logging of debug information to stdout to be
+	disabled via config.logDebugToStdOut. Still enabled by default.
+
+2007-10-22  Zack Cerza <zcerza@redhat.com>
+
+	* examples/gedit-test-utf8-procedural-api.py,
+	examples/gedit-test-utf8-tree-api.py: Tweak slightly to work with the
+	new dogtail behavior of click() using raw mouse events.
+
+2007-10-22  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Remove all calls to time.sleep().
+
+2007-10-22  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Add some missing doDelay()'s. Also remove a chunk
+	of dead code.
+
+2007-10-22  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/errors.py, dogtail/tc.py: Fix encoding headers.
+
+2007-10-22  Zack Cerza <zcerza@redhat.com>
+
+	* MAINTAINERS: Updated.
+
+2007-08-29  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Update and clean up the toplevel docstring.
+
+2007-08-29  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Rewrite Node.__doc__.
+
+2007-08-29  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Remove some redundant documentation from
+	Node.__doc__.
+
+2007-08-23  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Port the Action class over. Mainly needed to get at
+	keybindings.
+
+2007-08-23  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/__init__.py: Make __init__.py import pyatspi.
+
+2007-08-23  Zack Cerza <zcerza@redhat.com>
+
+	* tests/Node.py: Update unit tests with API changes: Node States (from
+	the old stateSet) are accessed directly, e.g. node.sensitive;
+	read-only attributes now raise AttributeError instead of
+	ReadOnlyError; atspi.SpiException has been replaced by
+	CORBA.COMM_FAILURE.
+
+	* dogtail/tree.py: Replace ReadOnlyError with AttributeError. Also
+	make Node.doAction() raise NotSensitiveError if necessary.
+
+2007-08-23  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Fix Application.window() to not try to initialize
+	the Window class.
+
+2007-08-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Port setting of Node.combovalue and additionally
+	allow retrieval of the value.
+
+2007-08-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Port Node.caretOffset.
+
+2007-08-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Add most of the rest of the checks from the old
+	Node.children into the new one, i.e. children limits and null-child
+	filtering. Also, when filtering null children, warn if
+	config.debugSearching is True.
+
+2007-07-27  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Handle broken nodes more gracefully.
+
+2007-07-27  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Minor change in how we keep track of
+	keyboard press/release events.
+
+2007-07-26  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Port dogtail-recorder to pyatspi. Remove
+	some dead code. Add lots of comments. The keyboard modifier processing
+	had to be rewritten. As a bonus, things like <Shift><Home> should
+	actually get noticed now. Also, the madness that was FakeNode is no
+	more.
+
+2007-07-25  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/i18n.py: Fix duplicate checking in
+	loadTranslationsFromPackageMoFiles(). Closes: #452232.
+
+2007-06-22  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/dump.py: Remove SIGINT handler.
+
+2007-06-22  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Port Selection stuff to pyatspi and convert to use
+	normal instance methods and properties.
+
+2007-06-20  Zack Cerza <zcerza@redhat.com>
+
+	* examples/no-help-at-all.py: Add patch from Jan Hutař to use
+	cgi.escape() where necessary.
+
+2007-06-20  Zack Cerza <zcerza@redhat.com>
+
+	* examples/filechooser-stress-test.py: Add patch from Jan Hutař to add
+	i18n support.
+
+2007-05-31  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Fix a minor bug in Node._fastFindChild() that
+	caused a non-recursive search to halt completely if a null child was
+	encountered.
+
+2007-05-30  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Move some documentation into the new properties.
+	Remove some unhelpful documentation. Further clean up bits of
+	documentation here and there. Note: not done with docs yet :)
+
+2007-05-29  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Remove actual search code from Node.findChild() and
+	use pyatspi.utils.findDescendent, via a new Node._fastFindChild()
+	function.
+
+2007-05-29  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/predicate.py: Turn all predicates' satisfiedByNode() functions
+	into pseudo-staticmethods, so we can pass those methods directly to the
+	search methods in pyatspi.utils.
+
+2007-05-25  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Port Sniff to pyatspi. It should all work now, but
+	there could be a bug or two.
+
+2007-05-25  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Begin port from pyspi to pyatspi. Disable __init__,
+	__getattr__, __setattr__, __str__ while their functionality is ported.
+	Attributes that were accessed via __[gs]attr__ are now declared as
+	properties, to make the code easier to read and document.
+
+2007-05-25  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/logging.py: Actually obey config.logDebugToFile.
+
+	* dogtail/config.py: Implement runtime changing of logDebugToFile.
+
+2007-05-25  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/config.py: Fix logic in first unit test.
+
+2007-05-16  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/rawinput.py: Port from pyspi to pyatspi. Use ctypes and Xlib
+	to do the keystring -> keycode keycode conversion.
+
+2007-05-11  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py, recorder/dogtail-recorder,
+	scripts/dogtail-run-headless, sniff/sniff: Replace 'except:' with
+	'except: Exception', since we don't want KeyboardInterrupt and
+	SystemExit to be ignored in any of those cases. See:
+	http://www.python.org/dev/peps/pep-0352/. Also catch only ImportError
+	in once case inside of dogtail-recorder.
+
+2007-05-03  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Add patch from Michal Babej to correctly reset the
+	actions label when a Node with no actions is selected. Closes:
+	#432999.
+
+2007-03-16  Zack Cerza <zcerza@redhat.com>
+
+	* setup.py: Add patch from Fernando Herrera to fix building from a
+	subversion checkout. Closes: #418923.
+
+2007-02-20  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/predicate.py: Add unit tests for all predicates.
+
+2007-02-13  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Add patch from Michal Babej to fix
+	Node.childLabelled().
+
+2007-02-09  Zack Cerza <zcerza@redhat.com>
+
+	* examples/no-help-at-all.py: Add patch from Michal Babej to use
+	cgi.escape() to escape content for SGML.
+
+2007-02-09  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tc.py: Add patch from Michal Babej that removes some
+	confusion in TCImage.compare(), and also fixes a unit test.
+
+2007-02-08  Daniel Drake  <d.drake@mmm.com>
+
+	* dogtail/tree.py: Fix wrong logic in Node.selectedChildren
+	implementation
+
+2007-02-08  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/utils.py: Make isA11yEnabled() look at $GTK_MODULES, too.
+
+2006-11-28  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/config.py: When creating the default directories for logs,
+	etc. (/tmp/dogtail/*), create them world-writable so that they may be
+	shared by multiple users.
+
+2006-11-22  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/config.py: Add parameter 'childrenLimit', which is an integer
+	representing how many children of a Node instance to return at maximum.
+	The default is 100.
+
+	* dogtail/tree.py: Only return config.childrenLimit children. Log a
+	warning to the debug logger the first time the list is clipped, but
+	remain silent on subsequent occurences.
+
+2006-11-17  Zack Cerza <zcerza@redhat.com>
+
+	* examples/test-events.py: Make sure dogtail.tree is imported. Closes:
+	#374898. Also add warning that the script is outdated, may do evil, and
+	will probably be removed soon.
+
+2006-11-15  David Malcolm  <dmalcolm@redhat.com>
+
+	* dogtail/tree.py: ensure that a Node and a Link's children attribute
+	always is a list and hence iteratable (previously returned None for
+	Link instances and for Node instances that had __hideChildren set);
+	similar fix for the Node.findChildren method
+
+2006-10-23  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Make run() insert a space while concatenating
+	the binary name and arguments to pass. Closes: #364553.
+
+2006-10-23  Zack Cerza <zcerza@redhat.com>
+
+	* setup.py, dogtail/__init__.py, NEWS: Post-release version bump.
+
+2006-10-13  Zack Cerza <zcerza@redhat.com>
+
+	* Released 0.6.1.
+
+2006-10-13  Zack Cerza <zcerza@redhat.com>
+
+	* NEWS: Update.
+
+2006-10-13  Zack Cerza <zcerza@redhat.com>
+
+	* examples/data/GNOME-Street1.png, examples/data/GNOME-Street.png,
+	examples/data/g-star1.png, examples/data/g-star.png: Remove and
+	replace with far smaller test images.
+
+	* examples/data/10b.png, examples/data/10w.png, examples/data/20b.png,
+	examples/data/20w.png: Add, to replace older, larger test images.
+
+	* dogtail/tc.py: Update to reflect the change in test images.
+
+2006-10-12  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Keep track of which 'frame' (window) the
+	widget we're poking is under. If necessary, write out 'focus.frame()'
+	lines for that frame. This should keep us from getting confused about
+	which non-dialog window of a given application we care about.
+
+2006-10-12  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Be consistent about what name we use for
+	the recorder internally.
+
+2006-10-11  Zack Cerza <zcerza@redhat.com>
+
+	* NEWS: Update with changes since 0.6.0.
+
+2006-10-11  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/rawinput.py: Make typeText('foo\nbar') work again.
+
+2006-10-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py: Fix up Solaris detection so that an /etc/release
+	that does not contain 'Solaris' doesn't prevent the exception from
+	being raised.
+
+2006-10-10  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Re-add Dave Malcolm's patch to add syntax
+	hilighting to the script view, which was accidentally dropped. Closes:
+	#345374.
+
+2006-10-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py: Add patch from Brian Cameron to detect Solaris.
+	Closes: #360479. Also, check for Fedora before checking for Red Hat.
+
+2006-10-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/i18n.py: Make TranslatableString.matchedBy() check for
+	equality before trying to match via regular expression. This will
+	ensure that traditional, exact-string searches will work regardless of
+	the presence of any regexy-looking characters. Additionaly escape '('
+	and ')', since grouping will never need to be used in this context.
+	Closes: #348891.
+
+2006-10-02  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/utils.py: Fix 'Technolofy' typo :)
+
+2006-09-27  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Add support for recording right clicks.
+	It mostly works, but I'm seeing some inconsistency regarding what gets
+	focus when a right-click event occurs. For example, when a nautilus
+	icon seems to retain focus only about half the times it is
+	right-clicked; the other half, the context menu receives the focus.
+	Obviously, when that happens, the recorder records the wrong event.
+
+2006-09-26  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder, sniff/sniff: Stop whining if the glade
+	file isn't in the current directory.
+
+2006-09-26  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder, recorder/recorder.glade: Implement script
+	playback using python's threading module.
+
+2006-09-26  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Make type() and keyCombo() fall back to their
+	corresponding function in rawinput if focus.widget.node == None.
+
+2006-09-26  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder, recorder/recorder.glade: Remove Quit button
+	and add Play button. The Play button isn't fully implemented yet.
+
+2006-09-26  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder, recorder/recorder.glade: Remove combo box
+	since OOScriptWriter needs fixing. Also remove the expander since a
+	GTK bug was keeping it from expanding properly.
+
+2006-09-22  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/rawinput.py: Make pressKey(), which is used by typeText(),
+	use UniCharToKeySym(). Now typeText('foo, bar; baz!?!') works again.
+
+2006-09-21  Zack Cerza <zcerza@redhat.com>
+
+	* examples/filechooser-stress-test.py: Apply a patch from Michal Babej
+	to correctly look for the u'Open files\u2026' dialog.
+
+	* examples/no-help-at-all.py: Apply a patch from Michal Babej fail
+	gracefully if no argument was supplied, and also to start the
+	requested app if it is not running.
+
+2006-09-21  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/logging.py: Refactor logging mechanism. DebugLogger is now
+	just Logger, and LogWriter is now a Logger subclass called
+	ResultsLogger. Logger can (and will by default) write its output to a
+	file in config.logDir. To disable the logging of debug information to
+	a file, set config.logDebugToFile to False. ResultsLogger now also
+	prints its results to standard out.
+
+	* dogtail/distro.py, dogtail/tree.py, dogtail/utils.py:
+	Replace all print statements with calls to the debug logger.
+
+	* dogtail/tc.py: Update to reflect changes in dogtail.logging.
+
+	* dogtail/procedural.py: Don't raise a FocusError if
+	config.fatalErrors is False. Instead, spit a warning out via
+	dogtail.errors.warn(), which relays to the debug logger.
+
+	* dogtail/errors.py: Add warn(), which is the mechanism by which an
+	exception is replaced by a warning if config.fatalErrors is False.
+	Uses dogtail.logging.debugLogger, which is a dogtail.logging.Logger
+	instance.
+
+	* dogtail/config.py: Add two new parameters: 'fatalErrors', which
+	specifies whether errors encountered while using dogtail.procedural
+	should be considered fatal; and 'logDebugToFile', which specifies
+	whether to write debug output to a file. They default to False and
+	True, respectively.
+
+	* dogtail/predicate.py: Give debugNames to all the Predicates that
+	were missing them.
+
+	* dogtail/i18n.py: Don't spam warnings and probably-useless tracebacks
+	when a broken app spews fake UTF-8.
+
+	* dogtail/__init__.py: Post-release version bump. Add the errors
+	module to __all__.
+
+	* NEWS, setup.py: Post-release version bump.
+
+2006-09-13  Zack Cerza <zcerza@redhat.com>
+
+	Released 0.6.0.
+
+2006-09-13  Zack Cerza <zcerza@redhat.com>
+
+	* README: Update.
+
+	* setup.py, dogtail/__init__.py: Bump version numbers.
+
+2006-09-13  Zack Cerza <zcerza@redhat.com>
+
+	* MANIFEST.in: Remove debian directory from tarball.
+
+	* setup.py: Remove references to dogtail.apps.wrappers.
+
+2006-09-13  David Malcolm  <dmalcolm@redhat.com>
+
+	* examples/rhythmbox-test.py: removed
+
+	* examples/nautilus-test-icon-view-collage.py: removed (moved to
+	dogtail-tests/nautilus)
+
+	* examples/google-search.py: removed (moved to dogtail-tests/epiphany)
+
+	* examples/gnome-panel-test-starting-every-app.py: removed (moved to
+	dogtail-tests/gnome-panel)
+
+	* examples/gcalctool-test-fibonacci.py: removed (moved to
+	dogtail-tests/gcalctool)
+
+	* examples/firefox-test-browsing-local-html-file.py: removed
+
+	* examples/evolution-test-switching-components.py:
+	* examples/data/CAN-2005-0806.mbox:
+	* examples/evolution-test-survives-email-CAN-2005-0806.py:
+	* examples/evolution-test-sending-email.py:
+	* examples/evolution-test-first-time-wizard.py:
+	* examples/evolution-test-configuring-imap-smtp.py:
+	* examples/evolution-test-configuring-exchange.py:
+	* examples/evolution-test-composing-html.py: removed (moved to
+	dogtail-tests/evolution)
+
+	* examples/crack.py: removed (never worked)
+
+	* examples/abiword-test.py: removed (moved to dogtail-tests/abiword)
+
+2006-09-13  David Malcolm  <dmalcolm@redhat.com>
+
+	* dogtail/apps: remove entire subdirectory structure: what remained is now in
+	GNOME CVS inside dogtail-tests/appwrappers
+
+2006-09-13  David Malcolm  <dmalcolm@redhat.com>
+
+	* dogtail/apps/wrappers/kicker.py: remove
+
+	* dogtail/apps/wrappers/konqueror.py: remove
+
+	* dogtail/apps/wrappers/mozilla.py: remove
+
+	* dogtail/apps/wrappers/epiphany.py,
+	* dogtail/apps/wrappers/evolution.py,
+	* dogtail/apps/wrappers/gnomepanel.py,
+	* dogtail/apps/wrappers/gnomepanel.py,
+	* dogtail/apps/wrappers/yelp.py,
+	* dogtail/apps/wrappers/nautilus.py: remove reference to categories
+
+	* dogtail/apps/categories.py: remove
+
+	* dogtail/apps/__init__.py: remove categories
+
+2006-09-13  Zack Cerza <zcerza@redhat.com>
+
+	* NEWS: Update.
+
+2006-09-11  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Replace newlines in node.name values with
+	an escaped '\n' in ProceduralScriptWriter.recordClick(). Remove a debug
+	statement in EventRecorder.onKeyPress().
+
+2006-09-11  David Malcolm  <dmalcolm@redhat.com>
+
+	* dogtail/apps/wrappers/yelp.py, dogtail/apps/wrappers/mozilla.py,
+	* dogtail/apps/wrappers/gnomepanel.py: rename self.version in each app
+	wrapper to avoid a naming collision with the synthesized Tree.version
+	attribute.
+
+2006-09-11  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff, recorder/dogtail-recorder: Add patch from Tim Lee so
+	sniff and dogtail-recorder can find glade files even if they're not
+	installed into the /usr prefix. Closes: #353719, #353731.
+
+2006-09-11  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/utils.py, sniff/sniff, recorder/dogtail-recorder,
+	dogtail/tree.py: Add utility functions to check whether accessibility
+	is enabled via GConf, and either present a dialog asking to enable it
+	(for sniff & dogtail-recorder) or just bail (for scripts).
+
+2006-09-07  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Make sure the recorder can't record
+	itself. Also remove some old comments.
+
+2006-09-07  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/i18n.py: Also use safeDecode() instead of calling any
+	string's encode() method directly. Now i18n.py should work exclusively
+	with Unicode internally, and the safe conversion means that dogtail
+	should never crash because of an invalid Unicode string ever again.
+
+2006-09-07  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/i18n.py: Add safeDecode(), a function based on the fix
+	committed on 2006-08-22. Use it instead of calling any string's
+	decode() method directly. Closes: #354515.
+
+2006-09-07  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Fix syntax error, and look for
+	gnome-settings-daemon in /usr/libexec before $PATH. Closes: #354518.
+
+2006-09-07  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/utils.py: Rewrite screenshot() to use GDK instead of
+	ImageMagick.
+
+2006-09-06  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py: Add patch from Tim Lee to fix up SuSe support.
+	Closes: #353601.
+
+2006-09-05  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/logging.py: Don't use an IconLogger by default.
+
+	* dogtail/config.py: Add useIconLogger setting, which defaults to
+	False. Setting it to True enables the IconLogger immediately. Add
+	documentation and a unit test to that effect.
+
+2006-08-28  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Ignore any SpiException, only when trying to access
+	root.children. This is so people using broken applications while
+	trying to test non-broken applications don't have to suffer.
+
+2006-08-25  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Add patch from Chris Lee to add the 'checked' Node
+	attribute, which indicates whether the Node is a check box that is
+	currently checked.
+
+2006-08-23  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/config.py: Add parameter 'typingDelay', defaulting to 0.075.
+
+	* dogtail/rawinput.py: Make typeText() use pressKey(). Add
+	keySymAliases for '\t' and '\n'.
+
+2006-08-23  Zack Cerza <zcerza@redhat.com>
+
+	* setup.py, MANIFEST.in: Remove mentions of textinput.glade.
+
+2006-08-22  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Remove the text input UI. Implement actual
+	keystroke recording. Add support for the ProceduralScriptWriter to
+	write out script calls. The OOScriptWriter is unsupported at this time.
+	Also, make exceptions occuring inside AT-SPI-registered callbacks more
+	informative by printing their tracebacks before they're lost in the
+	marshaling process.
+
+	* recorder/recorder.glade: Remove 'Input Text' button.
+
+	* recorder/textinput.glade: Remove glade file for text input UI.
+
+2006-08-22  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Add type(), which for now just calls
+	focus.widget.node.typeText(). Add keyCombo(), which for now just calls
+	focus.widget.node.keyCombo().
+
+2006-08-22  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Add new Node attributes: 'focusable' and 'focused'.
+	Both are read-only Boolean values. 'focusable' indicates whether the
+	Node is able of taking keyboard focus. 'focused' indicates whether the
+	Node currently has keyboard focus. Remove Node.rawType() and move its
+	functionality to Node.typeText(). In Node.typeText(), if the node is
+	focusable and not focused, try to grab its focus with Node.grabFocus
+	before using rawtype.typeText() to do the typing. If the node is not
+	focusable, just append the string to the node's 'text' property. Add
+	Node.keyCombo(), which does a similar thing but cannot have a fallback
+	mechanism.
+
+2006-08-22  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/rawinput.py: Add keyCombo(), which takes a string in the same
+	format of gtk.accelerator_parse(), e.g. "<Control><Alt>Delete" and
+	generates the appropriate keyboard events to simulate the user pressing
+	that combination. Add __buildKeyStringsDict(), which essentially
+	generates an inverted version of the keySyms dict. Add
+	keySymToUniChar(), which takes a keysym and returns the corresponding
+	Unicode character, if one exists. Add uniCharToKeySym(), which does the
+	reverse. Also add a few more keysym aliases to the keySymAliases dict.
+
+2006-08-22  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/i18n.py: If we encounter a UnicodeDecodeError because of an
+	invalid string, print the exception plus a warning explanation, and
+	contintue by decoding the string and replacing invalid characters with
+	question marks.
+
+2006-08-21  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder.desktop: Move to the 'Programming'
+	category in the menu.
+
+	* sniff/sniff.desktop: Move to the 'Programming' category in the menu.
+
+2006-08-11  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Use the python GConf bindings.
+
+2006-08-11  Zack Cerza <zcerza@redhat.com>
+
+	* NEWS, setup.py, dogtail/__init__.py, dogtail/apps/__init__.py,
+	dogtail/apps/wrappers/__init__.py: Post-release version bump.
+
+2006-08-01  Zack Cerza <zcerza@redhat.com>
+
+	Released 0.5.2.
+
+2006-08-01  Zack Cerza <zcerza@redhat.com>
+
+	* NEWS: Update.
+
+2006-08-01  Zack Cerza <zcerza@redhat.com>
+
+	* tests/Node.py: Put a time.sleep() in GtkDemoTest.tearDown() to let
+	gtk-demo actually die before launching another. AT-SPI seems to really
+	disapprove of the speed at which it was being hammered.
+
+2006-08-01  Zack Cerza <zcerza@redhat.com>
+
+	* NEWS: Update.
+
+2006-07-31  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/config.py, dogtail/tree.py: Remove shebang lines.
+
+2006-07-28  David Malcolm  <dmalcom@redhat.com>
+
+	* Makefile: add a working default target ('all') and an install target,
+	so that it builds within jhbuild (Fixes: #318535)
+
+2006-07-27  David Malcolm  <dmalcolm@redhat.com>
+
+	* tests/Node.py: added TestExceptions: ensure that when an app dies,
+	attempts to contact it result in an exception being raised (even more
+	final part of bg #318135)
+
+2006-07-27  David Malcolm  <dmalcolm@redhat.com>
+
+	* sniff/sniff: handle broken communication with nodes (e.g. for a
+	crashed app) by displaying "broken node" and an error icon (hopefully
+	the final part of bug #318135)
+
+2006-07-24  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/rawinput.py: Use gtk.kesyms to look up keysyms. Retain
+	compatibility with old names via a keySymAliases dict. Also, use only
+	one atspi.EventGenerator.
+
+2006-07-21  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/utils.py: Set GTK_MODULES='gail:atk-bridge' in run() before
+	executing the app, to make sure it is accessible. It seems most
+	non-GNOME apps need this set.
+
+2006-07-21  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Add a UI for setting the text property of
+	a Node instance. While recording, you click 'Input Text', and a dialog
+	pops up. Click the node whose text you want to set, then type the text
+	into the dialog and press OK. The recorder sets the node's text, then
+	writes out lines in the script to do the same.
+
+	* recorder/recorder.glade: Add 'Input Text' button.
+
+	* recorder/textinput.glade: Add new glade file: the text input dialog.
+
+	* MANIFEST.in: Add textinput.glade to tarball.
+
+	* setup.py: Add textinput.glade to packages.
+
+2006-07-19  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Initialize EventRecorder.listeners to an
+	empty list, to fix a traceback when the user tries to quit the
+	recorder without actually recording anything.
+
+2006-07-14  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Make the script TextView editable at
+	all times, so the user can add comments and the like while recording.
+
+2006-07-14  Zack Cerza <zcerza@redhat.com>
+
+	* examples/gedit-test-utf8-tree-api.py: Add patch from Len DiMaggio
+	to fix this script. Also make the script search for u'Save As\u2026'
+	in addition to 'Save As...' for the dialog title. Closes: #340734.
+
+2006-07-14  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail.spec: Forward-port a fix from the Fedora Extras specfile,
+	fixing a broken call to desktop-file-install. Closes: #347322.
+
+2006-07-13  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Rewrite the script in Python. It now
+	accepts command line options to specify what session is to be used.
+	Currently those are: '--gnome' or '-g' for the old minimal GNOME
+	session, and '--none' or '-n' for just metacity. The script also has
+	a usage statement and helpful error messages. In general it's more
+	featureful, robust and easy to use. Closes: #344902.
+
+	* scripts/dogtail-detect-session: Also exit normally if any apps are
+	found at all.
+
+2006-06-30  David Malcolm  <david@localhost.localdomain>
+
+	* tests/Node.py: add unit test for getting bogus attributes of a Node;
+	document many of the existing unit tests; add unit tests for writing to
+	a read-only attribute of Node; fix some typos in the names of the unit
+	tests; check that Node.extents has non-zero size, and that Node.size is
+	non-zero
+
+	* dogtail/tree.py: make attempts to write to a read-only attribute of
+	Node raise a ReadOnlyError, rather than fall through to an
+	AttributeError; remove the old stubbed unit test from the tail of the
+	file
+
+2006-06-29  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Add warning not to read without understanding
+	the API.
+
+2006-06-27  David Malcolm  <dmalcolm@redhat.com>
+
+	* recorder/dogtail-recorder: use GtkSourceView if available to get
+	syntax-highlighting.  Closes: #345374.
+
+	* tests/Node.py: new file: unit tests for the dogtail.Node class.
+
+	* tests: new subdirectory, to hold unit tests for Dogtail itself
+
+2006-06-27  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Make SearchError a proper Exception subclass.
+
+	* dogtail/procedural.py: Prepare module for support for accepting
+	regular expressions as 'name' arguments. Use the IsAnApplicationNamed
+	predicate in FocusApplication. Remove unused 'description' arguments.
+
+	* dogtail/i18n.py: Add regular expression support to
+	TranslatableString.matchedBy(). This means that any 'name' argument
+	supports regular expression matching, by virtue of the fact that all
+	Predicate subclasses uses TranslatableString.matchedBy() for 'name'
+	arguments.
+
+2006-06-16  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Add patch from Dave Malcolm to work around the
+	problem where pyspi would essentially just stop working, until the
+	user logged out and back in. Closes: #321273.
+
+2006-06-15  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/config.py: Fix help(dogtail.config.config). Fix outdated
+	documentation for dogtail.config.config by reorganizing and documenting
+	accidentally-undocumented parameters.
+
+2006-06-02  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/config.py: Fix unit test that was broken by a commit from
+	2005-11-01, which made config.ensureSensitivity default to True. The
+	unit test wasn't updated in that commit. The unit test now doesn't
+	assume what the default is, and uses the value obtained from
+	config.defaults. Thanks to Len DiMaggio for reporting. Closes: #342028.
+
+2006-05-01  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/recorder.glade: Remove the 'Stop' button, and add a 'Clear'
+	button.
+
+	* recorder/dogtail-recorder: Make the 'Record' button turn into a
+	'Stop' button after it is pressed, and vice versa. Add
+	toggleRecording() to RecorderGUI and remove startRecording(). Make
+	RecorderGUI.quit() stop the recording before it calls gtk.main_quit().
+
+2006-04-17  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Make ProceduralScriptWriter.recordClick()
+	write out correct calls for Node instances that don't have
+	action['click'] and instead need, for example, 'activate'. If other
+	actions aren't available, use the node's select(). If that doesn't
+	work, do a click(raw=True), to spoof raw mouse input. Also, remove
+	some old AttributeError handlers from FakeNode.__init__(). Also, make
+	EventRecorder stop listening to window:create events, since those are
+	just thrown away. Also, refactor and rewrite
+	EventRecorder.onMouseButton() to be much more accurate in detecting
+	clicks. Reporting the wrong nodes happens far less often, now. There
+	is still the problem of clicks getting dropped when the mouse button
+	isn't help down for, say, 200ms. Clicks on toolbar buttons tend to get
+	dropped too. But there are no more false clicks, e.g. clicking on a
+	non-accessible application still recorded a (bogus) action. Also, make
+	clicking on table cells work properly, working around the fact that
+	mouse:button events are always reported by the table and not the cell,
+	by finding the smallest child of the table whose extents the event
+	occured inside.
+
+	* dogtail/procedural.py: Add Select, an Action subclass that doesn't
+	deal with actions. It lets us have select() and deselect() calls. The
+	former is how page tabs are activated.
+
+2006-04-17  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Restore sane default window size.
+
+2006-04-17  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Fix Node.size by using the values from
+	Node.__accessible.getExtents() instead of .getSize().
+
+2006-04-13  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Change the way Node reports that attributes
+	provided by specialized Accessible interface extensions do not apply.
+	For example, for some instance 'foo', trying to access 'foo.text' when
+	the AccessibleText interface is not available for that node will now
+	return None instead of raising an AttributeError (if it were
+	available, and the text was zero-length, it would have returned '').
+	Trying to access 'foo.children' will return [] instead of raising an
+	AttributeError. The reason for this change is that these conditions
+	are not "exceptional". Trying to access
+	'foo.thisIsANonexistentAttribute' would be exceptional. Also, add a
+	ReadOnlyError exception which is raised when, for example, someone
+	tries to set 'foo.text' when 'foo' does not have an
+	AccessibleEditableText implementation.
+
+	* sniff/sniff: Update Sniff to reflect the removal of most of Node's
+	AttributeErrors.
+
+	* sniff/sniff.glade: Use a GtkWindow instead of a GnomeApp. The latter
+	was unnecessary and forced us to use widgets we didn't want.
+
+2006-04-11  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Scroll to the end of the TextView after
+	inserting a new line, so you can watch the script as it's written.
+
+2006-04-11  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder, recorder/recorder.glade: Add ComboBox to
+	allow selection of ScriptWriter. Make ProceduralScriptWriter default.
+	Remove those assertions, because they were evil.
+
+2006-04-11  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Implement ProceduralScriptWriter class.
+	It implements recordClick() just like OOScriptWriter, but it also has
+	the special method findAncestor(), for deciding whether the script
+	will need to do a focus.application() or focus.dialog(). For this, I
+	needed to implement a FakeNode.__cmp__(). It only compares the name,
+	roleName and description of the FakeNode instances. Bother me if you
+	need it to compare more attributes for it to work. Make
+	ProceduralScriptWriter the default ScriptWriter for now. Also, add a
+	couple assertions in various methods to make sure the node parameter
+	is never None.
+
+2006-04-04  Zack Cerza <zcerza@redhat.com>
+
+	* setup.py, dogtail/__init__.py, dogtail/config.py, dogtail/distro.py,
+	dogtail/dump.py, dogtail/errors.py, dogtail/i18n.py,
+	dogtail/logging.py, dogtail/path.py, dogtail/predicate.py,
+	dogtail/procedural.py, dogtail/rawinput.py, dogtail/tc.py,
+	dogtail/trayicon.py, dogtail/tree.py, dogtail/utils.py,
+	dogtail/version.py, dogtail/apps/categories.py,
+	dogtail/apps/wrappers/__init__.py, dogtail/apps/wrappers/epiphany.py,
+	dogtail/apps/wrappers/evolution.py,
+	dogtail/apps/wrappers/gcalctool.py, dogtail/apps/wrappers/gedit.py,
+	dogtail/apps/wrappers/gnomepanel.py, dogtail/apps/wrappers/kicker.py,
+	dogtail/apps/wrappers/konqueror.py, dogtail/apps/wrappers/mozilla.py,
+	dogtail/apps/wrappers/nautilus.py, dogtail/apps/wrappers/yelp.py,
+	examples/abiword-test.py, examples/crack.py,
+	examples/evolution-test-switching-components.py,
+	examples/filechooser-stress-test.py,
+	examples/gcalctool-test-fibonacci.py,
+	examples/gedit-test-utf8-procedural-api.py,
+	examples/gedit-test-utf8-tree-api.py,
+	examples/gnome-panel-test-starting-every-app.py,
+	examples/google-search.py, examples/i18n-test.py,
+	examples/nautilus-test-icon-view-collage.py,
+	examples/no-help-at-all.py, examples/rhythmbox-test.py,
+	examples/test-events.py, recorder/dogtail-recorder, sniff/sniff:
+	Convert everything to use 4 spaces for indentation, instead of tabs.
+
+	* HACKING: Remove all the notes about forcing editors to use tabs for
+	indentation. Closes: #318833.
+
+2006-04-04  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff.desktop: Move to the 'Accessories' category in the menu.
+
+2006-04-04  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder.desktop: Add desktop file for
+	dogtail-recorder.
+
+	* MANIFEST.in, setup.py: Ship and install dogtail-recorder.desktop.
+
+2006-04-04  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/recorder.glade: Add gtk.Expander and	gtk.TextView
+	to allow viewing and editing a script. Note that when the Expander is
+	collapsed, the main window doesn't shrink back to its original size.
+	This is a bug.
+
+	* recorder/dogtail-recorder: Make ScriptWriters either store
+	the script in a normal Python string, or a gtk.TextView if it's
+	available. Continue to print the script to standard out, for
+	debugging. Implement saving scripts via the GUI, automatically
+	appending a '.py' to the filename if necessary. Also, add some basic
+	docstrings to some OOScriptWriter methods (mostly to note that the
+	keyboard stuff doesn't work yet).
+
+2006-03-31  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Added support for AccessibleSelection to Node, via
+	Node.{de,}select(), Node.{de,}selectAll(), Node.isSelected,
+	Node.selectedChildren and Node.indexInParent.. Thanks to Peter
+	Johanson and Jose Dapena Paz. Closes: #336562.
+
+2006-03-28  Zack Cerza <zcerza@redhat.com>
+
+	* MANIFEST.in: Add the new recorder files to the tarball.
+
+	* setup.py: Add the new recorder files to packages.
+
+2006-03-28  Zack Cerza <zcerza@redhat.com>
+
+	* recorder/dogtail-recorder: Add GUI with Record, Stop, Save and Quit
+	buttons. Add new methods to EventRecorder: startRecording() and
+	stopRecording(), and move all the event listener (de)registration and
+	and AT-SPI event loop handling into those methods. Remove hack that
+	killed the recorder when an Edit menu was clicked, since there is a
+	working Stop button. This requires today's pyspi HEAD.
+
+	* recorder/recorder.glade: Add Glade file for dogtail-recorder.
+
+2006-03-28  Zack Cerza <zcerza@redhat.com>
+
+	* examples/recorder.py: Move to recorder/dogtail-recorder.
+
+	* recorder/dogtail-recorder: Move from examples/recorder.py.
+
+2006-03-28  Zack Cerza <zcerza@redhat.com>
+
+	* examples/recorder.py: Remove the Writer class and move its only
+	method to the ScriptWriter class. Create a a subclass of
+	dogtail.tree.node, called FakeNode, which can wrap a Node instance and
+	store certain attributes of it, so AT-SPI calls are not used when
+	reading them. This was necessary because events are useless if they
+	are received after their source has been destroyed. For example, by
+	storing recorder.lastFocusedNode as a FakeNode instead of a Node, if a
+	Close button in a dialog is clicked we will still have all the
+	information we need to record the event. So, make
+	EventRecorder.on{Focus,Select}() store self.last{Focus,Select}edNode
+	as FakeNodes. Also, make EventRecorder.onMouseButton() properly dance
+	around dogtail.tree's handling of attributes. This will have to be
+	fixed in the nearish future, though.
+
+2006-03-21  Zack Cerza <zcerza@redhat.com>
+
+	* examples/recorder.py: s/Focussed/Focused/g. Add lastSelectedNode
+	callbacks and event listener registration. s/MouseClick/MouseButton/g.
+	Keep track of lastPressedNode and lastReleasedNode. Add code to try to
+	detect the "real" source nodes by checking the X and Y coordinates of
+	lastFocusedNode and lastSelectedNode. Add a way to exit the recorder -
+	currently, clicking on an Edit menu will do it. When the
+	OOScriptWriter is initialized, make it spit out "from dogtail.tree
+	import *".
+
+2006-03-21  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/predicate.py: Remove extra quotes from all the script
+	generation code.
+
+2006-03-21  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/__init__.py, dogtail/apps/__init__.py,
+	dogtail/apps/wrappers/__init__.py, setup.py, NEWS: Post-release
+	version bump.
+
+2006-03-14  Zack Cerza <zcerza@redhat.com>
+
+	Released 0.5.1.
+
+2006-03-14  Zack Cerza <zcerza@redhat.com>
+
+	* examples/recorder.py: Store each EventListener in a list instead of
+	initializing it and throwing it away. Add the beginnings of a
+	OOScriptWriter.recordKey() method - for when pyspi's DeviceListener
+	works properly.
+
+	* NEWS: Updated.
+
+2006-03-14  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/i18n.py, dogtail/rawinput.py, dogtail/i18n.py,
+	dogtail/rawinput.py, dogtail/logging.py, dogtail/utils.py,
+	dogtail/path.py: Remove '#!/usr/bin/env python' headers to fix rpmlint
+	warnings. The rest apparently can keep them, since they have unit
+	tests. Add UTF-8 encoding headers.
+
+2006-02-28  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/predicate.py: Fix makeCamel() to deal with
+	TranslatableString instances properly by calling str() on the
+	parameter as a safeguard.
+
+2006-02-24  Zack Cerza <zcerza@redhat.com>
+
+	* setup.py, dogtail/__init__.py, dogtail/apps/__init__.py,
+	dogtail/apps/wrappers/__init__.py: Belated post-release version bump.
+
+2006-02-24  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py, dogtail/i18n.py, dogtail/logging.py,
+	dogtail/tc.py, dogtail/trayicon.py, dogtail/tree.py,
+	dogtail/apps/wrappers/evolution.py: s/  / /g. This will make it easier
+	to convert to four-space indentation, since that's all the rage these
+	days.
+
+	* dogtail/apps/wrappers/nautilus.py: Fix up indentation; was mixing
+	tabs and spaces.
+
+2006-02-24  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Tweak the FocusWidget and FocusDialog
+	algorithms so that they store the predicate instance. That way, we can
+	give more meaningful FocusErrors by passing the predicate's debugName.
+
+2006-02-14  Zack Cerza <zcerza@redhat.com>
+
+	* Makefile: Split 'rpm' target into 'rpm_prep' and 'rpm'. Add a new
+	target, 'srpm', to build just a source RPM. Make it ignore
+	BuildRequires. Make 'rpm' target only build binary RPMs. Don't make
+	the 'tarball' target depend on the 'clean' target.
+
+2006-02-07  Zack Cerza <zcerza@redhat.com>
+
+	Released 0.5.0.
+
+2006-02-07  Zack Cerza <zcerza@redhat.com>
+
+	* README: Add pointed to gedit-procedural example, and note that it's
+	the most frequently updated.
+
+2006-02-03  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Add some error checking to getSelectedNode(), to get
+	rid of a (harmless, but scary) traceback on startup.
+
+2006-02-03  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/logging.py: Update to use new icon path.
+
+2006-02-03  Zack Cerza <zcerza@redhat.com>
+
+	* setup.py, sniff/sniff: Move sniff's application icons from
+	/usr/share/pixmaps/ into /usr/share/hicolor/*/apps/.
+
+	* setup.cfg: Remove.
+
+2006-02-03  Zack Cerza <zcerza@redhat.com>
+
+	* README: Add README file. It's a start.
+
+2006-01-31  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/i18n.py, dogtail/predicate.py dogtail/trayicon.py: Be much
+	more intelligent about encodings. This should really, truly fix the
+	last remaining blocker on the automatic runtime translation feature.
+	Closes: 328652.
+
+2006-01-31  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/i18n.py: Generalize language detection.
+
+2006-01-31  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/apps/wrappers/epiphany.py: Update to new Action API.
+
+2006-01-27  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/i18n.py: Comment out some super-verbose debug statements.
+
+	* examples/gedit-test-utf8-procedural-api.py: Use a proper Unicode
+	ellipsis.
+
+2006-01-27  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/i18n.py: Make sure we filter the list of mo-files so that
+	we only get the ones in the target language.
+
+2006-01-26  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/i18n.py: Fix automatic runtime translation. Stop using
+	gettext.dgettext(), and instead use the gettext.GNUTranslations class
+	and its member function, ugettext(). This ensures that we always get
+	Unicode back. As a consequence, stop caring about "domains" and just
+	deal with mo-files. Remove getTranslationDomainsForPackage(). Closes:
+	#328652. Also, fix isMoFile()'s regexp matching.
+
+2006-01-24  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Comment out the warning about missing wnck
+	bindings, since the functionality is nonworking anyway.
+
+	* NEWS: Add note about the last change to dogtail.tree.
+
+2006-01-17  Zack Cerza <zcerza@redhat.com>
+
+	* examples/gedit-test-utf8-procedural-api.py: Use codecs.open()
+	instead of open() for reading the UTF-8 files. open() apparently
+	ignores encoding issues, and codecs.open() allows us to specify the
+	encoding of the file. Add comments to that effect.
+
+	* dogtail/tc.py: Make a note in TC.compare()'s docstring that
+	codecs.open() must be used to open any non-ASCII files that are
+	intended to be compared using that function.
+
+2006-01-17  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/utils.py: Make screenshot() raise a DependencyNotFoundError
+	if ImageMagick is not installed.
+
+	* NEWS: Add note about the last change to screenshot().
+
+2006-01-17  Zack Cerza <zcerza@redhat.com>
+
+	* NEWS: Add notes about dogtail.errors and the change to TCImage.
+
+2006-01-17  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/errors.py: Add errors.py, a module for generalized
+	exceptions, i.e. its first exception: DependencyNotFoundError. Other
+	exceptions such as distro.PackageNotFoundError and
+	procedural.FocusError probably do not belong here.
+
+	* dogtail/tc.py: Give a better error message if TCImage is
+	instantiated while ImageMagick is not installed, by raising a
+	DependencyNotFoundError.
+
+	* examples/gedit-test-utf8-procedural-api.py: Remove unncessary
+	TCImage instantiation. Also, be aware that the naming of the "Save as"
+	dialog changed slightly. Try both strings.
+
+2006-01-13  Zack Cerza <zcerza@redhat.com>
+
+	* setup.py: Change author_email to dogtail-list@gnome.org.
+
+2006-01-13  Zack Cerza <zcerza@redhat.com>
+
+	* setup.py, dogtail/__init__.py, dogtail/apps/__init__.py,
+	dogtail/apps/wrappers/__init__.py: Bump version numbers.
+
+2006-01-13  Zack Cerza <zcerza@redhat.com>
+
+	* MANIFEST.in: Add NEWS file to tarball.
+
+2006-01-05  Zack Cerza <zcerza@redhat.com>
+
+	* NEWS: Update with changes since 0.4.3.
+
+2006-01-04  Zack Cerza <zcerza@redhat.com>
+
+	* examples/gedit-test-utf8-procedural-api.py: Add comment about how to
+	turn on automatic translation.
+
+2005-12-01  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Update to the new Action API.
+
+2005-12-01  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Add patch from David Malcolm to add a single
+	shortcut method for Node.doAction('click') - simply Node.click() as a
+	compromise. Closes: #321196.
+
+2005-11-27  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/utils.py: Remove spurious print statement from screenshot().
+
+2005-11-27  Zack Cerza <zcerza@redhat.com>
+
+	* NEWS: Reformat to make more readable.
+
+2005-11-27  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Re-add helper methods that were removed on 11-08.
+	Change Action API from "Node.actionName()" to
+	"Node.doAction(actionName)" for an action whose name is	'actionName'.
+
+	* dogtail/procedural.py: Update to new Action API.
+
+2005-11-22  Zack Cerza <zcerza@redhat.com>
+
+	* debian/control: Fix typo. Thanks to Alex Roitman for reminding me
+	to commit this. Closes: #322169.
+
+2005-11-22  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tc.py: Make TCImage.compare() work around a change in
+	ImageMagick that broke the method, by comparing its version string
+	against the one at which it changed. Closes: #321431.
+
+2005-11-18  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/config.py: Add config parameter 'blinkOnActions'. The
+	parameter defaults to False. Set it to True to watch your scripts
+	blinken die lichten!
+
+	* dogtail/tree.py: Make Action.do() call blink() on the associated
+	node.
+
+2005-11-18  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/utils.py: Add Blinker class from sniff/sniff, which, upon
+	initialization, blinks a rectangular shape onscreen.
+
+	* dogtail/tree.py: Add Node.blink(), which blinks a rectangle around
+	the node's extents (if it has extents). This is intended to help
+	debugging situations where, during script writing, the node found in a
+	search is not what was expeced.
+
+	* sniff/sniff: Remove Blinker class and blinkExtents(). Make
+	selectionChanged() just call node.blink().
+
+2005-11-18  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Move blink interval constant into Blinker class. Make
+	Blinker.__init__()'s count argument optional, defaulting to 2.
+
+2005-11-17  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Add Hyperlink and Hypertext support via the Link
+	class (subclass of Node). Link objects have a roleName of 'hyper link'
+	and a 'jump' action in Epiphany - I haven't tested Firefox yet.
+
+2005-11-17  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Add debug logging to Node.rawClick() and
+	Node.rawType().
+
+2005-11-17  David Malcolm <dmalcolm@redhat.com>
+
+	* sniff/sniff: reduce it to a single blink (2 calls of the callback)
+	rather than two blinks (4 calls) to avoid visual confusion when
+	rapidly changing the selection.
+
+2005-11-17  David Malcolm <dmalcolm@redhat.com>
+
+	* sniff/sniff: implement a selectionChanged callback for the tree
+	view; use it to make the extents of the selected node blink, porting
+	code from at-poke's src/poke.c (though without the grabs that uses).
+	Closes: #321655
+
+2005-11-17  David Malcolm <dmalcolm@redhat.com>
+
+	* sniff/sniff: remove the unused "populate" function
+
+2005-11-16  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Properly catch an AttributeError where an
+	AssertionError was previously expected. Closes: #321564:.
+
+2005-11-16  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Make FocusDialog.__call__() pass
+	recursive=False to FocusApplication.node.findChild(). Closes: #321624.
+
+2005-11-15  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/logging.py: Make LogWriter print the name of the logfile
+	just before it creates it.
+
+2005-11-15  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/logging.py: Fix TimeStamp.zeroPad() by defaulting to
+	width=2. Fix TimeStamp.fileStamp() by renaming 'long' argument to
+	'addTime'.
+
+2005-11-14  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Use {get,set}attr() inside
+	FocusBase.__{get,set}attr__() instead of
+	FocusBase.node.__{get,set}attr__(), in order to composite attributes
+	that aren't dynamically generated.
+
+2005-11-14  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Fix compositing of Node properties into
+	FocusBase subclasses.
+
+2005-11-14  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Fix focusing. There are supposed to be three
+	different focus 'slots': application, dialog, and widget. Previously
+	Actions were not operating on the same nodes as FocusWidget as
+	intended. Also remove a couple print statements left over from
+	previous debugging.
+
+2005-11-14  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/rawinput.py: rewrite pressKey() to take as an argument the
+	English key name as seen on the keyboard, look its keysym up via a
+	dict, and pass that value to AT-SPI to synthesize the event. This
+	means each key will have to be added to the keySyms dict explicitly,
+	but I think it's worth it for the API to make sense and be portable.
+	Add docstrings to pressKey() and typeText().
+
+2005-11-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/logging.py: Fix TimeStamper.zeroPad()'s padding, and note in
+	its docstring that it will not truncate.
+
+2005-11-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/predicate.py, dogtail/rawinput.py: Clean up imports.
+
+2005-11-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/rawinput.py: Add typeText() and pressKey(). For now
+	pressKey() takes an integer keycode argument, but I'd like to enable
+	something like "pressKey('Return')" in the future.
+
+	* dogtail/tree.py: Make Node.grabFocus() get added to the object in
+	Node.__init__(), but only of the node wraps a Component. Also add
+	Node.rawClick() and Node.rawType().
+
+	* dogtail/procedural.py: Implement click(raw=True).
+
+2005-11-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Make FocusWidget.__call__() actually raise a
+	FocusError if it can't find what it's looking for.
+
+2005-11-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Add menu(), Focus.frame(), Focus.window().
+
+2005-11-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Add Node.position, Node.size, and Node.grabFocus()
+	for those Nodes wrapping an AccessibleComponent.
+
+2005-11-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tc.py: Don't initialize TC's self.{baseline,undertest,result} so
+	that TC.compare() defaults to failing. Make sure to assign
+	self.{baseline,undertest} to the value of the arguments passed to
+	compare(). Fix several unit tests to specify their strings as being
+	Unicode-encoded. Strings comparisons now fail properly. Thanks to
+	Muktha Narayan for reporting the bug and attaching a proposed patch.
+	Closes: #321151.
+
+2005-11-10  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tc.py: s@scripts/pound@examples/data@g to reflect the
+	directory naming that occured a while back.
+
+2005-11-08  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Fix bogus logic in Node.__getattr__() where if, for
+	example, a Node had multiple actions such that
+	node.actions[0].name == 'activate' and node.actions[1].name == 'menu',
+	calling node.menu() would fail.
+
+2005-11-08  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Remove "various wrapper/helper search methods":
+	Node.{child, menu, menuItem, textentry, button, childLabelled,
+	childNamed, tab}(). Node.menu() conflicted with the other Node.menu(),
+	which is needed to execute the AccessibleAction's 'menu' action.
+
+2005-11-08  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Fix "maximum recursion depth exceeded" error
+	in FocusBase.__getattr__() when 'help(dogtail.procedural)' is called
+	right after 'import dogtail.procedural'.
+
+2005-11-08  Zack Cerza <zcerza@redhat.com>
+
+	* Makefile: Build RPMs as a normal user. Thanks again to Bastien
+	Nocera for the patch! Closes: #320983.
+
+2005-11-08  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail.spec: Make __os_install_post macro one line to fix building
+	RPMs on RHEL4 and earlier. Thanks to Bastien Nocera for the patch.
+	Closes: #320978.
+
+2005-11-03  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py: Add PackageDb.getMoFiles(), returning (mostly)
+	all the .mo files in the distro, optionally for just one locale. Move
+	all PackageDb subclasses into the top level of the module, and prefix
+	their names with a '_' so it is possible to subclass them. Add
+	UbuntuAptPackageDb to make it possible for getMoFiles() to search in
+	/usr/share/locale and /usr/share/locale-langpack. Add JHBuild class, a
+	subclass of Distro, and JhBuildPackageDB class, a subclass of
+	PackageDb. JhBuildPackageDB.getFiles() and
+	JhBuildPackageDB.getVersion() are not implemented yet, as I haven't
+	figured out just how they should work yet.
+
+2005-11-03  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py: Make AptPackageDb only call apt_pkg.GetCache()
+	once and save the cache object, to save time in the case where
+	multiple calls to getVersion() or getDependencies() need to be made.
+
+2005-11-03  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py: Move *PackageDb class declarations and
+	instantiations into their Distro classes' __init__() methods. Remove
+	all __make*PackageDb() functions. Make dogtail.distro.packageDb a
+	reference to dogtail.distro.distro.packageDb, where the second
+	'distro' is the Distro subclass instance to preserve the API.
+
+2005-11-02  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail.spec: Bump version number.
+
+2005-11-02  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Save the value of the GConf key
+	/desktop/gnome/interface/accessibility, then set it to true before
+	running the test. After the test is run, restore the old value.
+	Closes: #320548.
+
+2005-11-02  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Preserve the return code of the script
+	being exectued. Closes: #320535.
+
+2005-11-01  David Malcolm <dmalcolm@redhat.com>
+
+	* dogtail/apps/wrappers/evolution.py: added setBogusGConfAccountData()
+	function as a way of bypassing the first-time wizard
+
+2005-11-01  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/config.py: Make config.ensureSensitivity False by default.
+
+	* dogtail/tree.py: Make Action.do() spit out a warning if the Node
+	instance is not sensitive and config.ensureSensitivity is False.
+
+2005-11-01  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Implement a proper NotSensitiveError exception.
+	Make Action.do() raise it instead of a string literal when the
+	action's Node instance is not sensitive, and config.ensureSensitivity
+	is True.
+
+2005-11-01  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/logging.py: Change format of TimeStamp.fileStamp() to
+	filename_YYYYMMDD-hhmmss or just filename_YYYYMMDD, controlled by the
+	new optional argument 'long'. Fix docstrings of TimeStamp.fileStamp()
+	and TimeStamp.entryStamp().
+
+	* dogtail/utils.py: Rewrite most of screenshot(), and add assertions
+	that config.scratchDir exists before the screenshot is taken, and that
+	the screenshot file exists before the function returns. Generate
+	screenshot filenames using logging.TimeStamp.entryStamp() by default.
+	A call like "screenshot(file='foo') will name the file
+	'foo_YYYYMMDD-hhmmss.png', but the timestamping can be disabled with a
+	call like "screenshot(file='foo', timeStamp=False)", naming the file
+	just 'foo.png'. Additionally, the file argument may specify an
+	extension, e.g. 'foo.png' or 'foo.jpg'. Make screenshot() return the
+	full path to the screenshot taken. Clarify screenshot()'s docstring.
+
+2005-10-31  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/i18n.py: Add URL to bug filed at bugzilla.redhat.com to the
+	note about popt making gettext.dgettext() bail.
+
+2005-10-31  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py: Add an Ubuntu subclass of Debian, since Ubuntu in
+	some cases does things wildly different. For a good example, see
+	dogtail/i18n.py.
+
+	* dogtail/i18n.py: Make automatic translation work on Ubuntu with a
+	special-case: If a script needing automatic translation is running on
+	Ubuntu, look for translations in the language-pack-gnome-$LANGUAGE
+	package before the actual package under test. Note that this makes
+	automatic translation significantly slower. Also, remove the
+	'dogtail' prefix from references to dogtail.config and dogtail.distro.
+
+2005-10-31  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Only be verbose about setting a Node.text attribute
+	if config.debugSearching is turned on.
+
+2005-10-31  Zack Cerza <zcerza@redhat.com>
+
+	* examples/gedit-test-utf8-procedural-api.py: Add automatic
+	translation support (it's a one-liner!). Don't set $LANG from inside
+	the script. Add a line for config.debugTranslation, but comment both
+	debug lines out.
+
+2005-10-28  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py: Implement proper Exceptions PackageNotFoundError
+	and DistributionNotSupportedError.
+
+2005-10-28  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py: Implement getFiles() and getDependencies() in
+	AptPackageDb.
+
+2005-10-28  David Malcolm <dmalcolm@redhat.com>
+
+	* dogtail/i18n.py: New file, providing i18n facilities.
+
+	* dogtail/config.py: Add debugTranslation boolean
+
+	* examples/i18n-test.py: New example, demonstrating the i18n hooks
+
+	* dogtail/tree.py: Add a getUserVisibleStrings() method to Node
+
+	* dogtail/predicate.py: Rewrite all string matching within predicates to
+	use the dogtail.i18n.TranslatableString class, and rewriting as
+	necessary.
+
+	* dogtail/apps/wrappers/evolution.py: Use the evolution-connector
+	package's translations by default.
+
+	* examples/evolution-test-switching-components.py: Use the evolution
+	package's translations
+
+2005-10-28  David Malcolm <dmalcolm@redhat.com>
+
+	* dogtail/distro.py: Use correct exceptions for unimplemented functions.
+	Add getFiles and getDependencies methods to PackageDb; implement them
+	for RpmPackageDb.   Fix the PATCH_MESSAGE to give the mailing list
+	address.
+
+2005-10-27  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/config.py: Rewrite. Rename the Config class to _Config, and
+	provide a singleton instance named config. It is no longer necessary
+	to instantiate a _Config instance in any script, whereas previously it
+	was necessary to do so if any values needed to be changed. Also rename
+	logdir to logDir, scratch to scratchDir, and data to dataDir. When the
+	*Dir values are changed, the new directory is created instantly if it
+	does not exist.	NOTE: this is an API change. Updating any scripts
+	should be as simple as replacing 'Config' with 'config', 'logdir' with
+	'logDir', 'scratch' with 'scratchDir', 'data' with 'dataDir' and
+	removing any instantiations of the old Config class. Also, the old way
+	of loading configuration values from a file is no longer supported.
+	The current preferred method is to create a Python file that contains
+	something like: "from dogtail.config import config; config.logDir =
+	'../logs/'; config.debugSearching = True" and then import that file
+	from whatever scripts need it.
+
+	* dogtail/logging.py, dogtail/tc.py, dogtail/tree.py,
+	examples/firefox-test-browsing-local-html-file.py,
+	examples/gcalctool-test-fibonacci.py,
+	examples/gedit-test-utf8-procedural-api.py,
+	examples/gnome-panel-test-starting-every-app.py,
+	examples/google-search.py,
+	examples/nautilus-test-icon-view-collage.py, examples/data/sample.cfg:
+	Update to new config API.
+
+	* dogtail/procedural.py: Update to new config API. Also, change "def
+	run(application, arguments = None, appName = None):" to "def
+	run(application, arguments = '', appName = ''):".
+
+	* dogtail/utils.py: Update to new config API. Also, make run()'s appName
+	argument default to "''" instead of "None", just like
+	dogtail.procedural.run(). Also, make run() use doDelay() instead of
+	sleep() to get logging for free via the config.config.debugSearching
+	option.
+
+2005-10-24  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/utils.py: Don't break if a filename is passed to
+	screenshot().
+
+2005-10-24  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/__init__.py, dogtail/apps/__init__.py,
+	dogtail/apps/wrappers/__init__.py, setup.py: Post-release version
+	bump.
+
+2005-10-24  Zack Cerza <zcerza@redhat.com>
+
+	Released 0.4.3.
+
+2005-10-24  Zack Cerza <zcerza@redhat.com>
+
+	* NEWS: Created with major changes since 0.4.2.
+
+	* dogtail/__init__.py, dogtail/apps/__init__.py,
+	dogtail/apps/wrappers/__init__.py, setup.py: Bump version numbers.
+
+	* dogtail.spec, debian/changelog: Add changelog entries for 0.4.3.
+
+2005-10-24  Zack Cerza <zcerza@redhat.com>
+
+	* icons/dogtail-head-48.png, icons/dogtail-head.svg,
+	icons/dogtail-tail-48.png, icons/dogtail-tail.svg: Add icons.
+
+	* MANIFEST.in, setup.py: Add new icons to distribution.
+
+	* dogtail/logging.py: Make IconLogger use the dogtail-tail icon.
+
+	* sniff/sniff: Use the dogtail-head icon for the application. Use the
+	theme's	desktop icon for the root node in the TreeView. If the then
+	has an icon for any application displayed in the TreeView, use it.
+
+	* sniff/sniff.desktop: Use the dogtail-head icon in the menu.
+
+	* dogtail/trayicon.py: Fix typo.
+
+2005-10-24  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Implement the FocusError exception properly.
+
+2005-10-21  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/trayicon.py: Instead of totally bailing out if Python is
+	older than 2.4, just make TrayIcon useless, as is currently the case
+	if TrayIcon._runZenity() fails. What should really happen is for
+	TrayIcon to actually work under older Python versions, I think.
+
+2005-10-20  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/apps/wrappers/epiphany.py: Use the package name
+	'epiphany-browser' on Debian-based distributions. Thanks to Andrew
+	Beresford for the patch.
+
+2005-10-19  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail.spec, setup.py, debian/changelog, debian/copyright: Correct
+	website URL.
+
+2005-10-19  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/icons: Create directory.
+
+	* sniff/*.xpm, sniff/icons/*.xpm: Move icons.
+
+	* MANIFEST.in, setup.py, sniff/sniff: Update the icon locations.
+
+2005-10-19  Zack Cerza <zcerza@redhat.com>
+
+	* MANIFEST.in: Add sniff/*.xpm.
+
+2005-10-19  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Add table() and tableCell() to Action and
+	FocusWidget. Allow run() to use utils.run()'s optional 'appName'
+	argument, for cases where the application's name is different from the
+	binary's name.
+
+2005-10-17  David Malcolm <dmalcolm@redhat.com>
+
+	* dogtail/apps/wrappers/yelp.py: new file, wrapper for Yelp.
+
+2005-10-17  David Malcolm <dmalcolm@redhat.com>
+
+	* dogtail/apps/wrappers/predicate.py: add IsATabNamed class
+
+	* dogtail/tree.py: add Node.tab() method
+
+	* dogtail/apps/wrappers/evolution.py: add Evolution.createMeeting()
+	method; add AppointmentWindow and MeetingWindow subclasses
+
+2005-10-14  David Malcolm <dmalcolm@redhat.com>
+
+	* dogtail/apps/wrappers/evolution.py: Refactor createAccount, add
+	functions to run the first-time wizard (sharing code with account
+	creation). Add a blowAwayEvolution function
+
+	* examples/evolution-test-first-time-wizard.py: New example, testing
+	the above. Blows away your evolution configuration, so use with
+	caution...
+
+2005-10-14  David Malcolm <dmalcolm@redhat.com>
+
+	* dogtail/apps/wrappers/evolution.py: Fix wrapper so that it does not
+	require a window, in preparation for wrapping the first-time assistant.
+
+2005-10-13  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/trayicon.py: Added from jhbuild's jhbuild/utils/.
+
+	* dogtail/logging.py: Add IconLogger class, a stripped-down version of
+	jhbuild's TerminalBuildScript in jhbuild/frontends/terminal.py. Modify
+	the DebugLogger class to additionally write messages to the
+	IconLogger's tooltip. If zenity is not installed or not working
+	properly, the DebugLogger should work exactly as before.
+
+2005-10-13  David Malcolm <dmalcolm@redhat.com>
+
+	* examples/no-help-at-all.py: script which generates parodies of bad
+	end-user documentation by simply converting reading the UI back in
+	DocBook form.
+
+2005-10-12  David Malcolm <dmalcolm@redhat.com>
+
+	* dogtail/apps/wrappers/gedit.py: Initial version, taken from Paolo
+	Borelli's home page.
+
+2005-10-11  David Malcolm <dmalcolm@redhat.com>
+
+	* dogtail/tree.py: Replaced a stray reference to "Search" with
+	"Predicate"
+
+2005-10-11  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: rename open() to openItem() to avoid
+	namespace collision.
+
+	* scripts/dogtail-run-headless: Ignore errors when restoring
+	~/.xinitrc. If there was no previous ~/.xinitrc, make sure the
+	temporary one isn't left behind. Increase hardcoded sleep delay.
+
+2005-10-11  Zack Cerza <zcerza@redhat.com>
+
+	* MANIFEST.in: Add scripts/ to tarball distribution.
+
+	* setup.py: Install scripts/* .
+
+	* setup.cfg: Add xorg-x11-Xvfb to requires for RPMs.
+
+	* Makefile: Make 'deb' target run 'fakeroot debian/rules clean' before
+	building a package.
+
+	* debian/control: Add xvfb to Recommends for debs.
+
+2005-10-11  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Correct typo.
+
+2005-10-11  Zack Cerza <zcerza@redhat.com>
+
+	* scripts/dogtail-run-headless: Restore the original ~/.xinitrc after
+	the X server terminates.
+
+2005-10-11  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Add focus.desktop (just a copy of tree.root).
+	Later, I'll probably want to replace it with a FocusDesktop instance,
+	but for now it's really just to make FocusApplication not break as
+	horribly when there are no applications running.
+
+	* scripts/: Created to hold scripts to be installed into /usr/bin/.
+
+	* scripts/dogtail-detect-session: Add a script to detect if an
+	accessibility-enabled session is currently running. Right now it
+	obviously only looks for a GNOME session, but KDE support can be added
+	when available.
+
+	* scripts/dogtail-run-headless: Add a script to run a given dogtail
+	script in a headless setup. Currently launches a minimalistic GNOME
+	"session" under Xvfb, calls dogtail-detect-session, and if a session
+	is detected, executes the dogtail script. Once the script terminates,
+	so does the X server - Boom! Closes: #318537
+
+2005-10-11  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/procedural.py: Add Focus.icon(). Add open() for opening
+	icons on nautilus' desktop.
+
+2005-10-10  David Malcolm <dmalcolm@redhat.com>
+
+	* sniff/sniff: Move initial expansion from main to resetModel, so that
+	we get the sane one-deep expansion on a Refresh, as well as when sniff
+	starts.
+
+2005-10-10  Zack Cerza <zcerza@redhat.com>
+
+	* examples/filechooser-stress-test.py: Port to procedural API.
+
+2005-10-10  David Malcolm <dmalcolm@redhat.com>
+
+	* examples/filechooser-stress-test.py: New file: repeatedly open and
+	close the filechooser, for testing perfomance/profiling
+
+2005-10-09  David Malcolm <dmalcolm@redhat.com>
+
+	* examples/gcalctool-test-fibonacci.py: New file: another test
+	example. Drives gcalctool to calculate the Fibonacci series.
+
+	* dogtail/apps/wrappers/gcalctool.py: New file: wrapper to help when
+	writing gcalctool tests
+
+2005-10-09  Zack Cerza <zcerza@redhat.com>
+
+	* setup.py: Include sniff/*.xpm in the distribution.
+
+	* sniff/sniff: modify loadIcon() to first search the current
+	directory, then /usr/share/dogtail/icons. If distributions need to put
+	them elsewhere, we can certainly accommodate them.
+
+2005-10-09  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/tree.py: Revert API change - rename Action.doThisAction() to
+	Action.do(). Add documentation in Node.__getattr__(), the only place
+	it is used, to make it clear what is happening.
+
+2005-10-09  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff.glade: Give the TreeView default focus.
+	Really remove the Edit menu.
+
+2005-10-09  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Add Dave as an author.
+	Correct the website URL and remove the License button in the About box.
+	Remove 'Role name and 'Description' fields from the TreeView.
+	Change the packing on the TreeView to disable expanding.
+	Stop importing pdb without using it.
+
+	* sniff/sniff.glade: Change the 'Snoop' menu item name to 'Sniff' -
+	sniff used to be called snoop.
+	Add keyboard shortcuts to all menu items.
+	Remove Edit menu.
+
+2005-10-09  David Malcolm <dmalcolm@redhat.com>
+
+	* dogtail/tree.py: added role attribute to Node (forgot to commit this
+	earlier)
+
+2005-10-09  David Malcolm <dmalcolm@redhat.com>
+
+	* sniff/button.xpm, sniff/checkbutton.xpm, sniff/checkmenuitem.xpm,
+	sniff/colorselection.xpm, sniff/combo.xpm, sniff/dialog.xpm,
+	sniff/image.xpm, sniff/label.xpm, sniff/menubar.xpm,
+	sniff/menuitem.xpm, sniff/notebook.xpm, sniff/scrolledwindow.xpm,
+	sniff/spinbutton.xpm, sniff/statusbar.xpm, sniff/table.xpm,
+	sniff/text.xpm, sniff/toolbar.xpm, sniff/tree.xpm, sniff/treeitem.xpm,
+	sniff/unknown.xpm, sniff/viewport.xpm, sniff/vscrollbar.xpm,
+	sniff/vseparator.xpm, sniff/window.xpm: Add icons, copied from at-poke
+
+	* sniff/sniff: add constants to represent the tree model columns; use
+	icons for nodes, based on code in at-poke. Requires up-to-date pyspi
+	(for the role attribute)
+
+2005-10-08  David Malcolm <dmalcolm@redhat.com>
+
+	* examples/recorder.py: Fix the imports so this works again.
+
+2005-10-08  David Malcolm <dmalcolm@redhat.com>
+
+	* examples/evolution-test-switching-components.py: New example which
+	repeatedly cycles through Evolution's components.
+
+2005-10-08  Zack Cerza <zcerza@redhat.com>
+
+	* sniff/sniff: Expand the root node of the TreeView on startup.
+
+2005-10-08  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail.spec: Added, from Jeremy Katz.
+
+	* MANIFEST.in: Add dogtail.spec.
+
+	* Makefile: Rework 'rpm' target to call the 'tarball' target first,
+	then build the rpm using dogtail.spec, using sudo if necessary. Also,
+	make the 'tarball' target call the 'clean' target.
+
+2005-10-08  Zack Cerza <zcerza@redhat.com>
+
+	* examples/google-search.py: Fix call to findChildren(). Fix reference
+	to predicate.GenericPredicate.
+
+2005-10-08  Zack Cerza <zcerza@redhat.com>
+	* examples/firefox-test-browsing-local-html-file.py,
+	examples/gnome-panel-test-starting-every-app.py,
+	examples/google-search.py,
+	examples/nautilus-test-icon-view-collage.py:
+	s/dogtail\.Config/dogtail.config.Config/
+
+2005-10-17  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py: Add patch from Tim Gerla, adding Conary
+	support. Closes: #318224
+
+2005-10-07  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py: Add patch from Brent Smith, adding Gentoo
+	support. Closes: #318225
+
+2005-10-07  Zack Cerza <zcerza@redhat.com>
+
+	* ChangeLog: Add history since import, tweak formatting. Also add
+	commit times (maybe we don't actually want them though, I'm not sure I
+	care).
+
+2005-10-07  David Malcolm <dmalcolm@redhat.com>
+
+	* examples/gedit-test-utf8-tree-api.py: Fix the example against
+	changes to the API.
+
+2005-10-07  David Malcolm <dmalcolm@redhat.com>
+
+	* dogtail/tree.py: Provide a better warning for when import wnck
+	fails (it's a warning, not an error). Make Root.application() return
+	an Application instance, rather than a mere Node.
+
+	* ChangeLog: Created.
+
+2005-10-07  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/distro.py: Minor indentation fix.
+
+2005-10-06  Zack Cerza <zcerza@redhat.com>
+
+	 Released 0.4.2.
+
+2005-10-06  Zack Cerza <zcerza@redhat.com>
+
+	* setup.py, debian/changelog, dogtail/__init__.py,
+	  dogtail/apps/__init__.py, dogtail/apps/wrappers/__init__.py:
+	Bump version numbers.
+
+2005-10-06  Zack Cerza <zcerza@redhat.com>
+
+	* MANIFEST.in: add MANIFEST.in. (Why do I have to do this again?)
+	* setup.py: Add more examples and example data to distribution.
+	* Makefile: Add 'tarball' target. Fix 'deb' target.
+
+2005-10-06  Zack Cerza <zcerza@redhat.com>
+
+	Released 0.4.1.
+
+2005-10-06  Zack Cerza <zcerza@redhat.com>
+
+	* setup.py, debian/changelog, dogtail/__init__.py,
+	  dogtail/apps/__init__.py, dogtail/apps/wrappers/__init__.py:
+	Bump version numbers.
+
+	* MANIFEST.in: Add missing files.
+
+2005-10-06  Zack Cerza <zcerza@redhat.com>
+
+	Released 0.4.0.
+
+2005-10-06  Zack Cerza <zcerza@redhat.com>
+
+	* setup.py, debian/changelog, dogtail/__init__.py,
+	  dogtail/apps/__init__.py, dogtail/apps/wrappers/__init__.py: Minor
+	  corrections to version numbers.
+
+2005-10-06  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/utils.py: Make screenshot() log the filename of the
+	screenshot via the debug logger.
+
+2005-10-06  Zack Cerza <zcerza@redhat.com>
+
+	* dogtail/logging.py: Add TimeStamp.zeroPad() to pad integers with
+	zeroes to a specified width. Make TimeStamp.{file,entry}Stamp use the
+	new zeroPad() function.
+
+2005-10-05  Zack Cerza <zcerza@redhat.com>
+
+	* MAINTAINERS: Created.
+
+2005-10-05  Zack Cerza <zcerza@redhat.com>
+
+	* COPYING, HACKING, INSTALL, MANIFEST.in, Makefile, setup.cfg,
+	  setup.py, debian/changelog, debian/compat, debian/control,
+	  debian/copyright, debian/python-dogtail.install, debian/rules,
+	  dogtail/__init__.py, dogtail/config.py, dogtail/distro.py,
+	  dogtail/dump.py, dogtail/path.py, dogtail/predicate.py,
+	  dogtail/procedural.py, dogtail/rawinput.py, dogtail/tree.py,
+	  dogtail/utils.py, dogtail/version.py, dogtail/logging.py,
+	  dogtail/tc.py, dogtail/apps/__init__.py,
+	  dogtail/apps/categories.py, dogtail/apps/wrappers/__init__.py,
+	  dogtail/apps/wrappers/epiphany.py,
+	  dogtail/apps/wrappers/evolution.py,
+	  dogtail/apps/wrappers/gnomepanel.py,
+	  dogtail/apps/wrappers/kicker.py,
+	  dogtail/apps/wrappers/konqueror.py,
+	  dogtail/apps/wrappers/mozilla.py,
+	  dogtail/apps/wrappers/nautilus.py, examples/COPYING,
+	  examples/abiword-test.py, examples/crack.py,
+	  examples/evolution-test-composing-html.py,
+	  examples/evolution-test-configuring-exchange.py,
+	  examples/evolution-test-configuring-imap-smtp.py,
+	  examples/evolution-test-sending-email.py,
+	  examples/evolution-test-survives-email-CAN-2005-0806.py,
+	  examples/firefox-test-browsing-local-html-file.py,
+	  examples/gedit-test-utf8-procedural-api.py,
+	  examples/gedit-test-utf8-tree-api.py,
+	  examples/gnome-panel-test-starting-every-app.py,
+	  examples/google-search.py,
+	  examples/nautilus-test-icon-view-collage.py,
+	  examples/recorder.py, examples/rhythmbox-test.py,
+	  examples/test-events.py, examples/data/UTF-8-demo.txt,
+	  examples/data/sample.cfg, sniff/sniff, sniff/sniff.desktop,
+	  sniff/sniff.glade, examples/data/CAN-2005-0806.mbox,
+	  examples/data/g-star.png, examples/data/g-star1.png,
+	  examples/data/GNOME-Street.png, examples/data/GNOME-Street1.png:
+	Initial Import

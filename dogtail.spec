@@ -1,11 +1,11 @@
-%if 0%{?fedora} || 0%{?rhel} > 7
+%if 0%{?fedora} || 0%{?rhel} > 9
 %global with_python3 1
 %endif
 
 Summary: GUI test tool and automation framework
 Name: dogtail
-Version: 1.0.7
-Release: 0.2%{?dist}
+Version: 2.0.dev0
+Release: 2%{?dist}
 License: GPLv2
 URL: https://gitlab.com/dogtail/dogtail/
 Source0: https://gitlab.com/dogtail/dogtail/raw/released/%{name}-%{version}.tar.gz
@@ -42,6 +42,7 @@ Requires: gnome-ponytail-daemon
 Requires: python3-gobject
 Requires: python3-cairo
 #Requires: xorg-x11-xinit
+#Requires: xorg-x11-xinit
 Requires: hicolor-icon-theme
 
 %description -n python3-dogtail
@@ -57,8 +58,9 @@ Requires: python3-pyatspi
 Requires: python3-gobject
 Requires: python3-cairo
 #Requires: xorg-x11-xinit
+#Requires: xorg-x11-xinit
 Requires: hicolor-icon-theme
-Requires: python3-dogtail >= 1.0.0
+Requires: python3-dogtail >= 2.0
 
 %description -n python3-dogtail-scripts
 GUI test tool and automation framework that uses assistive technologies to
@@ -97,15 +99,6 @@ rm -rf $RPM_BUILD_ROOT/%{_docdir}/dogtail
 rm -rf $RPM_BUILD_ROOT/%{python3_sitelib}/%{name}-%{version}-py%{python3_version}.egg-info
 popd
 
-# Create dogtail system configuration directory
-mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/dogtail
-
-# Install RHEL-specific configuration for buttonRoleCompat
-cat > $RPM_BUILD_ROOT/%{_sysconfdir}/dogtail/config << 'EOF'
-# System-wide dogtail configuration for RHEL
-# Set buttonRoleCompat to True for backwards compatibility
-buttonRoleCompat=True
-EOF
 %endif # with_python3
 
 find examples -type f -exec chmod 0644 \{\} \;

@@ -1,98 +1,125 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
+#!/usr/bin/python3
+"""
+Experimental dogtail changes for 2.0 release.
+Various Utilities
+"""
+
+# pylint: disable=broad-exception-caught
+# pylint: disable=wrong-import-position
+# pylint: disable=wrong-import-order
+# pylint: disable=import-error
+# pylint: disable=import-outside-toplevel
+# pylint: disable=no-name-in-module
+# ruff: noqa: E402
+# ruff: noqa: E501
+
+
 from time import sleep
+from pathlib import Path
+
 import os
 import sys
 import errno
 import shlex
 import subprocess
-import cairo
-
-from dogtail import predicate
-from dogtail.config import config
-from dogtail.logging import debug_log
-from dogtail.logging import debugLogger as logger
-from dogtail.logging import TimeStamp
+import functools
 
 import gi
+
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk
 
-"""
-Various utilities
-"""
+from dogtail.logging import logging_class
+LOGGING = logging_class.logger
 
-__author__ = """
-Ed Rousseau <rousseau@redhat.com>,
-Zack Cerza <zcerza@redhat.com,
-David Malcolm <dmalcolm@redhat.com>
-"""
+from dogtail.config import config
 
 
-def screenshot(file="screenshot.png", timeStamp=True):
+def screenshot(file="" , time_stamp=True, datetime_string = "%Y%m%d-%H:%M:%S"):
     """
-    This function wraps the ImageMagick import command to take a screenshot.
+    Screenshot using the DBus.
 
-    The file argument may be specified as 'foo', 'foo.png', or using any other
-    extension that ImageMagick supports. PNG is the default.
+    :param file: File to save the screenshot as, defaults to "screenshot.png"
+    :type file: str, optional
 
-    By default, screenshot filenames are in the format of foo_YYYYMMDD-hhmmss.png .
-    The timeStamp argument may be set to False to name the file foo.png.
+    :param time_stamp: Option to include time stamp or not, defaults to True
+    :type time_stamp: bool, optional
+
+    :param datetime_string: _description_, defaults to "%Y%m%d-%H:%M:%S"
+    :type datetime_string: str, optional
+
+    :raises TypeError: File must be string or Path
+    :raises TypeError: Time Stamp must be True or False
+    :raises TypeError: Currently supporting only PNG.
+
+    :return: Set of True or False based on success or failure and file location string.
+    :rtype: Tuple(bool, str)
     """
 
-    debug_log("screenshot(file=%s, timeStamp=%s)" % (str(file), str(timeStamp)))
+    LOGGING.debug("Capturing Screenshot via DBus.")
 
-    if not isinstance(timeStamp, bool):
-        raise TypeError("timeStampt must be True or False")
+    save_file_as = None
 
-    assert os.path.isdir(config.scratchDir), LOGGER.info("Directory for screenshot not found.")
+    if not isinstance(file, str) and not isinstance(file, Path):
+        raise TypeError("file name must be string or Path*")
 
-    baseName = "".join(file.split(".")[0:-1])
-    fileExt = file.split(".")[-1].lower()
-
-    if not baseName:
-        baseName = file
-        fileExt = "png"
-
-    if timeStamp:
-        ts = TimeStamp()
-        newFile = ts.fileStamp(baseName) + "." + fileExt
-        path = config.scratchDir + newFile
-
-    else:
-        newFile = baseName + "." + fileExt
-        path = config.scratchDir + newFile
-
-    from gi.repository import Gdk
-    from gi.repository import GdkPixbuf
-    rootWindow = Gdk.get_default_root_window()
-    geometry = rootWindow.get_geometry()
-    pixbuf = GdkPixbuf.Pixbuf(colorspace=GdkPixbuf.Colorspace.RGB,
-                              has_alpha=False,
-                              bits_per_sample=8,
-                              width=geometry[2],
-                              height=geometry[3])
-
-    pixbuf = Gdk.pixbuf_get_from_window(rootWindow, 0, 0, geometry[2], geometry[3])
-
-    if fileExt == "jpg":
-        debug_log("GdkPixbuf.Pixbuf.save() needs 'jpeg' and not 'jpg'")
-        fileExt = "jpeg"
+    if not isinstance(time_stamp, bool):
+        raise TypeError("time_stamp must be True or False")
 
     try:
-        pixbuf.savev(path, fileExt, [], [])
-    except GLib.GError:
-        raise ValueError("Failed to save screenshot in '%s' format" % fileExt)
+        from dasbus.connection import SessionMessageBus
+        import datetime
 
-    assert os.path.exists(path), logger.log("Directory for screenshot does not exist.")
+        if file:
+            save_file_as = str(file)
+        else:
+            save_file_as = "screenshot.png"
 
-    debug_log("Screenshot taken: " + path)
+        if ".png" not in save_file_as:
+            raise TypeError("Currently supporting only PNG format.")
 
-    return path
+        if time_stamp:
+            time_stamp_string = datetime.datetime.now().strftime(datetime_string)
+
+            base_name, extension = save_file_as.rsplit(".", 1)
+            save_file_as = base_name + "-" + time_stamp_string + "." + extension
+
+        user_id = str(os.geteuid())
+        os.environ["DBUS_SESSION_BUS_ADDRESS"] = f"unix:path=/run/user/{user_id}/bus"
+
+        bus = SessionMessageBus()
+        proxy = bus.get_proxy(
+            "org.gnome.Shell.Screenshot", "/org/gnome/Shell/Screenshot"
+        )
+        screenshot_call = proxy.Screenshot(
+            True, False, save_file_as
+        )
+
+        return screenshot_call
+
+    except Exception as error:
+        LOGGING.info(f"Capturing Screenshot via DBus failed with error: '{error}'.")
 
 
-def run(string, timeout=config.runTimeout, interval=config.runInterval, desktop=None, dumb=False, appName=""):
+def do_delay(delay=None):
+    """
+    Utility function to insert a delay (with logging and a configurable default delay).
+    """
+
+    LOGGING.debug(logging_class.get_func_params_and_values())
+
+    if delay is None:
+        delay = config.default_delay
+        LOGGING.debug(f"Default Delay: Sleeping for '{delay}'")
+
+    if config.debug_sleep:
+        LOGGING.debug(f"Debug Sleep: Sleeping for '{delay}'")
+
+    sleep(float(delay))
+
+
+def run(string, timeout=None, interval=None, desktop=None, dumb=False, app_name="", **kwargs,):
     """
     Runs an application.
     [For simple command execution such as 'rm *', use os.popen() or os.system()]
@@ -100,174 +127,107 @@ def run(string, timeout=config.runTimeout, interval=config.runInterval, desktop=
     starting, or until timeout is reached. If dumb is True, returns when timeout is reached.
     """
 
-    debug_log("run(string=%s, timeout=%s, interval=%s, desktop=%s, dumb=%s, appName=%s)" %
-                  (str(string), str(timeout), str(interval), str(desktop), str(dumb), str(appName)))
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
-    if not desktop:
-        from dogtail.tree import root as desktop
+    # Users can change timeout and interval via config.ini or by parameter in function.
+    validated_timeout = config.run_timeout if timeout is None else timeout
+    validated_interval = config.run_interval if interval is None else interval
+
+    # Use root if not desktop was given. Why desktop though? This is weird.
+    if desktop is None:
+        from dogtail.tree import root
+    else:
+        root = desktop
 
     args = shlex.split(string)
     os.environ["GTK_MODULES"] = "gail:atk-bridge"
-    pid = subprocess.Popen(args, env=os.environ).pid
+    process = subprocess.Popen(args, env=os.environ)
 
-    if not appName:
-        appName = args[0]
+    # === Backward compatibility for 'appName' usage ===
+    validated_application_name = app_name
+    for key, val in kwargs.items():
+        if "appName" in str(key):
+            validated_application_name = val
+    # ==================================================
+    if not validated_application_name:
+        validated_application_name = args[0]
 
     if dumb:
-        debug_log("Disable startup detection. We're starting a non-AT-SPI-aware application.")
-
-        doDelay(timeout)
+        LOGGING.debug("Disable startup detection.")
+        do_delay(validated_timeout)
 
     else:
-        debug_log("Startup detection code. The timing here is not totally precise, but it's good enough for now.")
+        LOGGING.debug("Startup detection code.")
 
         time = 0
 
-        while time < timeout:
-            time = time + interval
+        while time < validated_timeout:
+            time = time + validated_interval
 
             try:
-                for child in desktop.children[::-1]:
-                    if child.name == appName:
-                        for grandchild in child.children:
-                            if grandchild.roleName == "frame":
-                                from dogtail.procedural import focus
+                application = root.application(validated_application_name)
+                assert application.child(role_name="frame")
+                do_delay(validated_interval)
+                return process
 
-                                focus.application.node = child
-                                doDelay(interval)
-
-                                return pid
-            except AttributeError:  # pragma: no cover
+            except Exception:
                 pass
 
-            doDelay(interval)
+            do_delay(validated_interval)
 
-    return pid
+    return process
 
 
-def doDelay(delay=None):
+class Lock:
     """
-    Utility function to insert a delay (with logging and a configurable
-    default delay)
-    """
-
-    if delay is None:
-        delay = config.defaultDelay
-
-    if config.debugSleep:
-        logger.log("Do delay. Sleeping for %f" % delay)
-
-    sleep(delay)
-
-
-class Highlight(Gtk.Window):  # pragma: no cover
-    """
-    Hightlight class used by Blinker. Display a red rectangle corresponding to the Accessibility
-    node position and size via Gtk.Window class.
+    A known system-wide mutex implementation that uses atomicity of the mkdir operation
+    in UNIX-like systems. This should be used mainly to provide mutual exclusion in
+    handling possible collisions among multiple script instances. You can choose to make
+    randomized single-script wise locks or a more general locks if you do not choose to
+    randomize the lock dir name. Set unLockOnExit to True to enable automatic unlock
+    when script process exits to avoid having to unlock manually.
     """
 
-    def __init__(self, x, y, w, h):
-        super(Highlight, self).__init__()
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
-        self.x = x; self.y = y;
-        self.w = w; self.h = h;
-        self.set_decorated(False)
-        self.set_has_resize_grip(False)
-        self.maximize()
-        self.screen = self.get_screen()
-        self.visual = self.screen.get_rgba_visual()
-
-        if self.visual is not None and self.screen.is_composited():
-            self.set_visual(self.visual)
-
-        self.set_app_paintable(True)
-        self.connect("draw", self.area_draw)
-        self.show_all()
-
-
-    def area_draw(self, widget, cr):
-        """
-        Draw a rectangle on the screen.
-        """
-
-        debug_log("Drawing the node on the screen.")
-
-        cr.set_source_rgba(.0, .0, .0, 0.0)
-        cr.set_operator(cairo.OPERATOR_SOURCE)
-        cr.paint()
-        cr.set_operator(cairo.OPERATOR_OVER)
-        cr.set_source_rgb(0.9, 0.1, 0.1)
-        cr.set_line_width(6)
-        cr.rectangle(self.x, self.y, self.w, self.h)
-        cr.stroke()
-
-
-class Blinker:  # pragma: no cover
-    """
-    Blinker class used to highlight the Accessibility node in graphical interface.
-    This highlight will be seen for 1 second before it will disappear.
-    """
-
-    INTERVAL_MS = 1000
-
-    def __init__(self, x, y, w, h):
-        self.highlight_window = Highlight(x, y, w, h)
-        if self.highlight_window.screen.is_composited() is not False:
-            self.timeout_handler_id = GLib.timeout_add(
-                Blinker.INTERVAL_MS, self.destroyHighlight)
-            Gtk.main()
-        else:
-            self.highlight_window.destroy()
-
-
-    def destroyHighlight(self):
-        """
-        Remove the highlight.
-        """
-
-        debug_log("Blinker destroy highlight.")
-
-        self.highlight_window.destroy()
-        Gtk.main_quit()
-
-        return False
-
-
-class Lock(object):
-    """
-    A known sytem-wide mutex implementation that uses atomicity of the mkdir operation in UNIX-like
-    systems. This should be used mainly to provide mutual exclution in handling possible collisions
-    among multiple script instances. You can choose to make randomized single-script wise locks
-    or a more general locks if you do not choose to randomize the lockdir name. Set unLockOnExit
-    to True to enable automatic unlock when scipt process exits to avoid having to unlock manually.
-    """
-
-    def __init__(self, location="/tmp", lockname="dogtail_lockdir_", randomize=True, unlockOnExit=False):
+    def __init__(
+        self,
+        location="/tmp",
+        lockname="dogtail_lockdir_",
+        randomize=True,
+        unlock_on_exit=False,
+        **kwargs,
+    ):
         """
         You can change the default lockdir location or name. Setting randomize to
-        False will result in no random string being appened to the lockdir name.
+        False will result in no random string being appended to the lockdir name.
         """
+
+        using_unlock_on_exit = unlock_on_exit
+        # === Backward compatibility and extra parameters ===
+        for key, val in kwargs.items():
+            if "unlockOnExit" in str(key):
+                using_unlock_on_exit = val
+        # ===================================================
 
         self.lockdir = os.path.join(os.path.normpath(location), lockname)
         if randomize:
             self.lockdir = "".join((self.lockdir, self.__getPostfix()))
 
-        self.unlockOnExit = unlockOnExit
-
+        self.unlock_on_exit = using_unlock_on_exit
 
     def __exit_unlock(self):
         """
         Removes the lock upon exiting headless.
         """
 
-        debug_log("Remove the lock. Raising the exception if the lock is not present.")
+        #debug_log("Remove the lock. Raising the exception if the lock is not present.")
 
         if os.path.exists(self.lockdir):
             try:
                 os.rmdir(self.lockdir)
             except OSError:
                 pass  # already deleted (by .unlock()), we're exiting, it's fine
-
 
     def lock(self):
         """
@@ -276,7 +236,11 @@ class Lock(object):
         atomic on POSIX compliant systems.
         """
 
-        debug_log("Create a lock directory. Raising the exception if the lock is already present.")
+        LOGGING.debug(" ".join((
+                "Create a lock directory."
+                "Raising the exception if the lock is already present."
+            ))
+        )
 
         locked_msg = "Dogtail lock: Already locked with the same lock."
 
@@ -285,17 +249,17 @@ class Lock(object):
                 os.mkdir(self.lockdir)
             except OSError as error:
                 if error.errno == errno.EEXIST and os.path.isdir(self.lockdir):
-                    raise OSError(locked_msg)
+                    raise OSError(locked_msg) from error
 
             if os.path.exists(self.lockdir):
                 if self.unlockOnExit:
                     import atexit
+
                     atexit.register(self.__exit_unlock)
 
                 return self.lockdir
         else:
             raise OSError(locked_msg)
-
 
     def unlock(self):
         """
@@ -303,32 +267,32 @@ class Lock(object):
         Should be atomic on POSIX compliant systems.
         """
 
-        debug_log("Remove the lock. Raising the exception if the lock is not present.")
+        LOGGING.debug("Remove the lock. Raising the exception if the lock is not present.")
 
-        #if self.unlockOnExit:
-        #    raise Exception('Cannot unlock with unlockOnExit set to True!')
+        if self.unlock_on_exit:
+            raise RuntimeError("Cannot unlock with unlock_on_exit set to True!")
 
         if os.path.exists(self.lockdir):
             try:
                 os.rmdir(self.lockdir)
             except OSError as error:
                 if error.errno == errno.EEXIST:
-                    raise OSError("Dogtail unlock: lockdir removed elsewhere!")
+                    raise OSError("Dogtail unlock: lockdir removed elsewhere!") from error
         else:
             raise OSError("Dogtail unlock: not locked")
-
 
     def locked(self):
         """
         Check if locked directory exists.
         """
 
-        debug_log("Checking if locked directory exists.")
+        LOGGING.debug("Checking if locked directory exists.")
 
         return os.path.exists(self.lockdir)
 
 
-    def __getPostfix(self):
+    # More commonly used word as opposed to postfix.
+    def __get_suffix(self):
         """
         Generate a length of 5 random string that serves as file name suffix.
         """
@@ -336,134 +300,242 @@ class Lock(object):
         import random
         import string
 
-        debug_log("Get random file suffix of length 5.")
+        LOGGING.debug("Get random file suffix of length 5.")
 
-        return "".join(random.choice(string.ascii_letters + string.digits) for x in range(5))
-
-
-a11yDConfKey = "org.gnome.desktop.interface"
-
-
-def isA11yEnabled():
-    """
-    Checks if accessibility is enabled via DConf.
-    """
-
-    debug_log("isA11yEnabled()")
-
-    from gi.repository.Gio import Settings
-
-    try:
-        InterfaceSettings = Settings(schema_id=a11yDConfKey)
-    except TypeError:
-        InterfaceSettings = Settings(schema=a11yDConfKey)
-
-    dconfEnabled = InterfaceSettings.get_boolean("toolkit-accessibility")
-
-    if os.environ.get("GTK_MODULES", "").find("gail:atk-bridge") == -1:
-        envEnabled = False
-    else:
-        envEnabled = True  # pragma: no cover
-
-    return dconfEnabled or envEnabled
+        return "".join(
+            random.choice(string.ascii_letters + string.digits) for x in range(5)
+        )
 
 
-def bailBecauseA11yIsDisabled():
+    ########################################
+    # Backwards compatibility definitions. #
+    ########################################
+    def __getPostfix(self): # pylint: disable=invalid-name
+        """
+        Wrapper over __get_suffix.
+        """
+
+        return self.__get_suffix()
+
+    @property
+    def unlockOnExit(self): # pylint: disable=invalid-name
+        """
+        Making a property in case users would like to access it and change it.
+        """
+
+        return self.unlock_on_exit
+
+    @unlockOnExit.setter
+    def unlockOnExit(self, value_to_set): # pylint: disable=invalid-name
+        """
+        Setter for unlockOnExit.
+        """
+
+        assert isinstance(value_to_set, bool), "unlockOnExit has to be of type 'bool'."
+        self.unlock_on_exit = value_to_set
+
+    ###############################################
+    # End of backwards compatibility definitions. #
+    ###############################################
+
+
+def bail_because_accessibility_is_disabled():
     """
     Accessibility is detected as enabled. End the execution if there are no exceptions.
     """
 
-    debug_log("bailBecauseA11yIsDisabled()")
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     if sys.argv[0].endswith("pydoc"):
-        debug_log("Execution was not ended. Script name with 'pydoc' exception.")
+        LOGGING.info("Execution was not ended. Script name with 'pydoc' exception.")
         return
 
     try:
-        with open("/proc/%s/cmdline" % os.getpid(), 'r') as f:
+        with open(f"/proc/{os.getpid()}/cmdline", "r", encoding="utf-8") as f:
             content = f.read()
 
         if content.find("epydoc") != -1:
-            debug_log("Execution was not ended. Proces content 'epydoc' exception.")
-            return   # pragma: no cover
-        if content.find("sphinx") != -1:
-            debug_log("Execution was not ended. Proces content 'sphinx' exception.")
-            return  # pragma: no cover
-    except Exception:  # pragma: no cover
-        pass
+            LOGGING.info("Execution was not ended. Process content 'epydoc' exception.")
+            return
 
-    logger.log("\n".join((
-        "Dogtail requires that Assistive Technology support be enabled.",
+        if content.find("sphinx") != -1:
+            LOGGING.info("Execution was not ended. Process content 'sphinx' exception.")
+            return
+
+    except Exception as error:
+        LOGGING.info(f"Exception caught, but the execution is ending anyway: '{error}'")
+
+
+    LOGGING.info("".join((
+        "Dogtail requires that Assistive Technology support to be enabled.",
         "You can enable accessibility with sniff or by running:",
         "'gsettings set org.gnome.desktop.interface toolkit-accessibility true'",
-        "Aborting...")))
+        "Aborting...",
+    )))
 
     sys.exit(1)
 
 
-def enableA11y(enable=True):
-    """
-    Enables accessibility via DConf.
-    """
-
-    debug_log("enableA11y(enable=%s)" % str(enable))
-
-    from gi.repository.Gio import Settings
-    InterfaceSettings = Settings(schema_id=a11yDConfKey)
-    InterfaceSettings.set_boolean("toolkit-accessibility", enable)
-
-
-def checkForA11y():  # pragma: no cover
+def check_for_accessibility():
     """
     Checks if accessibility is enabled, and halts execution if it is not.
     """
 
-    debug_log("checkForA11y()")
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
-    if not isA11yEnabled():
-        bailBecauseA11yIsDisabled()
+    if not is_accessibility_enabled():
+        bail_because_accessibility_is_disabled()
 
 
-def checkForA11yInteractively():  # pragma: no cover
+def enable_accessibility(enable=True):
+    """
+    Enable Accessibility toolkit via dconf.
+    """
+
+    LOGGING.debug(logging_class.get_func_params_and_values())
+
+    from gi.repository.Gio import Settings
+
+    a11y_dconf_key = "org.gnome.desktop.interface"
+    try:
+        interface_settings = Settings(schema_id=a11y_dconf_key)
+
+    except TypeError:
+        interface_settings = Settings(schema=a11y_dconf_key)
+
+    interface_settings.set_boolean("toolkit-accessibility", enable)
+
+
+def is_accessibility_enabled():
+    """
+    Checks if accessibility is enabled via DConf.
+    """
+
+    LOGGING.debug(logging_class.get_func_params_and_values())
+
+    from gi.repository.Gio import Settings
+
+    a11y_dconf_key = "org.gnome.desktop.interface"
+    try:
+        interface_settings = Settings(schema_id=a11y_dconf_key)
+
+    except TypeError:
+        interface_settings = Settings(schema=a11y_dconf_key)
+    dconf_enabled = interface_settings.get_boolean("toolkit-accessibility")
+
+    if os.environ.get("GTK_MODULES", "").find("gail:atk-bridge") == -1:
+        env_enabled = False
+
+    else:
+        env_enabled = True
+
+    return dconf_enabled or env_enabled
+
+
+def check_for_accessibility_interactively():
     """
     Checks if accessibility is enabled, and presents a dialog prompting the
     user if it should be enabled if it is not already, then halts execution.
     """
 
-    debug_log("checkForA11yInteractively()")
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
-    if isA11yEnabled():
+    if is_a11y_enabled():
+        LOGGING.debug("Accessibility already enabled.")
         return
 
-    dialog = Gtk.Dialog("Enable Assistive Technology Support?",
-                        None,
-                        Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
-                        (Gtk.STOCK_QUIT, Gtk.ResponseType.CLOSE,
-                         "_Enable", Gtk.ResponseType.ACCEPT))
+    # Inspiration found in Gtk examples, lets not reinvent the wheel.
+    class InteractiveDialog(Gtk.Dialog):
+        """
+        Interactive Dialog that user can confirm or cancel.
+        """
 
-    question = """
-        Dogtail requires that Assistive Technology Support be enabled for it to function. Would you like to
-        enable Assistive Technology support now?
+        def __init__(self, parent):
+            super().__init__(title="Are you sure?", transient_for=parent, flags=0)
+            self.add_buttons(
+                Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK
+            )
 
-        Note that you will have to log out for the change to fully take effect.
-    """.strip()
+            self.set_default_size(300, 100)
+            self.set_resizable(False)
 
-    dialog.set_default_response(Gtk.ResponseType.ACCEPT)
-    questionLabel = Gtk.Label(label=question)
-    questionLabel.set_line_wrap(True)
-    dialog.vbox.pack_start(questionLabel, True, True, 0)
-    dialog.show_all()
-    result = dialog.run()
+            grid = Gtk.Grid(column_spacing=10, row_spacing=10)
 
-    if result == Gtk.ResponseType.ACCEPT:
-        logger.log("Enabling accessibility...")
-        enableA11y()
-    elif result == Gtk.ResponseType.CLOSE:
-        bailBecauseA11yIsDisabled()
-    dialog.destroy()
+            # TODO is sniff still enough to just enable the toolkit?
+            # Nowadays we need ponytail, xauthority to properly function on wayland.
+            # using qecore-headless might be the only way to to properly enable everything.
+            # In which case this function might be useless.
+            question = """
+            Dogtail requires Assistive Technology Support to be enabled for it to function.
+            Would you like to enable Assistive Technology support now?
+
+            Note that you might have to logout for the change to fully take effect.
+            """
+
+            label = Gtk.Label(label=question)
+            grid.add(label)
+            grid.set_margin_end(20)
+
+            box = self.get_content_area()
+            #box.add(label)
+
+            box.add(grid)
+            self.show_all()
+
+    class InteractiveWindow(Gtk.Window):
+        """
+        Interactive window that will spawn question dialog.
+        """
+
+        def __init__(self):
+            Gtk.Window.__init__(self, title="Interactive Check for Accessibility toolkit.")
+            self.set_border_width(6)
+
+            grid = Gtk.Grid(column_spacing=10, row_spacing=10)
+            grid.set_margin_bottom(20)
+            grid.set_margin_top(20)
+            grid.set_margin_start(20)
+            grid.set_margin_end(20)
+            grid.set_column_homogeneous(True)
+            grid.set_row_homogeneous(False)
+
+            button = Gtk.Button(label="Enable toolkit-accessibility")
+            button.connect("clicked", self.on_button_clicked)
+
+            grid.add(button)
+
+            self.add(grid)
+
+        def on_button_clicked(self, widget): # pylint: disable=unused-argument
+            """
+            On click function.
+
+            :param widget: Unused Gtk Button.
+            :type widget: Gtk Button.
+            """
+
+            dialog = InteractiveDialog(self)
+            response = dialog.run()
+
+            if response == Gtk.ResponseType.OK:
+                LOGGING.info("Enabling Accessibility.")
+                enable_accessibility()
+            elif response == Gtk.ResponseType.CANCEL:
+                LOGGING.info("Execution halted, Accessibility Enabling was Cancelled.")
+                bail_because_accessibility_is_disabled()
+
+            # Destroy the dialog.
+            dialog.destroy()
+            # Destroy the main window.
+            self.destroy()
+
+    win = InteractiveWindow()
+    win.connect("destroy", Gtk.main_quit)
+    win.show_all()
+    Gtk.main()
 
 
-def waitForWindow(name, timeout=30):
+def wait_for_window(name, timeout=30):
     """
     Wait for window to appear. Currently wayland only.
     name can be a window 'title' as reported via Node.name
@@ -471,158 +543,281 @@ def waitForWindow(name, timeout=30):
     Returns true on success, false on x11.
     """
 
-    debug_log("waitForWindow(name=%s, timeout=%s)" % (name, str(timeout)))
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
-    from dogtail.rawinput import ponytail, SESSION_TYPE
+    from dogtail.rawinput import SESSION_TYPE
+    from dogtail.ponytail_helper import ponytail_helper
+
     if SESSION_TYPE == "wayland":
-        ponytail.waitFor(name, timeout=timeout)
+        ponytail_interface = ponytail_helper.get_ponytail_interface()
+        ponytail_interface.waitFor(name, timeout=timeout)
         return True
-    else:
-        return False
+
+    return False
 
 
 def get_current_x_window_position():
     """
-    This is a helper to get window possition (top left corner) solely by means of
+    This is a helper to get window position (top left corner) solely by means of
     Xlib (direct X calls) - without a11y. This is targeted to be used with !GTK4!
     apps only - which don't support giving GLOBAL coords of their nodes under Xorg
     (as well as on wayland). By getting the win location and adding that up together
     with local coords, we can make actions with GTK4 apps under Xorg as well.
     Not to be mixed with what we do with local coords and local functions on W.
 
-    Imports are used locally here not to bring uncessery deps in most cases - because
+    Imports are used locally here not to bring unnecessary deps in most cases - because
     this is for rather a corner case... GTK4 apps will mostly be run in wayland and
     with Xorg most likely much much less.
     """
 
+    LOGGING.debug(logging_class.get_func_params_and_values())
+
     try:
         from Xlib import X, display
         from Xlib.error import XError
-    except ModuleNotFoundError as e:
-        raise ImportError("python-xlib is required for this script to run. Please install it i.e. using 'pip install python-xlib'.") from e
+    except ModuleNotFoundError as error:
+        raise ImportError("".join(
+                (
+                    "python-xlib is required for this script to run.",
+                    "Please install it i.e. using 'pip3 install python-xlib'.",
+                )
+            )
+        ) from error
 
+    _display = display.Display()
+    root = _display.screen().root
 
-    d = display.Display()
-    root = d.screen().root
-    prop = root.get_full_property(d.intern_atom('_NET_ACTIVE_WINDOW'), X.AnyPropertyType)
+    prop = root.get_full_property(
+        _display.intern_atom("_NET_ACTIVE_WINDOW"), X.AnyPropertyType
+    )
     if prop is None:
         return 0, 0
 
     window_id = prop.value[0]
-    window = d.create_resource_object('window', window_id)
+
+    window = _display.create_resource_object("window", window_id)
 
     try:
         geom = window.get_geometry()
         return geom.x, geom.y
-    except XError as e:
-        print(f"Error getting current window position: {e}")
-        return 0, 0
+
+    except XError as error:
+        LOGGING.info(f"Error getting current window position: {error}")
+        return (0, 0)
 
 
+# Before cache
+#'0.0014488697052001953' seconds - first call
+#'0.0018050670623779297' seconds - all following calls
+
+# After cache
+#'0.0014488697052001953' seconds - first call
+#'2.384185791015625e-06' seconds - all following calls
+
+# Since 3.2
+# Since 3.9 we could use @functools.cache
+@functools.lru_cache
 def get_screen_resolution():
-    """ Additional helper function with similar reasoning as the get_current_x_window_position needed
-    to work with GTK4 apps - even on wayland! (needs Xwayland running for xlib to get this info).
-    We need this to detect whether the frame is in fullscreen mode in order to either use the config.gtk4Offset
-    or not. There is no offset when window is full-screen. Se README for more info on this and shadows.
     """
+    Get resolution.
+
+    :return: Resolution.
+    :rtype: list
+    """
+
+    LOGGING.debug(logging_class.get_func_params_and_values())
+
     try:
-        from Xlib import X, display
-        from Xlib.error import XError
-    except ModuleNotFoundError as e:
-        raise ImportError("python-xlib is required for this script to run. Please install it i.e. using 'pip install python-xlib'.") from e
+        import dbus
 
-    d = display.Display()
-    screen = d.screen()
-    width = screen.width_in_pixels
-    height = screen.height_in_pixels
-    return width, height
+        bus = dbus.SessionBus()
+        obj = bus.get_object(
+            "org.gnome.Mutter.DisplayConfig", "/org/gnome/Mutter/DisplayConfig"
+        )
+        interface = dbus.Interface(obj, "org.gnome.Mutter.DisplayConfig")
+        call_method = interface.get_dbus_method("GetCurrentState")
+        method_call_output = call_method()
+
+        # Unwrapping the values to deal with usual types and not dbus types.
+        def unwrap(value):
+            if isinstance(value, dbus.ByteArray):
+                return "".join([str(x) for x in value])
+            if isinstance(value, (dbus.Array, list, tuple, dbus.Struct)):
+                return [unwrap(x) for x in value]
+            if isinstance(value, (dbus.Dictionary, dict)):
+                return dict([(unwrap(x), unwrap(y)) for x, y in value.items()])
+            if isinstance(value, (dbus.Signature, dbus.String)):
+                return str(value)
+            if isinstance(value, dbus.Boolean):
+                return bool(value)
+            if isinstance(
+                value,
+                (
+                    dbus.Int16,
+                    dbus.UInt16,
+                    dbus.Int32,
+                    dbus.UInt32,
+                    dbus.Int64,
+                    dbus.UInt64,
+                ),
+            ):
+                return int(value)
+            if isinstance(value, (dbus.Double)):
+                return float(value)
+            if isinstance(value, dbus.Byte):
+                return bytes([int(value)])
+            return value
+
+        # Recursive helper function to walk the data structure.
+        # Data structure is searched for current resolution.
+        def search_dbus_structure(dbus_object, previous_object=None):
+
+            # Check if the structure is dictionary.
+            if isinstance(dbus_object, dict):
+                for key, value in dbus_object.items():
+                    # Check for the wanted condition of a dictionary.
+                    # We need current display.
+                    if key == "is-current" and value is True:
+                        # If current object value is True
+                        # return previous object's values.
+                        return previous_object[1], previous_object[2]
+
+                    # Check the result from the recursive function.
+                    result_found = search_dbus_structure(value, dbus_object)
+                    # End if there was result present. Return the value.
+                    if result_found:
+                        return result_found
+
+            # Check if the structure is iterable but not a string.
+            elif hasattr(dbus_object, "__iter__") and not isinstance(
+                dbus_object, str
+            ):
+                # Check all the items present in the object.
+                for item in dbus_object:
+                    # Check the result from the recursive function.
+                    result_found = search_dbus_structure(item, dbus_object)
+                    # End if there was result present. Return the value.
+                    if result_found:
+                        return result_found
+
+        resolution = search_dbus_structure(unwrap(method_call_output))
+        LOGGING.debug(f"Resolution detected: '{resolution}'")
+        return resolution
+    except Exception as error:
+        resolution = f"The resolution retrieval failed for: {error}"
+        LOGGING.info(f"resolution error: '{resolution}'")
+        return (0,0)
 
 
-class GnomeShell:  # pragma: no cover
+########################################
+# Backwards compatibility definitions. #
+########################################
+def doDelay(delay=None):  # pylint: disable=invalid-name
     """
-    Utility class to help working with certain atributes of gnome-shell.
-    Currently that means handling the Application menu available for apps
-    on the top gnome-shell panel. Searching for the menu and its items is
-    somewhat tricky due to fuzzy a11y tree of gnome-shell, mainly since the
-    actual menu is not present as child to the menu-spawning button. Also,
-    the menus get constructed/destroyed on the fly with application focus
-    changes. Thus current application name as displayed plus a reference
-    known menu item (with 'Quit' as default) are required by these methods.
+    Do Delay.
+    """
+    do_delay(delay=delay)
+
+
+def waitForWindow(name, timeout=30): # pylint: disable=invalid-name
+    """
+    Wrapper over wait_for_window.
     """
 
-    def __init__(self, classic_mode=False):
-        from dogtail.tree import root
-        self.shell = root.application("gnome-shell")
+    return wait_for_window(name=name, timeout=timeout)
 
 
-    def getApplicationMenuList(self, search_by_item="Quit"):
-        """
-        Returns list of all menu item nodes. Searches for the menu by a reference item.
-        Provide a different item name, if the 'Quit' is not present - but beware picking one
-        present elsewhere, like 'Lock' or 'Power Off' present under the user menu.
-        """
+def check_for_a11y_interactively():
+    """
+    Wrapper over check_for_accessibility_interactively.
+    """
 
-        debug_log("getApplicationMenuList(self, search_by_item=%s)" % str(search_by_item))
-
-        matches = self.shell.findChildren(
-            predicate.GenericPredicate(name=search_by_item, roleName="label"))
-
-        for match in matches:
-            ancestor = match.parent.parent.parent
-            if ancestor.roleName == "panel":
-                return ancestor.findChildren(predicate.GenericPredicate(roleName="label"))
-
-        raise SearchError(
-            "Could not find the Application menu based on '%s' item. \
-            Please provide an existing reference item" % search_by_item)
+    return check_for_accessibility_interactively()
 
 
-    def getApplicationMenuButton(self, app_name):
-        """
-        Returns the application menu 'button' node as present on the gnome-shell top panel.
-        """
+def checkForA11yInteractively(): # pylint: disable=invalid-name
+    """
+    Wrapper over check_for_a11y_interactively.
+    """
 
-        debug_log("getApplicationMenuButton(self, app_name=%s)" % str(app_name))
-
-        try:
-            return self.shell[0][0][3].child(app_name, roleName="label")
-        except Exception:
-            raise SearchError(
-                "Application menu button '%s' could not be found within gnome-shell!" % app_name)
+    return check_for_accessibility_interactively()
 
 
-    def getApplicationMenuItem(self, item, search_by_item="Quit"):
-        """
-        Returns a particilar menu item node. Uses a different 'Quit' or custom item name for
-        reference, but also attempts to use the given item if the general reference fails.
-        """
+def enable_a11y(enable=True):
+    """
+    Wrapper over enable_accessibility.
+    """
 
-        debug_log("getApplicationMenuItem(item=%s, search_by_item=%s)" %
-                      (str(item), str(search_by_item)))
-
-        try:
-            menu_items = self.getApplicationMenuList(search_by_item)
-        except Exception:
-            menu_items = self.getApplicationMenuList(item)
-
-        if sys.version_info.major == 2 and any(ord(x) > 127 for x in item):
-            item = item.encode("utf-8")
-
-        for node in menu_items:
-            if node.name == item:
-                return node
-
-        raise Exception("Could not find the item, did application focus change?")
+    return enable_accessibility(enable=enable)
 
 
-    def clickApplicationMenuItem(self, app_name, item, search_by_item="Quit"):
-        """
-        Executes the given menu item through opening the menu first followed by a click at the
-        particular item. The menu search reference 'Quit' may be customized. Also attempts to
-        use the given item for reference if search fails with the default/custom one.
-        """
-        debug_log("clickApplicationMenuItem(app_name=%s, item=%s, search_by_item=%s)" %
-                  (str(app_name), str(item), str(search_by_item)))
+def enableA11y(enable=True): # pylint: disable=invalid-name
+    """
+    Wrapper over enable_accessibility.
+    """
 
-        self.getApplicationMenuButton(app_name).click()
-        self.getApplicationMenuItem(item, search_by_item).click()
+    return enable_accessibility(enable=enable)
+
+
+def check_for_a11y():
+    """
+    Wrapper over check_for_accessibility.
+    """
+
+    return check_for_accessibility()
+
+
+def checkForA11y(): # pylint: disable=invalid-name
+    """
+    Wrapper over check_for_accessibility.
+    """
+
+    return check_for_accessibility()
+
+
+def is_a11y_enabled():
+    """
+    Wrapper over is_accessibility_enabled.
+    """
+
+    return is_accessibility_enabled()
+
+
+def isA11yEnabled(): # pylint: disable=invalid-name
+    """
+    Wrapper over is_accessibility_enabled.
+    """
+
+    return is_accessibility_enabled()
+
+
+def bail_because_a11y_is_disabled():
+    """
+    Wrapper over bail_because_accessibility_is_disabled.
+    """
+
+    return bail_because_accessibility_is_disabled()
+
+
+def bailBecauseA11yIsDisabled(): # pylint: disable=invalid-name
+    """
+    Wrapper over bail_because_accessibility_is_disabled.
+    """
+
+    return bail_because_accessibility_is_disabled()
+
+
+# TODO delete once all changes are applied.
+# Keeping for now to not break something along the way.
+class Highlight(Gtk.Window): # pylint: disable=missing-class-docstring
+    def __init__(self):
+        LOGGING.info("Deprecated on Wayland with release 2.0.")
+
+
+class Blinker: # pylint: disable=missing-class-docstring
+    def __init__(self):
+        LOGGING.info("Deprecated on Wayland with release 2.0.")
+
+###############################################
+# End of backwards compatibility definitions. #
+###############################################

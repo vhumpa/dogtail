@@ -1,0 +1,305 @@
+/plan:
+    summary:
+        Run all dogtail tests.
+    discover:
+        how: fmf
+
+        # Used when running by hand to specify branches.
+        # url: https://gitlab.com/dogtail/dogtail.git
+        # ref: <branch>
+
+    provision:
+        how: virtual
+        hw:
+          memory: ">= 4 GB"
+
+        # Specify usage of rhel-10 and api token
+        # api-key: ${TESTING_FARM_API_TOKEN} # Use a secure CI/CD variable
+
+    # # Local VM testing.
+    # provision:
+    #    how: connect
+    #    user: root
+    #    guest: 192.168.122.92
+
+    prepare:
+      - name: packages
+        how: install
+        package:
+          - gtk3-devel
+          - gtk4-devel-tools
+          - gnome-ponytail-daemon
+          - python3-gnome-ponytail-daemon
+          - python3-pip
+          - python3-psutil
+          - python3-devel
+
+    # Debugging logind issues.
+    #  - name: logind_debug_setup
+    #    how: shell
+    #    script: |
+    #      mkdir /etc/systemd/system/systemd-logind.service.d/
+    #      touch /etc/systemd/system/systemd-logind.service.d/10-debug.conf
+    #      cat > /etc/systemd/system/systemd-logind.service.d/10-debug.conf << EOL
+    #      [Service]
+    #      Environment=SYSTEMD_LOG_LEVEL=debug
+    #      EOL
+    #      sleep 1
+    #      cat /etc/systemd/system/systemd-logind.service.d/10-debug.conf
+
+      - name: group_install
+        how: shell
+        script:
+        # Red Hat
+        #  dnf group install -y "Server with GUI" --allowerasing
+        # Fedora/Centos - important.
+         dnf install -y @gnome-desktop --allowerasing
+      - name: pip3
+        how: shell
+        script:
+          - python3 -m pip install build
+      - name: dogtail
+        how: shell
+        script: |
+          echo "Starting the Python build process..."
+          python3 -m build
+          python3 -m pip install dist/dogtail-2.0.dev0-py3-none-any.whl --force-reinstall
+      - name: user_setup
+        how: shell
+        script: |
+          sudo useradd test -G wheel
+          echo "redhat" | passwd test --stdin
+          echo "Defaults:test !env_reset" >> /etc/sudoers
+          echo "test ALL=(ALL)   NOPASSWD: ALL" >> /etc/sudoers
+    execute:
+      how: tmt
+
+    # report:
+      # Use the GitLab reporting plugin
+      # how: display
+
+      # The API URL of your GitLab instance.
+      # TMT often automatically detects this from CI variables.
+      # Testing if ci will get it on its own first.
+      # api-url: https://gitlab.com
+      # api-url: https://gitlab.com
+
+      # The name for the status check shown in the GitLab UI.
+      # Defaults to 'tmt'.
+      # context: "testing-farm-results"
+      # context: "testing-farm-results"
+
+      # The access token for the GitLab API.
+      # IMPORTANT: This is read from a secure environment variable.
+      # api-token: ${GITLAB_API_TOKEN}
+      # api-token: ${GITLAB_API_TOKEN}
+
+/tests:
+
+    /test_config:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_config -v"
+        environment:
+            TEST: dogtail_test_config
+        order: 10
+        duration: 10m
+        tty: true
+
+    /test_predicate:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_predicate -v"
+        environment:
+            TEST: dogtail_test_predicate
+        order: 20
+        duration: 10m
+        tty: true
+
+    /test_rawinput:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_rawinput -v"
+        environment:
+            TEST: dogtail_test_rawinput
+        order: 30
+        duration: 10m
+        tty: true
+
+    /test_tree_gtk3:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_tree_gtk3 -v"
+        environment:
+            TEST: dogtail_test_tree_gtk3
+        order: 40
+        duration: 10m
+        tty: true
+
+    /test_tree_gtk4:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_tree_gtk4 -v"
+        environment:
+            TEST: dogtail_test_tree_gtk4
+        order: 50
+        duration: 10m
+        tty: true
+
+    /test_tree_search_gtk3:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_tree_search_gtk3 -v"
+        environment:
+            TEST: dogtail_test_tree_search_gtk3
+        order: 60
+        duration: 10m
+        tty: true
+
+    /test_tree_search_gtk4:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_tree_search_gtk4 -v"
+        environment:
+            TEST: dogtail_test_tree_search_gtk4
+        order: 70
+        duration: 10m
+        tty: true
+
+    /test_tree_selection_gtk3:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_tree_selection_gtk3 -v"
+        environment:
+            TEST: dogtail_test_tree_selection_gtk3
+        order: 80
+        duration: 10m
+        tty: true
+
+    /test_tree_selection_gtk4:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_tree_selection_gtk4 -v"
+        environment:
+            TEST: dogtail_test_tree_selection_gtk4
+        order: 90
+        duration: 10m
+        tty: true
+
+    /test_tree_states_gtk3:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_tree_states_gtk3 -v"
+        environment:
+            TEST: dogtail_test_tree_states_gtk3
+        order: 100
+        duration: 10m
+        tty: true
+
+    /test_tree_states_gtk4:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_tree_states_gtk4 -v"
+        environment:
+            TEST: dogtail_test_tree_states_gtk4
+        order: 110
+        duration: 10m
+        tty: true
+
+    /test_tree_string_representation_gtk3:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_tree_string_representation_gtk3 -v"
+        environment:
+            TEST: dogtail_test_tree_string_representation_gtk3
+        order: 120
+        duration: 10m
+        tty: true
+
+    /test_tree_string_representation_gtk4:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_tree_string_representation_gtk4 -v"
+        environment:
+            TEST: dogtail_test_tree_string_representation_gtk4
+        order: 130
+        duration: 10m
+        tty: true
+
+    /test_tree_value_gtk3:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_tree_value_gtk3 -v"
+        environment:
+            TEST: dogtail_test_tree_value_gtk3
+        order: 140
+        duration: 10m
+        tty: true
+
+    /test_tree_value_gtk4:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_tree_value_gtk4 -v"
+        environment:
+            TEST: dogtail_test_tree_value_gtk4
+        order: 150
+        duration: 10m
+        tty: true
+
+    /test_utils_accessibility:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_utils_accessibility -v"
+        environment:
+            TEST: dogtail_test_utils_accessibility
+        order: 160
+        duration: 10m
+        tty: true
+
+    /test_utils_delay:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_utils_delay -v"
+        environment:
+            TEST: dogtail_test_utils_delay
+        order: 170
+        duration: 10m
+        tty: true
+
+    /test_utils_lock:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_utils_lock -v"
+        environment:
+            TEST: dogtail_test_utils_lock
+        order: 180
+        duration: 10m
+        tty: true
+
+    /test_utils_run_gtk3:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_utils_run_gtk3 -v"
+        environment:
+            TEST: dogtail_test_utils_run_gtk3
+        order: 190
+        duration: 10m
+        tty: true
+
+    /test_utils_run_gtk4:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_utils_run_gtk4 -v"
+        environment:
+            TEST: dogtail_test_utils_run_gtk4
+        order: 200
+        duration: 10m
+        tty: true
+
+    /test_version:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_version -v"
+        environment:
+            TEST: dogtail_test_version
+        order: 210
+        duration: 10m
+        tty: true
+
+    /test_rawinput_drag:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_rawinput_drag -v"
+        environment:
+            TEST: test_rawinput_drag
+        order: 220
+        duration: 10m
+        tty: true
+
+    /test_rawinput_keyboard_gtk3:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_rawinput_keyboard_gtk3 -v"
+        environment:
+            TEST: dogtail_test_rawinput_keyboard_gtk3
+        order: 230
+        duration: 10m
+        tty: true
+
+    /test_rawinput_keyboard_gtk4:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_rawinput_keyboard_gtk4 -v"
+        environment:
+            TEST: dogtail_test_rawinput_keyboard_gtk4
+        order: 240
+        duration: 10m
+        tty: true
+
+    /test_rawinput_mouse_buttons_gtk3:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_rawinput_mouse_buttons_gtk3 -v"
+        environment:
+            TEST: dogtail_test_rawinput_mouse_buttons_gtk3
+        order: 250
+        duration: 10m
+        tty: true
+
+    /test_rawinput_mouse_buttons_gtk4:
+        test: sudo -u test /usr/local/bin/dogtail-headless "python3 -m unittest tests.test_rawinput_mouse_buttons_gtk4 -v"
+        environment:
+            TEST: dogtail_test_rawinput_mouse_buttons_gtk4
+        order: 260
+        duration: 10m
+        tty: true

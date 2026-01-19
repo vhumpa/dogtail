@@ -1,66 +1,86 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
+#!/usr/bin/python3
+"""
+Unit tests for the dogtail.config.
+"""
+
 import unittest
-import dogtail.config
-
-"""
-Unit tests for the dogtail.config class
-"""
+from dogtail.config import config
 
 
-class TestConfiguration(unittest.TestCase):
+class TestConfig(unittest.TestCase):
+    """
+    Class to test dogtail's config.
+    """
 
-    def test_get_set_all_properties(self):
-        for option in list(dogtail.config.config.defaults.keys()):
-            print("Setting config.%s property" % str(option))
-            old_value = dogtail.config.config.__getattr__(option)
-            value = ''
-            if 'Dir' in option:
-                value = '/tmp/dogtail/'  # Special value for dir-related properties
-            dogtail.config.config.__setattr__(option, value)
-            self.assertEqual(dogtail.config.config.__getattr__(option), value)
-            dogtail.config.config.__setattr__(option, old_value)
+    def test_set_value(self):
+        """
+        Testing set value.
+        """
 
-    def test_default_directories_created(self):
-        import os.path
-        self.assertEqual(
-            os.path.isdir(dogtail.config.config.scratchDir), True)
-        self.assertEqual(os.path.isdir(dogtail.config.config.logDir), True)
-        self.assertEqual(os.path.isdir(dogtail.config.config.dataDir), True)
+        self.assertEqual(config.action_delay, 1.0)
+        config.action_delay = 2.0
+        self.assertEqual(config.action_delay, 2.0)
 
-    def test_set(self):
-        self.assertRaises(AttributeError, setattr, dogtail.config.config, 'nosuchoption', 42)
 
-    def test_get(self):
-        self.assertRaises(AttributeError, getattr, dogtail.config.config, 'nosuchoption')
+    def test_set_incorrect_value(self):
+        """
+        Testing set incorrect value.
+        """
 
-    def helper_create_directory_and_set_option(self, path, property_name):
-        import os.path
-        if os.path.isdir(path):
-            import shutil
-            shutil.rmtree(path)
-        dogtail.config.config.__setattr__(property_name, path)
-        self.assertEqual(os.path.isdir(path), True)
+        with self.assertRaises(ValueError):
+            config.action_delay = False
 
-    def test_create_scratch_directory(self):
-        new_folder = "/tmp/dt"
-        self.helper_create_directory_and_set_option(new_folder, 'scratchDir')
 
-    def test_create_data_directory(self):
-        new_folder = "/tmp/dt_data"
-        self.helper_create_directory_and_set_option(new_folder, 'dataDir')
+    def test_set_not_existing_value(self):
+        """
+        Testing set not existing value.
+        """
 
-    def test_create_log_directory(self):
-        new_folder = "/tmp/dt_log"
-        self.helper_create_directory_and_set_option(new_folder, 'logDir')
+        with self.assertRaises(AttributeError):
+            config.not_existing = False
 
-    def test_load(self):
-        dogtail.config.config.load({'actionDelay': 2.0})
-        self.assertEqual(dogtail.config.config.actionDelay, 2.0)
 
-    def test_reset(self):
-        default_actionDelay = dogtail.config.config.defaults['actionDelay']
-        dogtail.config.config.actionDelay = 2.0
-        dogtail.config.config.reset()
-        self.assertEqual(dogtail.config.config.actionDelay, default_actionDelay)
+    def test_get_value(self):
+        """
+        Testing get value.
+        """
+
+        self.assertEqual(config.action_delay, 1.0)
+
+
+    def test_get_incorrect_value(self):
+        """
+        Testing get not existing value.
+        """
+
+        self.assertRaises(AttributeError, getattr, config, "not_existing")
+
+
+    def test_reset_configuration(self):
+        """
+        Testing resetting the configuration.
+        """
+
+        # When running unit tests we manipulate the config, reset it first.
+        config.reset_configuration()
+
+
+        original_action_delay = config.action_delay
+        self.assertEqual(config.action_delay, original_action_delay)
+        original_default_delay = config.default_delay
+        self.assertEqual(config.default_delay, original_default_delay)
+
+        config.action_delay = 2.0
+        config.default_delay = 2.0
+
+        self.assertNotEqual(config.action_delay, original_action_delay)
+        self.assertNotEqual(config.default_delay, original_default_delay)
+
+        config.reset_configuration()
+
+        self.assertEqual(config.action_delay, original_action_delay)
+        self.assertEqual(config.default_delay, original_default_delay)
+
+
+if __name__ == "__main__":
+    unittest.main()

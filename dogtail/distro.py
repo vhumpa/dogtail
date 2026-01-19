@@ -1,15 +1,19 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
+#!/usr/bin/python3
+"""
+Handles differences between different distributions.
+"""
+
+# pylint: disable=line-too-long
+# ruff: noqa: E501
+
 import os
 import re
-from subprocess import check_output, STDOUT
+from subprocess import check_output
 from dogtail.version import Version
-from dogtail.logging import debugLogger as logger
-from dogtail.logging import debug_log
 
-"""
-Handles differences between different distributions
-"""
+from dogtail.logging import logging_class
+LOGGING = logging_class.logger
+
 
 __author__ = """
 Dave Malcolm <dmalcolm@redhat.com>,
@@ -22,23 +26,19 @@ class DistributionNotSupportedError(Exception):  # pragma: no cover
     This distribution is not supported.
     """
 
-    PATCH_MESSAGE = "Please open merge requests at https://gitlab.com/dogtail/dogtail"
+    PATCH_MESSAGE = "Please send patches to dogtail-devel-list@gnome.org"
 
-    def __init__(self, distro):
-        self.distro = distro
+    def __init__(self, distribution):
+        self.distribution = distribution
 
     def __str__(self):
-        return self.distro + ". " + DistributionNotSupportedError.PATCH_MESSAGE
+        return self.distribution + ". " + DistributionNotSupportedError.PATCH_MESSAGE
 
 
 class PackageNotFoundError(Exception):
     """
     Error finding the requested package.
     """
-
-
-global packageDb
-global distro
 
 
 class PackageDb:
@@ -49,10 +49,10 @@ class PackageDb:
 
     def __init__(self):
         self.prefix = "/usr"
-        self.localePrefixes = [self.prefix + "/share/locale"]
+        self.locale_prefixes = [self.prefix + "/share/locale"]
 
 
-    def getVersion(self, packageName):
+    def get_version(self, package_name):
         """
         Method to get the version of an installed package as a Version
         instance (or raise an exception if not found)
@@ -63,7 +63,7 @@ class PackageDb:
         raise NotImplementedError
 
 
-    def getFiles(self, packageName):
+    def get_files(self, package_name):
         """
         Method to get a list of filenames owned by the package, or raise an
         exception if not found.
@@ -72,107 +72,173 @@ class PackageDb:
         raise NotImplementedError
 
 
-    def getMoFiles(self, locale=None):
+    def get_mo_files(self, locale=None):
         """
         Method to get a list of all .mo files on the system, optionally for a
         specific locale.
         """
 
-        debug_log("getMoFiles(self, locale=%s)" % str(locale))
+        LOGGING.debug(f"get_mo_files(self, locale={str(locale)})")
 
-        moFiles = {}
+        mo_files = {}
 
-        def appendIfMoFile(moFiles, dirName, fNames):
-            for fName in fNames:
-                if re.match("(.*)\\.mo", fName):
-                    moFiles[dirName + "/" + fName] = None
+        def append_if_mo_file(mo_files, dir_name, f_names):
+            for f_name in f_names:
+                if re.match("(.*)\\.mo", f_name):
+                    mo_files[dir_name + "/" + f_name] = None
 
-        for localePrefix in self.localePrefixes:
+        for locale_prefix in self.locale_prefixes:
             if locale:
-                localePrefix = localePrefix + "/" + locale
-            os.walk(localePrefix, appendIfMoFile, moFiles)
+                locale_prefix = locale_prefix + "/" + locale
+            os.walk(locale_prefix, append_if_mo_file, mo_files)
 
-        return list(moFiles.keys())
+        return list(mo_files.keys())
 
-
-    def getDependencies(self, packageName):
+    def get_dependencies(self, package_name):
         """
         Method to get a list of unique package names that this package
         is dependent on, or raise an exception if the package is not
         found.
         """
+
         raise NotImplementedError
 
+    ### Backwards compatibility.
 
-class _RpmPackageDb(PackageDb):  # pragma: no cover
-    def __init__(self):
-        PackageDb.__init__(self)
-
-
-    def getVersion(self, packageName):
-        import rpm
-        ts = rpm.TransactionSet()
-        for header in ts.dbMatch("name", packageName):
-            return Version.fromString(header["version"])
-
-        raise PackageNotFoundError(packageName)
+    @property
+    def localePrefixes(self):  # pylint: disable=invalid-name
+        """
+        Set localePrefixes. Wrapper over locale_prefixes.
+        """
+        return self.locale_prefixes
 
 
-    def getFiles(self, packageName):
-        import rpm
-        ts = rpm.TransactionSet()
-        for header in ts.dbMatch("name", packageName):
+    @localePrefixes.setter
+    def localePrefixes(self, value_to_set):  # pylint: disable=invalid-name
+        self.locale_prefixes = value_to_set
+
+
+    def getVersion(self, packageName):  # pylint: disable=invalid-name
+        """
+        Method to get the version of an installed package as a Version
+        instance (or raise an exception if not found). Wrapper over get_version.
+
+        Note: does not know about distributions' internal revision numbers.
+        """
+        return self.get_version(package_name=packageName)
+
+
+    def getFiles(self, packageName):  # pylint: disable=invalid-name
+        """
+        Method to get a list of filenames owned by the package, or raise an
+        exception if not found. Wrapper over get_files.
+        """
+        return self.get_files(package_name=packageName)
+
+
+    def getMoFiles(self, locale=None):  # pylint: disable=invalid-name
+        """
+        Method to get a list of all .mo files on the system, optionally for a
+        specific locale. Wrapper over get_mo_files.
+        """
+        return self.get_mo_files(locale=locale)
+
+
+    def getDependencies(self, packageName):  # pylint: disable=invalid-name
+        """
+        Method to get a list of unique package names that this package
+        is dependent on, or raise an exception if the package is not
+        found. Wrapper over get_dependencies.
+        """
+        return self.get_dependencies(package_name=packageName)
+
+
+class _RpmPackageDb(PackageDb):
+    """
+    RPM Package Database Implementation.
+    """
+
+    def get_version(self, package_name):
+        import rpm   # pylint: disable=import-outside-toplevel,import-error
+        transaction_set = rpm.TransactionSet()
+        for header in transaction_set.dbMatch("name", package_name):
+            return Version.from_string(header["version"])
+
+        raise PackageNotFoundError(package_name)
+
+
+    def get_files(self, package_name):
+        import rpm   # pylint: disable=import-outside-toplevel,import-error
+        transaction_set = rpm.TransactionSet()
+        for header in transaction_set.dbMatch("name", package_name):
             return header["filenames"]
 
-        raise PackageNotFoundError(packageName)
+        raise PackageNotFoundError(package_name)
 
 
-    def getDependencies(self, packageName):
-        import rpm
-        ts = rpm.TransactionSet()
-        for header in ts.dbMatch("name", packageName):
+    def get_dependencies(self, package_name):
+        import rpm   # pylint: disable=import-outside-toplevel,import-error
+        transaction_set = rpm.TransactionSet()
+        for header in transaction_set.dbMatch("name", package_name):
             result = {}
 
             for requirement in header[rpm.RPMTAG_REQUIRES]:
-                for depPackageHeader in ts.dbMatch("provides", requirement):
-                    depName = depPackageHeader['name']
-                    if depName != packageName:
+                for dependency_package_header in transaction_set.dbMatch("provides", requirement):
+                    dependency_name = dependency_package_header["name"]
+                    if dependency_name != package_name:
 
-                        result[depName] = None
+                        result[dependency_name] = None
 
             return list(result.keys())
 
-        raise PackageNotFoundError(packageName)
+        raise PackageNotFoundError(package_name)
+
+    ### Backwards compatibility.
+
+    def getVersion(self, packageName):
+        return self.get_version(package_name=packageName)
+
+
+    def getFiles(self, packageName):
+        return self.get_files(package_name=packageName)
+
+
+    def getDependencies(self, packageName):
+        return self.get_dependencies(package_name=packageName)
 
 
 class _AptPackageDb(PackageDb):
+    """
+    Apt Package Database Implementation.
+    """
+
     def __init__(self):
-        PackageDb.__init__(self)
+        super().__init__()
         self.cache = None
 
 
-    def getVersion(self, packageName):
+    def get_version(self, package_name):
         if not self.cache:
-            import apt_pkg
+            import apt_pkg  # pylint: disable=import-outside-toplevel,import-error
             apt_pkg.init()
             self.cache = apt_pkg.Cache()
 
         packages = self.cache.packages
         for package in packages:
-            if package.name == packageName:
-                verString = re.match(".*Ver:'(.*)-.*' Section:", str(package.current_ver)).group(1)
-                return Version.fromString(verString)
+            if package.name == package_name:
+                version_string = re.match(".*Ver:'(.*)-.*' Section:", str(package.current_ver)).group(1)
+                return Version.fromString(version_string)
 
-        raise PackageNotFoundError(packageName)
+        raise PackageNotFoundError(package_name)
 
 
-    def getFiles(self, packageName):
+    def get_files(self, package_name):
         files = []
-        list = os.popen("dpkg -L %s" % packageName).readlines()
-        if not list:
-            raise PackageNotFoundError(packageName)
+        lines = os.popen(f"dpkg -L {package_name}").readlines()
+        if not lines:
+            raise PackageNotFoundError(package_name)
 
-        for line in list:
+        for line in lines:
             file = line.strip()
             if file:
                 files.append(file)
@@ -180,86 +246,120 @@ class _AptPackageDb(PackageDb):
         return files
 
 
-    def getDependencies(self, packageName):
+    def get_dependencies(self, package_name):
         result = {}
         if not self.cache:
-            import apt_pkg
+            import apt_pkg  # pylint: disable=import-outside-toplevel,import-error
             apt_pkg.init()
             self.cache = apt_pkg.Cache()
 
+
         packages = self.cache.packages
         for package in packages:
-            if package.name == packageName:
+            if package.name == package_name:
                 current = package.current_ver
                 if not current:
-                    raise PackageNotFoundError(packageName)
+                    raise PackageNotFoundError(package_name)
 
                 depends = current.depends_list
-                list = depends["Depends"]
-                for dependency in list:
+                dependency_list = depends["Depends"]
+                for dependency in dependency_list:
                     name = dependency[0].target_pkg.name
                     result[name] = None
 
         return list(result.keys())
 
+    ### Backwards compatibility.
+
+    def getVersion(self, packageName):
+        return self.get_version(package_name=packageName)
+
+
+    def getFiles(self, packageName):
+        return self.get_files(package_name=packageName)
+
+
+    def getDependencies(self, packageName):
+        return self.get_dependencies(package_name=packageName)
+
 
 class _UbuntuAptPackageDb(_AptPackageDb):
+    """
+    Ubuntu Apt Package Database Implementation.
+    """
+
     def __init__(self):
         _AptPackageDb.__init__(self)
         self.localePrefixes.append(self.prefix + "/share/locale-langpack")
 
 
-class _PortagePackageDb(PackageDb):  # pragma: no cover
-    def __init__(self):
-        PackageDb.__init__(self)
+
+class _PortagePackageDb(PackageDb):
+    """
+    Portage Package Database Implementation.
+    """
 
 
-    def getVersion(self, packageName):
-        # the portage utilities are almost always going to be in
-        # /usr/lib/portage/pym
-        import sys
+    def get_version(self, package_name):
+        # The portage utilities are almost always going to be in /usr/lib/portage/pym
+        import sys  # pylint: disable=import-outside-toplevel
         sys.path.append("/usr/lib/portage/pym")
 
-        import portage
-        # this takes the first package returned in the list, in the
+        import portage  # pylint: disable=import-outside-toplevel,import-error
+        # This takes the first package returned in the list, in the
         # case that there are slotted packages, and removes the leading
-        # category such as 'sys-apps'
-        gentooPackageName = portage.db["/"]["vartree"].dbapi.match(packageName)[0].split("/")[1]
+        # category such as 'sys-apps'.
+        gentoo_package_name = portage.db["/"]["vartree"].dbapi.match(package_name)[0].split("/")[1]
 
-        # this removes the distribution specific versioning returning only the
-        # upstream version
-        upstreamVersion = portage.pkgsplit(gentooPackageName)[1]
+        # This removes the distribution specific versioning returning only the
+        # upstream version.
+        upstream_version = portage.pkgsplit(gentoo_package_name)[1]
 
-        # print("Version of package is: " + upstreamVersion)
-        return Version.fromString(upstreamVersion)
+        # print("Version of package is: " + upstream_version)
+        return Version.fromString(upstream_version)
 
 
-class _ConaryPackageDb(PackageDb):  # pragma: no cover
-    def __init__(self):
-        PackageDb.__init__(self)
-
+    ### Backwards compatibility.
 
     def getVersion(self, packageName):
-        from conaryclient import ConaryClient
+        return self.get_version(package_name=packageName)
+
+
+class _ConaryPackageDb(PackageDb):
+    """
+    Conary Package Database Implementation.
+    """
+
+    def get_version(self, package_name):
+        from conaryclient import ConaryClient  # pylint: disable=import-outside-toplevel,import-error
         client = ConaryClient()
-        dbVersions = client.db.getTroveVersionList(packageName)
-        if not len(dbVersions):
-            raise PackageNotFoundError(packageName)
+        database_versions = client.db.getTroveVersionList(package_name)
+        if not database_versions:
+            raise PackageNotFoundError(package_name)
 
-        return dbVersions[0].trailingRevision().asString().split("-")[0]
+        return database_versions[0].trailingRevision().asString().split("-")[0]
 
+    ### Backwards compatibility.
 
-# getVersion not implemented because on Solaris multiple modules are installed
-# in single packages, so it is hard to tell what version number of a specific
-# module.
-
-
-class _SolarisPackageDb(PackageDb):  # pragma: no cover
-    def __init__(self):
-        PackageDb.__init__(self)
+    def getVersion(self, packageName):
+        return self.get_version(package_name=packageName)
 
 
-class JhBuildPackageDb(PackageDb):  # pragma: no cover
+class _SolarisPackageDb(PackageDb):
+    """
+    Solaris Package Database Implementation.
+    """
+
+    # The getVersion not implemented because on Solaris multiple modules are installed
+    # in single packages, so it is hard to tell what version number of a specific
+    # module.
+
+
+class JhBuildPackageDb(PackageDb):
+    """
+    JH Build Package Database Implementation.
+    """
+
     def __init__(self):
         PackageDb.__init__(self)
         prefixes = []
@@ -267,14 +367,14 @@ class JhBuildPackageDb(PackageDb):  # pragma: no cover
         prefixes.append(os.environ["XDG_CONFIG_DIRS"])
         prefixes.append(os.environ["PKG_CONFIG_PATH"])
         self.prefix = os.path.commonprefix(prefixes)
-        self.localePrefixes.append(self.prefix + "/share/locale")
+        self.locale_prefixes.append(self.prefix + "/share/locale")
 
 
-    def getDependencies(self, packageName):
-        debug_log("getDependencies(self, packageName=%s)" % str(packageName))
+    def get_dependencies(self, package_name):
+        LOGGING.debug(f"get_dependencies(self, package_name={str(package_name)})")
 
         result = {}
-        lines = os.popen("jhbuild list " + packageName).readlines()
+        lines = os.popen("jhbuild list " + package_name).readlines()
         for line in lines:
             if line:
                 result[line.strip()] = None
@@ -282,63 +382,105 @@ class JhBuildPackageDb(PackageDb):  # pragma: no cover
         return list(result.keys())
 
 
+    ### Backwards compatibility.
+
+    def getDependencies(self, packageName):
+        return self.get_dependencies(package_name=packageName)
+
+
+
 class _ContinuousPackageDb(PackageDb):
+    """
+    Continuous Package Database Implementation.
+    """
 
-    def __init__(self):
-        PackageDb.__init__(self)
-
-
-    def getVersion(self, packageName):
+    def get_version(self, package_name):
         return ""
 
 
-    def getFiles(self, packageName):
+    def get_files(self, package_name):
         return check_output(
-            ["ls -1 /usr/share/locale/*/LC_MESSAGES/%s.mo" % \
-                packageName], shell=True).strip().split("\n")
+            [f"ls -1 /usr/share/locale/*/LC_MESSAGES/{package_name}.mo"],
+            shell=True
+        ).strip().split("\n")
 
 
-    def getDependencies(self, packageName):
+    def get_dependencies(self, package_name):
         return []
 
 
-class _ArchPackageDb(PackageDb):
-
-    def __init__(self):
-        PackageDb.__init__(self)
-
-    def _pacman(self, option, packageName):
-        if option == "v":
-            cmd = "i %s | grep Version | cut -d: -f2-"
-        elif option == "f":
-            cmd = "l %s | cut -d' ' -f2-"
-        elif option == "d":
-            cmd = "i %s | grep 'Depends On' | cut -d: -f2-"
-        else:
-            cmd = ""
-        cmd = "LC_ALL=C COLUMNS=1000 pacman -Q" + cmd
-        out = check_output(cmd % packageName,
-                  stderr=STDOUT,
-                  shell=True).decode("UTF-8")
-        if out.startswith("error:"):
-            raise PackageNotFoundError(packageName)
-        else:
-            return out.strip()
-
+    ### Backwards compatibility.
 
     def getVersion(self, packageName):
-        version = self._pacman("v", packageName)
-        return Version.fromString(version)
+        return self.get_version(package_name=packageName)
 
 
     def getFiles(self, packageName):
-        files = self._pacman("f", packageName)
-        return [f for f in files.split() if not f.endswith('/')]
+        return self.get_files(package_name=packageName)
 
 
     def getDependencies(self, packageName):
-        deps = self._pacman("d", packageName)
+        return self.get_dependencies(package_name=packageName)
+
+
+class _ArchPackageDb(PackageDb):
+    """
+    Arch Package Database Implementation.
+    """
+
+    def _pacman(self, option, packageName):  # pylint: disable=invalid-name
+        package_name = packageName
+
+        if option == "v":
+            command_option = "i %s | grep Version | cut -d: -f2-"
+
+        elif option == "f":
+            command_option = "l %s | cut -d' ' -f2-"
+
+        elif option == "d":
+            command_option = "i %s | grep 'Depends On' | cut -d: -f2-"
+
+        else:
+            command_option = ""
+
+        command = "LC_ALL=C COLUMNS=1000 pacman -Q" + command_option
+        out = check_output(command % package_name,
+                           stderr=STDOUT,
+                           shell=True
+                           ).decode("UTF-8")
+
+        if out.startswith("error:"):
+            raise PackageNotFoundError(package_name)
+
+        return out.strip()
+
+
+    def get_version(self, package_name):
+        version = self._pacman("v", package_name)
+        return Version.from_string(version)
+
+
+    def get_files(self, package_name):
+        files = self._pacman("f", package_name)
+        return [f for f in files.split() if not f.endswith('/')]
+
+
+    def get_dependencies(self, package_name):
+        deps = self._pacman("d", package_name)
         return [d for d in deps.split() if d != "None"]
+
+    ### Backwards compatibility.
+
+    def getVersion(self, packageName):
+        return self.get_version(package_name=packageName)
+
+
+    def getFiles(self, packageName):
+        return self.get_files(package_name=packageName)
+
+
+    def getDependencies(self, packageName):
+        return self.get_dependencies(package_name=packageName)
 
 
 class Distro:
@@ -355,98 +497,176 @@ class Distro:
     (could get messy fast though)
     """
 
+    package_database = None
 
-class Fedora(Distro):  # pragma: no cover
+    @property
+    def packageDb(self):  # pylint: disable=invalid-name
+        """
+        Set localePrefixes. Wrapper over locale_prefixes.
+        """
+        return self.package_database
+
+    @packageDb.setter
+    def packageDb(self, value_to_set):  # pylint: disable=invalid-name
+        self.package_database = value_to_set
+
+
+class Fedora(Distro):
+    """
+    Defining Fedora Distribution.
+    """
     def __init__(self):
-        self.packageDb = _RpmPackageDb()
+        self.package_database = _RpmPackageDb()
 
 
-class RHEL(Fedora):  # pragma: no cover
-    pass
+class RHEL(Fedora):
+    """
+    Defining RHEL Distribution.
+    """
 
 
-class Debian(Distro):  # pragma: no cover
+class Debian(Distro):
+    """
+    Defining Debian Distribution.
+    """
     def __init__(self):
-        self.packageDb = _AptPackageDb()
+        self.package_database = _AptPackageDb()
 
 
 class Ubuntu(Debian):
+    """
+    Defining Ubuntu Distribution based on Debian.
+    """
     def __init__(self):
-        self.packageDb = _UbuntuAptPackageDb()
+        super().__init__()
+        self.package_database = _UbuntuAptPackageDb()
 
 
 class Suse(Distro):  # pragma: no cover
+    """
+    Defining Suse Distribution.
+    """
     def __init__(self):
-        self.packageDb = _RpmPackageDb()
+        self.package_database = _RpmPackageDb()
 
 
 class Gentoo(Distro):  # pragma: no cover
+    """
+    Defining Gentoo Distribution.
+    """
     def __init__(self):
-        self.packageDb = _PortagePackageDb()
+        self.package_database = _PortagePackageDb()
 
 
 class Conary(Distro):  # pragma: no cover
+    """
+    Defining Conary Distribution.
+    """
     def __init__(self):
-        self.packageDb = _ConaryPackageDb()
+        self.package_database = _ConaryPackageDb()
 
 
 class Solaris(Distro):  # pragma: no cover
+    """
+    Defining Solaris Distribution.
+    """
     def __init__(self):
-        self.packageDb = _SolarisPackageDb()
+        self.package_database = _SolarisPackageDb()
 
 
 class JHBuild(Distro):  # pragma: no cover
+    """
+    Defining JHBuild Distribution.
+    """
     def __init__(self):
-        self.packageDb = JhBuildPackageDb()
+        self.package_database = JhBuildPackageDb()
 
 
 class GnomeContinuous(Distro):  # pragma: no cover
+    """
+    Defining GnomeContinuous Distribution.
+    """
     def __init__(self):
-        self.packageDb = _ContinuousPackageDb()
+        self.package_database = _ContinuousPackageDb()
 
 
 class Arch(Distro):  # pragma: no cover
+    """
+    Defining Arch Distribution.
+    """
     def __init__(self):
-        self.packageDb = _ArchPackageDb()
+        self.package_database = _ArchPackageDb()
 
 
-def detectDistro():  # pragma: no cover
-    logger.log("Detecting distribution:", newline=False)
-    debug_log("detectDistro()")
+def detect_distribution():
+    """
+    Detect Distribution.
+    """
 
     if os.environ.get("CERTIFIED_GNOMIE", "no") == "yes":
-        distro = JHBuild()
+        distribution_detection = JHBuild()
+
     elif os.path.exists("/etc/SuSE-release"):
-        distro = Suse()
+        distribution_detection = Suse()
+
     elif os.path.exists("/etc/fedora-release"):
-        distro = Fedora()
+        distribution_detection = Fedora()
+
     elif os.path.exists("/etc/redhat-release"):
-        distro = RHEL()
+        distribution_detection = RHEL()
+
     elif os.path.exists("/usr/share/doc/ubuntu-minimal"):
-        distro = Ubuntu()
+        distribution_detection = Ubuntu()
+
     elif os.path.exists("/etc/debian_version"):
-        distro = Debian()
+        distribution_detection = Debian()
+
     elif os.path.exists("/etc/gentoo-release"):
-        distro = Gentoo()
+        distribution_detection = Gentoo()
+
     elif os.path.exists("/etc/slackware-version"):
         raise DistributionNotSupportedError("Slackware")
+
     elif os.path.exists("/var/lib/conarydb/conarydb"):
-        distro = Conary()
+        distribution_detection = Conary()
+
     elif os.path.exists("/etc/arch-release"):
-        distro = Arch()
+        distribution_detection = Arch()
+
     elif os.path.exists("/etc/release") and \
-            re.match(".*Solaris", open("/etc/release").readline()):
-        distro = Solaris()
+            re.match(".*Solaris", open("/etc/release", encoding="utf-8").readline()):
+        distribution_detection = Solaris()
+
     elif os.path.exists("/etc/os-release") and \
-            re.match(".*GNOME-Continuous", open("/etc/os-release").readline()):
-        distro = GnomeContinuous()
+            re.match(".*GNOME-Continuous", open("/etc/os-release",  encoding="utf-8").readline()):
+        distribution_detection = GnomeContinuous()
+
     else:
         raise DistributionNotSupportedError("Unknown")
-    
+
     logger.log(distro.__class__.__name__)
     debug_log(distro.__class__.__name__)
-    
+
     return distro
 
 distro = detectDistro()
 packageDb = distro.packageDb
+
+    LOGGING.debug(f"Detecting distribution: {distribution_detection.__class__.__name__}")
+
+    return distribution_detection
+
+distribution = detect_distribution()
+package_database = distribution.package_database
+
+
+### Backwards compatibility.
+
+def detectDistro():  # pylint: disable=invalid-name
+    """
+    Detect Distribution. Wrapper over detect_distribution.
+    """
+    return detect_distribution()
+
+distro = distribution
+packageDb = package_database

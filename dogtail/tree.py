@@ -1,405 +1,1759 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
-from dogtail.config import config
-from dogtail import path
-from dogtail import predicate
-from dogtail import rawinput
-from dogtail.rawinput import ponytail
-from dogtail.logging import debug_log
-from dogtail.logging import debugLogger as logger
-from dogtail.utils import doDelay, Blinker, Lock
-from dogtail.rawinput import SESSION_TYPE, ponytail_check_is_xwayland
+#!/usr/bin/python3
+"""
+Experimental dogtail changes for 2.0 release.
+"""
 
-from time import sleep
-from types import LambdaType
-import gi
-from gi.repository import GLib
+# pylint: disable=broad-exception-caught
+# pylint: disable=no-name-in-module
+# pylint: disable=wrong-import-position
+# pylint: disable=wrong-import-order
+# pylint: disable=import-error
+# pylint: disable=import-outside-toplevel
+# pylint: disable=protected-access
+# ruff: noqa: E402
+# ruff: noqa: E501
+
 import os
-import sys
+
+import gi
+
+gi.require_version("Atspi", "2.0")
+from gi.repository import Atspi
 
 import warnings
+
 warnings.filterwarnings("ignore", "g_object_unref")
 
-"""
-Makes some sense of the AT-SPI API
-
-The tree API handles various things for you:
-    - fixes most timing issues
-    - can automatically generate (hopefully) highly-readable logs of what the
-script is doing
-    - traps various UI malfunctions, raising exceptions for them (again,
-hopefully improving the logs)
-
-The most important class is Node. Each Node is an element of the desktop UI.
-There is a tree of nodes, starting at 'root', with applications as its
-children, with the top-level windows and dialogs as their children. The various
-widgets that make up the UI appear as descendents in this tree. All of these
-elements (root, the applications, the windows, and the widgets) are represented
-as instances of Node in a tree (provided that the program of interest is
-correctly exporting its user-interface to the accessibility system). The Node
-class is a mixin for Accessible and the various Accessible interfaces.
-
-The Action class represents an action that the accessibility layer exports as
-performable on a specific node, such as clicking on it. It's a wrapper around
-Accessibility.Action.
-
-We often want to look for a node, based on some criteria, and this is provided
-by the Predicate class.
-
-Dogtail implements a high-level searching system, for finding a node (or
-nodes) satisfying whatever criteria you are interested in. It does this with
-a 'backoff and retry' algorithm. This fixes most timing problems e.g. when a
-dialog is in the process of opening but hasn't yet done so.
-
-If a search fails, it waits 'config.searchBackoffDuration' seconds, and then
-tries again, repeatedly. After several failed attempts (determined by
-config.searchWarningThreshold) it will start sending warnings about the search
-to the debug log. If it still can't succeed after 'config.searchCutoffCount'
-attempts, it raises an exception containing details of the search. You can see
-all of this process in the debug log by setting 'config.debugSearching' to True
-
-We also automatically add a short delay after each action
-('config.defaultDelay' gives the time in seconds). We'd hoped that the search
-backoff and retry code would eliminate the need for this, but unfortunately we
-still run into timing issues. For example, Evolution (and probably most
-other apps) set things up on new dialogs and wizard pages as they appear, and
-we can run into 'setting wars' where the app resets the widgetry to defaults
-after our script has already filled out the desired values, and so we lose our
-values. So we give the app time to set the widgetry up before the rest of the
-script runs.
-
-The classes trap various UI malfunctions and raise exceptions that better
-describe what went wrong. For example, they detects attempts to click on an
-insensitive UI element and raise a specific exception for this.
-
-Unfortunately, some applications do not set up the 'sensitive' state
-correctly on their buttons (e.g. Epiphany on form buttons in a web page). The
-current workaround for this is to set config.ensureSensitivity=False, which
-disables the sensitivity testing.
-"""
-
-__author__ = """
-Zack Cerza <zcerza@redhat.com>,
-David Malcolm <dmalcolm@redhat.com>
-"""
-
-try:
-    import pyatspi
-    import Accessibility
-except ImportError:  # pragma: no cover
-    raise ImportError("Error importing the AT-SPI bindings")
+from .logging import logging_class
+LOGGING = logging_class.logger
 
 
-if config.checkForA11y:
-    from dogtail.utils import checkForA11y
-    checkForA11y()
+from .accessibles.accessible_actions import AccessibleActions
+from .accessibles.accessible_component import AccessibleComponent
+from .accessibles.accessible_editable_text import AccessibleEditableText
+from .accessibles.accessible_hypertext import AccessibleHypertext
+from .accessibles.accessible_image import AccessibleImage
+from .accessibles.accessible_object import AccessibleObject, SearchError
+from .accessibles.accessible_root import AccessibleRoot
+from .accessibles.accessible_selection import AccessibleSelection
+from .accessibles.accessible_state import AccessibleState
+from .accessibles.accessible_table import AccessibleTable
+from .accessibles.accessible_table_cell import AccessibleTableCell
+from .accessibles.accessible_text import AccessibleText
+from .accessibles.accessible_utilities import AccessibleUtilities
+from .accessibles.accessible_value import AccessibleValue
 
+from dogtail.predicate import (
+    GenericPredicate,
+    IsAMenuNamed,
+    IsAMenuItemNamed,
+    IsATextEntryNamed,
+    IsAButtonNamed,
+    IsLabelledAs,
+    IsNamed,
+    IsATabNamed,
+    IsAWindowNamed,
+    IsADialogNamed,
+)
 
-# We optionally import the bindings for libWnck.
-try:
-    gi.require_version("Wnck", "3.0")
-    from gi.repository import Wnck
-    gotWnck = True  # pragma: no cover
-except (ImportError, ValueError):
-    # Skip this warning, since the functionality is almost entirely nonworking anyway.
-    # print "Warning: Dogtail could not import the Python bindings for
-    # libwnck. Window-manager manipulation will not be available."
-    gotWnck = False
-
-
-haveBeenWarnedAboutActionTypes = False
-haveWarnedAboutChildrenLimit = False
-
-
-class SearchError(Exception):
-    """
-    The widget was not found.
-    """
-
-
-class NotSensitiveError(Exception):
-    """
-    The widget is not sensitive.
-    """
-
-    def __init__(self, action):
-        debug_log("Not Sensitive Error Exception")
-
-        self.message = "Cannot %s %s. It is not sensitive."
-        self.action = action
-
-
-    def __str__(self):
-        return self.message % (self.action.name, self.action.node.getLogString())
-
-
-class ActionNotSupported(Exception):
-    """
-    The widget does not support the requested action.
-    """
-
-    def __init__(self, actionName, node):
-        debug_log("Action Not Supported Exception")
-
-        self.message = "Cannot do '%s' action on %s"
-        self.actionName = actionName
-        self.node = node
-
-
-    def __str__(self):
-        return self.message % (self.actionName, self.node.getLogString())
-
-
-class Action(object):
-    """
-    Class representing an action that can be performed on a specific node.
-    """
-
-    def __init__(self, node, action, index):
-        self.types = ("click", "press", "release", "activate", \
-            "jump", "check", "dock", "undock", "open", "menu")
-
-        global haveBeenWarnedAboutActionTypes
-        if not haveBeenWarnedAboutActionTypes:
-            debug_log("Valid types of actions we know about.\n'%s'.\n" % ",".join(self.types))
-            debug_log("Feel free to add any you see.")
-            haveBeenWarnedAboutActionTypes = True
-
-        self.node = node
-        self.__action = action
-        self.__index = index
-
-
-    @property
-    def name(self):
-        return self.__action.getName(self.__index)
-
-
-    @property
-    def description(self):
-        return self.__action.getDescription(self.__index)
-
-
-    @property
-    def keyBinding(self):
-        return self.__action.getKeyBinding(self.__index)
-
-
-    def __str__(self):
-        return "[action | %s | %s ]" % (self.name, self.keyBinding)
-
-
-    def do(self):
-        """
-        Performs the given tree.Action, with appropriate delays and logging.
-        """
-
-        logger.log(str("%s on %s") % (str(self.name), self.node.getLogString()))
-
-        if not self.node.sensitive:
-            if config.ensureSensitivity:
-                raise NotSensitiveError(self)
-            else:
-                logger.log("Warning " + str(NotSensitiveError(self)))
-
-        if config.blinkOnActions:
-            self.node.blink()
-
-        result = self.__action.doAction(self.__index)
-        doDelay(config.actionDelay)
-
-        return result
+from dogtail.ponytail_helper import ponytail_helper
+from dogtail.rawinput import click, point, double_click
+from dogtail.utils import do_delay
 
 
 class Node(object):
     """
-    A node in the tree of UI elements. This class is mixed in with
-    Accessibility.Accessible to both make it easier to use and to add
-    additional functionality. It also has a debugName which is set up
-    automatically when doing searches.
+    Main dogtail API definition.
     """
 
-    def __setupUserData(self):
+    LOGGING.debug("Initiating dogtail api.")
+
+    event_listeners = {}
+
+    # Keep session as a variable.
+    session_type = "x11"
+    if "XDG_SESSION_TYPE" in os.environ and "wayland" in os.environ["XDG_SESSION_TYPE"]:
+        session_type = "wayland"
+
+
+    # I understand this a little better now.
+    def register_event_listener(self, client, *names):
         """
-        Setup user data dictionary.
+        Register an event listener.
+        In the future we might need to register all event listeners to get updates.
         """
-        try:
-            len(self.user_data)
-        except (AttributeError, TypeError):
-            self.user_data = {}
-
-
-    @property
-    def debugName(self):
-        """
-        Debug name assigned during search operations.
-        """
-
-        self.__setupUserData()
-        return self.user_data.get("debugName", None)
-
-
-    @debugName.setter
-    def debugName(self, debugName):
-        """
-        Debug name setter.
-        """
-
-        self.__setupUserData()
-        self.user_data["debugName"] = debugName
-
-
-    @property
-    def dead(self):
-        """
-        Is the node dead (defunct)?
-        """
-
-        debug_log("dead(self)")
 
         try:
-            if self.roleName == "invalid":
-                return True
-            assert self.role is not None
-            assert self.name is not None
-            if len(self) > 0:
-                assert self.children[0] is not None
+            listener = self.event_listeners[client]
         except Exception:
-            return True
-        return False
+            self.event_listeners[client] = Atspi.EventListener.new(self.dummy_callback)
+            listener = self.event_listeners[client]
+
+        for name in names:
+            # If Newton do X.
+                # Newton.event_listener.register...
+            # else: Do Atspi
+            Atspi.EventListener.register(listener, name)
 
 
-    @property
-    def children(self):
+    # I understand this a little better now.
+    def deregister_event_listener(self, client, *names):
         """
-        A list of this Accessible's children.
+        Register an event listener.
         """
-
-        debug_log("children(self)")
-
-        if self.parent and self.parent.roleName == "hyper link":
-            debug_log(self.parent.role)
-            return []
-
-        children_list = []
-        childCount = self.childCount
-        if childCount > config.childrenLimit:
-            global haveWarnedAboutChildrenLimit
-            if not haveWarnedAboutChildrenLimit:
-                logger.log("Only returning %s children. You may change "
-                           "config.childrenLimit if you wish. This message will only"
-                           " be printed once." % str(config.childrenLimit))
-                haveWarnedAboutChildrenLimit = True
-                childCount = config.childrenLimit
-
-        for i in range(childCount):
-            """
-            Workaround for GNOME bug #465103
-            also solution for GNOME bug #321273
-            """
-
-            try:
-                child = self[i]
-            except LookupError:
-                child = None
-
-            if child:
-                children_list.append(child)
-
-        invalidChildren = childCount - len(children_list)
-        if invalidChildren and config.debugSearching:
-            logger.log(str("Skipped %s invalid children of %s") %
-                       (invalidChildren, str(self)))
 
         try:
-            ht = self.queryHypertext()
-            for li in range(ht.getNLinks()):
-                link = ht.getLink(li)
-                for ai in range(link.nAnchors):
-                    child = link.getObject(ai)
-                    if child == self:
-                        continue
-                    child.__setupUserData()
-                    child.user_data['linkAnchor'] = \
-                        LinkAnchor(node=child,
-                                   hypertext=ht,
-                                   linkIndex=li,
-                                   anchorIndex=ai)
-                    children_list.append(child)
-        except (NotImplementedError, AttributeError):
-            pass
+            listener = self.event_listeners[client]
+        except Exception:
+            return
 
-        return children_list
+        for name in names:
+            # If Newton do X.
+                # Newton.event_listener.deregister...
+            # else: Do Atspi
+            Atspi.EventListener.deregister(listener, name)
+
+
+    # I understand this a little better now.
+    def dummy_callback(self, event):
+        """
+        Define what to do when a registered event is fired.
+        In this case it will print what event was fired and what source was the cause.
+        """
+
+        LOGGING.debug("Dummy callback.")
+
+        # The Atspi object.
+        source = event.source
+
+        if isinstance(source, Atspi.Accessible):
+            try:
+                name = Atspi.Accessible.get_name(source)
+                role_name = Atspi.Accessible.get_role_name(source)
+                source_description = f"source: [ {role_name} | {name} ]"
+            except Exception as e:
+                source_description = f"[DEAD] - '{e}'"
+        else:
+            source_description = ""
+
+        # Not printing any unnamed objects, which will flood the log.
+        if "| ]" not in source_description:
+            print(f"Event: '{event.type}' '{source_description}'")
+
+
+    def do_action(self, index):
+        """
+        Invoke the action indicated by index on the object implementing Atspi.Action.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleActions.do_action(self, index)
+
+
+    def get_action_description(self, index):
+        """
+        Get the description of the index-th Action on the object implementing Atspi.Action.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleActions.get_action_description(self, index)
+
+
+    def get_action_name(self, index):
+        """
+        Get the name of the index-th Action on the object implementing Atspi.Action.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleActions.get_action_description(self, index)
+
+
+    def get_key_binding(self, index):
+        """
+        Get the keybindings of the index-th Action on the object implementing Atspi.Action.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleActions.get_key_binding(self, index)
+
+
+    def get_localized_name(self, index):
+        """
+        Get the localized name of the index-th Action on the object implementing Atspi.Action.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleActions.get_localized_name(self, index)
 
 
     @property
-    def roleName(self):
+    def actions(self):
         """
-        Return the role name of the node, with optional button compatibility.
+        Get dictionary of actions.
         """
-        role_name = Accessibility.Accessible.getRoleName(self)
-        if config.buttonRoleCompat and role_name == "button":
-            return "push button"
-        return role_name
-    role = property(Accessibility.Accessible.getRole)
-    name = property(Accessibility.Accessible.name)
-    parent = property(Accessibility.Accessible.parent)
-    indexInParent = property(Accessibility.Accessible.getIndexInParent)
-    attributesList = property(Accessibility.Accessible.getAttributes)
-    __window_id = None
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleActions.get_actions(self)
+
+
+    def do_action_named(self, named_action):
+        """
+        Invoke the action indicated by its name on the object implementing Atspi.Action.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleActions.do_action_named(self, named_action)
+
+
+    def contains(self, x_coordinate, y_coordinate, coordinate_type=None):
+        """
+        Queries whether a given Atspi.Component contains a particular point.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.contains(self, x_coordinate, y_coordinate, coordinate_type)
+
+
+    def get_accessible_at_point(self, x_coordinate, y_coordinate, coordinate_type=None):
+        """
+        Gets the accessible child at a given coordinate within an Atspi.Component.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.get_accessible_at_point(self, x_coordinate, y_coordinate, coordinate_type)
+
+
+    def get_alpha(self):
+        """
+        Gets the opacity/alpha value of a component, if alpha blending is in use.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.get_alpha(self)
+
+
+    def get_extents(self):
+        """
+        Gets the bounding box of the specified Atspi.Component. The returned values are
+        meaningful only if the Component has both STATE_VISIBLE and STATE_SHOWING.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.get_extents(self)
+
+
+    @property
+    def extents(self):
+        """
+        Gets the bounding box of the specified Atspi.Component. The returned values are
+        meaningful only if the Component has both STATE_VISIBLE and STATE_SHOWING.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return self.get_extents()
+
+
+    def get_layer(self):
+        """
+        Queries which layer the component is painted into, to help determine its
+        visibility in terms of stacking order.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.get_layer(self)
+
+
+    def get_mdi_z_order(self):
+        """
+        Queries the z stacking order of a component which is in the MDI or window layer.
+        (Bigger z-order numbers mean nearer the top)
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.get_mdi_z_order(self)
+
+
+    def get_position(self):
+        """
+        A tuple containing the position of the Accessible: (x, y).
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.get_position(self)
+
+
+    @property
+    def position(self):
+        """
+        A tuple containing the position of the Accessible: (x, y).
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return self.get_position()
+
+
+    def get_size(self):
+        """
+        A tuple containing the size of the Accessible: (w, h)
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.get_size(self)
+
+
+    @property
+    def size(self):
+        """
+        A tuple containing the size of the Accessible: (w, h).
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return self.get_size()
+
+
+    def grab_focus(self):
+        """
+        Grab focus.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.grab_focus(self)
+
+
+    def scroll_to(self, scroll_type):
+        """
+        Scrolls whatever container of the Atspi.Component object so it becomes visible
+        on the screen.
+
+        Atspi.ScrollType.TOP_LEFT = 0
+        Atspi.ScrollType.BOTTOM_RIGHT  = 1
+        Atspi.ScrollType.TOP_EDGE  = 2
+        Atspi.ScrollType.BOTTOM_EDGE  = 3
+        Atspi.ScrollType.LEFT_EDGE  = 4
+        Atspi.ScrollType.RIGHT_EDGE  = 5
+        Atspi.ScrollType.ANYWHERE  = 6
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.scroll_to(self, scroll_type)
+
+
+    def scroll_to_point(self, coordinate_type, x_coordinate, y_coordinate):
+        """
+        Scrolls whatever container of the Atspi.Component object so it becomes visible
+        on the screen.
+
+        Atspi.CoordType.SCREEN = 0
+        Atspi.CoordType.WINDOW = 1
+        Atspi.CoordType.PARENT = 2
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.scroll_to_point(
+            self,
+            coordinate_type,
+            x_coordinate,
+            y_coordinate
+        )
+
+
+    def set_extents(self, x_coordinate, y_coordinate, width, height, coordinate_type):
+        """
+        Moves and resizes the specified component.
+
+        Atspi.CoordType.SCREEN = 0
+        Atspi.CoordType.WINDOW = 1
+        Atspi.CoordType.PARENT = 2
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.set_extents(
+            self,
+            x_coordinate,
+            y_coordinate,
+            width,
+            height,
+            coordinate_type
+        )
+
+
+    def set_position(self, x_coordinate, y_coordinate, coordinate_type):
+        """
+        Moves the component to the specified position.
+
+        Atspi.CoordType.SCREEN = 0
+        Atspi.CoordType.WINDOW = 1
+        Atspi.CoordType.PARENT = 2
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.set_position(
+            self,
+            x_coordinate,
+            y_coordinate,
+            coordinate_type
+        )
+
+
+    def set_size(self,width, height):
+        """
+        Resizes the specified component to the given pixel dimensions.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.set_size(self, width, height)
+
+
+    def get_center(self):
+        """
+        A tuple containing the center of the Accessible: (x, y).
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleComponent.get_center(self)
+
+
+    @property
+    def center(self):
+        """
+        A tuple containing the center of the Accessible: (x, y).
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return self.get_center()
+
+
+    def copy_text(self, start_position=None, end_position=None):
+        """
+        Copies text from an Atspi.EditableText object into the system clipboard.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleEditableText.copy_text(self, start_position, end_position)
+
+
+    def cut_text(self, start_position=None, end_position=None):
+        """
+        Deletes text from an Atspi.EditableText object, copying the excised portion into
+        the system clipboard.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleEditableText.cut_text(self, start_position, end_position)
+
+
+    def delete_text(self, start_position=None, end_position=None):
+        """
+        Deletes text from an Atspi.EditableText object, without copying the excised
+        portion into the system clipboard.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleEditableText.delete_text(self, start_position, end_position)
+
+
+    def insert_text(self, text, position=0, length=0):
+        """
+        Inserts text into an Atspi.EditableText object. As with all character offsets,
+        the specified position may not be the same as the resulting byte offset, since
+        the text is in a variable-width encoding.
+
+        Deliberately moving parameters around so that the text is first.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleEditableText.insert_text(self, text, position, length)
+
+
+    def paste_text(self, position):
+        """
+        Inserts text from the system clipboard into an Atspi.EditableText object. As
+        with all character offsets, the specified position may not be the same as the
+        resulting byte offset, since the text is in a variable-width encoding.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleEditableText.paste_text(self, position)
+
+
+    def set_text_contents(self, new_contents):
+        """
+        Replace the entire text contents of an Atspi.EditableText object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleEditableText.set_text_contents(self, new_contents)
+
+
+    def get_link(self, link_index):
+        """
+        Gets the Atspi.Hyperlink object at a specified index.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleHypertext.get_link(self, link_index)
+
+
+    def get_link_index(self, character_offset):
+        """
+        Gets the index of the Atspi.Hyperlink object at a specified character offset.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleHypertext.get_link_index(self, character_offset)
+
+
+    def get_n_links(self):
+        """
+        Gets the total number of Atspi.Hyperlink objects that an Atspi.Hypertext
+        implementor has.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleHypertext.get_n_links(self)
+
+
+    def get_image_description(self):
+        """
+        Gets the description of the image displayed in an Atspi.Image object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleImage.get_image_description(self)
+
+
+    def get_image_extents(self, coordinate_type=None):
+        """
+        Gets the bounding box of the image displayed in a specified Atspi.Image
+        implementor. The returned values are meaningful only if the Image has both
+        STATE_VISIBLE and STATE_SHOWING.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleImage.get_image_extents(self, coordinate_type)
+
+
+    def get_image_locale(self):
+        """
+        Gets the locale associated with an image and its textual representation.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleImage.get_image_locale(self)
+
+
+    def get_image_position(self, coordinate_type=None):
+        """
+        Gets the minimum x and y coordinates of the image displayed in a specified
+        Atspi.Image implementor. The returned values are meaningful only if the Image
+        has both STATE_VISIBLE and STATE_SHOWING.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleImage.get_image_position(self, coordinate_type)
+
+
+    def get_image_size(self):
+        """
+        Gets the size of the image displayed in a specified Atspi.Image object.
+        The returned values are meaningful only if the Image has both STATE_VISIBLE and
+        STATE_SHOWING.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleImage.get_image_size(self)
+
+
+    def clear_selection(self):
+        """
+        Clears the current selection, removing all selected children from the specified
+        Atspi.Selection implementor's selection list.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleSelection.clear_selection(self)
+
+
+    def deselect_all(self):
+        """
+        Deselects all children.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return self.clear_selection()
+
+
+    def deselect_child(self, child_index):
+        """
+        Deselects a specific child of an Atspi.Selection. Note that child_index is the
+        index of the child in the parent container.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleSelection.deselect_child(self, child_index)
+
+
+    def deselect_selected_child(self, child_index):
+        """
+        Removes a child from the selected children list of an Atspi.Selection. Note that
+        selected_child_index is the index in the selected-children list, not the index
+        in the parent container. selected_child_index in this method, and child_index in
+        Atspi.Selection.select_child are asymmetric.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleSelection.deselect_selected_child(self, child_index)
+
+
+    def get_n_selected_children(self):
+        """
+        Gets the number of children of an Atspi.Selection implementor which are
+        currently selected.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleSelection.get_n_selected_children(self)
+
+
+    def get_selected_child(self, selected_child_index):
+        """
+        Gets the i-th selected Atspi.Accessible child of an Atspi.Selection. Note that
+        selected_child_index refers to the index in the list of 'selected' children and
+        generally differs from that used in Atspi.Accessible.get_child_at_index or
+        returned by Atspi.Accessible.get_index_in_parent. selected_child_index must lie
+        between 0 and Atspi.Selection.get_n_selected_children - 1, inclusive.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleSelection.get_selected_child(self, selected_child_index)
+
+
+    def is_child_selected(self, child_index):
+        """
+        Determines whether a particular child of an Atspi.Selection implementor is
+        currently selected. Note that child_index is the index into the standard
+        Atspi.Accessible container's list of children.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleSelection.is_child_selected(self, child_index)
+
+
+    def select_all(self):
+        """
+        Attempts to select all of the children of an Atspi.Selection implementor. Not
+        all Atspi.Selection implementors support this operation.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleSelection.select_all(self)
+
+
+    def select_child(self, child_index):
+        """
+        Adds a child to the selected children list of an Atspi.Selection. For
+        Atspi.Selection implementors that only allow single selections, this may replace
+        the (single) current selection.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleSelection.select_child(self, child_index)
+
+
+    def select(self):
+        """
+        Selects a child.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleSelection.select(self)
+
+
+    def deselect(self):
+        """
+        Deselects a child.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleSelection.deselect(self)
+
+
+    @property
+    def active(self):
+        """
+        Indicates this object can accept keyboard focus, which means all events
+        resulting from typing on the keyboard will normally be passed to it when it has
+        focus.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleState.get_active(self)
+
+
+    @property
+    def focusable(self):
+        """
+        Indicates this object can accept keyboard focus, which means all events
+        resulting from typing on the keyboard will normally be passed to it when it has
+        focus.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleState.get_focusable(self)
+
+
+    @property
+    def focused(self):
+        """
+        Indicates this object currently has the keyboard focus.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleState.get_focused(self)
+
+
+    @property
+    def pressed(self):
+        """
+        Indicates this object is currently pressed.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleState.get_pressed(self)
+
+
+    @property
+    def resizable(self):
+        """
+        Indicates the size of this object's size is not fixed.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleState.get_resizable(self)
+
+
+    @property
+    def selected(self):
+        """
+        Indicates this object is selected..
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleState.get_selected(self)
+
+
+    @property
+    def selectable(self):
+        """
+        Indicates this object is selected..
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleState.get_selectable(self)
+
+
+    @property
+    def sensitive(self):
+        """
+        Indicates this object is sensitive, e.g. to user interaction.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleState.get_sensitive(self)
+
+
+    @property
+    def showing(self):
+        """
+        Indicates this object, the object's parent, the object's parent's parent, and
+        so on, are all 'shown' to the end-user, i.e. subject to “exposure” if blocking
+        or obscuring objects do not interpose between this object and the top of the
+        window stack.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleState.get_showing(self)
+
+
+    @property
+    def visible(self):
+        """
+        Indicates this object is visible, e.g. has been explicitly marked for exposure
+        to the user.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleState.get_visible(self)
+
+
+    @property
+    def checked(self):
+        """
+        Indicates this object is currently checked.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleState.get_checked(self)
+
+
+    @property
+    def checkable(self):
+        """
+        Indicates this object has the potential to be checked, such as a checkbox or
+        toggle-able table cell.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleState.get_checkable(self)
+
+
+    @property
+    def read_only(self):
+        """
+        Indicates that an object which is ENABLED and SENSITIVE has a value which can be
+        read, but not modified, by the user.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleState.get_read_only(self)
+
+
+    @property
+    def collapsed(self):
+        """
+        Indicates this object is collapsed.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleState.get_collapsed(self)
+
+
+    @property
+    def editable(self):
+        """
+        Indicates the user can change the contents of this object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleState.get_editable(self)
+
+
+    @property
+    def armed(self):
+        """
+        Indicates that the object is armed.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleState.get_armed(self)
+
+
+    @property
+    def invalid(self):
+        """
+        Indicates that the object is invalid.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleState.get_invalid(self)
+
+
+    @property
+    def state_set(self):
+        """
+        Get states.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleState.get_accessible_states(self)
+
+
+    def add_column_selection(self, column):
+        """
+        Selects the specified column, adding it to the current column selection. Not
+        all tables support column selection.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.add_column_selection(self, column)
+
+
+    def add_row_selection(self, row):
+        """
+        Selects the specified row, adding it to the current row selection. Not all
+        tables support row selection.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.add_row_selection(self, row)
+
+
+    def get_accessible_at(self, row, column):
+        """
+        Gets the table cell at the specified row and column indices. To get the
+        accessible object at a particular (x, y) screen coordinate, use
+        Atspi.Component.get_accessible_at_point.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.get_accessible_at(self, row, column)
+
+
+    def get_caption(self):
+        """
+        Gets an accessible representation of the caption for an Atspi.Table.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.get_caption(self)
+
+
+    def get_column_at_index(self, index):
+        """
+        Gets the table column index occupied by the child at a particular 1-D child
+        index. See Atspi.Table.get_index_at, Atspi.Table.get_row_at_index.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.get_column_at_index(self, index)
+
+
+    def get_column_description(self, column):
+        """
+        Gets a text description of a particular table column. This differs from
+        Atspi.Table.get_column_header, which returns an #Accessible.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.get_column_description(self, column)
+
+
+    def get_column_extent_at(self, row, column):
+        """
+        Gets the number of columns spanned by the table cell at the specific row and
+        column (some tables can have cells which span multiple rows and/or columns).
+        The returned values are meaningful only if the Table has both STATE_VISIBLE and
+        STATE_SHOWING.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.get_column_extent_at(self, row, column)
+
+
+    def get_column_header(self, column):
+        """
+        Gets the header associated with a table column, if available. This differs from
+        Atspi.Table.get_column_description, which returns a string.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.get_column_header(self, column)
+
+
+    def get_index_at(self, row, column):
+        """
+        Gets the 1-D child index corresponding to the specified 2-D row and column
+        indices. To get the accessible object at a particular (x, y) screen coordinate,
+        use Atspi.Component.get_accessible_at_point. See Atspi.Table.get_row_at_index,
+        Atspi.Table.get_column_at_index
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.get_index_at(self, row, column)
+
+
+    def get_n_columns(self):
+        """
+        Gets the number of columns in an Atspi.Table, exclusive of any columns that are
+        programmatically hidden, but inclusive of columns that may be outside of the
+        current scrolling window or viewport.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.get_n_columns(self)
+
+
+    def get_n_rows(self):
+        """
+        Gets the number of rows in an Atspi.Table, exclusive of any rows that are
+        programmatically hidden, but inclusive of rows that may be outside of the
+        current scrolling window or viewport.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.get_n_rows(self)
+
+
+    def get_n_selected_columns(self):
+        """
+        Queries a table to find out how many columns are currently selected. Not all
+        tables support column selection.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.get_n_selected_columns(self)
+
+
+    def get_n_selected_rows(self):
+        """
+        Query a table to find out how many rows are currently selected. Not all tables
+        support row selection.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.get_n_selected_rows(self)
+
+
+    def get_row_at_index(self, index):
+        """
+        Gets the table row index occupied by the child at a particular 1-D child index.
+        See Atspi.Table.get_index_at, Atspi.Table.get_column_at_index.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.get_row_at_index(self, index)
+
+
+    def get_row_column_extents_at_index(self, index):
+        """
+        Given a child index, determines the row and column indices and extents, and
+        whether the cell is currently selected. If the child at index is not a cell
+        (for instance, if it is a summary, caption, etc.), False is returned.
+        The returned values are meaningful only if the Table has both STATE_VISIBLE and
+        STATE_SHOWING.
+
+        Return type:
+
+        (bool, row: int, col: int, row_extents: int, col_extents: int, is_selected: bool)
+
+        Example: If the Atspi.Table child at index '6' extends across columns 5 and 6 of
+        row 2 of an Atspi.Table instance, and is currently selected, then
+
+        retval = Atspi.Table.get_row_column_extents_at_index
+        (table, 6, row, col, row_extents, col_extents, is_selected);
+
+        will return True, and after the call row, col, row_extents, col_extents, and
+        is_selected will contain 2, 5, 1, 2, and True, respectively.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.get_row_column_extents_at_index(self, index)
+
+
+    def get_row_description(self, row):
+        """
+        Gets a text description of a particular table row. This differs from
+        Atspi.Table.get_row_header, which returns an Atspi.Accessible.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.get_row_description(self, row)
+
+
+    def get_row_extent_at(self, row, column):
+        """
+        Gets the number of rows spanned by the table cell at the specific row and
+        column. (some tables can have cells which span multiple rows and/or columns).
+        The returned values are meaningful only if the Table has both STATE_VISIBLE and
+        STATE_SHOWING.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.get_row_extent_at(self, row, column)
+
+
+    def get_row_header(self, row):
+        """
+        Gets the header associated with a table row, if available. This differs from
+        Atspi.Table.get_row_description, which returns a string.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.get_row_header(self, row)
+
+
+    def get_selected_columns(self):
+        """
+        Queries a table for a list of indices of columns which are currently selected.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.get_selected_columns(self)
+
+
+    def get_selected_rows(self):
+        """
+        Queries a table for a list of indices of rows which are currently selected.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.get_selected_rows(self)
+
+
+    def get_summary(self):
+        """
+        Gets an accessible object which summarizes the contents of an Atspi.Table.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.get_summary(self)
+
+
+    def is_column_selected(self, column):
+        """
+        Determines whether specified table column is selected. Not all tables support
+        column selection.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.is_column_selected(self, column)
+
+
+    def is_row_selected(self, row):
+        """
+        Determines whether a table row is selected. Not all tables support row
+        selection.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.is_row_selected(self, row)
+
+
+    def is_selected(self, row, column):
+        """
+        Determines whether the cell at a specific row and column is selected.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.is_selected(self, row, column)
+
+
+    def remove_column_selection(self, column):
+        """
+        De-selects the specified column, removing it from the current column selection.
+        Not all tables support column selection.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.remove_column_selection(self, column)
+
+
+    def remove_row_selection(self, row):
+        """
+        De-selects the specified row, removing it from the current row selection. Not
+        all tables support row selection.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTable.remove_row_selection(self, row)
+
+
+    def get_column_header_cells(self):
+        """
+        Returns the column headers as an array of cell accessibles.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTableCell.get_column_header_cells(self)
+
+
+    def get_column_index(self):
+        """
+        Returns the column index.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTableCell.get_column_index(self)
+
+
+    def get_column_span(self):
+        """
+        Returns the number of columns occupied by this cell accessible. The returned
+        values are meaningful only if the table cell has both STATE_VISIBLE and
+        STATE_SHOWING.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTableCell.get_column_span(self)
+
+
+    def get_cell_position(self):
+        """
+        Retrieves the tabular position of this cell.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTableCell.get_position(self)
+
+
+    def get_row_column_span(self):
+        """
+        Gets the row and column indexes and extents of this cell accessible.
+        The returned values are meaningful only if the table cell has both STATE_VISIBLE
+        and STATE_SHOWING.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTableCell.get_row_column_span(self)
+
+
+    def get_row_header_cells(self):
+        """
+        Returns the row headers as an array of cell accessibles.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTableCell.get_row_header_cells(self)
+
+
+    def get_row_span(self):
+        """
+        Returns the number of rows occupied by this cell accessible. The returned values
+        are meaningful only if the table cell has both STATE_VISIBLE and STATE_SHOWING.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTableCell.get_row_span(self)
+
+
+    def get_table(self):
+        """
+        Returns a reference to the accessible of the containing table.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleTableCell.get_table(self)
+
+
+    def add_selection(self, start_offset, end_offset):
+        """
+        Selects some text (adds a text selection) in an Atspi.Text object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.add_selection(self, start_offset, end_offset)
+
+
+    def get_attribute_run(self, offset, include_defaults):
+        """
+        Gets a set of attributes applied to a range of text from an Atspi.Text object,
+        optionally including its 'default' attributes.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_attribute_run(self, offset, include_defaults)
+
+
+    def get_bounded_ranges(self, x, y, width, height, coord_type, clip_type_x, clip_type_y):
+        """
+        Gets the ranges of text from an Atspi.Text object which lie within the bounds
+        defined by (x, y) and (x+'width', y+'height').
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_bounded_ranges(
+            self,
+            x,
+            y,
+            width,
+            height,
+            coord_type,
+            clip_type_x,
+            clip_type_y
+        )
+
+
+    def get_caret_offset(self):
+        """
+        Gets the current offset of the text caret in an Atspi.Text object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_caret_offset(self)
+
+
+    def get_character_at_offset(self, offset):
+        """
+        Gets the character at a given offset for an Atspi.Text object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_character_at_offset(self, offset)
+
+
+    def get_character_count(self):
+        """
+        Gets the character count of an #AccessibleText object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_character_count(self)
+
+
+    def get_character_extents(self, offset, coord_type):
+        """
+        Gets a bounding box containing the glyph representing the character at a
+        particular text offset. The returned values are meaningful only if the Text has
+        both STATE_VISIBLE and STATE_SHOWING.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_character_extents(self, offset, coord_type)
+
+
+    def get_default_attributes(self):
+        """
+        Gets the default attributes applied to an Atspi.Text object. The text attributes
+        correspond to CSS attributes where possible. The combination of this attribute
+        set and the attributes reported by Atspi.Text.get_text_attributes describes the
+        entire set of text attributes over a range.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_default_attributes(self)
+
+
+    def get_n_selections(self):
+        """
+        Gets the number of active non-contiguous selections for an Atspi.Text object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_n_selections(self)
+
+
+    def get_offset_at_point(self, x, y, coord_type):
+        """
+        Gets the character offset into the text at a given point.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_offset_at_point(self, x, y, coord_type)
+
+
+    def get_range_extents(self, start_offset, end_offset, coord_type):
+        """
+        Gets the bounding box for text within a range in an Atspi.Text object.
+        The returned values are meaningful only if the Text has both STATE_VISIBLE and
+        STATE_SHOWING.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_range_extents(self, start_offset, end_offset, coord_type)
+
+
+    def get_selection(self, selection_num):
+        """
+        Gets the bounds of the selection_num-th active text selection for an Atspi.Text
+        object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_selection(self, selection_num)
+
+
+    def get_string_at_offset(self, offset, granularity):
+        """
+        Gets a portion of the text exposed through an Atspi.Text according to a given
+        offset and a specific granularity, along with the start and end offsets defining
+        the boundaries of such a portion of text.
+
+        New in version Atspi 2.9.90.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_string_at_offset(self, offset, granularity)
+
+
+    def get_text(self, start_offset, end_offset):
+        """
+        Gets a range of text from an Atspi.Text object. The number of bytes in the
+        returned string may exceed either end_offset or start_offset, since UTF-8 is a
+        variable-width encoding.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_text(self, start_offset, end_offset)
+
+
+    def get_text_after_offset(self, offset, coord_type):
+        """
+        Gets delimited text from an Atspi.Text object which follows a given text offset.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_text_after_offset(self, offset, coord_type)
+
+
+    def get_text_at_offset(self, offset, coord_type):
+        """
+        Gets delimited text from an Atspi.Text object which includes a given text
+        offset.
+
+        Deprecated since version 2.10. Use Atspi.Text.get_string_at_offset.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_text_at_offset(self, offset, coord_type)
+
+
+    def get_text_attribute_value(self, offset, attribute_name):
+        """
+        Gets the value of a named attribute at a given offset.
+
+        Deprecated since version 2.10: Use Atspi.Text.get_text_attribute_value instead.
+
+        Note: The deprecation note what to use seems wrong.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_text_attribute_value(self, offset, attribute_name)
+
+
+    def get_text_attributes(self, offset):
+        """
+        Gets the attributes applied to a range of text from an Atspi.Text object.
+        The text attributes correspond to CSS attributes where possible.
+
+        Deprecated since version 2.10: Use Atspi.Text.get_text_attributes instead.
+
+        Note: The deprecation note what to use seems wrong.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_text_attributes(self, offset)
+
+
+    def get_text_before_offset(self, offset, coord_type):
+        """
+        Gets delimited text from an Atspi.Text object which precedes a given text
+        offset.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_text_before_offset(self, offset, coord_type)
+
+
+    def remove_selection(self, selection_num):
+        """
+        De-selects a text selection.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.remove_selection(self, selection_num)
+
+
+    def scroll_substring_to(self, start_offset, end_offset, coord_type):
+        """
+        Scrolls whatever container of the Atspi.Text text range so it becomes visible
+        on the screen.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.scroll_substring_to(self, start_offset, end_offset, coord_type)
+
+
+    def scroll_substring_to_point(self, start_offset, end_offset, coord_type, x, y):
+        """
+        Scrolls whatever container of the Atspi.Text text range so it becomes visible
+        on the screen at a given position.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.scroll_substring_to_point(
+            self,
+            start_offset,
+            end_offset,
+            coord_type,
+            x,
+            y
+        )
+
+
+    def set_caret_offset(self, new_offset):
+        """
+        Moves the text caret to a given position.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.set_caret_offset(self, new_offset)
+
+
+    def set_selection(self, selection_num, start_offset, end_offset):
+        """
+        Changes the bounds of an existing Atspi.Text text selection.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.set_selection(self, selection_num, start_offset, end_offset)
+
+
+    @property
+    def text(self):
+        """
+        Define a 'text' property for Atspi object.
+        """
+
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleText.get_all_text(self)
+
+
+    @text.setter
+    def text(self, content):
+        """
+        Define a 'text' setter for Atspi.Text object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleEditableText.set_text_contents(self, content)
+
+
+    def get_current_value(self):
+        """
+        Gets the current value for an Atspi.Value.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleValue.get_current_value(self)
+
+
+    @property
+    def value(self):
+        """
+        Gets the current value for an Atspi.Value.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return self.get_current_value()
+
+
+    @value.setter
+    def value(self, new_value):
+        """
+        Gets the current value for an Atspi.Value.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleValue.set_current_value(self, new_value)
+
+
+    def get_maximum_value(self):
+        """
+        Gets the maximum allowed value for an Atspi.Value.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleValue.get_maximum_value(self)
+
+
+    @property
+    def max_value(self):
+        """
+        Gets the maximum allowed value for an Atspi.Value.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return self.get_maximum_value()
+
+
+    def get_minimum_increment(self):
+        """
+        Gets the minimum increment by which an Atspi.Value can be adjusted.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleValue.get_minimum_increment(self)
+
+
+    @property
+    def min_value_increment(self):
+        """
+        Gets the minimum increment by which an Atspi.Value can be adjusted.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return self.get_minimum_increment()
+
+
+    def get_minimum_value(self):
+        """
+        Gets the minimum allowed value for an Atspi.Value.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleValue.get_minimum_value(self)
+
+
+    @property
+    def min_value(self):
+        """
+        Gets the minimum allowed value for an Atspi.Value.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return self.get_minimum_value()
+
+
+    @property
+    def toolkit(self):
+        """
+        Return string description of the toolkit we are using.
+        """
+
+        # TODO revisit, this will flood logs on position query.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleUtilities.get_toolkit(self)
 
 
     @property
     def window_id(self):
         """
-        Return window id of a node.
+        Return window_id of a node.
         """
 
-        debug_log("window_id(self)")
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
-        if SESSION_TYPE == "x11":
-            return None
-
-        if self.__window_id is None:
-            debug_log("Window id event.")
-
-            window_list = ponytail.window_list
-            if len(window_list) == 0:
-                doDelay(config.actionDelay)
-                window_list = ponytail.window_list
-
-            for window in window_list:
-                if "title" not in window.keys():
-                    window["title"] = ""
-
-            node = self
-            parent_list = [node]
-            while node.parent is not None:
-                parent_list.append(node.parent)
-                node = node.parent
-
-            for ancestor in parent_list:
-                if ancestor.parent is None:
-                    self.__window_id = [x["id"] for x in window_list if bool(x["has-focus"]) is True][0]
-                    return [x["id"] for x in window_list if bool(x["has-focus"]) is True][0]
-
-                elif ancestor.parent.roleName == "application" and ancestor.parent.name == "gnome-shell":
-                    return ""
-
-                elif ancestor.parent.roleName == "application" and ancestor.roleName == "window" and ancestor.name == "":
-                    self.__window_id = [x["id"] for x in window_list if bool(x["has-focus"]) is True][0]
-                    return [x["id"] for x in window_list if bool(x["has-focus"]) is True][0] # context menus
-
-                elif ancestor.parent.roleName == "application" and ancestor.name in [x["title"] for x in window_list]:
-                    self.__window_id = [x["id"] for x in window_list if x["title"] == ancestor.name][0]
-                    return [x["id"] for x in window_list if x["title"] == ancestor.name][0]
-
-                elif ancestor.parent.roleName == "application":
-                    self.__window_id = [x["id"] for x in window_list if bool(x["has-focus"]) is True][0]
-                    return [x["id"] for x in window_list if bool(x["has-focus"]) is True][0]
-
-        else:
-            return self.__window_id
+        return ponytail_helper.get_window_id(self)
 
 
     @property
@@ -408,387 +1762,263 @@ class Node(object):
         Check if window is focused.
         """
 
-        debug_log("window_has_focus(self)")
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
-        if SESSION_TYPE == "wayland":
-            window_id = self.window_id
-
-            window_list = ponytail.window_list
-            for window in window_list:
-                if window["id"] == window_id and bool(window["has-focus"]) is True:
-                    return True
-
+        if self.session_type != "wayland":
+            LOGGING.info("Ponytail is not used in non Wayland session.")
             return False
 
-        else:
-            raise NotImplementedError
-
-
-    def doActionNamed(self, name):
-        """
-        Perform the action with the specified name. For a list of actions
-        supported by this instance, check the 'actions' property.
-        """
-
-        debug_log("doActionNamed(self, name=%s)" % str(name))
-
-        actions = self.actions
-        if name in actions:
-            return actions[name].do()
-
-        raise ActionNotSupported(name, self)
+        return ponytail_helper.get_window_has_focus()
 
 
     @property
-    def actions(self):
+    def id(self):
         """
-        A dictionary of supported action names as keys, with Action objects as
-        values. Common action names include:
-            'click' 'press' 'release' 'activate' 'jump'
-            'check' 'dock' 'undock' 'open' 'menu'
+        Define a 'id' property for Atspi object.
         """
 
-        debug_log("actions(self)")
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
-        actions = {}
+        return AccessibleObject.get_id(self)
 
+
+    @property
+    def accessible_id(self):
+        """
+        Define a 'accessible_id' property for Atspi object.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.get_accessible_id(self)
+
+
+    @property
+    def name(self):
+        """
+        Define a 'name' property for Atspi object.
+        """
+
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.get_name(self)
+
+
+    @property
+    def role(self):
+        """
+        Define a 'role property for Atspi object.
+        """
+
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.get_role(self)
+
+
+    @property
+    def role_name(self):
+        """
+        Define a 'role_name' property for Atspi object.
+        """
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.get_role_name(self)
+
+
+    @property
+    def description(self):
+        """
+        Define a 'description' property for Atspi object.
+        """
+
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.get_description(self)
+
+
+    @property
+    def parent(self):
+        """
+        Define a 'parent' property for Atspi object.
+        """
+
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.get_parent(self)
+
+
+    @property
+    def index_in_parent(self):
+        """
+        Define a 'index_in_parent' property for Atspi object.
+        """
+
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.get_index_in_parent(self)
+
+
+    @property
+    def attributes(self):
+        """
+        Define a 'attributes' property for Atspi object.
+        """
+
+        return AccessibleObject.get_attributes(self)
+
+
+    @property
+    def attributes_as_array(self):
+        """
+        Define a 'attributes_as_array' property for Atspi object.
+        """
+
+        return AccessibleObject.get_attributes_as_array(self)
+
+
+    @property
+    def children(self):
+        """
+        Creating children easy navigation when required.
+        """
+
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
+        #LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.get_children(self)
+
+
+    @property
+    def dead(self):
+        """
+        Is the node dead (defunct)?
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.is_dead(self)
+
+
+    def child(self, name=None, role_name=None, description=None, label=None, **kwargs):
+        """
+        Find a single child satisfying the name role_name or description.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        using_identifier = None
+        using_role_name = role_name
+        # === Backward compatibility and extra parameters ===
+        for key, val in kwargs.items():
+            if "roleName" in str(key):
+                using_role_name = val
+
+            if "identifier" in str(key):
+                using_identifier = val
+        # ===================================================
+
+        predicate = GenericPredicate(
+            name=name,
+            role_name=using_role_name,
+            description=description,
+            label=label,
+            identifier=using_identifier
+        )
+
+        return AccessibleObject.find_descendant(self, predicate, **kwargs)
+
+
+    def is_child(self, name=None, role_name=None, description=None, label=None, **kwargs):
+        """
+        Determines whether a child satisfying the given criteria exists.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        using_identifier = None
+        using_role_name = role_name
+        # === Backward compatibility and extra parameters ===
+        for key, val in kwargs.items():
+            if "roleName" in str(key):
+                using_role_name = val
+
+            if "identifier" in str(key):
+                using_identifier = val
+        # ===================================================
+
+        predicate = GenericPredicate(
+            name=name,
+            role_name=using_role_name,
+            description=description,
+            label=label,
+            identifier=using_identifier
+        )
+
+        # Execute the search.
         try:
-            action_query = self.queryAction()
-            for index in range(action_query.nActions):
-                action_object = Action(self, action_query, index)
-                actions[action_query.getName(index)] = action_object
-        finally:
-            debug_log("If actions are empty there could have been an exception.")
-            return actions
-
-
-    @property
-    def combovalue(self):
-        """
-        The value (as a string) currently selected in the combo box.
-        """
-
-        debug_log("combovalue(self)")
-
-        return self.name
-
-
-    @combovalue.setter
-    def combovalue(self, value):
-        logger.log(str("Setting combobox %s to '%s'") % (self.getLogString(), str(value)))
-
-        self.childNamed(childName=value).doActionNamed("click")
-        doDelay()
-
-
-    @property
-    def URI(self):
-        """
-        The value of user data linkAnchor.
-        """
-
-        debug_log("URI(self)")
-
-        try:
-            return self.user_data["linkAnchor"].URI
-        except (KeyError, AttributeError):
-            raise NotImplementedError
-
-
-    @property
-    def text(self):
-        """
-        For instances with an AccessibleText interface, the text as a
-        string. This is read-only, unless the instance also has an
-        AccessibleEditableText interface. In this case, you can write values
-        to the attribute. This will get logged in the debug log, and a delay
-        will be added.
-
-        If this instance corresponds to a password entry, use the passwordText
-        property instead.
-        """
-
-        debug_log("text(self)")
-
-        try:
-            return self.queryText().getText(0, self.get_character_count())
-        except NotImplementedError:
-            return None
-
-
-    @text.setter
-    def text(self, text):
-        try:
-            if config.debugSearching:
-                setter_message = "Setting text of %s to '%s'"
-
-                debug_log("Maximum length is set at 140, cutting the text after.")
-                if len(text) > 140:
-                    txt = text[:134] + " [...]"
-                else:
-                    txt = text
-
-                logger.log(str(setter_message) % (self.getLogString(), str("'%s'") % str(txt)))
-
-            self.queryEditableText().setTextContents(text)
-        except NotImplementedError:
-            raise AttributeError("can't set attribute")
-
-
-    @property
-    def caretOffset(self):
-        """
-        For instances with an AccessibleText interface, the caret offset as an integer.
-        """
-
-        debug_log("caretOffset(self)")
-
-        return self.queryText().caretOffset
-
-
-    @caretOffset.setter
-    def caretOffset(self, offset):
-        """
-        Caret offset setter.
-        """
-
-        debug_log("caretOffset(self, offset=%s)" % str(offset))
-
-        return self.queryText().setCaretOffset(offset)
-
-
-    @property
-    def position(self):
-        """
-        A tuple containing the position of the Accessible: (x, y)
-        """
-
-        debug_log("position(self)")
-
-        # Always start with DESKTOP_COORDS to detect GTK4 app
-        pos = self.queryComponent().getPosition(pyatspi.DESKTOP_COORDS)
-
-        # Check if it's a GTK4 app by detecting the initial position as (0,0)
-        if pos == (0,0):
-            if self.name == "Activities" and (self.roleName == "label" or self.roleName == "toggle button"):
-                # specil case of the Activities in the corner... will not be gtk4
-                return pos
-            gtk4Offset = config.gtk4Offset
-            # Determine if *this* node is a part of a full-screen frame
-            fullscreen_offset = (0, 0) # No offset fullscreen, shadows or not!
-            node = self  # Assuming 'self' is the current node
-            try:
-                from dogtail.utils import get_screen_resolution
-                screen_width, _ = get_screen_resolution()
-                while node:
-                    if node.roleName == "frame":
-                        frame_width, frame_height = node.size
-                        if frame_width == screen_width:
-                            gtk4Offset = fullscreen_offset
-                        break
-                    node = node.parent  # Traverse up to check for frame ancestors
-            except Exception:
-                pass
-            # For x11 session, calculate position using WINDOW_COORDS, add up with window possition
-            # and finally apply offset if not fullscreen
-            if SESSION_TYPE == "x11":
-                pos = self.queryComponent().getPosition(pyatspi.WINDOW_COORDS)
-                from dogtail.utils import get_current_x_window_position
-                base_x, base_y = get_current_x_window_position()
-                # Add both gtk4Offset and the current x window position
-                pos = (pos[0] + base_x + gtk4Offset[0], pos[1] + base_y + gtk4Offset[1])
-            else:
-                # For wayland, if it's still (0,0) return that, otherwise adjust offset directly
-                pos = self.queryComponent().getPosition(pyatspi.WINDOW_COORDS)
-                if pos != (0,0):
-                    pos = (pos[0] + gtk4Offset[0], pos[1] + gtk4Offset[1])
-
-        # Return the position as determined above
-        return pos
-
-
-    @property
-    def size(self):
-        """
-        A tuple containing the size of the Accessible: (w, h)
-        """
-
-        debug_log("size(self)")
-
-        if SESSION_TYPE == "wayland":
-            if self.roleName == "window" or self.roleName == "dialog" or self.roleName == "frame":
-                window_list = ponytail.window_list
-                window_id = self.window_id
-                for window in window_list:
-                    if window["id"] == window_id:
-                        return (int(window["width"]), int(window["height"]))
-
-        return self.queryComponent().getSize()
-
-
-    @property
-    def extents(self):
-        """
-        A tuple containing the location and size of the Accessible: (x, y, w, h)
-        """
-
-        debug_log("extents(self)")
-
-        try:
-            ex = self.queryComponent().getExtents(pyatspi.DESKTOP_COORDS)
-            if (ex.x, ex.y) == (0,0):
-                ex = self.queryComponent().getExtents(pyatspi.WINDOW_COORDS)
-                pos = self.position
-                return (pos[0], pos[1], ex.width, ex.height)
-            return (ex.x, ex.y, ex.width, ex.height)
-        except NotImplementedError:
-            return None
-
-    @property
-    def center(self):
-        """
-        A tuple containing the center position of the Accessible:(x, y)
-        """
-
-        debug_log("center(self)")
-
-        x, y, w, h = self.extents
-        return x + w / 2, y + h / 2
-
-    def contains(self, x, y):
-        """
-        Can tell if and x and y coordinates are inside a desktop coordinates.
-        """
-
-        debug_log("contains(self, x=%s, y=%s)" % (str(x), str(y)))
-
-        try:
-            return self.queryComponent().contains(x, y, pyatspi.DESKTOP_COORDS)
-        except NotImplementedError:
+            # We do not care about a result here, just existence.
+            AccessibleObject.find_descendant(self, predicate, **kwargs)
+            return True
+        except SearchError:
             return False
 
 
-    def getChildAtPoint(self, x, y):
+    def find_ancestor(self, predicate, **kwargs):
         """
-        Get a child in coordinates x, y.
-        """
-
-        debug_log("getChildAtPoint(self, x=%s, y=%s)" % (str(x), str(y)))
-
-        node = self
-        while True:
-            try:
-                child = node.queryComponent().getAccessibleAtPoint(x, y, pyatspi.DESKTOP_COORDS)
-                if child and child.contains(x, y):
-                    node = child
-                else:
-                    break
-            except NotImplementedError:
-                break
-
-        if node and node.contains(x, y):
-            return node
-        else:
-            return None
-
-
-    def grabFocus(self):
-        """
-        Attempts to set the keyboard focus to this Accessible.
-        Affected by rhbz 1656447 on Wayland! We do different actions based on type of the node
-        to get it focused there as workaround. For some we can do nothing (push button)
+        Find a single ancestor satisfying the predicate.
         """
 
-        debug_log("grabFocus(self)")
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
-        if SESSION_TYPE == "x11" or ponytail_check_is_xwayland(self.window_id) or self.window_has_focus:
-            return self.queryComponent().grabFocus()
-
-        else:
-            if "toggle" in self.roleName or "check box" in self.roleName:
-                self.doubleClick()
-
-            elif "text" in self.roleName or "table cell" in self.roleName:
-                self.click()
-
-            elif "menu item" in self.roleName and self.position[0] > 0:
-                self.select()
-
-            elif "menu item" in self.roleName and self.findAncestor(predicate.GenericPredicate(roleName="combo box")):
-                self.doActionNamed("click")
-
-            else:
-                pass
+        return AccessibleObject.find_ancestor(self, predicate, **kwargs)
 
 
-    def click(self, button=1):
+    def find_child(self, predicate, **kwargs):
         """
-        Generates a raw mouse click event, using the specified button.
-            - 1 is left,
-            - 2 is middle,
-            - 3 is right.
+        Find a single child satisfying the predicate.
         """
 
-        logger.log(str("Clicking on %s") % self.getLogString())
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
-        clickX = self.position[0] + self.size[0] / 2
-        clickY = self.position[1] + self.size[1] / 2
-
-
-        if ("menu item" in self.roleName or self.roleName == "menu") and \
-                self.parent.roleName != "menu bar" and \
-                "click" in self.actions:
-            # self.select()
-
-            # doDelay(config.typingDelay)
-            # window_id = None
-            if self.name.lower() in ["quit", "exit"] or "close" in self.name.lower():
-                window_id = ""
-
-            ### this old workaround with select and enter was needed due to click action
-            ### crashing app on these items... that is no longer an issue
-            self.doActionNamed('click')
-            # rawinput.pressKey("enter", window_id)
-            doDelay(config.typingDelay)
-
-        else:
-            if config.debugSearching:
-                logger.log(str("raw click on %s %s at (%s,%s)") %
-                    (str(self.name), self.getLogString(), str(clickX), str(clickY)))
-            debug_log("click(self, button=%s)" % str(button))
-
-            rawinput.click(clickX, clickY, button, window_id=self.window_id)
+        return AccessibleObject.find_descendant(self, predicate, **kwargs)
 
 
-    def doubleClick(self, button=1):
+    def find_children(self, predicate, **kwargs):
         """
-        Generates a raw mouse double-click event, using the specified button.
+        Find a all children satisfying the predicate.
         """
 
-        clickX = self.position[0] + self.size[0] / 2
-        clickY = self.position[1] + self.size[1] / 2
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
-        if config.debugSearching:
-            logger.log(str("raw click on %s %s at (%s,%s)") %
-                       (str(self.name), self.getLogString(), str(clickX), str(clickY)))
-        debug_log("doubleClick(self, button=%s)" % str(button))
-
-        rawinput.doubleClick(clickX, clickY, button, window_id=self.window_id)
+        return AccessibleObject.find_all_descendants(self, predicate, **kwargs)
 
 
-    def point(self, mouseDelay=None):
+    @property
+    def last_child(self):
         """
-        Move mouse cursor to the center of the widget.
+        Is this Accessible Node the last child in parent node?
         """
 
-        pointX = self.position[0] + self.size[0] / 2
-        pointY = self.position[1] + self.size[1] / 2
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
-        logger.log(str("Pointing on %s %s at (%s,%s)") %
-                   (str(self.name), self.getLogString(), str(pointX), str(pointY)))
-        debug_log("point(self, mouseDelay=%s)" % str(mouseDelay))
+        return AccessibleObject.is_last_child(self)
 
-        rawinput.point(pointX, pointY, window_id=self.window_id)
+
+    @property
+    def child_count(self):
+        """
+        Get how many children Accessible Node has.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleObject.get_child_count(self)
 
 
     @property
@@ -798,353 +2028,503 @@ class Node(object):
         The node(s) that is/are a label for this node. Generated from 'relations'.
         """
 
-        debug_log("labeler(self)")
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
-        relationSet = self.getRelationSet()
-        for relation in relationSet:
-            if relation.getRelationType() == pyatspi.RELATION_LABELLED_BY:
-                if relation.getNTargets() == 1:
-                    return relation.getTarget(0)
-
-                targets = []
-                for i in range(relation.getNTargets()):
-                    targets.append(relation.getTarget(i))
-
-                return targets
-
-    labeller = labeler
+        return AccessibleObject.get_labeler(self)
 
 
     @property
     def labelee(self):
         """
-        'labellee' (read-only list of Node instances):
+        'labelee' (read-only list of Node instances):
         The node(s) that this node is a label for. Generated from 'relations'.
         """
 
-        debug_log("labelee(self)")
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
-        relationSet = self.getRelationSet()
-        for relation in relationSet:
-            if relation.getRelationType() == pyatspi.RELATION_LABEL_FOR:
-                if relation.getNTargets() == 1:
-                    return relation.getTarget(0)
-
-                targets = []
-                for i in range(relation.getNTargets()):
-                    targets.append(relation.getTarget(i))
-
-                return targets
+        return AccessibleObject.get_labelee(self)
 
 
-    labellee = labelee
+    def click(self, button=1, offset_x=0, offset_y=0):
+        """
+        Generates a raw mouse click event, using the specified button.
+        - 1 is left,
+        - 2 is middle,
+        - 3 is right.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        click_x = int(self.position[0] + self.size[0] / 2) + offset_x
+        click_y = int(self.position[1] + self.size[1] / 2) + offset_y
+
+        # Starting with no workarounds for any role names or objects.
+        # If something will start crashing we can fix it easily.
+
+        click(click_x, click_y, button, window_id=self.window_id)
+
+
+    def double_click(self, button=1, offset_x=0, offset_y=0):
+        """
+        Generates a raw mouse double-click event, using the specified button.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        click_x = int(self.position[0] + self.size[0] / 2) + offset_x
+        click_y = int(self.position[1] + self.size[1] / 2) + offset_y
+
+        # Starting with no workarounds for any role names or objects.
+        # If something will start crashing we can fix it easily.
+
+        double_click(click_x, click_y, button, window_id=self.window_id)
+
+
+    def point(self, offset_x=0, offset_y=0):
+        """
+        Move mouse cursor to the center of the widget.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        point_x = int(self.position[0] + self.size[0] / 2) + offset_x
+        point_y = int(self.position[1] + self.size[1] / 2) + offset_y
+
+        # Starting with no workarounds for any role names or objects.
+        # If something will start crashing we can fix it easily.
+
+        point(point_x, point_y, window_id=self.window_id)
+
+
+    def dump(self, output_type="plain", file_name=None, labels=False):
+        """
+        Dumping a structure representation.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        from dogtail.dump import AccessibleStructureRepresentation
+
+        if output_type == "plain":
+            print(AccessibleStructureRepresentation(self, "plain", file_name=file_name, labels=labels))
+
+        elif output_type == "verbose":
+            print(AccessibleStructureRepresentation(self, "verbose", file_name=file_name, labels=labels))
+
+        elif output_type == "tree":
+            # Print done by tree method.
+            self.tree(file_name=file_name, labels=labels)
+
+        else:
+            LOGGING.info(f"Unknown output type: '{output_type}'")
+
+
+    def tree(self, file_name=None, labels=False):
+        """
+        Dumping a tree structure of the node in tree like representation.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        from dogtail.dump import AccessibleStructureRepresentation
+
+        print(AccessibleStructureRepresentation(self, "tree", file_name=file_name, labels=labels))
+
+
+    def blink(self):
+        """
+        Blink will highlight the current node on the screen. Using Blinker from utility.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        if not self.extents:
+            return False
+
+        #from dogtail.utils import Blinker
+        #(x, y, w, h) = self.extents
+        #Blinker(x, y, w, h)
+        return True
+
+
+    @staticmethod
+    def application(application_name):
+        """
+        Gets an application by name, returning an Application instance or raising an
+        exception.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleRoot.application(application_name)
+
+
+    @staticmethod
+    def applications():
+        """
+        Get all applications.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        return AccessibleRoot.applications()
+
+
+    ########################################
+    # Backwards compatibility definitions. #
+    ########################################
+    def __setupUserData(self): # pylint: disable=invalid-name
+        """
+        Setup user data dictionary.
+        """
+        try:
+            len(self.user_data)
+        except (AttributeError, TypeError):
+            self.user_data = {} # pylint: disable=attribute-defined-outside-init
 
 
     @property
-    def sensitive(self):
+    def debugName(self): # pylint: disable=invalid-name
         """
-        Is the Accessible sensitive (i.e. not greyed out)?
+        Debug name assigned during search operations.
         """
 
-        debug_log("sensitive(self)")
+        self.__setupUserData()
+        return self.user_data.get("debugName", None)
 
-        return self.getState().contains(pyatspi.STATE_SENSITIVE)
+
+    @debugName.setter
+    def debugName(self, debugName): # pylint: disable=invalid-name
+        """
+        Debug name setter.
+        """
+
+        self.__setupUserData()
+        self.user_data["debugName"] = debugName
 
 
     @property
-    def showing(self):
+    def combovalue(self):
         """
-        Is the Accessible showing (rendered and visible) on the screen?
+        The value (as a string) currently selected in the combo box.
         """
 
-        debug_log("showing(self)")
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
-        return self.getState().contains(pyatspi.STATE_SHOWING)
+        return self.name
+
+
+    @combovalue.setter
+    def combovalue(self, value):
+        """
+        Set the value (as a string) in the combo box.
+        """
+
+        LOGGING.debug(logging_class.get_func_params_and_values())
+
+        self.childNamed(childName=value).doActionNamed("click")
+        do_delay()
 
 
     @property
-    def focusable(self):
+    def isChecked(self): # pylint: disable=invalid-name
         """
-        Is the Accessible capable of having keyboard focus?
+        Is the Accessible a checked checkbox? Compatibility property, same as
+        Node.checked.
         """
-
-        debug_log("focusable(self)")
-
-        return self.getState().contains(pyatspi.STATE_FOCUSABLE)
-
-
-    @property
-    def focused(self):
-        """
-        Does the Accessible have keyboard focus?
-        """
-
-        debug_log("focused(self)")
-
-        return self.getState().contains(pyatspi.STATE_FOCUSED)
-
-
-    @property
-    def checked(self):
-        """
-        Is the Accessible a checked checkbox?
-        """
-
-        debug_log("Node.checked - is the Accessible a checked checkbox?")
-
-        return self.getState().contains(pyatspi.STATE_CHECKED)
-
-
-    @property
-    def isChecked(self):
-        """
-        Is the Accessible a checked checkbox? Compatibility property, same as Node.checked.
-        """
-
-        debug_log("isChecked(self)")
 
         return self.checked
 
 
     @property
-    def visible(self):
-        """
-        Is the Accessible set to be visible? A widget with set attribute
-        'visible' is supposed to be shown and doesn't need to be actually
-        rendered. On the other hand, a widget with unset attribute 'visible'
-        """
-
-        debug_log("visible(self)")
-
-        return self.getState().contains(pyatspi.STATE_VISIBLE)
-
-
-    def selectAll(self):
-        """
-        Selects all children.
-        """
-
-        debug_log("selectAll(self)")
-
-        result = self.querySelection().selectAll()
-        doDelay()
-        return result
-
-
-    def deselectAll(self):
-        """
-        Deselects all selected children.
-        """
-
-        debug_log("deselectAll(self)")
-
-        result = self.querySelection().clearSelection()
-        doDelay()
-        return result
-
-
-    def select(self):
-        """
-        Selects the Accessible.
-        """
-
-        debug_log("select(self)")
-
-        try:
-            parent = self.parent
-        except AttributeError:
-            raise NotImplementedError
-
-        result = parent.querySelection().selectChild(self.indexInParent)
-        doDelay()
-        return result
-
-
-    def deselect(self):
-        """
-        Deselects the Accessible.
-        """
-
-        debug_log("deselect(self)")
-
-        try:
-            parent = self.parent
-        except AttributeError:
-            raise NotImplementedError
-
-        result = parent.querySelection().deselectChild(self.indexInParent)
-        doDelay()
-        return result
-
-
-    @property
-    def isSelected(self):
-        """
-        Is the Accessible selected? Compatibility property, same as Node.selected.
-        """
-
-        debug_log("isSelected(self)")
-
-        try:
-            parent = self.parent
-        except AttributeError:
-            raise NotImplementedError
-        return parent.querySelection().isChildSelected(self.indexInParent)
-
-
-    @property
-    def selected(self):
+    def isSelected(self): # pylint: disable=invalid-name
         """
         Is the Accessible selected?
         """
 
-        debug_log("selected(self)")
-
-        return self.isSelected
+        return self.selected
 
 
     @property
-    def selectedChildren(self):
+    def selectedChildren(self): # pylint: disable=invalid-name
         """
         Returns a list of children that are selected.
         """
 
-        debug_log("selectedChildren(self)")
-
-        selection = self.querySelection()
-
-        selectedChildren = []
-        for i in range(selection.nSelectedChildren):
-            selectedChildren.append(selection.getSelectedChild(i))
+        selected_children = []
+        for index in range(AccessibleSelection.get_n_selected_children(self)):
+            selected_children.append(AccessibleSelection.get_selected_child(self, index))
+        return selected_children
 
 
     @property
-    def value(self):
+    def roleName(self): # pylint: disable=invalid-name
         """
-        The value contained by the AccessibleValue interface.
-        """
-
-        debug_log("value(self)")
-
-        try:
-            return self.queryValue().currentValue
-        except NotImplementedError:
-            pass
-
-
-    @value.setter
-    def value(self, value):
-        """
-        Setter for the value contained by the AccessibleValue interface.
+        For backwards compatibility reasons. Wrapper for self.role_name.
         """
 
-        debug_log("value(self, value=%s)" % str(value))
-
-        self.queryValue().currentValue = value
+        return self.role_name
 
 
     @property
-    def minValue(self):
+    def minValue(self): # pylint: disable=invalid-name
         """
-        The minimum value of Node.value
+        For backwards compatibility reasons. Wrapper for self.min_value.
         """
 
-        debug_log("minValue(self)")
-
-        try:
-            return self.queryValue().minimumValue
-        except NotImplementedError:
-            pass
+        return self.min_value
 
 
     @property
-    def minValueIncrement(self):
+    def maxValue(self): # pylint: disable=invalid-name
         """
-        The minimum value increment of the Node.value
+        For backwards compatibility reasons. Wrapper for self.max_value.
         """
 
-        debug_log("minValueIncrement(self)")
-
-        try:
-            return self.queryValue().minimumIncrement
-        except NotImplementedError:
-            pass
+        return self.max_value
 
 
     @property
-    def maxValue(self):
+    def minValueIncrement(self): # pylint: disable=invalid-name
         """
-        The maximum value of self.value
+        For backwards compatibility reasons. Wrapper for self.min_value_increment.
         """
 
-        debug_log("maxValue(self)")
+        return self.min_value_increment
+
+
+    def doActionNamed(self, named_action): # pylint: disable=invalid-name
+        """
+        For backwards compatibility reasons. Wrapper for self.do_action_named.
+        """
+
+        return self.do_action_named(named_action)
+
+
+    def grabFocus(self): # pylint: disable=invalid-name
+        """
+        For backwards compatibility reasons. Wrapper for self.grab_focus.
+        """
+
+        return self.grab_focus()
+
+
+    @property
+    def indexInParent(self): # pylint: disable=invalid-name
+        """
+        For backwards compatibility reasons. Wrapper for self.index_in_parent.
+        """
+
+        return self.index_in_parent
+
+
+    def isChild(self, name=None, roleName=None, description=None, label=None, **kwargs): # pylint: disable=invalid-name
+        """
+        For backwards compatibility reasons. Wrapper for self.is_child.
+        """
+
+        return self.is_child(
+            name=name,
+            role_name=roleName,
+            description=description,
+            label=label,
+            **kwargs
+        )
+
+
+    def menu(self, menuName, recursive=True, showingOnly=None): # pylint: disable=invalid-name
+        """
+        Search below this node for a menu with the given name.
+        """
+
+        return self.find_child(
+            IsAMenuNamed(name=menuName),
+            recursive=recursive,
+            showing_only=showingOnly
+        )
+
+
+    def menuItem(self, menuItemName, recursive=True, showingOnly=None): # pylint: disable=invalid-name
+        """
+        Search below this node for a menu item with the given name.
+        """
+
+        return self.find_child(
+            IsAMenuItemNamed(name=menuItemName),
+            recursive=recursive,
+            showing_only=showingOnly
+        )
+
+
+    def textentry(self, textEntryName, recursive=True, showingOnly=None): # pylint: disable=invalid-name
+        """
+        Search below this node for a text entry with the given name.
+        """
+
+        return self.find_child(
+            IsATextEntryNamed(name=textEntryName),
+            recursive=recursive,
+            showing_only=showingOnly
+        )
+
+
+    def button(self, buttonName, recursive=True, showingOnly=None): # pylint: disable=invalid-name
+        """
+        Search below this node for a button with the given name.
+        """
+
+        return self.find_child(
+            IsAButtonNamed(name=buttonName),
+            recursive=recursive,
+            showing_only=showingOnly
+        )
+
+
+    def childLabelled(self, labelText, recursive=True, showingOnly=None): # pylint: disable=invalid-name
+        """
+        Search below this node for a child labelled with the given text.
+        """
+
+        return self.find_child(
+            IsLabelledAs(label=labelText),
+            recursive=recursive,
+            showing_only=showingOnly
+        )
+
+
+    def childNamed(self, childName, recursive=True, showingOnly=None): # pylint: disable=invalid-name
+        """
+        Search below this node for a child with the given name.
+        """
+
+        return self.find_child(
+            IsNamed(name=childName),
+            recursive=recursive,
+            showing_only=showingOnly
+        )
+
+
+    def tab(self, childName, recursive=True, showingOnly=None): # pylint: disable=invalid-name
+        """
+        Search below this node for a tab with the given name.
+        """
+
+        return self.find_child(
+            IsATabNamed(name=childName),
+            recursive=recursive,
+            showing_only=showingOnly
+        )
+
+
+    def dialog(self, dialogName, recursive=True, showingOnly=None): # pylint: disable=invalid-name
+        """
+        Search below this node for a tab with the given name.
+        """
+
+        return self.find_child(
+            IsADialogNamed(name=dialogName),
+            recursive=recursive,
+            showing_only=showingOnly
+        )
+
+
+    def window(self, windowName, recursive=True, showingOnly=None): # pylint: disable=invalid-name
+        """
+        Search below this node for a tab with the given name.
+        """
+
+        return self.find_child(
+            IsAWindowNamed(name=windowName),
+            recursive=recursive,
+            showing_only=showingOnly
+        )
+
+
+    def findAncestor(self, predicate, retry=True): # pylint: disable=invalid-name
+        """
+        For backwards compatibility reasons. Wrapper for self.find_ancestor.
+        """
+
+        return self.find_ancestor(predicate, retry=retry)
+
+
+    def findChild(self, predicate, retry=True): # pylint: disable=invalid-name
+        """
+        For backwards compatibility reasons. Wrapper for self.find_child.
+        """
+
+        return self.find_child(predicate, retry=retry)
+
+
+    def findChildren(self, predicate): # pylint: disable=invalid-name
+        """
+        For backwards compatibility reasons. Wrapper for self.find_children.
+        """
+
+        return self.find_children(predicate)
+
+
+    def selectAll(self): # pylint: disable=invalid-name
+        """
+        Selects all children.
+        """
+
+        return self.select_all()
+
+
+    def deselectAll(self): # pylint: disable=invalid-name
+        """
+        Deselects all children.
+        """
+
+        return self.deselect_all()
+
+    def doubleClick(self, button=1): # pylint: disable=invalid-name
+        """
+        Make a double-click.
+        """
+
+        return self.double_click(button=button)
+
+
+    @property
+    def link(self): # pylint: disable=invalid-name
+        """
+        Get Link from HyperText object.
+        """
 
         try:
-            return self.queryValue().maximumValue
-        except NotImplementedError:
-            pass
+            if AccessibleObject.is_newton(self):
+                # TODO
+                return None
+
+            for link_index in Atspi.HyperText.get_n_links(self):
+                return Atspi.HyperText.get_link(self, link_index)
+
+        except (NotImplementedError, AttributeError) as error:
+            raise RuntimeError from error
 
 
-    def typeText(self, string):
+    @property
+    def URI(self): # pylint: disable=invalid-name
         """
-        Type the given text into the node, with appropriate delays and logging.
-        """
-
-        logger.log(str("Typing text into %s: '%s'") % (self.getLogString(), str(string)))
-        debug_log("typeText(self, string=%s)" % string)
-
-        if self.focusable:
-            if not self.focused:
-                try:
-                    self.grabFocus()
-                except Exception:
-                    logger.log("Node is focusable but I can't grabFocus!")
-
-            rawinput.typeText(string)
-
-        else:
-            logger.log("Node is not focusable; falling back to inserting text")
-            et = self.queryEditableText()
-            et.insertText(self.caretOffset, string, len(string))
-            self.caretOffset += len(string)
-            doDelay()
-
-
-    def keyCombo(self, comboString):
-        """
-        Press keys in combination.
+        Get Link Anchor from HyperLink object.
         """
 
-        if config.debugSearching:
-            logger.log(str("Pressing keys '%s' into %s") %
-                       (str(comboString), self.getLogString()))
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
-        debug_log("keyCombo(self, comboString=%s)" % str(comboString))
+        try:
+            if AccessibleObject.is_newton(self):
+                # TODO
+                return None
 
-        if self.focusable:
-            if not self.focused:
-                try:
-                    self.grabFocus()
-                except Exception:
-                    logger.log("Node is focusable but I can't grabFocus!")
-        else:
-            logger.log("Node is not focusable; trying key combo anyway")
+            for link_index in Atspi.HyperText.get_n_links(self):
+                link = Atspi.HyperText.get_link(self, link_index)
+                for anchor_index in link.get_n_anchors(link_index):
+                    return link.get_uri(self, anchor_index)
 
-        rawinput.keyCombo(comboString)
-
-
-    def getLogString(self):
-        """
-        Get a string describing this node for the logs,
-        respecting the config.absoluteNodePaths boolean.
-        """
-
-        debug_log("getLogString(self)")
-
-        if config.absoluteNodePaths:
-            return self.getAbsoluteSearchPath()
-        else:
-            return str(self)
+        except (NotImplementedError, AttributeError) as error:
+            raise RuntimeError from error
 
 
     def satisfies(self, pred):
@@ -1152,797 +2532,100 @@ class Node(object):
         Does this node satisfy the given predicate?
         """
 
-        debug_log("satisfies(self, pred=%s)" % (str(pred)))
+        LOGGING.debug(logging_class.get_func_params_and_values())
 
-        assert isinstance(pred, predicate.Predicate)
-        return pred.satisfiedByNode(self)
+        assert isinstance(pred, GenericPredicate)
+        return pred.satisfied_by_node(self)
 
 
-    def dump(self, type="plain", fileName=None):
+    @property
+    def labellee(self): # pylint: disable=invalid-name
         """
-        Dumping a tree structure of the node.
-        """
-
-        debug_log("dump(self, type=%s, fileName=%s)" % (str(type), str(fileName)))
-
-        from dogtail import dump
-        dumper = getattr(dump, type)
-        dumper(self, fileName)
-
-
-    def getAbsoluteSearchPath(self):
-        """
-        Generate a SearchPath instance giving the 'best'
-        way to find the Accessible wrapped by this node again, starting
-        at the root and applying each search in turn.
-
-        This is somewhat analagous to an absolute path in a filesystem,
-        except that some of searches may be recursive, rather than just
-        searching direct children.
-
-        Used by the recording framework for identifying nodes in a
-        persistent way, independent of the style of script being
-        written.
+        'labelee' (read-only list of Node instances):
+        The node(s) that this node is a label for. Generated from 'relations'.
         """
 
-        debug_log("getAbsoluteSearchPath(self)")
+        return self.labelee()
 
-        if config.debugSearchPaths:
-            logger.log("getAbsoluteSearchPath(%s)" % self)
+    ###############################################
+    # End of backwards compatibility definitions. #
+    ###############################################
 
-        if self.roleName == "application":
-            result = path.SearchPath()
-            result.append(predicate.IsAnApplicationNamed(self.name), False)
-            return result
 
-        else:
-            if self.parent:
-                (ancestor, pred, isRecursive) = self.getRelativeSearch()
-                if config.debugSearchPaths:
-                    debug_log("Found ancestor: %s" % ancestor)
+    def __len__(self):
+        return AccessibleObject.get_child_count(self)
 
-                ancestorPath = ancestor.getAbsoluteSearchPath()
-                ancestorPath.append(pred, isRecursive)
-                return ancestorPath
 
-            else:
-                # This should be the root node:
-                return path.SearchPath()
+    def __getitem__(self, index):
+        length = len(self)
 
+        if index < 0:
+            index = index + length
 
-    def getRelativeSearch(self):
-        """
-        Get a (ancestorNode, predicate, isRecursive) triple that
-        identifies the best way to find this Node uniquely.
-        """
+        if index < 0 or index >= length:
+            raise IndexError
 
-        debug_log("getRelativeSearch(self)")
+        return AccessibleObject.get_child_at_index(self, index)
 
-        if config.debugSearchPaths:
-            logger.log("getRelativeSearchPath(%s)" % self)
 
-        assert self
-        assert self.parent
+    def __bool__(self):
+        return self is not None
 
-        isRecursive = False
-        ancestor = self.parent
 
-        while not self.__nodeIsIdentifiable(ancestor):
-            debug_log("Node is not identifiable, setting isRecursive as True.")
-            ancestor = ancestor.parent
-            isRecursive = True
+    def __nonzero__(self):
+        return self is not None
 
-        # I think this is useless, since only change is the debug string
 
-        # Pick the most appropriate predicate for finding this node:
-        if self.labellee:
-            if self.labellee.name:
-                return (ancestor, predicate.IsLabelledAs(self.labellee.name), isRecursive)
-
-        if self.roleName == "menu":
-            return (ancestor, predicate.IsAMenuNamed(self.name), isRecursive)
-        elif self.roleName == "menu item" or self.roleName == "check menu item":
-            return (ancestor, predicate.IsAMenuItemNamed(self.name), isRecursive)
-        elif self.roleName == "text":
-            return (ancestor, predicate.IsATextEntryNamed(self.name), isRecursive)
-        elif self.roleName == "button":
-            return (ancestor, predicate.IsAButtonNamed(self.name), isRecursive)
-        elif self.roleName == "push button":
-            return (ancestor, predicate.IsAButtonNamed(self.name), isRecursive)
-        elif self.roleName == "frame":
-            return (ancestor, predicate.IsAWindowNamed(self.name), isRecursive)
-        elif self.roleName == "dialog":
-            return (ancestor, predicate.IsADialogNamed(self.name), isRecursive)
-        else:
-            pred = predicate.GenericPredicate(name=self.name, roleName=self.roleName)
-            return (ancestor, pred, isRecursive)
-
-
-    def __nodeIsIdentifiable(self, ancestor):
-        """
-        Checks if given node can be identified by labellee, name or parent.
-        """
-
-        debug_log("__nodeIsIdentifiable(self, ancestor=%s)" % str(ancestor))
-
-        if ancestor.labellee:
-            return True
-
-        elif ancestor.name:
-            return True
-
-        elif not ancestor.parent:
-            return True
-
-        else:
-            return False
-
-
-    def _fastFindChild(self, pred, recursive=True, showingOnly=None):
-        """
-        Searches for an Accessible using methods from pyatspi.utils
-        """
-
-        debug_log("_fastFindChild(self, pred=%s, recursive=%s, recursive=%s)" %
-                      (str(pred), str(recursive), str(recursive)))
-
-        if isinstance(pred, predicate.Predicate):
-            pred = pred.satisfiedByNode
-
-        if showingOnly is None:
-            showingOnly = config.searchShowingOnly
-
-        if showingOnly:
-            original_predicate = pred
-            pred = lambda x: original_predicate(x) and x.getState().contains(pyatspi.STATE_SHOWING)
-
-        if not recursive:
-            cIter = iter(self)
-            while True:
-                try:
-                    child = next(cIter)
-                except StopIteration:
-                    break
-
-                if child is not None and pred(child):
-                    return child
-
-        else:
-            return pyatspi.utils.findDescendant(self, pred)
-
-
-    def findChild(self, pred, recursive=True, debugName=None, retry=True, requireResult=True, showingOnly=None):
-        """
-        Search for a node satisyfing the predicate, returning a Node.
-
-        If retry is True (the default), it makes multiple attempts, backing off and retrying
-        on failure, and eventually raises a descriptive exception if the search fails.
-
-        If retry is False, it gives up after one attempt.
-
-        If requireResult is True (the default), an exception is raised after all
-        attempts have failed. If it is false, the function simply returns None.
-        """
-
-        debug_log("findChild(self, pred=%s, recursive=%s, debugName=%s, retry=%s, requireResult=%s, showingOnly=%s)" %
-                      (str(pred), str(recursive), str(debugName), str(retry), str(requireResult), str(showingOnly)))
-
-        def describeSearch(parent, pred, recursive, debugName):
-            """
-            Internal helper function
-            """
-
-            noun = "descendant" if recursive else "child"
-
-            if debugName is None:
-                debugName = pred.describeSearchResult()
-
-            return "%s of %s: %s" % (str(noun), parent.getLogString(), str(debugName))
-
-
-        compare_function = None
-        if isinstance(pred, LambdaType):
-            compare_function = pred
-            if debugName is None:
-                debugName = "child satisyfing a custom lambda function"
-
-        else:
-            assert isinstance(pred, predicate.Predicate)
-            compare_function = pred.satisfiedByNode
-
-        number_of_attempts = 0
-        while number_of_attempts < config.searchCutoffCount:
-            if number_of_attempts >= config.searchWarningThreshold or config.debugSearching:
-                logger.log(str("Searching for %s (attempt %i)") %
-                           (describeSearch(self, pred, recursive, debugName), number_of_attempts))
-
-            result = self._fastFindChild(compare_function, recursive, showingOnly=showingOnly)
-
-            if result:
-                assert isinstance(result, Node)
-                if debugName:
-                    result.debugName = debugName
-                else:
-                    result.debugName = pred.describeSearchResult()
-                return result
-
-            else:
-                if not retry:
-                    break
-                number_of_attempts += 1
-                if config.debugSearching or config.debugSleep:
-                    logger.log("sleeping for '%f'" % config.searchBackoffDuration)
-                sleep(config.searchBackoffDuration)
-
-        if requireResult:
-            raise SearchError(describeSearch(self, pred, recursive, debugName))
-
-
-    def findChildren(self, pred, recursive=True, isLambda=False, showingOnly=None):
-        """
-        Find all children/descendents satisfying the predicate. You can also use lambdas in
-        place of the pred that will enable search also against pure dogtail Node properties
-        (like showing). I.e: "lambda x: x.roleName == 'menu item' and x.showing is True".
-        isLambda does not have to be set, it's kept only for api compatibility.
-        """
-
-        debug_log("findChildren(self, pred=%s, recursive=%s, isLambda=%s, showingOnly=%s)" %
-                      (str(pred), str(recursive), str(isLambda), str(showingOnly)))
-
-        compare_function = None
-        if isLambda is True or isinstance(pred, LambdaType):
-            compare_function = pred
-
-        else:
-            assert isinstance(pred, predicate.Predicate)
-            compare_function = pred.satisfiedByNode
-
-        if showingOnly is None:
-            showingOnly = config.searchShowingOnly
-
-        if showingOnly:
-            original_compare_func = compare_function
-            compare_function = lambda n: original_compare_func(n) and \
-                n.getState().contains(pyatspi.STATE_SHOWING)
-
-        results = []
-        number_of_attempts = 0
-        while number_of_attempts < config.searchCutoffCount:
-            if number_of_attempts >= config.searchWarningThreshold or config.debugSearching:
-                logger.log("Warning: a11y errors caught, making attempt %i" % number_of_attempts)
-
-            try:
-                if recursive:
-                    results = pyatspi.utils.findAllDescendants(self, compare_function)
-                else:
-                    results = list(filter(compare_function, self.children))
-                break
-
-            except (GLib.GError, TypeError):
-                number_of_attempts += 1
-                if number_of_attempts == config.searchCutoffCount:
-                    logger.log("Warning: errors caught from the a11y tree, giving up search")
-                    raise RuntimeError("Error: Session has probaly broken a11y! Exiting allowing session re-runs")
-                else:
-                    sleep(config.searchBackoffDuration)
-                continue
-
-        return results
-
-
-    def findAncestor(self, pred, showingOnly=None):
-        """
-        Search up the ancestry of this node, returning the first Node
-        satisfying the predicate, or None.
-        """
-
-        debug_log("findAncestor(self, pred=%s, showingOnly=%s)" %
-                      (str(pred), str(showingOnly)))
-
-        assert isinstance(pred, predicate.Predicate)
-
-        candidate = self.parent
-        while candidate is not None:
-            if candidate.satisfies(pred):
-                return candidate
-            else:
-                candidate = candidate.parent
-
-        return None
-
-    # Various wrapper/helper search methods:
-    def child(self, name="", roleName="", description="", label="", identifier="", recursive=True, retry=True, debugName=None, showingOnly=None):
-        """
-        Finds a child satisying the given criteria.
-
-        This is implemented using findChild, and hence will automatically retry
-        if no such child is found, and will eventually raise an exception. It
-        also logs the search.
-        """
-
-        debug_log("child(self, name=%s, roleName=%s, description=%s, label=%s, identifier=%s, recursive=%s, retry=%s, debugName=%s, showingOnly=%s)" %
-            (str(name), str(roleName), str(description), str(label), str(identifier), str(recursive), str(retry), str(debugName), str(showingOnly)))
-
-        return self.findChild(predicate.GenericPredicate(name=name, roleName=roleName, description=description,
-                              label=label, identifier=identifier), recursive=recursive, retry=retry, debugName=debugName, showingOnly=showingOnly)
-
-    def isChild(self, name="", roleName="", description="", label="", identifier="", recursive=True, retry=False, debugName=None, showingOnly=None):
-        """
-        Determines whether a child satisying the given criteria exists.
-
-        This is implemented using findChild, but will not automatically retry
-        if no such child is found. To make the function retry multiple times set retry to True.
-        Returns a boolean value depending on whether the child was eventually found. Similar to
-        'child', yet it catches SearchError exception to provide for False results, will raise
-        any other exceptions. It also logs the search.
-        """
-
-        debug_log("isChild(self, name=%s, roleName=%s, description=%s, label=%s, identifier=%s, recursive=%s, retry=%s, debugName=%s, showingOnly=%s)" %
-            (str(name), str(roleName), str(description), str(label), str(identifier), str(recursive), str(retry), str(debugName), str(showingOnly)))
-
+    def __str__(self):
         try:
-            self.findChild(
-                predicate.GenericPredicate(
-                    name=name, roleName=roleName, description=description, label=label, identifier=identifier),
-                recursive=recursive, retry=retry, debugName=debugName, showingOnly=showingOnly)
-            return True
-        except SearchError:
-            return False
-
-
-    def menu(self, menuName, recursive=True, showingOnly=None):
-        """
-        Search below this node for a menu with the given name.
-
-        This is implemented using findChild, and hence will automatically retry
-        if no such child is found, and will eventually raise an exception. It
-        also logs the search.
-        """
-
-        debug_log("menu(self, nameName=%s, recursive=%s, showingOnly=%s)" %
-                      (str(menuName), str(recursive), str(showingOnly)))
-
-        return self.findChild(predicate.IsAMenuNamed(menuName=menuName), recursive, showingOnly=showingOnly)
-
-
-    def menuItem(self, menuItemName, recursive=True, showingOnly=None):
-        """
-        Search below this node for a menu item with the given name.
-
-        This is implemented using findChild, and hence will automatically retry
-        if no such child is found, and will eventually raise an exception. It
-        also logs the search.
-        """
-
-        debug_log("menuItem(self, menuItemName=%s, recursive=%s, showingOnly=%s)" %
-                      (str(menuItemName), str(recursive), str(showingOnly)))
-
-        return self.findChild(predicate.IsAMenuItemNamed(menuItemName=menuItemName), recursive, showingOnly=showingOnly)
-
-
-    def textentry(self, textEntryName, recursive=True, showingOnly=None):
-        """
-        Search below this node for a text entry with the given name.
-
-        This is implemented using findChild, and hence will automatically retry
-        if no such child is found, and will eventually raise an exception. It
-        also logs the search.
-        """
-
-        debug_log("textentry(self, textEntryName=%s, recursive=%s, showingOnly=%s)" %
-                      (str(textEntryName), str(recursive), str(showingOnly)))
-
-        return self.findChild(predicate.IsATextEntryNamed(textEntryName=textEntryName), recursive, showingOnly=showingOnly)
-
-
-    def button(self, buttonName, recursive=True, showingOnly=None):
-        """
-        Search below this node for a button with the given name.
-
-        This is implemented using findChild, and hence will automatically retry
-        if no such child is found, and will eventually raise an exception. It
-        also logs the search.
-        """
-
-        debug_log("button(self, buttonName=%s, recursive=%s, showingOnly=%s)" %
-                      (str(buttonName), str(recursive), str(showingOnly)))
-
-        return self.findChild(predicate.IsAButtonNamed(buttonName=buttonName), recursive, showingOnly=showingOnly)
-
-
-    def childLabelled(self, labelText, recursive=True, showingOnly=None):
-        """
-        Search below this node for a child labelled with the given text.
-
-        This is implemented using findChild, and hence will automatically retry
-        if no such child is found, and will eventually raise an exception. It
-        also logs the search.
-        """
-
-        debug_log("childLabelled(self, labelText=%s, recursive=%s, showingOnly=%s)" %
-                      (str(labelText), str(recursive), str(showingOnly)))
-
-        return self.findChild(predicate.IsLabelledAs(labelText), recursive, showingOnly=showingOnly)
-
-
-    def childNamed(self, childName, recursive=True, showingOnly=None):
-        """
-        Search below this node for a child with the given name.
-
-        This is implemented using findChild, and hence will automatically retry
-        if no such child is found, and will eventually raise an exception. It
-        also logs the search.
-        """
-
-        debug_log("childNamed(self, childName=%s, recursive=%s, showingOnly=%s)" %
-                      (str(childName), str(recursive), str(showingOnly)))
-
-        return self.findChild(predicate.IsNamed(childName), recursive, showingOnly=showingOnly)
-
-
-    def tab(self, tabName, recursive=True, showingOnly=None):
-        """
-        Search below this node for a tab with the given name.
-
-        This is implemented using findChild, and hence will automatically retry
-        if no such child is found, and will eventually raise an exception. It
-        also logs the search.
-        """
-
-        debug_log("tab(self, tabName=%s, recursive=%s, showingOnly=%s)" %
-                      (str(tabName), str(recursive), str(showingOnly)))
-
-        return self.findChild(predicate.IsATabNamed(tabName=tabName), recursive, showingOnly=showingOnly)
-
-
-    def getUserVisibleStrings(self):
-        """
-        Get all user-visible strings in this node and its descendents.
-
-        (Could be implemented as an attribute)
-        """
-
-        debug_log("getUserVisibleStrings(self)")
-
-        result = []
-        if self.name:
-            result.append(self.name)
-
-        if self.description:
-            result.append(self.description)
-
-        try:
-            children = self.children
-        except Exception:
-            return result
-
-        for child in children:
-            result.extend(child.getUserVisibleStrings())
-
-        return result
-
-
-    def blink(self):
-        """
-        Blink will hightlight the current node on the screen. Using Blinker from utility.
-        """
-
-        debug_log("blink(self)")
-
-        if not self.extents:
-            return False
-        else:
-            (x, y, w, h) = self.extents
-            Blinker(x, y, w, h)
-            return True
-
-
-class LinkAnchor(object):
-    """
-    Class storing info about an anchor within an Accessibility.Hyperlink, which
-    is in turn stored within an Accessibility.Hypertext.
-    """
-
-    def __init__(self, node, hypertext, linkIndex, anchorIndex):
-        self.node = node
-        self.hypertext = hypertext
-        self.linkIndex = linkIndex
-        self.anchorIndex = anchorIndex
-
-
-    @property
-    def link(self):
-        return self.hypertext.getLink(self.linkIndex)
-
-
-    @property
-    def URI(self):
-        return self.link.getURI(self.anchorIndex)
-
-
-class Root(Node):
-    """
-    Root class used to get data from Accessible.
-    """
-
-    def applications(self):
-        """
-        Get all applications.
-        """
-
-        debug_log("applications(self)")
-
-        return root.findChildren(predicate.GenericPredicate(roleName="application"), recursive=False, showingOnly=False)
-
-
-    def application(self, appName, retry=True):
-        """
-        Gets an application by name, returning an Application instance
-        or raising an exception.
-
-        This is implemented using findChild, and hence will automatically retry
-        if no such child is found, and will eventually raise an exception. It
-        also logs the search.
-        """
-
-        debug_log("applications(self, appName=%s, retry=%s)" % (appName, str(retry)))
-
-        return root.findChild(predicate.IsAnApplicationNamed(appName), recursive=False, retry=retry, showingOnly=False)
-
-
-class Application(Node):
-    """
-    Application class used to get data from Accessible.
-    """
-
-    def dialog(self, dialogName, recursive=False, showingOnly=None):
-        """
-        Search below this node for a dialog with the given name,
-        returning a Window instance.
-
-        This is implemented using findChild, and hence will automatically retry
-        if no such child is found, and will eventually raise an exception. It
-        also logs the search.
-        """
-
-        debug_log("dialog(self, dialogName=%s, recursive=%s, showingOnly=%s)" %
-                      (str(dialogName), str(recursive), str(showingOnly)))
-
-        return self.findChild(predicate.IsADialogNamed(dialogName=dialogName), recursive, showingOnly=showingOnly)
-
-
-    def window(self, windowName, recursive=False, showingOnly=None):
-        """
-        Search below this node for a window with the given name,
-        returning a Window instance.
-
-        This is implemented using findChild, and hence will automatically retry
-        if no such child is found, and will eventually raise an exception. It
-        also logs the search.
-        """
-
-        debug_log("window(self, windowName=%s, recursive=%s, showingOnly=%s)" %
-                      (str(windowName), str(recursive), str(showingOnly)))
-
-        result = self.findChild(predicate.IsAWindowNamed(windowName=windowName), recursive, showingOnly=showingOnly)
-        return result
-
-
-    def getWnckApplication(self, showingOnly=None):  # pragma: no cover
-        """
-        Get the wnck.Application instance for this application, or None
-
-        Currently implemented via a hack: requires the app to have a
-        window, and looks up the application of that window
-
-        wnck.Application can give you the pid, the icon, etc
-        """
-
-        debug_log("getWnckApplication(self, showingOnly=%s) - untested" % str(showingOnly))
-
-        window = self.child(roleName="frame", showingOnly=showingOnly)
-        if window:
-            wnckWindow = window.getWnckWindow()
-            return wnckWindow.get_application()
-
-
-class Window(Node):
-    """
-    Window class used to get data from Accessible.
-    """
-
-    def getWnckWindow(self):  # pragma: no cover
-        """
-        Get the wnck.Window instance for this window, or None
-        """
-
-        debug_log("getWnckWindow(self) - untested")
-
-        screen = Wnck.screen_get_default()
-        screen.force_update()
-        for wnckWindow in screen.get_windows():
-            if wnckWindow.get_name() == self.name:
-                return wnckWindow
-
-
-    def activate(self):  # pragma: no cover
-        """
-        Activates the wnck.Window associated with this Window.
-        """
-
-        debug_log("activate(self) - untested")
-
-        wnckWindow = self.getWnckWindow()
-        wnckWindow.activate(0)
-
-
-class Wizard(Window):
-    """
-    Note that the buttons of a GnomeDruid were not accessible until recent versions of libgnomeui.
-    This is http://bugzilla.gnome.org/show_bug.cgi?id=157936 and is fixed in
-    gnome-2.10 and gnome-2.12 (in CVS libgnomeui) there's a patch attached to that bug.
-    This bug is known to affect FC3; fixed in FC5
-    """
-
-    def __init__(self, node, debugName=None):
-        Node.__init__(self, node)
-        if debugName:
-            self.debugName = debugName
-
-        logger.log("%s is on '%s' page" % (self, self.getPageTitle()))
-
-
-    def currentPage(self):
-        """
-        Get the current page of this wizard.
-        This is currently a hack, supporting only GnomeDruid
-        """
-
-        debug_log("currentPage(self) - untested")
-
-        pageHolder = self.child(roleName="panel")
-        for child in pageHolder.children:
-            if child.showing:
-                return child
-
-        raise "Unable to determine current page of %s" % self
-
-
-    def getPageTitle(self):
-        """
-        Get the string title of the current page of this wizard
-        This is currently a total hack, supporting only GnomeDruid
-        """
-
-        debug_log("getPageTitle(self) - untested")
-
-        currentPage = self.currentPage()
-        return currentPage.child(roleName="panel").child(roleName="panel").child(roleName="label", recursive=False).text
-
-
-    def clickForward(self):
-        """
-        Click on the 'Forward' button to advance to next page of wizard.
-        It will log the title of the new page that is reached.
-        This will only work if your libgnomeui has accessible buttons see above.
-        """
-
-        debug_log("clickForward(self) - untested")
-
-        fwd = self.child("Forward")
-        fwd.click()
-
-        logger.log("%s is now on '%s' page"% (self, self.getPageTitle()))
-
-
-    def clickApply(self):
-        """
-        Click on the 'Apply' button to advance to next page of wizard.
-        What if it's Finish rather than Apply?
-        This will only work if your libgnomeui has accessible buttons see above.
-        """
-
-        debug_log("clickApply(self) - untested")
-
-        fwd = self.child("Apply")
-        fwd.click()
-
-
-class Extension:
-    @property
-    def index_in_parent(self):
-        for index, child in enumerate(self.get_parent().children):
-            if child.get_parent().get_child_at_index(index) == self:
-                return index
-
-    @property
-    def last_child(self):
-        return not self.get_parent() or \
-            self.index_in_parent is None or \
-            self.index_in_parent == self.get_parent().get_child_count() - 1
-
-
-    def _tree_branching(self, parent_prefix, was_parent_last, node, current, cutoff):
-        if current == cutoff:
-            return
-
-        prefix_spacer = "     "
-        prefix_extend = "  │  "
-        suffix_branch = "  ├──"
-        suffix_last =   "  └──"
-
-        new_prefix = parent_prefix
-        new_suffix = ""
-
-        if node != self:
-            if node.last_child:
-                new_suffix = suffix_last
-            else:
-                new_suffix = suffix_branch
-
-        if node != self and node.parent != self:
-            if was_parent_last:
-                current_prefix = prefix_spacer
-            else:
-                current_prefix = prefix_extend
-            new_prefix += current_prefix
-
-
-        node_data = "".join((
-            f"[{node.name}-",
-            f"{node.roleName}-",
-            f"{node.description}]"
-        ))
-
-        print(f"{new_prefix+new_suffix} {node_data}")
-
-        for child in node.children:
-            self._tree_branching(new_prefix,
-                                 was_parent_last=node.last_child,
-                                 node=child,
-                                 current=current+1,
-                                 cutoff=cutoff)
-
-
-    def tree(self, cutoff=None):
-        return self._tree_branching(parent_prefix="",
-                                    was_parent_last=False,
-                                    node=self,
-                                    current=0,
-                                    cutoff=cutoff)
-
-
-Accessibility.Accessible.__bases__ = (
-    Application, Root, Node, Extension, ) + Accessibility.Accessible.__bases__
-
+            return f"[ '{self.name}' | '{self.role_name}' | '{self.description}' ]"
+        except Exception as error:
+            return f"[Exception encountered]: {error}"
+
+
+Atspi.Accessible.__bases__ = (
+    Node,
+) + Atspi.Accessible.__bases__
+
+
+# Load desktop to the root variable.
+try:
+    root = AccessibleUtilities.get_desktop()
+except Exception:
+    LOGGING.info("Error: Accessible desktop is not visible. Is accessibility enabled?")
+
+
+# The 'children' field on desktop is inherited Field from GObject.Object
+# We are recoding this logic in DogtailAPI so that the Object
+# in 'children' is Accessible instead of default [object].
+try:
+    del Atspi.Accessible.children
+except AttributeError:
+    # Might be already deleted.
+    pass
+
+# To keep the same keyword <keyword> we need to remove the Atspi.Accessible.<keyword>
+# So that the API is forced to use DogtailAPI.<keyword> and we can adjust it for Newton
+try:
+    del Atspi.Accessible.parent
+except AttributeError:
+    # Might be already deleted.
+    pass
 
 try:
-    root = pyatspi.Registry.getDesktop(0)
-    root.debugName = "root"
-except Exception:  # pragma: no cover
-    logger.log("Error: AT-SPI's desktop is not visible. Is accessibility enabled?")
+    del Atspi.Accessible.name
+except AttributeError:
+    # Might be already deleted.
+    pass
 
+try:
+    del Atspi.Accessible.description
+except AttributeError:
+    # Might be already deleted.
+    pass
 
-children = root.children
-if not children:  # pragma: no cover
-    logger.log("Warning: AT-SPI's desktop is visible but it has no children. \
-Are you running any AT-SPI-aware applications?")
-del children
-
-
-"""
-Sniff also imports from tree and we don't want to run this code from sniff itself.
-May have already been locked by dogtail.procedural.
-Mark newly opened sniff not to use auto-refresh while script using this module is running.
-"""
-if not os.path.exists("/tmp/sniff_running.lock") or not os.path.exists("/tmp/sniff_refresh.lock"):
-    sniff_lock = Lock(lockname="sniff_refresh.lock", randomize=False, unlockOnExit=True)
-    try:
-        sniff_lock.lock()
-    except OSError:  # pragma: no cover
-        pass
-
-elif "sniff" not in sys.argv[0]:
-    print("Dogtail: Warning: Running sniff has been detected.")
-    print("Please make sure sniff has the 'Auto Refresh' disabled.")
-    print("NOTE: Running scripts with sniff present is not recommended.")
+try:
+    del Atspi.Accessible.attributes
+except AttributeError:
+    # Might be already deleted.
+    pass

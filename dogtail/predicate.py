@@ -1,546 +1,341 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
-from dogtail.config import config
-from dogtail.i18n import TranslatableString
-from dogtail.logging import debug_log
-from dogtail.logging import debugLogger as logger
-from gi.repository import GLib
-import re
-from time import sleep
-
+#!/usr/bin/python3
 """
-Predicates that can be used when searching for nodes.
+Experimental dogtail changes for 2.0 release. Simple Predicate
 """
 
-__author__ = """
-David Malcolm <dmalcolm@redhat.com>
-"""
+# pylint: disable=broad-exception-caught
+# pylint: disable=wrong-import-position
+# pylint: disable=wrong-import-order
+# pylint: disable=import-error
+# pylint: disable=line-too-long
+# pylint: disable=no-name-in-module
+# ruff: noqa: E402
+# ruff: noqa: E501
+
+from dogtail.logging import logging_class
+LOGGER = logging_class.logger
 
 
-def stringMatches(scriptName, reportedName):
-    assert isinstance(scriptName, TranslatableString)
-    return scriptName.matchedBy(reportedName)
-
-
-def makeScriptRecursiveArgument(isRecursive, defaultValue):
-    if isRecursive == defaultValue:
-        return ""
-    else:
-        return ", recursive=%s" % isRecursive
-
-
-def makeCamel(string):
+class GenericPredicate:
     """
-    Convert string to camelCaps
+    Simple predicate class, providing easy way to compare nodes.
     """
 
-    result = ""
-    string = str(string)
-    for char in ":;!@#$%^&*()-+=_~`\\/?|[]{}<>,.\t\n\r\"'":
-        string = string.replace(char, " ")
+    def __init__(self, name=None, role_name=None, description=None, label=None, identifier=None, **kwargs):
 
-    words = string.strip().split(" ")
+        using_role_name = role_name
+        # === Backward compatibility and extra parameters ===
+        for key, val in kwargs.items():
+            if "roleName" in str(key):
+                using_role_name = val
+        # ===================================================
 
-    firstWord = True
-    for word in words:
-        lowercaseWord = word.lower()
-        if firstWord:
-            result += lowercaseWord
-            firstWord = False
-        else:
-            result += lowercaseWord.capitalize()
-
-    return result
-
-
-class Predicate(object):
-    """
-    Abstract base class representing a predicate function on nodes.
-    It's more than just a function in that it has data and can describe itself
-    """
-
-    def satisfiedByNode(self, node):
-        """
-        Pure virtual method returning a boolean if the predicate is satisfied by the node.
-        """
-        raise NotImplementedError
+        self.name = name
+        self.role_name = using_role_name
+        self.description = description
+        self.label = label
+        self.identifier = identifier
+        self.showing_only = None
+        self.satisfied_by_node = self._get_compare_function()
 
 
-    def describeSearchResult(self, node):
-        """
-        Pure virtual method returning a string that describes the search result.
-        """
-        raise NotImplementedError
+    def _get_compare_function(self):
+        def predicate_satisfied_by_node(node):
+            """
+            Simple comparison function that can be used in case of non-lambda search.
 
+            :param node: Accessible object.
+            :type node: Atspi.Accessible
 
-    def makeScriptMethodCall(self, isRecursive):
-        """
-        Method to generate a string containing a (hopefully) readable search
-        method call on a node (to be used when generating Python source code in
-        the event recorder).
-        """
-        raise NotImplementedError
+            :return: True or False based on given criteria.
+            :rtype: bool
+            """
 
+            # First lets check if user wants to check label.
+            if self.label is not None:
+                # If so, check if labeler labeler is present.
+                if node.labeler:
+                    # Try to match either text or name of the labeler.
+                    label_name = self.label == node.labeler.name
+                    label_text = self.label == node.labeler.text
+                    return label_name or label_text
+                # No labeler, match is False.
+                return False
 
-    def makeScriptVariableName(self):
-        """
-        Method to generate a string containing a (hopefully) readable name
-        for a Node instance variable that would be the result of a search on
-        this predicate (to be used when generating Python source code in the
-        event recorder).
-        """
-        raise NotImplementedError
+            try:
+                # Check if user wants to check name.
+                if self.name is not None:
+                    # Compare name of self with the given node.
+                    if self.name != node.name:
+                        return False
+
+                # Check if user wants to check role_name.
+                if self.role_name is not None:
+                    # Compare role_name of self with the given node.
+                    # If 'push button' is wanted, attempt to match also 'button'
+                    if (self.role_name != "push button" and self.role_name != node.role_name) or (
+                        self.role_name == "push button" and node.role_name not in ("button", "push button")
+                    ):
+                        return False
+
+                # Check if user wants to check description.
+                if self.description is not None:
+                    # Compare description of self with the given node.
+                    if self.description != node.description:
+                        return False
+
+                # Check if user wants to check identifier.
+                if self.identifier is not None:
+                    # Compare identifier with the given node's "id" or "accessible_id".
+                    if self.identifier not in (node.id, node.accessible_id):
+                        return False
+
+                # Check if user wants to match showing only.
+                if self.showing_only:
+                    # Compare description of self with the given node.
+                    if not node.showing:
+                        return False
+
+                # There are no conflicting parameters, match is a success.
+                return True
+
+            except Exception:
+                return False
+
+        return predicate_satisfied_by_node
 
 
     def __eq__(self, other):
         """
-        Predicates are considered equal if they are of the same subclass and
-        have the same data
+        Predicates are considered equal if they are of the same subclass and have the
+        same data.
         """
 
         if not isinstance(self, type(other)):
             return False
-        else:
-            return self.__dict__ == other.__dict__
+
+        # Since the compare function will have different hexadecimal,
+        # lets remove it from the comparison.
+        # predicate_satisfied_by_node at 0x7fdb99f787c0>
+        # predicate_satisfied_by_node at 0x7fdb96683060>
+
+        exclude_key = {"satisfied_by_node"}
+
+        self_dict = {key: self.__dict__[key] for key in set(list(self.__dict__.keys())) - set(exclude_key)}
+        other_dict = {key: other.__dict__[key] for key in set(list(other.__dict__.keys())) - set(exclude_key)}
+
+        return self_dict == other_dict
 
 
-class IsAnApplicationNamed(Predicate):
+    def __str__(self):
+        """
+        Representation of what the Predicate is matching.
+        """
+
+        string_to_represent_object = ""
+        string_to_represent_object += f"name:{repr(self.name)} "
+        string_to_represent_object += f"role_name:{repr(self.role_name)} "
+        string_to_represent_object += f"description:{repr(self.description)} "
+        string_to_represent_object += f"label:{repr(self.label)} "
+        string_to_represent_object += f"id:{repr(self.identifier)} "
+        string_to_represent_object += f"showing_only:{repr(self.showing_only)}"
+        return string_to_represent_object
+
+
+class IsAnApplicationNamed(GenericPredicate):
     """
-    Search subclass that looks for an application by name
-    """
-
-    def __init__(self, appName):
-        self.appName = TranslatableString(appName)
-        self.debugName = self.describeSearchResult()
-        self.satisfiedByNode = self._genCompareFunc()
-
-
-    def _genCompareFunc(self):
-        def satisfiedByNode(node):
-            try:
-                return node.roleName == "application" and stringMatches(self.appName, node.name)
-            except GLib.GError as error:
-                if re.match(r"name :[0-9]+\.[0-9]+ was not provided", str(error)):
-                    logger.log("Dogtail: warning: omiting possibly broken at-spi application record")
-                    return False
-
-                try:
-                    sleep(config.defaults["searchWarningThreshold"])
-                    return node.roleName == "application" and stringMatches(self.appName, node.name)
-                except GLib.GError:
-                    logger.log("Dogtail: warning: application may be hanging")
-                    return False
-        return satisfiedByNode
-
-
-    def describeSearchResult(self):
-        debug_log("describeSearchResult(self)")
-        return "%s application" % self.appName
-
-
-    def makeScriptMethodCall(self, isRecursive):
-        debug_log("makeScriptMethodCall(self, isRecursive=%s)" % str(isRecursive))
-        return "application(%s)" % self.appName
-
-
-    def makeScriptVariableName(self):
-        debug_log("makeScriptVariableName(self)")
-        return makeCamel(self.appName) + "App"
-
-
-class GenericPredicate(Predicate):
-    """
-    SubtreePredicate subclass that takes various optional search fields
+    Predicate subclass that looks for a application by name.
     """
 
-    def __init__(self, name=None, roleName=None, description=None, label=None, identifier=None, debugName=None):
-        if name:
-            self.name = TranslatableString(name)
-        else:
-            self.name = None
+    def __init__(self, name=None):
+        self.name = name
 
-        self.roleName = roleName
-        self.description = description
+        if not self.name:
+            LOGGER.info("You did not provide any 'name' to match.")
+            self.name = "__invalid__"
 
-        if label:
-            self.label = TranslatableString(label)
-        else:
-            self.label = None
-        self.identifier = identifier
-
-        if debugName:
-            self.debugName = debugName
-        else:
-            if label:
-                self.debugName = "labelled '%s'" % self.label
-            else:
-                self.debugName = "child with"
-
-            if name:
-                self.debugName = str(self.debugName) + str(" name=%s") % str(self.name)
-
-            if roleName:
-                self.debugName = str(self.debugName) + str(" roleName='%s'") % str(roleName)
-
-            if description:
-                self.debugName = str(self.debugName) + str(" description='%s'") % str(description)
-
-        assert self.debugName
-        self.satisfiedByNode = self._genCompareFunc()
+        super().__init__(name=self.name, role_name="application")
 
 
-    def _genCompareFunc(self):
-        def satisfiedByNode(node):
-            if self.label:
-                if node.labeller:
-                    return stringMatches(self.label, node.labeller.name)
-                else:
-                    return False
-            else:
-                # Ensure the node matches any criteria that were set:
-                try:
-                    if self.name:
-                        if not stringMatches(self.name, node.name):
-                            return False
-                    if self.roleName:
-                        if self.roleName != node.roleName:
-                            return False
-                    if self.description:
-                        if self.description != node.description:
-                            return False
-                    if self.identifier:
-                        if ('id' not in node.get_attributes() or \
-                            self.identifier != node.get_attributes()['id']) and \
-                           ('accessibleId' not in dir(node) or \
-                            self.identifier != node.accessibleId):
-                            return False
-                except GLib.GError as e:
-                    if re.match(r"name :[0-9]+\.[0-9]+ was not provided", e.message):
-                        logger.log("Dogtail: warning: omiting possibly broken at-spi application record")
-                        return False
-                    else:
-                        raise e
-                return True
-        return satisfiedByNode
-
-
-    def describeSearchResult(self):
-        debug_log("describeSearchResult(self)")
-        return self.debugName
-
-
-    def makeScriptMethodCall(self, isRecursive):
-        debug_log("makeScriptMethodCall(self, isRecursive=%s)" % str(isRecursive))
-
-        if self.label:
-            args = "label=%s" % self.label
-        else:
-            args = ""
-            if self.name:
-                print(self.name)
-                args += " name=%s" % self.name
-
-            if self.roleName:
-                args += " roleName='%s'" % self.roleName
-
-            if self.description:
-                args += " description='%s'" % self.description
-            if self.identifier:
-                args += " identifier='%s'" % self.identifier
-        return "child(%s%s)" % (args, makeScriptRecursiveArgument(isRecursive, True))
-
-
-    def makeScriptVariableName(self):
-        debug_log("makeScriptVariableName(self)")
-
-        if self.label:
-            return makeCamel(self.label) + "Node"
-        else:
-            if self.name:
-                return makeCamel(self.name) + "Node"
-            if self.roleName:
-                return makeCamel(self.roleName) + "Node"
-            if self.description:
-                return makeCamel(self.description) + "Node"
-            if self.identifier:
-                return makeCamel(self.identifier) + "Node"
-
-
-class IsNamed(Predicate):
+class IsATabNamed(GenericPredicate):
     """
-    Predicate subclass that looks simply by name
+    Predicate subclass that looks for a tab by name.
     """
 
-    def __init__(self, name):
-        self.name = TranslatableString(name)
-        self.debugName = self.describeSearchResult()
-        self.satisfiedByNode = self._genCompareFunc()
+    def __init__(self, name=None):
+        self.name = name
+
+        if not self.name:
+            LOGGER.info("You did not provide any 'name' to match.")
+            self.name = "__invalid__"
+
+        super().__init__(name=self.name, role_name="tab")
 
 
-    def _genCompareFunc(self):
-        def satisfiedByNode(node):
-            return stringMatches(self.name, node.name)
-        return satisfiedByNode
-
-
-    def describeSearchResult(self):
-        debug_log("describeSearchResult(self)")
-        return "named %s" % self.name
-
-
-    def makeScriptMethodCall(self, isRecursive):
-        debug_log("makeScriptMethodCall(self, isRecursive=%s)" % str(isRecursive))
-        return "child(name=%s%s)" % (self.name, makeScriptRecursiveArgument(isRecursive, True))
-
-
-    def makeScriptVariableName(self):
-        debug_log("makeScriptVariableName(self)")
-        return makeCamel(self.name) + "Node"
-
-
-class IsAWindowNamed(Predicate):
+class IsAButtonNamed(GenericPredicate):
     """
-    Predicate subclass that looks for a top-level window by name
+    Predicate subclass that looks for a button by name.
     """
 
-    def __init__(self, windowName):
-        self.windowName = TranslatableString(windowName)
-        self.debugName = self.describeSearchResult()
-        self.satisfiedByNode = self._genCompareFunc()
+    def __init__(self, name=None):
+        self.name = name
+
+        if not self.name:
+            LOGGER.info("You did not provide any 'name' to match.")
+            self.name = "__invalid__"
+
+        super().__init__(name=self.name, role_name="button")
 
 
-    def _genCompareFunc(self):
-        def satisfiedByNode(node):
-            return node.roleName == "frame" and stringMatches(self.windowName, node.name)
-        return satisfiedByNode
-
-    def describeSearchResult(self):
-        debug_log("describeSearchResult(self)")
-        return "%s window" % self.windowName
-
-
-    def makeScriptMethodCall(self, isRecursive):
-        debug_log("makeScriptMethodCall(self, isRecursive=%s)" % str(isRecursive))
-        return "window(%s%s)" % (self.windowName, makeScriptRecursiveArgument(isRecursive, False))
-
-
-    def makeScriptVariableName(self):
-        debug_log("makeScriptVariableName(self)")
-        return makeCamel(self.windowName) + "Win"
-
-
-class IsAWindow(Predicate):
+class IsAPushButtonNamed(GenericPredicate):
     """
-    Predicate subclass that looks for top-level windows
+    Predicate subclass that looks for a push button by name.
     """
+
+    def __init__(self, name=None):
+        self.name = name
+
+        if not self.name:
+            LOGGER.info("You did not provide any 'name' to match.")
+            self.name = "__invalid__"
+
+        super().__init__(name=self.name, role_name="push button")
+
+
+class IsATextEntryNamed(GenericPredicate):
+    """
+    Predicate subclass that looks for a text entry by name.
+    """
+
+    def __init__(self, name=None):
+        self.name = name
+
+        if not self.name:
+            LOGGER.info("You did not provide any 'name' to match.")
+            self.name = "__invalid__"
+
+        super().__init__(name=self.name, role_name="text")
+
+class IsAMenuItemNamed(GenericPredicate):
+    """
+    Predicate subclass that looks for a menu item by name.
+    """
+
+    def __init__(self, name=None):
+        self.name = name
+
+        if not self.name:
+            LOGGER.info("You did not provide any 'name' to match.")
+            self.name = "__invalid__"
+
+        super().__init__(name=self.name, role_name="menu item")
+
+
+class IsAMenuNamed(GenericPredicate):
+    """
+    Predicate subclass that looks for a menu by name.
+    """
+
+    def __init__(self, name=None):
+        self.name = name
+
+        if not self.name:
+            LOGGER.info("You did not provide any 'name' to match.")
+            self.name = "__invalid__"
+
+        super().__init__(name=self.name, role_name="menu")
+
+
+class IsLabelledBy(GenericPredicate):
+    """
+    Predicate: is this node labelled by another node.
+    """
+
+    # I do not see a reason for this.
+    # If user wants to know that something has a labeller, who not just ask <>.labeller?
+    # This was empty in older version of dogtail, so what did it do?
+
+
+class IsLabelledAs(GenericPredicate):
+    """
+    Predicate: is this node labelled with the text string (i.e. by another node with
+    that as a name).
+    """
+
+    def __init__(self, label=None):
+        self.label = label
+
+        if not self.label:
+            LOGGER.info("You did not provide any 'label' to match.")
+            self.label = "__invalid__"
+
+        super().__init__(label=self.label)
+
+
+class IsADialogNamed(GenericPredicate):
+    """
+    Predicate subclass that looks for a top-level dialog by name.
+    """
+
+    def __init__(self, name=None):
+        self.name = name
+
+        if not self.name:
+            LOGGER.info("You did not provide any 'name' to match.")
+            self.name = "__invalid__"
+
+        super().__init__(name=self.name, role_name="dialog")
+
+
+class IsAWindow(GenericPredicate):
+    """
+    Predicate subclass that looks for top-level windows.
+    """
+
 
     def __init__(self):
-        self.satisfiedByNode = lambda node: node.roleName == "frame"
+        super().__init__(role_name="window")
 
 
-    def describeSearchResult(self):
-        debug_log("describeSearchResult(self)")
-        return "window"
-
-
-class IsADialogNamed(Predicate):
+class IsAWindowNamed(GenericPredicate):
     """
-    Predicate subclass that looks for a top-level dialog by name
+    Predicate subclass that looks for a top-level window by name.
     """
 
-    def __init__(self, dialogName):
-        self.dialogName = TranslatableString(dialogName)
-        self.debugName = self.describeSearchResult()
-        self.satisfiedByNode = self._genCompareFunc()
+    def __init__(self, name=None):
+        self.name = name
+
+        if not self.name:
+            LOGGER.info("You did not provide any 'name' to match.")
+            self.name = "__invalid__"
+
+        super().__init__(name=self.name, role_name="window")
 
 
-    def _genCompareFunc(self):
-        def satisfiedByNode(node):
-            return node.roleName == "dialog" and stringMatches(self.dialogName, node.name)
-        return satisfiedByNode
-
-
-    def describeSearchResult(self):
-        debug_log("describeSearchResult(self)")
-        return "%s dialog" % self.dialogName
-
-
-    def makeScriptMethodCall(self, isRecursive):
-        debug_log("makeScriptMethodCall(self, isRecursive=%s)" % str(isRecursive))
-        return "dialog(%s%s)" % (self.dialogName, makeScriptRecursiveArgument(isRecursive, False))
-
-
-    def makeScriptVariableName(self):
-        debug_log("makeScriptVariableName(self)")
-        return makeCamel(self.dialogName) + "Dlg"
-
-
-class IsLabelledBy(Predicate):
+class IsAFrameNamed(GenericPredicate):
     """
-    Predicate: is this node labelled by another node
+    Predicate subclass that looks for a top-level frame by name.
     """
 
+    def __init__(self, name=None):
+        self.name = name
 
-class IsLabelledAs(Predicate):
+        if not self.name:
+            LOGGER.info("You did not provide any 'name' to match.")
+            self.name = "__invalid__"
+
+        super().__init__(name=self.name, role_name="frame")
+
+
+class IsNamed(GenericPredicate):
     """
-    Predicate: is this node labelled with the text string (i.e. by another node with that as a name)
+    Predicate subclass that looks simply by name.
     """
+    def __init__(self, name=None):
+        self.name = name
 
-    def __init__(self, labelText):
-        self.labelText = TranslatableString(labelText)
-        self.debugName = self.describeSearchResult()
-        self.satisfiedByNode = self._genCompareFunc()
+        if not self.name:
+            LOGGER.info("You did not provide any 'name' to match.")
+            self.name = "__invalid__"
 
-
-    def _genCompareFunc(self):
-        def satisfiedByNode(node):
-            if node.labeller:
-                return stringMatches(self.labelText, node.labeller.name)
-            return False
-        return satisfiedByNode
-
-
-    def describeSearchResult(self):
-        debug_log("describeSearchResult(self)")
-        return "labelled %s" % self.labelText
-
-
-    def makeScriptMethodCall(self, isRecursive):
-        debug_log("makeScriptMethodCall(self, isRecursive=%s)" % str(isRecursive))
-        return "child(label=%s%s)" % (self.labelText, makeScriptRecursiveArgument(isRecursive, True))
-
-
-    def makeScriptVariableName(self):
-        debug_log("makeScriptVariableName(self)")
-        return makeCamel(self.labelText) + "Node"
-
-
-class IsAMenuNamed(Predicate):
-    """
-    Predicate subclass that looks for a menu by name
-    """
-
-    def __init__(self, menuName):
-        self.menuName = TranslatableString(menuName)
-        self.debugName = self.describeSearchResult()
-        self.satisfiedByNode = lambda node: node.roleName == "menu" and stringMatches(self.menuName, node.name)
-
-
-    def describeSearchResult(self):
-        debug_log("describeSearchResult(self)")
-        return "%s menu" % (self.menuName)
-
-
-    def makeScriptMethodCall(self, isRecursive):
-        debug_log("makeScriptMethodCall(self, isRecursive=%s)" % str(isRecursive))
-        return "menu(%s%s)" % (self.menuName, makeScriptRecursiveArgument(isRecursive, True))
-
-
-    def makeScriptVariableName(self):
-        debug_log("makeScriptVariableName(self)")
-        return makeCamel(self.menuName) + "Menu"
-
-
-class IsAMenuItemNamed(Predicate):
-    """
-    Predicate subclass that looks for a menu item by name
-    """
-
-    def __init__(self, menuItemName):
-        self.menuItemName = TranslatableString(menuItemName)
-        self.debugName = self.describeSearchResult()
-        self.satisfiedByNode = lambda node: \
-            node.roleName.endswith("menu item") and stringMatches(self.menuItemName, node.name)
-
-
-    def describeSearchResult(self):
-        debug_log("describeSearchResult(self)")
-        return "%s menuitem" % (self.menuItemName)
-
-
-    def makeScriptMethodCall(self, isRecursive):
-        debug_log("makeScriptMethodCall(self, isRecursive=%s)" % str(isRecursive))
-        return "menuItem(%s%s)" % (self.menuItemName, makeScriptRecursiveArgument(isRecursive, True))
-
-
-    def makeScriptVariableName(self):
-        debug_log("makeScriptVariableName(self)")
-        return makeCamel(self.menuItemName) + "MenuItem"
-
-
-class IsATextEntryNamed(Predicate):
-    """
-    Predicate subclass that looks for a text entry by name
-    """
-
-    def __init__(self, textEntryName):
-        self.textEntryName = TranslatableString(textEntryName)
-        self.debugName = self.describeSearchResult()
-        self.satisfiedByNode = lambda node: node.roleName == "text" and stringMatches(self.textEntryName, node.name)
-
-
-    def describeSearchResult(self):
-        debug_log("describeSearchResult(self)")
-        return "%s textentry" % (self.textEntryName)
-
-
-    def makeScriptMethodCall(self, isRecursive):
-        debug_log("makeScriptMethodCall(self, isRecursive=%s)" % str(isRecursive))
-        return "textentry(%s%s)" % (self.textEntryName, makeScriptRecursiveArgument(isRecursive, True))
-
-
-    def makeScriptVariableName(self):
-        debug_log("makeScriptVariableName(self)")
-        return makeCamel(self.textEntryName) + "Entry"
-
-
-class IsAButtonNamed(Predicate):
-    """
-    Predicate subclass that looks for a button by name
-    """
-
-    def __init__(self, buttonName):
-        self.buttonName = TranslatableString(buttonName)
-        self.debugName = self.describeSearchResult()
-        self.satisfiedByNode = lambda node: node.roleName in ("button", "push button") and stringMatches(self.buttonName, node.name)
-
-
-    def describeSearchResult(self):
-        debug_log("describeSearchResult(self)")
-        return "%s button" % (self.buttonName)
-
-
-    def makeScriptMethodCall(self, isRecursive):
-        debug_log("makeScriptMethodCall(self, isRecursive=%s)" % str(isRecursive))
-        return "button(%s%s)" % (self.buttonName, makeScriptRecursiveArgument(isRecursive, True))
-
-
-    def makeScriptVariableName(self):
-        debug_log("makeScriptVariableName(self)")
-        return makeCamel(self.buttonName) + "Button"
-
-
-class IsATabNamed(Predicate):
-    """
-    Predicate subclass that looks for a tab by name
-    """
-
-    def __init__(self, tabName):
-        self.tabName = TranslatableString(tabName)
-        self.debugName = self.describeSearchResult()
-        self.satisfiedByNode = lambda node: node.roleName == "page tab" and stringMatches(self.tabName, node.name)
-
-
-    def describeSearchResult(self):
-        debug_log("describeSearchResult(self)")
-        return "%s tab" % (self.tabName)
-
-
-    def makeScriptMethodCall(self, isRecursive):
-        debug_log("makeScriptMethodCall(self, isRecursive=%s)" % str(isRecursive))
-        return "tab(%s%s)" % (self.tabName, makeScriptRecursiveArgument(isRecursive, True))
-
-
-    def makeScriptVariableName(self):
-        debug_log("makeScriptVariableName(self)")
-        return makeCamel(self.tabName) + "Tab"
+        super().__init__(name=self.name)

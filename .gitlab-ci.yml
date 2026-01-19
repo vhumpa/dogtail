@@ -1,13 +1,105 @@
-before_script:
-  - pwd
+image: python:3
 
 stages:
-  - unittests
+  - lint
+  - check_version
+  - build
+  # - upload_testpypi
+  - automatic_release
+  - deploy_to_git
 
-python:
-  stage: unittests
-  when: always
+variables:
+  PACKAGE_DIR: "dist"
+
+
+lint_code:
+  stage: lint
   script:
-    - sudo service gdm stop
-    - sleep 5
-    - dogtail-run-headless-next "nose2 -v tests"
+    - pip install ruff
+    - ruff check .
+    - python -m compileall dogtail/
+  only:
+    - tags
+    - branches
+
+check_version:
+  stage: check_version
+  rules:
+    - if: '$CI_COMMIT_TAG'  # Only run on tag pushes.
+  script:
+    - pip install build setuptools-scm  # or whatever dynamic version plugin you use
+    # Get the version that pyproject-build will produce
+    - VERSION=$(python -m setuptools_scm)
+    - |
+      echo "Detected version from setuptools-scm: $VERSION"
+    # Strip 'v' prefix from tag if present
+    - TAG_VERSION=${CI_COMMIT_TAG#v}
+    - |
+      echo "Git tag version: $TAG_VERSION"
+    # Compare
+    - |
+      if [ "$VERSION" != "$TAG_VERSION" ]; then
+        echo "❌ Tag ($TAG_VERSION) does not match project version ($VERSION)"
+        exit 1
+      else
+        echo "✅ Tag matches project version."
+      fi
+
+build_package:
+  stage: build
+  before_script:
+    - pip install build
+  script:
+    - pyproject-build
+  artifacts:
+    paths:
+      - $PACKAGE_DIR
+  only:
+    - tags
+    # Only relevant if pushing to test.pypi is wanted.
+    #- branches
+  dependencies:
+    - check_version
+
+  #upload_to_testpypi:
+  #  stage: upload_testpypi
+  #  script:
+  #    - twine upload --repository-url https://test.pypi.org/legacy/ -u "$TWINE_USERNAME_TESTPYPI" -p "$TWINE_PASSWORD_TESTPYPI" $PACKAGE_DIR/* --verbose
+  #  only:
+  #    - tags
+  #    # Only relevant if pushing to test.pypi is wanted.
+  #    #- branches
+  #  dependencies:
+  #    - build_package
+  #  when: manual
+
+upload_to_pypi:
+  stage: automatic_release
+  script:
+    - python --version
+    - pip install --upgrade pip setuptools wheel twine
+    - twine upload -u "$TWINE_USERNAME" -p "$TWINE_PASSWORD" $PACKAGE_DIR/* --verbose
+  only:
+    - tags
+  dependencies:
+    - build_package
+# Considered the version to be released manually after all checks are done.
+# But once the tag is pushed, we want the version to be released always. Lets not wait for user.
+#  when: manual
+
+publish-index:
+  stage: deploy_to_git
+#  only:
+#    refs:
+#      - master
+  before_script:
+    - pip install build twine
+  script:
+    - pyproject-build
+    - python -m twine upload --repository-url ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi dist/* -u $PACKAGE_REGISTRY_USERNAME -p $PACKAGE_REGISTRY_PASSWORD --verbose
+  artifacts:
+    paths:
+      - dist
+    when: always
+  # Maybe lets only do this manually, not sure if this is needed for every commit.
+  when: manual

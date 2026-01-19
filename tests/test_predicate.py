@@ -1,159 +1,421 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
-import dogtail.predicate
-import dogtail.tree
-import unittest
+#!/usr/bin/python3
+"""
+Unit tests for the dogtail.predicate.
+"""
 
-"""
-Unit tests for the dogtail.predicate package
-"""
+import unittest
+import dogtail.tree
+import dogtail.predicate
+
+
+class DummyNode:
+    """
+    Dummy class to represent basic dogtail Node.
+    """
+
+    def __init__(self, name=None, role_name=None, description=None):
+        self.name = name
+        self.role_name = role_name
+        self.description = description
+        self.labeler = None
+        self.text = "dummy text"
 
 
 class TestPredicate(unittest.TestCase):
-
-    class DummyNode:
-
-        def __init__(self, name='', roleName='', description=''):
-            self.name = name
-            self.roleName = roleName
-            self.description = description
-            self.labeller = None
-
-    def test_capitalization(self):
-        self.assertEqual(dogtail.predicate.makeCamel("gnome-terminal"), "gnomeTerminal")
-        self.assertEqual(dogtail.predicate.makeCamel("Evolution - Mail"), "evolutionMail")
-        self.assertEqual(
-            dogtail.predicate.makeCamel('self.assertEquals(makeCamel("Evolution - Mail"), "evolutionMail")'),
-            "selfAssertequalsMakecamelEvolutionMailEvolutionmail")
-
-    def test_abstract_class(self):
-        predicate = dogtail.predicate.Predicate()
-        self.assertRaises(NotImplementedError, predicate.satisfiedByNode, None)
-        self.assertRaises(NotImplementedError, predicate.makeScriptMethodCall, None)
-        self.assertRaises(NotImplementedError, predicate.makeScriptVariableName)
-        self.assertRaises(NotImplementedError, predicate.describeSearchResult, None)
+    """
+    Class to test Predicate.
+    """
 
     def test_correct_equality(self):
-        predicate1 = dogtail.predicate.Predicate()
-        predicate2 = dogtail.predicate.Predicate()
-        self.assertEqual(predicate1, predicate2)
+        """
+        Test to make sure the predicate equal comparison is working.
+        """
+
+        predicate_1 = dogtail.predicate.GenericPredicate()
+        predicate_2 = dogtail.predicate.GenericPredicate()
+
+        self.assertEqual(predicate_1, predicate_2)
+
 
     def test_incorrect_equality(self):
-        predicate = dogtail.predicate.Predicate()
-        self.assertNotEqual(predicate, self)
+        """
+        Test to make sure the predicate unequal comparison is working.
+        """
 
-    def test_predicates_application(self):
-        dummyApp = self.DummyNode("dummy", 'application')
-        appPredicate = dogtail.predicate.IsAnApplicationNamed(dummyApp.name)
-        self.assertTrue(appPredicate.satisfiedByNode(dummyApp))
-        self.assertEqual(appPredicate.makeScriptMethodCall(True), "application('dummy')")
-        self.assertEqual(appPredicate.makeScriptVariableName(), 'dummyApp')
+        predicate_1 = dogtail.predicate.GenericPredicate()
 
-    def test_predicates_window(self):
-        dummyWin = self.DummyNode("dummy", 'frame')
-        self.assertTrue(dogtail.predicate.IsAWindow().satisfiedByNode(dummyWin))
-        self.assertEqual(dogtail.predicate.IsAWindow().describeSearchResult(), 'window')
+        self.assertNotEqual(predicate_1, self)
 
-    def test_predicates_window_named(self):
-        dummyWin = self.DummyNode("dummy", 'frame')
-        frameNamedPredicate = dogtail.predicate.IsAWindowNamed(dummyWin.name)
-        self.assertTrue(frameNamedPredicate.satisfiedByNode(dummyWin))
-        self.assertEqual(frameNamedPredicate.makeScriptMethodCall(False), "window('dummy')")
-        self.assertEqual(frameNamedPredicate.makeScriptVariableName(), 'dummyWin')
 
-    def test_predicates_menu_named(self):
-        dummyMenu = self.DummyNode("dummy", 'menu')
-        menuNamedPredicate = dogtail.predicate.IsAMenuNamed(dummyMenu.name)
-        self.assertTrue(menuNamedPredicate.satisfiedByNode(dummyMenu))
-        self.assertEqual(menuNamedPredicate.makeScriptMethodCall(False), "menu('dummy', recursive=False)")
-        self.assertEqual(menuNamedPredicate.makeScriptVariableName(), 'dummyMenu')
+    def test_predicate_application(self):
+        """
+        Test Predicate IsAnApplicationNamed.
+        """
 
-    def test_predicates_menu_item_named(self):
-        dummyMenuItem = self.DummyNode("dummy", 'menu item')
-        menuItemNamedPredicate = dogtail.predicate.IsAMenuItemNamed(dummyMenuItem.name)
-        self.assertTrue(menuItemNamedPredicate.satisfiedByNode(dummyMenuItem))
-        self.assertEqual(menuItemNamedPredicate.makeScriptMethodCall(False), "menuItem('dummy', recursive=False)")
-        self.assertEqual(menuItemNamedPredicate.makeScriptVariableName(), 'dummyMenuItem')
+        dummy_application = DummyNode(name="dummy", role_name="application")
+        predicate = dogtail.predicate.IsAnApplicationNamed(dummy_application.name)
 
-    def test_predicates_text_entry_named(self):
-        dummyText = self.DummyNode("dummy", 'text')
-        textNamedPredicate = dogtail.predicate.IsATextEntryNamed(dummyText.name)
-        self.assertTrue(textNamedPredicate.satisfiedByNode(dummyText))
-        self.assertEqual(textNamedPredicate.makeScriptMethodCall(False), "textentry('dummy', recursive=False)")
-        self.assertEqual(textNamedPredicate.makeScriptVariableName(), 'dummyEntry')
+        self.assertTrue(predicate.satisfied_by_node(dummy_application))
 
-    def test_predicates_button_named(self):
-        # For Issue 35 - IsAButtonName checks 'button' as well.
-        dummyButton = self.DummyNode("dummy", 'push button')
-        buttonNamedPredicate = dogtail.predicate.IsAButtonNamed(dummyButton.name)
-        self.assertTrue(buttonNamedPredicate.satisfiedByNode(dummyButton))
-        self.assertEqual(buttonNamedPredicate.makeScriptMethodCall(False), "button('dummy', recursive=False)")
-        self.assertEqual(buttonNamedPredicate.makeScriptVariableName(), 'dummyButton')
 
-    def test_predicates_page_tab_named(self):
-        dummyTab = self.DummyNode("dummy", 'page tab')
-        pageTabNamedPredicate = dogtail.predicate.IsATabNamed(dummyTab.name)
-        self.assertTrue(pageTabNamedPredicate.satisfiedByNode(dummyTab))
-        self.assertEqual(pageTabNamedPredicate.makeScriptMethodCall(False), "tab('dummy', recursive=False)")
-        self.assertEqual(pageTabNamedPredicate.makeScriptVariableName(), 'dummyTab')
+    def test_predicate_application_negation(self):
+        """
+        Test Predicate IsAnApplicationNamed False Result.
+        """
 
-    def test_predicates_generic_by_name(self):
-        dn1 = self.DummyNode('dummy name 1', 'dummy role 1', 'dummy desc 1')
-        genericPredicateByName = dogtail.predicate.GenericPredicate(name=dn1.name)
-        self.assertTrue(genericPredicateByName.satisfiedByNode(dn1))
-        self.assertEqual(genericPredicateByName.makeScriptMethodCall(
-            False), "child( name='dummy name 1', recursive=False)")
-        self.assertEqual(genericPredicateByName.makeScriptVariableName(), 'dummyName1Node')
+        dummy_application = DummyNode(name="dummy", role_name="not_application")
+        predicate = dogtail.predicate.IsAnApplicationNamed(dummy_application.name)
 
-    def test_predicates_generic_by_roleName(self):
-        dn1 = self.DummyNode('dummy name 1', 'dummy role 1', 'dummy desc 1')
-        genericPredicateByRole = dogtail.predicate.GenericPredicate(roleName=dn1.roleName)
-        self.assertTrue(genericPredicateByRole.satisfiedByNode(dn1))
-        self.assertEqual(genericPredicateByRole.makeScriptMethodCall(
-            False), "child( roleName='dummy role 1', recursive=False)")
-        self.assertEqual(genericPredicateByRole.makeScriptVariableName(), 'dummyRole1Node')
+        self.assertFalse(predicate.satisfied_by_node(dummy_application))
 
-    def test_predicates_generic_by_description(self):
-        dn1 = self.DummyNode('dummy name 1', 'dummy role 1', 'dummy desc 1')
-        genericPredicateByDescription = dogtail.predicate.GenericPredicate(description=dn1.description)
-        self.assertTrue(genericPredicateByDescription.satisfiedByNode(dn1))
-        self.assertEqual(genericPredicateByDescription.makeScriptMethodCall(
-            False), "child( description='dummy desc 1', recursive=False)")
-        self.assertEqual(genericPredicateByDescription.makeScriptVariableName(), 'dummyDesc1Node')
 
-    def test_predicates_generic_by_label(self):
-        dn1 = self.DummyNode('dummy name 1', 'dummy role 1', 'dummy desc 1')
-        dn2 = self.DummyNode('dummy name 2', 'dummy role 2', 'dummy desc 2')
-        dn2.labeller = dn1
-        genericPredicateByLabel = dogtail.predicate.GenericPredicate(label=dn1.name)
-        self.assertTrue(genericPredicateByLabel.satisfiedByNode(dn2))
-        self.assertEqual(genericPredicateByLabel.makeScriptMethodCall(
-            False), "child(label='dummy name 1', recursive=False)")
-        self.assertEqual(genericPredicateByLabel.makeScriptVariableName(), 'dummyName1Node')
+    def test_predicate_tab(self):
+        """
+        Test Predicate IsATabNamed.
+        """
 
-    def test_predicates_named(self):
-        dn1 = self.DummyNode('dummy name 1', 'dummy role 1', 'dummy desc 1')
-        genericNamedPredicate = dogtail.predicate.IsNamed(dn1.name)
-        self.assertTrue(genericNamedPredicate.satisfiedByNode(dn1))
-        self.assertEqual(genericNamedPredicate.makeScriptMethodCall(
-            False), "child(name='dummy name 1', recursive=False)")
-        self.assertEqual(genericNamedPredicate.makeScriptVariableName(), 'dummyName1Node')
+        dummy_application = DummyNode(name="dummy", role_name="tab")
+        predicate = dogtail.predicate.IsATabNamed(dummy_application.name)
 
-    def test_predicates_labelled_as(self):
-        dn1 = self.DummyNode('dummy name 1', 'dummy role 1', 'dummy desc 1')
-        dn2 = self.DummyNode('dummy name 2', 'dummy role 2', 'dummy desc 2')
-        dn2.labeller = dn1
-        genericLabelledPredicate = dogtail.predicate.IsLabelledAs(dn1.name)
-        self.assertTrue(genericLabelledPredicate.satisfiedByNode(dn2))
-        self.assertFalse(genericLabelledPredicate.satisfiedByNode(dn1))
-        self.assertEqual(genericLabelledPredicate.makeScriptMethodCall(
-            False), "child(label='dummy name 1', recursive=False)")
-        self.assertEqual(genericLabelledPredicate.makeScriptVariableName(), 'dummyName1Node')
+        self.assertTrue(predicate.satisfied_by_node(dummy_application))
 
-    def test_predicates_dialog_named(self):
-        dn1 = self.DummyNode('dummy name 1', 'dialog', 'dummy desc 1')
-        genericNamedPredicate = dogtail.predicate.IsADialogNamed(dn1.name)
-        self.assertTrue(genericNamedPredicate.satisfiedByNode(dn1))
-        self.assertEqual(genericNamedPredicate.makeScriptMethodCall(False), "dialog('dummy name 1')")
-        self.assertEqual(genericNamedPredicate.makeScriptVariableName(), 'dummyName1Dlg')
+
+    def test_predicate_tab_negation(self):
+        """
+        Test Predicate IsATabNamed False Result.
+        """
+
+        dummy_application = DummyNode(name="dummy", role_name="not_tab")
+        predicate = dogtail.predicate.IsATabNamed(dummy_application.name)
+
+        self.assertFalse(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_predicate_button(self):
+        """
+        Test Predicate IsAButtonNamed.
+        """
+
+        dummy_application = DummyNode(name="dummy", role_name="button")
+        predicate = dogtail.predicate.IsAButtonNamed(dummy_application.name)
+
+        self.assertTrue(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_predicate_push_button(self):
+        """
+        Test Predicate IsAPushButtonNamed.
+        """
+
+        dummy_application = DummyNode(name="dummy", role_name="push button")
+        predicate = dogtail.predicate.IsAPushButtonNamed(dummy_application.name)
+
+        self.assertTrue(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_predicate_button_negation(self):
+        """
+        Test Predicate IsAButtonNamed False Result.
+        """
+
+        dummy_application = DummyNode(name="dummy", role_name="not_push_button")
+        predicate = dogtail.predicate.IsAButtonNamed(dummy_application.name)
+
+        self.assertFalse(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_predicate_text(self):
+        """
+        Test Predicate IsATextEntryNamed.
+        """
+
+        dummy_application = DummyNode(name="dummy", role_name="text")
+        predicate = dogtail.predicate.IsATextEntryNamed(dummy_application.name)
+
+        self.assertTrue(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_predicate_text_negation(self):
+        """
+        Test Predicate IsATextEntryNamed False Result.
+        """
+
+        dummy_application = DummyNode(name="dummy", role_name="not_text")
+        predicate = dogtail.predicate.IsATextEntryNamed(dummy_application.name)
+
+        self.assertFalse(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_predicate_menu_item(self):
+        """
+        Test Predicate IsAMenuItemNamed.
+        """
+
+        dummy_application = DummyNode(name="dummy", role_name="menu item")
+        predicate = dogtail.predicate.IsAMenuItemNamed(dummy_application.name)
+
+        self.assertTrue(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_predicate_menu_item_negation(self):
+        """
+        Test Predicate IsAMenuItemNamed False Result.
+        """
+
+        dummy_application = DummyNode(name="dummy", role_name="not_menu_item")
+        predicate = dogtail.predicate.IsAMenuItemNamed(dummy_application.name)
+
+        self.assertFalse(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_predicate_menu(self):
+        """
+        Test Predicate IsAMenuNamed.
+        """
+
+        dummy_application = DummyNode(name="dummy", role_name="menu")
+        predicate = dogtail.predicate.IsAMenuNamed(dummy_application.name)
+
+        self.assertTrue(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_predicate_menu_negation(self):
+        """
+        Test Predicate IsAMenuNamed False Result.
+        """
+
+        dummy_application = DummyNode(name="dummy", role_name="not_menu")
+        predicate = dogtail.predicate.IsAMenuNamed(dummy_application.name)
+
+        self.assertFalse(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_predicate_label_by_name(self):
+        """
+        Test Predicate IsLabelledAs.
+        """
+
+        dummy_application_1 = DummyNode(name="dummy_1", role_name="menu")
+        dummy_application_2 = DummyNode(name="dummy_2", role_name="menu")
+
+        dummy_application_2.labeler = dummy_application_1
+
+        predicate = dogtail.predicate.IsLabelledAs(dummy_application_1.name)
+
+        self.assertTrue(predicate.satisfied_by_node(dummy_application_2))
+
+
+    def test_predicate_label_by_text(self):
+        """
+        Test Predicate IsLabelledAs.
+        """
+
+        dummy_application_1 = DummyNode(name="dummy_1", role_name="menu")
+        dummy_application_1.text = "dummy_3"
+        dummy_application_2 = DummyNode(name="dummy_2", role_name="menu")
+        dummy_application_3 = DummyNode(name="dummy_3", role_name="menu")
+
+        dummy_application_2.labeler = dummy_application_1
+
+        predicate = dogtail.predicate.IsLabelledAs(dummy_application_3.name)
+
+        self.assertTrue(predicate.satisfied_by_node(dummy_application_2))
+
+
+    def test_predicate_label_negation(self):
+        """
+        Test Predicate IsLabelledAs False Result.
+        """
+
+        dummy_application_1 = DummyNode(name="dummy_1", role_name="menu")
+        dummy_application_2 = DummyNode(name="dummy_2", role_name="menu")
+
+        dummy_application_2.labeler = dummy_application_1
+
+        predicate = dogtail.predicate.IsLabelledAs(dummy_application_1.name)
+
+        self.assertFalse(predicate.satisfied_by_node(dummy_application_1))
+
+
+    def test_predicate_dialog(self):
+        """
+        Test Predicate IsADialogNamed.
+        """
+
+        dummy_application = DummyNode(name="dummy", role_name="dialog")
+        predicate = dogtail.predicate.IsADialogNamed(dummy_application.name)
+
+        self.assertTrue(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_predicate_dialog_negation(self):
+        """
+        Test Predicate IsADialogNamed False Result.
+        """
+
+        dummy_application = DummyNode(name="dummy", role_name="not_dialog")
+        predicate = dogtail.predicate.IsADialogNamed(dummy_application.name)
+
+        self.assertFalse(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_predicate_window(self):
+        """
+        Test Predicate IsAWindow.
+        """
+
+        dummy_application = DummyNode(name="dummy", role_name="window")
+        predicate = dogtail.predicate.IsAWindow()
+
+        self.assertTrue(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_predicate_window_negation(self):
+        """
+        Test Predicate IsAWindow False Result.
+        """
+
+        dummy_application = DummyNode(name="dummy", role_name="not_window")
+        predicate = dogtail.predicate.IsAWindow()
+
+        self.assertFalse(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_predicate_window_named(self):
+        """
+        Test Predicate IsAWindowNamed.
+        """
+
+        dummy_application = DummyNode(name="dummy", role_name="window")
+        predicate = dogtail.predicate.IsAWindowNamed(dummy_application.name)
+
+        self.assertTrue(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_predicate_window_named_negation(self):
+        """
+        Test Predicate IsAWindowNamed False Result.
+        """
+
+        dummy_application = DummyNode(name="dummy", role_name="not_window")
+        predicate = dogtail.predicate.IsAWindowNamed(dummy_application.name)
+
+        self.assertFalse(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_predicate_frame_named(self):
+        """
+        Test Predicate IsAFrameNamed.
+        """
+
+        dummy_application = DummyNode(name="dummy", role_name="frame")
+        predicate = dogtail.predicate.IsAFrameNamed(dummy_application.name)
+
+        self.assertTrue(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_predicate_frame_named_negation(self):
+        """
+        Test Predicate IsAFrameNamed False Result.
+        """
+
+        dummy_application = DummyNode(name="dummy", role_name="not_frame")
+        predicate = dogtail.predicate.IsAFrameNamed(dummy_application.name)
+
+        self.assertFalse(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_predicate_frame_named_name_negation(self):
+        """
+        Test Predicate IsAFrameNamed Name False Result.
+        """
+
+        dummy_application = DummyNode(name="dummy", role_name="not_frame")
+        predicate = dogtail.predicate.IsAFrameNamed("not_dummy")
+
+        self.assertFalse(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_predicate_frame_named_name_negation_frame_correction(self):
+        """
+        Test Predicate IsAFrameNamed Name False Result Frame Correct.
+        """
+
+        dummy_application = DummyNode(name="dummy", role_name="frame")
+        predicate = dogtail.predicate.IsAFrameNamed("not_dummy")
+
+        self.assertFalse(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_predicate_named(self):
+        """
+        Test Predicate IsNamed.
+        """
+
+        dummy_application = DummyNode(name="dummy")
+        predicate = dogtail.predicate.IsNamed(dummy_application.name)
+
+        self.assertTrue(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_predicate_named_negation(self):
+        """
+        Test Predicate IsNamed False Result.
+        """
+
+        dummy_application = DummyNode(name="dummy")
+        predicate = dogtail.predicate.IsNamed("not_dummy")
+
+        self.assertFalse(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_generic_predicate_by_name(self):
+        """
+        Test Predicate GenericPredicate by Name.
+        """
+
+        dummy_application = DummyNode(name="dummy")
+        predicate = dogtail.predicate.GenericPredicate(name="dummy")
+
+        self.assertTrue(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_generic_predicate_by_role_name(self):
+        """
+        Test Predicate GenericPredicate by Role Name.
+        """
+
+        dummy_application = DummyNode(role_name="dummy role name")
+        predicate = dogtail.predicate.GenericPredicate(role_name="dummy role name")
+
+        self.assertTrue(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_generic_predicate_by_description(self):
+        """
+        Test Predicate GenericPredicate by Description.
+        """
+
+        dummy_application = DummyNode(description="dummy description")
+        predicate = dogtail.predicate.GenericPredicate(description="dummy description")
+
+        self.assertTrue(predicate.satisfied_by_node(dummy_application))
+
+
+    def test_generic_predicate_by_label(self):
+        """
+        Test Predicate GenericPredicate by label.
+        """
+
+        dummy_application_1 = DummyNode(name="dummy_1", role_name="menu")
+        dummy_application_2 = DummyNode(name="dummy_2", role_name="menu")
+
+        dummy_application_2.labeler = dummy_application_1
+
+        predicate = dogtail.predicate.GenericPredicate(label=dummy_application_1.name)
+
+        self.assertTrue(predicate.satisfied_by_node(dummy_application_2))
+
+
+if __name__ == "__main__":
+    unittest.main()

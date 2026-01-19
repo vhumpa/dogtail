@@ -1,92 +1,161 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
-from io import StringIO
-
+#!/usr/bin/python3
 """
-Utility functions for 'dumping' trees of Node objects.
+Experimental dogtail changes for 2.0 release.
 """
 
-__author__ = """
-Zack Cerza <zcerza@redhat.com>,
-Matěj Cepl <mcepl@redhat.com>
-"""
+# pylint: disable=line-too-long
+# ruff: noqa: E501
 
-spacer = u" "
-
-def dump_str(node):
-    with StringIO as in_memory_stream:
-        plain(node, output=in_memory_stream)
-        stream_buffer = in_memory_stream.getvalue()
-        return stream_buffer
-
-
-def plain(node, output=None):
+class AccessibleStructureRepresentation:
     """
-    Plain-text dump. The hierarchy is represented through indentation.
+    Accessible Structure Representation from given Accessible Node.
     """
 
-    stream_output = None
-    close_output = False
-
-    def crawl(node, depth):
-        do_dump(node, depth)
-
-        actions_keys = list(node.actions.keys())
-        actions_keys.sort()
-
-        for action in actions_keys:
-            do_dump(node.actions[action], depth + 1)
-
-        for child in node.children:
-            crawl(child, depth + 1)
+    # TODO - add with_labels and print x.labeler.name and x.labeler.text
+    def __init__(self, accessible_node, structure_format="plain", file_name=None, labels=False):
+        self.spacer = "  "
+        self.format = structure_format
+        self.accessible_node = accessible_node
+        self.tree_representation = ""
+        self.file_name = file_name
+        self.labels = labels
 
 
-    def dumpFile(item, depth):
-        stream_output.write(str(spacer * depth) + str(item) + str("\n"))
+    def _get_label_string(self, acc_object):
+        labeler_string = ""
+        if self.labels and acc_object.labeler:
+            for iteration, labeler in enumerate(acc_object.labeler):
+                labeler_string += f" (labeler_{iteration}.text='{labeler.text}') "
+                labeler_string += f" (labeler_{iteration}.name='{labeler.name}') "
+
+        if self.labels and acc_object.labelee:
+            for iteration, labelee in enumerate(acc_object.labelee):
+                labeler_string += f" (labelee_{iteration}.text='{labelee.name}') "
+                labeler_string += f" (labelee_{iteration}.name='{labelee.name}') "
+
+        if self.labels and (not acc_object.labeler and not acc_object.labelee):
+            labeler_string += " (No labeler) "
+
+        return labeler_string
 
 
-    def dumpStdOut(item, depth):
+    def _represent_structure_as_plain(self, acc_object, level=0):
+        labeler_string = self._get_label_string(acc_object)
+
+        tree_representation = self.spacer * level + str(acc_object) + labeler_string + "\n"
+
+        for child in acc_object.children:
+            # Not adding Action strings by choice, we can revisit in the future.
+
+            tree_representation += self._represent_structure_as_plain(child, level + 1)
+
+        return tree_representation
+
+
+    def _represent_structure_as_verbose(self, acc_object, level=0):
+        if not acc_object:
+            return
+
+        labeler_string = self._get_label_string(acc_object)
+
+        verbose_str = "".join((
+            str(acc_object),
+            " - ",
+            f"(position:'{acc_object.position}', size:'{acc_object.size}', ",
+            f"visible:{acc_object.visible}, showing:{acc_object.showing})",
+            f"{labeler_string}"
+        ))
+
+        tree_representation = self.spacer * level + verbose_str + "\n"
+
+        for child in acc_object.children:
+            # Not adding Action strings by choice, we can revisit in the future.
+
+            tree_representation += self._represent_structure_as_verbose(child, level + 1)
+
+        return tree_representation
+
+
+    def _represent_structure_as_tree(self, node, last=True, spacer=""):
+        self._recursive_tree_structure_construction(node, last=last, spacer=spacer)
+        return self.tree_representation
+
+
+    def _recursive_tree_structure_construction(self, acc_object, last, spacer):
+        if not acc_object:
+            return
+
+        prefix_spacer = "    "
+        prefix_extend = " │  "
+        suffix_branch = " ├──"
+        suffix_last =   " └──"
+
+        labeler_string = self._get_label_string(acc_object)
+
+        # Attempt to shorten the line.
+        suffix_based_on_last = suffix_last if last else suffix_branch
+        # Add a line to the tree representation.
+
+        self.tree_representation += (spacer + suffix_based_on_last + str(acc_object)) + labeler_string + "\n"
+
+        for index, child in enumerate(acc_object.children):
+            # Not adding Action strings by choice, we can revisit in the future.
+
+            # Check if the index is last.
+            is_last = index == acc_object.child_count - 1
+            # Make a new spacer.
+            new_spacer = spacer + (prefix_spacer if last else prefix_extend)
+
+            self._recursive_tree_structure_construction(child, last=is_last, spacer=new_spacer)
+
+
+    def load_data_to_file(self, data):
+        """
+        Insert Accessible Structure Representation to the file.
+
+        :param data: Data to insert to the file.
+        :type data: str
+
+        :raises OSError: Raise OSError if the is an issue with file manipulation.
+        """
+
         try:
-            print(spacer * depth + str(item))  # py3
-        except UnicodeDecodeError:
-            print(spacer * depth + str(item).decode("utf8"))  # py2 fallback
-
-    do_dump = dumpFile if output else dumpStdOut
-
-    if output:
-        try:
-            if hasattr(output, "write"):
-                stream_output = output
-            elif isinstance(output, basestring):  # py2
-                stream_output = open(output, "w")
-                close_output = True
-        except NameError:
-            if isinstance(output, str):  # there's no basestring in py3 (no str and unicode)
-                stream_output = open(output, "w")
-                close_output = True
-
-    crawl(node, 0)
-
-    if close_output:
-        stream_output.close()
+            with open(self.file_name, "w", encoding="utf-8") as file_:
+                file_.write(data)
+        except OSError as error:
+            raise OSError(f"Issue with opening '{self.file_name}' file.") from error
 
 
-def verbose(node, output=None):
-    """
-    Verbose output is the same as plain but with attributes like
-    position, size, visible, showing.
-    Keeping output parameter for compatibility purpose.
-    Always dumping to stdout
-    """
+    def __str__(self):
+        if self.format == "plain":
+            plain_data = self._represent_structure_as_plain(self.accessible_node)
 
-    def crawl(node, depth):
-        do_dump(node, depth)
-        for child in node.children:
-            crawl(child, depth + 1)
+            if self.file_name:
+                self.load_data_to_file(data=plain_data)
+                return f"[ Plain structure was inserted in file '{self.file_name}'. ]"
 
-    def dump_std_out(item, depth):
-        print(spacer * depth + str(item) + "     [p:%s, s:%s, vis:%s, show:%s]" % \
-            item.position, item.size, item.visible, item.showing)
+            return plain_data
 
-    do_dump = dump_std_out
-    crawl(node, 0)
+        if self.format == "verbose":
+            verbose_data = self._represent_structure_as_verbose(self.accessible_node)
+
+            if self.file_name:
+                self.load_data_to_file(data=verbose_data)
+                return f"[ Verbose structure was inserted in file '{self.file_name}'. ]"
+
+            return verbose_data
+
+        if self.format == "tree":
+            tree_data = self._represent_structure_as_tree(self.accessible_node)
+
+            if self.file_name:
+                self.load_data_to_file(data=tree_data)
+                return f"[ Tree structure was inserted in file '{self.file_name}'. ]"
+
+            return tree_data
+
+        return f"[Unknown format selected '{self.format}']"
+
+
+    def __repr__(self):
+        return "<Accessible Structure Representation>"

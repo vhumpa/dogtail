@@ -1,219 +1,24 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
+#!/usr/bin/python3
+"""
+This file provides loggers.
+"""
+
+# pylint: disable=broad-exception-caught
+# pylint: disable=protected-access
+# pylint: disable=import-outside-toplevel
+
+
 import os
 import sys
-import time
-import traceback
-from dogtail.config import config
-
 import logging
-import inspect
 
-"""
-Logging facilities
-"""
-
-__author__ = """Ed Rousseau <rousseau@redhat.com>,
-Zack Cerza <zcerza@redhat.com,
-David Malcolm <dmalcolm@redhat.com>"""
-
-
-class TimeStamp:
-    """
-    Timestamp class for file logs
-    Generates timestamps tempfiles and log entries
-    """
-
-    def __init__(self):
-        self.now = "0"
-        self.timetup = time.localtime()
-
-
-    def zeroPad(self, intt, width=2):
-        """
-        Pads an integer 'int' with zeroes, up to width 'width'.
-        Returns a string.
-        It will not truncate. If you call zeroPad(100, 2), '100' will be returned.
-        """
-
-        if intt < 10 ** width:
-            return ("0" * (width - len(str(intt)))) + str(intt)
-
-        return str(intt)
-
-
-    def fileStamp(self, filename, addTime=True):
-        """
-        Generates a filename stamp in the format of filename_YYYYMMDD-hhmmss.
-        A format of filename_YYYYMMDD can be used instead by specifying addTime = False.
-        Should produce rel-eng style filestamps
-        """
-
-        self.now = filename.strip() + "_"
-        self.timetup = time.localtime()
-
-        fieldCount = 3
-        if addTime:
-            fieldCount = fieldCount + 3
-        for i in range(fieldCount):
-            if i == 3:
-                self.now = self.now + "-"
-            self.now = self.now + self.zeroPad(self.timetup[i])
-        return self.now
-
-
-    def entryStamp(self):
-        """
-        Generates a logfile entry stamp of YYYY.MM.DD HH:MM:SS
-        """
-
-        self.timetup = time.localtime()
-
-        for i in range(6):
-            if i == 0: # year
-                self.now = str(self.timetup[i])
-            elif i in (1, 2): # month day
-                self.now = self.now + "." + self.zeroPad(self.timetup[i])
-            else: # hour minutes seconds
-                if i == 3:
-                    self.now = self.now + " " + self.zeroPad(self.timetup[i])
-                else:
-                    self.now = self.now + ":" + self.zeroPad(self.timetup[i])
-
-        return self.now
-
-
-class Logger:
-    """
-    Writes entries to standard out.
-    """
-
-    stamper = TimeStamp()
-
-    def __init__(self, logName, file=False, stdOut=True):
-        """
-        name: the name of the log
-        file: The file object to log to.
-        stdOut: Whether to log to standard out.
-        """
-
-        self.logName = logName
-        self.stdOut = stdOut
-        self.filee = file
-
-        scriptName = config.scriptName
-
-        if not scriptName:  # pragma: no cover
-            scriptName = "log"
-
-        self.fileName = scriptName
-
-        if not self.filee:
-            self.filee = False
-            return
-
-        if os.path.isdir(config.logDir):
-            self.findUniqueName()
-        else:
-            raise IOError("Log path %s does not exist or is not a directory" % config.logDir)
-
-
-    def findUniqueName(self):
-        """
-        Generate a logfile name and check if it already exists to obtain a unique one
-        """
-
-        self.fileName = config.logDir + self.stamper.fileStamp(self.fileName) + '_' + self.logName
-        i = 0
-
-        while os.path.exists(self.fileName):
-            if i == 0:
-                self.fileName = self.fileName + "." + str(i)
-            else:
-                logsplit = self.fileName.split(".")
-                logsplit[-1] = str(i)
-                self.fileName = ".".join(logsplit)
-            i += 1
-
-
-    def createFile(self):
-        """
-        Try to create the file and write the header info
-        """
-
-        print("Creating logfile at %s ..." % self.fileName)
-        self.filee = open(self.fileName, mode="w")
-        self.filee.write("##### " + os.path.basename(self.fileName) + "\n")
-        self.filee.flush()
-
-
-    def log(self, message, newline=True, force=False):
-        """
-        Hook used for logging messages. Might eventually be a virtual
-        function, but nice and simple for now.
-
-        If force is True, log to a file irrespective of config.logDebugToFile.
-        """
-        
-
-        if isinstance(self.filee, bool) and (force or config.logDebugToFile):
-            self.createFile()
-
-        if force or config.logDebugToFile:
-            if newline:
-                self.filee.write(message + str("\n"))
-            else:
-                self.filee.write(message + str(" "))
-            self.filee.flush()
-
-        if self.stdOut and config.logDebugToStdOut:
-            try:
-                print(message)
-            except TypeError:
-                print(message.decode("utf-8", "replace"))
-
-class ResultsLogger(Logger):
-    """
-    Writes entries into the Dogtail log
-    """
-
-    def __init__(self, stdOut=True):
-        Logger.__init__(self, "results", file=True, stdOut=stdOut)
-
-
-    def log(self, entry):
-        """
-        Writes the log entry. Requires a 1 {key: value} pair dict for an argument or else it will
-        throw an exception.
-        """
-
-        if len(entry) == 1:
-            key = list(entry.keys())
-            value = list(entry.values())
-            key = key[0]
-            value = value[0]
-            entry = str(key) + ":      " + str(value)
-        else:
-            print("Method argument requires a 1 {key: value} dict. Supplied argument not one {key: value}")
-            raise ValueError(entry)
-
-        Logger.log(self, self.stamper.entryStamp() + "      " + entry, force=True)
-
-debugLogger = Logger("debug", config.logDebugToFile)
-
-
-def exceptionHook(exc, value, tb):  # pragma: no cover
-    tbStringList = traceback.format_exception(exc, value, tb)
-    tbString = "".join(tbStringList)
-    debugLogger.log(tbString)
-
-sys.excepthook = exceptionHook
-
-
-### Logging definition for debugging dogtail itself.
-### Can be used in other parts, but we cannot break the api.
+# Singleton solution provided by https://stackoverflow.com/a/54209647
 
 class Singleton(type):
+    """
+    Singleton class used as metaclass by :py:class:`logger.Logging`.
+    """
+
     _instances = {}
 
     def __call__(cls, *args, **kwargs):
@@ -221,39 +26,166 @@ class Singleton(type):
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
 
+class Logging(metaclass=Singleton):
+    """
+    Logging class.
+    """
 
-class DebugLogger(metaclass=Singleton):
     logger = None
+    default_log_file = "/tmp/dogtail_debug.log"
 
-    def __init__(self):
-        # Using logging.basicConfig can negatively affect all other (3rd party)
-        # already instantiated loggers
-        self.logger = logging.getLogger("debug")
-        streamHandler = logging.StreamHandler()
-        streamHandler.setFormatter(logging.Formatter("%(message)s"))
-        self.logger.addHandler(streamHandler)
+    def __init__(self) -> None:
+        """
+        Initiating logger class with some basic logging setup.
+        """
 
+        # Preventing circular import, we only need one value for logging.
+        import configparser
+        config_parser = configparser.ConfigParser()
+        config_parser.read("dogtail_config.ini")
+        self.debug_file = config_parser.get(
+            "config",
+            "debug_file",
+            fallback=self.default_log_file
+        )
+        # Validate the debug file value.
+        self.debug_file = None if self.debug_file == "None" else self.debug_file
 
-    @staticmethod
-    def __get_call_info():
-        stack = inspect.stack()
+        self.debug_file_persistence = config_parser.get(
+            "config",
+            "debug_file_persistence",
+            fallback=False
+        )
+        # Validate the debug file persistence value.
+        self.debug_file_persistence = True if self.debug_file_persistence == "True" else False
 
-        file_name = stack[3][1].split("/")[-1]
-        line_length = stack[3][2]
+        # Nulling the file based persistence config value.
+        if not self.debug_file_persistence:
+            self.dogtail_truncate_the_logger_file()
 
-        return file_name, line_length
+        self.logger = logging.getLogger("__dogtail_logger__")
+        self.logger.setLevel(logging.DEBUG)
 
+        # Disable default handler.
+        self.logger.propagate = False
 
-    def info(self, message, *args):
-        message = "[{}:{:3}] {}".format(*self.__get_call_info(), message)
-        self.logger.info(message, *args)
+        formatter = logging.Formatter(
+            "".join((
+                "[%(levelname)s] %(asctime)s: ",
+                "[%(filename)s:%(lineno)d] ",
+                "%(func_name)s: %(message)s"
+            ))
+        )
 
-try:
-    DEBUG_DOGTAIL = os.environ["DOGTAIL_DEBUG"] == "true"
-except KeyError:
-    DEBUG_DOGTAIL = False
+        # Default umask is 0o022 which turns off permissions for groups and others.
+        # We need the logger file to be readable and modifiable by anyone.
+        os.umask(0)
 
-_log = DebugLogger()
-def debug_log(message):
-    if DEBUG_DOGTAIL:
-        _log.info(message)
+        # Setup of file handler.
+        # All DEBUG and higher level logs will be going to the file.
+        if self.debug_file:
+            file_handler = logging.FileHandler(self.debug_file)
+            file_handler.setLevel(logging.DEBUG)
+            file_handler.setFormatter(formatter)
+            file_handler.set_name("file_handler")
+
+            # Add file handler only if file is defined.
+            self.logger.addHandler(file_handler)
+
+        # Setup of console handler.
+        # All INFO and higher level logs will be going to the console.
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setLevel(logging.INFO)
+        console_handler.setFormatter(formatter)
+        console_handler.set_name("console_handler")
+
+        # Add console handler.
+        self.logger.addHandler(console_handler)
+
+        self.logger.addFilter(FuncFilter())
+
+    def debug_to_console(self) -> None:
+        """
+        Set file handler level to DEBUG to get the output to console.
+        """
+
+        for handler in self.logger.handlers:
+            if handler.get_name() == "console_handler":
+                handler.setLevel(logging.DEBUG)
+                break
+
+    def disable_debug_to_console(self) -> None:
+        """
+        Set file handler level to INFO to get the output to console.
+        """
+
+        for handler in self.logger.handlers:
+            if handler.get_name() == "console_handler":
+                handler.setLevel(logging.INFO)
+                break
+
+    def get_func_params_and_values(self):
+        """
+        Simple way to have logging data from the place it was called in.
+        """
+
+        try:
+            frame = sys._getframe().f_back
+            _local_func_parameters = frame.f_locals.keys()
+            _local_func_parameters_value = frame.f_locals.values()
+
+            # ATTENTION: Never change this from repr() to str().
+            # In case of .name .role_name and .description when log is called it goes
+            # to the Node's __str__ which will want to represent the node with
+            # name role_name and description causing it to get logged again and again
+            # wanting to go the __str__ representation.
+            # Causing infinite recursion.
+            # The need to do it this way is for backwards compatibility.
+            # Logging is new so we have to work around it.
+            map_of_keys_and_values = [
+                x if "self" == x else x if "context" == x else repr(x) + "=" + repr(y)
+                for x, y in zip(_local_func_parameters, _local_func_parameters_value)
+            ]
+            return f"({', '.join(map_of_keys_and_values)})"
+        except Exception as error:
+            self.logger.error("Error in get_func_params_and_values: %s", error)
+            return ""
+
+    def dogtail_truncate_the_logger_file(self) -> None:
+        """
+        If the Logging class is used from multiple files or scripts especially when
+        running one script from another, the logger would not be found and file is
+        deleted, making previous logs disappear.
+
+        Lets just null the file only on request.
+        """
+
+        # Null the file only if it exists.
+        # If it does not, no problem, do nothing.
+        if os.path.isfile(self.debug_file):
+            # Default umask is 0o022 which turns off permissions for groups and others.
+            os.umask(0)
+
+            # Create a specific file descriptor for our needs with proper permissions.
+            descriptor = os.open(
+                path=self.debug_file,
+                flags=(os.O_CREAT | os.O_TRUNC),  # Create if not existing, truncate.
+                mode=0o666,
+            )
+            # Close the file descriptor.
+            os.close(descriptor)
+
+class FuncFilter(logging.Filter):
+    """
+    Filter Class to get exact wanted frame.
+    """
+
+    def filter(self, record):
+        # Have to walk the frame a bit back.
+        # 1. filter, 2. handle, 3. _log, 4. debug, 5. Original calling function.
+        record.func_name = str(
+            sys._getframe().f_back.f_back.f_back.f_back.f_back.f_code.co_name
+        )
+        return True
+
+logging_class = Logging()

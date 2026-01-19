@@ -3,3 +3,6 @@ build/*
 dist/*
 MANIFEST
 *.pyc
+dogtail.egg-info/*
+dogtail/dogtail.egg-info/*
+.testing

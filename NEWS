@@ -1,11 +1,29 @@
+dogtail-2.0
+===========
 
-# dogtail 1.0.1
+- Tracked in Issue #29
+- Remove obsolete and legacy code that I have not observed in usage for several years, working with dogtail and automation in general.
+- Improve Wayland support, iron out some wrinkles in very specific corner cases.
+- Improving code structure and moving specific parts to its own files to improve readability in high level Node.
+- Remove all pyatspi2 usage, switching to only Atspi usage.
+- Adding accessibility classes, which were heavily inspired by Orca.
+- Logging was rewritten to be more useful.
+- The ponytail handling was rewritten and added to its own file, so it is not implemented in several files.
+- Printing Accessibility Structure Representation with dump and tree was improved in readability and efficiency.
+- Configuration handling was improved and ability to have config file per project was added.
+- Changing casing to snake_case, but still have backwards compatibility to camelCase.
+- Custom keys and values - users can define their own config values in .ini file.
+- Type checking: users will get ValueError when trying to set e.g. bool to value defined as float in config.ini.
+- Unittests were rewritten and their execution have been validated with testing-farm. These will now execute before every MR.
+- Examples were updated.
+- Removing Sniff, I will not release dogtail with Sniff in a broken state. It is not working well under Wayland and effort to rewrite it would be great. If someone is willing to rewrite it and improve it I will accept MR with it. Until then there are better tools that fullfil the same role.
+- Preparation for Newton was added to Accessible classes, currently switched off.
+- Preparation for documentation is also present as docstring in class methods, but not executed upon yet. For now one of my colleagues said he will take a look, if not, I will do it myself later.
+- README file was updated with up to date information.
 
-Rebased with a number of contributions that were done to the master branch while we were working on Wayland and we have accidentaly not included them in 1.0.
-See https://gitlab.com/dogtail/dogtail/-/issues/31 
-Also returned couple of modules we thought were of no use (tc, wrapped) but were proved otherwise to keep 1.0 fully compatible with 0.x.
 
-# dogtail 1.0
+dogtail 1.0
+===========
 
 After more than five years of continuous experimentation and development, we are excited to finally release Dogtail 1.0—a Wayland-enabled version of Dogtail! How did we achieve this? It was made possible by the `gnome-ponytail-daemon`, originally crafted by Olivier Fourdan: https://gitlab.gnome.org/ofourdan/gnome-ponytail-daemon. This tool allows us to perform actions in a Wayland GNOME session in a similar way to how we have been doing so with X functions.
 

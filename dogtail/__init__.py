@@ -4,7 +4,7 @@ GUI test tool and automation framework that uses Accessibility (a11y) technologi
 to communicate with desktop applications.
 """
 
-from ._version import __version__
+from ._version import __version__ as imported_version
 
 __author__ = """Zack Cerza <zcerza@redhat.com>,
 Ed Rousseau <rousseau@redhat.com>,
@@ -12,6 +12,11 @@ David Malcolm <dmalcolm@redhat.com>,
 Vita Humpa <vhumpa@redhat.com>,
 Michal Odehnal <modehnal@redhat.com>
 """
+
+try:
+    __version__ = imported_version
+except Exception:
+    __version__ = "Unavailable"
 
 __url__ = "https://gitlab.com/dogtail/dogtail"
 __copyright__ = "Copyright © 2005-2026 Red Hat, Inc."

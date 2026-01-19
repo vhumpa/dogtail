@@ -4,8 +4,6 @@ GUI test tool and automation framework that uses Accessibility (a11y) technologi
 to communicate with desktop applications.
 """
 
-from ._version import __version__ as imported_version
-
 __author__ = """Zack Cerza <zcerza@redhat.com>,
 Ed Rousseau <rousseau@redhat.com>,
 David Malcolm <dmalcolm@redhat.com>,
@@ -14,6 +12,7 @@ Michal Odehnal <modehnal@redhat.com>
 """
 
 try:
+    from ._version import __version__ as imported_version
     __version__ = imported_version
 except Exception:
     __version__ = "Unavailable"

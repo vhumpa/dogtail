@@ -18,12 +18,14 @@ __copyright__ = "Copyright © 2005-2026 Red Hat, Inc."
 __license__ = "GPLv2"
 __all__ = (
     "config",
+    "distro",
     "dump",
-    "distro"
+    "errors",
     "logging",
     "ponytail_helper",
     "predicate",
     "rawinput",
     "tree",
-    "utils"
+    "utils",
+    "version",
 )

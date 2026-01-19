@@ -8,7 +8,7 @@ Handles differences between different distributions.
 
 import os
 import re
-from subprocess import check_output
+from subprocess import check_output, STDOUT
 from dogtail.version import Version
 
 from dogtail.logging import logging_class
@@ -26,7 +26,7 @@ class DistributionNotSupportedError(Exception):  # pragma: no cover
     This distribution is not supported.
     """
 
-    PATCH_MESSAGE = "Please send patches to dogtail-devel-list@gnome.org"
+    PATCH_MESSAGE = "Please open merge requests at https://gitlab.com/dogtail/dogtail"
 
     def __init__(self, distribution):
         self.distribution = distribution
@@ -643,14 +643,6 @@ def detect_distribution():
 
     else:
         raise DistributionNotSupportedError("Unknown")
-
-    logger.log(distro.__class__.__name__)
-    debug_log(distro.__class__.__name__)
-
-    return distro
-
-distro = detectDistro()
-packageDb = distro.packageDb
 
     LOGGING.debug(f"Detecting distribution: {distribution_detection.__class__.__name__}")
 

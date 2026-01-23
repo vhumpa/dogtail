@@ -1915,12 +1915,18 @@ class Node(object):
         using_identifier = None
         using_role_name = role_name
         # === Backward compatibility and extra parameters ===
+        allowed_kwargs = {"roleName", "identifier"}
+
         for key, val in kwargs.items():
             if "roleName" in str(key):
                 using_role_name = val
 
             if "identifier" in str(key):
                 using_identifier = val
+
+        # Arguments were handled, do not pass them to another method.
+        for allowed_argument in allowed_kwargs:
+            kwargs.pop(allowed_argument, False)
         # ===================================================
 
         predicate = GenericPredicate(
@@ -1944,12 +1950,18 @@ class Node(object):
         using_identifier = None
         using_role_name = role_name
         # === Backward compatibility and extra parameters ===
+        allowed_kwargs = {"roleName", "identifier"}
+
         for key, val in kwargs.items():
             if "roleName" in str(key):
                 using_role_name = val
 
             if "identifier" in str(key):
                 using_identifier = val
+
+        # Arguments were handled, do not pass them to another method.
+        for allowed_argument in allowed_kwargs:
+            kwargs.pop(allowed_argument, False)
         # ===================================================
 
         predicate = GenericPredicate(

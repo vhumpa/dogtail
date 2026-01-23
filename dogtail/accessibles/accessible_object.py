@@ -336,12 +336,26 @@ class AccessibleObject:
         validated_recursive = True
         validated_showing_only = config.search_showing_only
         # ===================================================
+        allowed_kwargs = {"recursive", "showingOnly", "showing_only"}
+
         for key, val in kwargs.items():
             if "recursive" == str(key):
                 validated_recursive = val
 
-            if str(key) in ("showingOnly", "showing_only"):
+            elif str(key) in ("showingOnly", "showing_only"):
                 validated_showing_only = val
+
+            # Handle possible leftovers and raise TypeError on unexpected value.
+            else:
+                unexpected_arguments = ", ".join(set(kwargs) - allowed_kwargs)
+                function_name = AccessibleObject.find_all_descendants.__name__
+                raise TypeError(
+                    f"{function_name}() got an unexpected keyword argument(s): {unexpected_arguments}"
+                )
+
+        # Arguments were handled, do not pass them to another method.
+        for allowed_argument in allowed_kwargs:
+            kwargs.pop(allowed_argument, False)
         # ===================================================
 
         # User is using lambdas.
@@ -389,18 +403,32 @@ class AccessibleObject:
         validated_require_result = True
         validated_showing_only = config.search_showing_only
         # ===================================================
+        allowed_kwargs = {"retry", "recursive", "requireResult", "require_result", "showingOnly", "showing_only"}
+
         for key, val in kwargs.items():
             if "retry" == str(key):
                 validated_retry = val
 
-            if "recursive" == str(key):
+            elif "recursive" == str(key):
                 validated_recursive = val
 
-            if str(key) in ("requireResult", "require_result"):
+            elif str(key) in ("requireResult", "require_result"):
                 validated_require_result = val
 
-            if str(key) in ("showingOnly", "showing_only"):
+            elif str(key) in ("showingOnly", "showing_only"):
                 validated_showing_only = val
+
+            # Handle possible leftovers and raise TypeError on unexpected value.
+            else:
+                unexpected_arguments = ", ".join(set(kwargs) - allowed_kwargs)
+                function_name = AccessibleObject.find_descendant.__name__
+                raise TypeError(
+                    f"{function_name}() got an unexpected keyword argument(s): {unexpected_arguments}"
+                )
+
+        # Arguments were handled, do not pass them to another method.
+        for allowed_argument in allowed_kwargs:
+            kwargs.pop(allowed_argument, False)
         # ===================================================
 
         # User is using lambdas.
@@ -550,6 +578,8 @@ class AccessibleObject:
         validated_require_result = True
         validated_showing_only = config.search_showing_only
         # ===================================================
+        allowed_kwargs = {"retry", "requireResult", "require_result", "showingOnly", "showing_only"}
+
         for key, val in kwargs.items():
             if "retry" == str(key):
                 validated_retry = val
@@ -559,6 +589,18 @@ class AccessibleObject:
 
             if str(key) in ("showingOnly", "showing_only"):
                 validated_showing_only = val
+
+            # Handle possible leftovers and raise TypeError on unexpected value.
+            else:
+                unexpected_arguments = ", ".join(set(kwargs) - allowed_kwargs)
+                function_name = AccessibleObject.find_ancestor.__name__
+                raise TypeError(
+                    f"{function_name}() got an unexpected keyword argument(s): {unexpected_arguments}"
+                )
+
+        # Arguments were handled, do not pass them to another method.
+        for allowed_argument in allowed_kwargs:
+            kwargs.pop(allowed_argument, False)
         # ===================================================
 
         # User is using lambdas.

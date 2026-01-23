@@ -143,12 +143,27 @@ def run(string, timeout=None, interval=None, desktop=None, dumb=False, app_name=
     os.environ["GTK_MODULES"] = "gail:atk-bridge"
     process = subprocess.Popen(args, env=os.environ)
 
-    # === Backward compatibility for 'appName' usage ===
     validated_application_name = app_name
+    # === Backward compatibility for 'appName' usage ===
+    allowed_kwargs = {"appName"}
+
     for key, val in kwargs.items():
         if "appName" in str(key):
             validated_application_name = val
+
+        # Handle possible leftovers and raise TypeError on unexpected value.
+        else:
+            unexpected_arguments = ", ".join(set(kwargs) - allowed_kwargs)
+            function_name = run.__name__
+            raise TypeError(
+                f"{function_name}() got an unexpected keyword argument(s): {unexpected_arguments}"
+            )
+
+    # Arguments were handled, do not pass them to another method.
+    for allowed_argument in allowed_kwargs:
+        kwargs.pop(allowed_argument, False)
     # ==================================================
+
     if not validated_application_name:
         validated_application_name = args[0]
 
@@ -205,9 +220,23 @@ class Lock:
 
         using_unlock_on_exit = unlock_on_exit
         # === Backward compatibility and extra parameters ===
+        allowed_kwargs = {"unlockOnExit"}
+
         for key, val in kwargs.items():
             if "unlockOnExit" in str(key):
                 using_unlock_on_exit = val
+
+            # Handle possible leftovers and raise TypeError on unexpected value.
+            else:
+                unexpected_arguments = ", ".join(set(kwargs) - allowed_kwargs)
+                function_name = Lock.__init__.__name__
+                raise TypeError(
+                    f"{function_name}() got an unexpected keyword argument(s): {unexpected_arguments}"
+                )
+
+        # Arguments were handled, do not pass them to another method.
+        for allowed_argument in allowed_kwargs:
+            kwargs.pop(allowed_argument, False)
         # ===================================================
 
         self.lockdir = os.path.join(os.path.normpath(location), lockname)

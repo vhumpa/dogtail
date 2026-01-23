@@ -193,8 +193,7 @@ class TestGtk4DogtailNode(Gtk4DemoTest):
 
                 window = self.demo.find_children(
                     lambda x: x.name == "Dialogs" and
-                    x.role_name == "frame",
-                    retry=False
+                    x.role_name == "frame"
                 )[-1]
 
                 break
@@ -231,8 +230,7 @@ class TestGtk4DogtailNode(Gtk4DemoTest):
 
         window = self.demo.find_children(
             lambda x: x.name == "Dialogs" and
-            x.role_name == "frame",
-            retry=False
+            x.role_name == "frame"
         )[-1]
 
         entry_one = window.child(name="Entry 1", role_name="text")
@@ -298,8 +296,7 @@ class TestGtk4DogtailNode(Gtk4DemoTest):
 
         window = self.demo.find_children(
             lambda x: x.name == "Dialogs" and
-            x.role_name == "frame",
-            retry=False
+            x.role_name == "frame"
         )[-1]
 
         entry_one = window.child(name="Entry 1", role_name="label")
@@ -334,8 +331,7 @@ class TestGtk4DogtailNode(Gtk4DemoTest):
 
                 window = self.demo.find_children(
                     lambda x: x.name == "Dialogs" and
-                    x.role_name == "frame",
-                    retry=False
+                    x.role_name == "frame"
                 )[-1]
 
                 break
@@ -493,6 +489,16 @@ class TestGtk4DogtailNode(Gtk4DemoTest):
 
         with self.assertRaises(AttributeError):
             self.demo.id = "not possible"
+
+
+    def test_child_unsupported_argument_raises_type_error(self):
+        """
+        Testing child method raises TypeError upon using unsupported argument.
+        """
+
+        with self.assertRaises(TypeError):
+            self.demo.child(not_supported="not supported")
+
 
 
 if __name__ == "__main__":

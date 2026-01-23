@@ -6,3 +6,4 @@ MANIFEST
 dogtail.egg-info/*
 dogtail/dogtail.egg-info/*
 .testing
+_version.py

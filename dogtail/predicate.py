@@ -25,9 +25,23 @@ class GenericPredicate:
 
         using_role_name = role_name
         # === Backward compatibility and extra parameters ===
+        allowed_kwargs = {"roleName"}
+
         for key, val in kwargs.items():
             if "roleName" in str(key):
                 using_role_name = val
+
+            # Handle possible leftovers and raise TypeError on unexpected value.
+            else:
+                unexpected_arguments = ", ".join(set(kwargs) - allowed_kwargs)
+                function_name = GenericPredicate.__init__.__name__
+                raise TypeError(
+                    f"{function_name}() got an unexpected keyword argument(s): {unexpected_arguments}"
+                )
+
+        # Arguments were handled, do not pass them to another method.
+        for allowed_argument in allowed_kwargs:
+            kwargs.pop(allowed_argument, False)
         # ===================================================
 
         self.name = name

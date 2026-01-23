@@ -418,5 +418,14 @@ class TestGtk3DogtailNode(Gtk3DemoTest):
             self.demo.id = "not possible"
 
 
+    def test_child_unsupported_argument_raises_type_error(self):
+        """
+        Testing child method raises TypeError upon using unsupported argument.
+        """
+
+        with self.assertRaises(TypeError):
+            self.demo.child(not_supported="not supported")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -584,10 +584,10 @@ class AccessibleObject:
             if "retry" == str(key):
                 validated_retry = val
 
-            if str(key) in ("requireResult", "require_result"):
+            elif str(key) in ("requireResult", "require_result"):
                 validated_require_result = val
 
-            if str(key) in ("showingOnly", "showing_only"):
+            elif str(key) in ("showingOnly", "showing_only"):
                 validated_showing_only = val
 
             # Handle possible leftovers and raise TypeError on unexpected value.

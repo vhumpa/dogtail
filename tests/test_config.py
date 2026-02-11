@@ -27,8 +27,17 @@ class TestConfig(unittest.TestCase):
         Testing set incorrect value.
         """
 
-        with self.assertRaises(ValueError):
+        with self.assertLogs("__dogtail_logger__", level="INFO") as captured_message:
             config.action_delay = False
+
+            expected_messages = [
+                "Attempt to set value of type '<class 'bool'>' to key with accepted types '[<class 'float'>, <class 'int'>]'",
+                "Fallback of config option 'action_delay' to '1'.",
+            ]
+
+            for record in captured_message.records:
+                self.assertEqual(record.levelname, "INFO")
+                self.assertIn(record.msg, expected_messages)
 
 
     def test_set_not_existing_value(self):

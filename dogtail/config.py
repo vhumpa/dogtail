@@ -55,10 +55,14 @@ class ConfigValidationError(Exception):
     pass
 
 
-def cast_basic(value: str, expected_type):
+def cast_basic(value, expected_type):
     """
     Casts primitive types.
     """
+
+    LOGGING.debug(logging_class.get_func_params_and_values())
+
+    LOGGING.debug(f"Basic casting value '{value}' as type '{expected_type}'")
 
     if isinstance(value, str) and expected_type is bool:
         lower = value.lower()
@@ -71,6 +75,10 @@ def cast_basic(value: str, expected_type):
 
         raise ValueError(f"Invalid boolean: {value}")
 
+    if isinstance(value, bool) and not isinstance(expected_type, bool):
+        raise ValueError(f"Expected type '{expected_type}' does not accept boolean value '{value}'")
+
+    LOGGING.debug(f"Return value '{value}' as a type '{type(expected_type(value))}'")
     return expected_type(value)
 
 
@@ -78,6 +86,8 @@ def cast_sequence(value: str, expected_container):
     """
     Casts comma-separated values into list[...] or tuple[...].
     """
+
+    LOGGING.debug(logging_class.get_func_params_and_values())
 
     origin = get_origin(expected_container)
     (item_type,) = get_args(expected_container)
@@ -119,30 +129,38 @@ def cast_value(value, expected_type):
     # --- Handle sequences ---
     if origin in (list, tuple):
         # If value is already the correct container type, just validate inner types
+        LOGGING.debug("Handling sequence.")
         if isinstance(value, origin):
+            LOGGING.debug(f"Value '{value}' is of type '{origin}'.")
             if args:
                 item_type = args[0]
                 for i, item in enumerate(value):
                     if not isinstance(item, item_type):
                         raise ValueError(f"Element '{i}' in '{value}' is not of type '{item_type}'.")
+
+            LOGGING.debug(f"Returning value '{value}'.")
             return value
+
         # Otherwise parse string into sequence
+        LOGGING.debug("Continuing casting to sequence.")
         return cast_sequence(value, expected_type)
 
     # --- Handle simple types ---
     # If value is already of correct type, return.
-    if isinstance(value, expected_type):
-        return value
 
     # If the value is object.
     if expected_type is object:
+        LOGGING.debug(f"Expected type is '{expected_type}' with value '{value}'.")
         return value
 
     # Otherwise, cast string to type
+    LOGGING.debug(f"Casting as basic value '{value}' of type '{expected_type}'.")
     return cast_basic(value, expected_type)
 
 
 def load_and_validate_config(path: str, schema: dict):
+    LOGGING.debug(logging_class.get_func_params_and_values())
+
     config = configparser.ConfigParser()
     config.read(path)
 
@@ -161,9 +179,9 @@ def load_and_validate_config(path: str, schema: dict):
 
                 try:
                     value = cast_value(raw_value, expected_type)
-                except Exception as e:
+                except Exception as error:
                     raise ConfigValidationError(
-                        f"Type error in [{section}].{key}: {e}"
+                        f"Type error in [{section}].{key}: {error}"
                     )
 
                 validated[key] = value

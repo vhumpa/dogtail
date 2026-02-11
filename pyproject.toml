@@ -17,10 +17,6 @@ authors = [
     {name = "Michal Odehnal", email = "modehnal@redhat.com"}
 ]
 urls = { "Homepage" = "https://gitlab.com/dogtail/dogtail" }
-dependencies = [
-    "PyGObject",
-    "psutil",
-]
 
 [tool.setuptools.packages.find]
 include = ["dogtail", "dogtail.accessibles", "dogtail.scripts", "tests"]

@@ -28,10 +28,10 @@ class TestConfig(unittest.TestCase):
         """
 
         with self.assertLogs("__dogtail_logger__", level="INFO") as captured_message:
-            config.action_delay = False
+            config.action_delay = "set_string_to_int_or_float_accepted_value"
 
             expected_messages = [
-                "Attempt to set value of type '<class 'bool'>' to key with accepted types '[<class 'float'>, <class 'int'>]'",
+                "Attempt to set value of type '<class 'str'>' to key with accepted types '[<class 'float'>, <class 'int'>]'",
                 "Fallback of config option 'action_delay' to '1'.",
             ]
 

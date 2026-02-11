@@ -62,8 +62,6 @@ def cast_basic(value, expected_type):
 
     LOGGING.debug(logging_class.get_func_params_and_values())
 
-    LOGGING.debug(f"Basic casting value '{value}' as type '{expected_type}'")
-
     if isinstance(value, str) and expected_type is bool:
         lower = value.lower()
 
@@ -73,10 +71,8 @@ def cast_basic(value, expected_type):
         if lower in NO_VALUES:
             return False
 
+        LOGGING.debug(f"Invalid boolean: {value}")
         raise ValueError(f"Invalid boolean: {value}")
-
-    if isinstance(value, bool) and not isinstance(expected_type, bool):
-        raise ValueError(f"Expected type '{expected_type}' does not accept boolean value '{value}'")
 
     LOGGING.debug(f"Return value '{value}' as a type '{type(expected_type(value))}'")
     return expected_type(value)
@@ -109,6 +105,7 @@ def cast_sequence(value: str, expected_container):
     if origin is tuple:
         return tuple(casted)
 
+    LOGGING.debug(f"Unsupported sequence type: {origin}")
     raise ValueError(f"Unsupported sequence type: {origin}")
 
 
@@ -116,11 +113,12 @@ def cast_value(value, expected_type):
     # --- Union-of-types support ---
     if isinstance(expected_type, list):
         errors = []
-        for t in expected_type:
+        for type_to_iterate in expected_type:
             try:
-                return cast_value(value, t)
-            except Exception as e:
-                errors.append(str(e))
+                return cast_value(value, type_to_iterate)
+            except Exception as error:
+                LOGGING.debug(str(error))
+                errors.append(str(error))
         raise ValueError(" | ".join(errors))
 
     origin = get_origin(expected_type)
@@ -136,6 +134,7 @@ def cast_value(value, expected_type):
                 item_type = args[0]
                 for i, item in enumerate(value):
                     if not isinstance(item, item_type):
+                        LOGGING.debug(f"Element '{i}' in '{value}' is not of type '{item_type}'.")
                         raise ValueError(f"Element '{i}' in '{value}' is not of type '{item_type}'.")
 
             LOGGING.debug(f"Returning value '{value}'.")
@@ -147,15 +146,19 @@ def cast_value(value, expected_type):
 
     # --- Handle simple types ---
     # If value is already of correct type, return.
+    if isinstance(value, expected_type):
+        LOGGING.debug(f"Value '{value}' is already of type '{expected_type}'.")
+        return value
 
     # If the value is object.
-    if expected_type is object:
+    elif expected_type is object:
         LOGGING.debug(f"Expected type is '{expected_type}' with value '{value}'.")
         return value
 
-    # Otherwise, cast string to type
-    LOGGING.debug(f"Casting as basic value '{value}' of type '{expected_type}'.")
-    return cast_basic(value, expected_type)
+    else:
+        # Otherwise, cast string to type.
+        LOGGING.debug(f"Casting as basic value '{value}' of type '{expected_type}'.")
+        return cast_basic(value, expected_type)
 
 
 def load_and_validate_config(path: str, schema: dict):
@@ -294,6 +297,7 @@ class _Config:
 
             try:
                 # Set the value.
+                LOGGING.debug(f"Validating '{value_to_set}' to '{validated_expected_type}'.")
                 self.validated_config[set_option_id] = cast_value(value_to_set, validated_expected_type)
             except Exception:
                 # Log the message but do not end, use the default.

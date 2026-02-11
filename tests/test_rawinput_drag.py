@@ -61,6 +61,7 @@ class TestGnomeShellOverviewRawinput(unittest.TestCase):
             (end_run_button_x, end_run_button_y),
         )
 
+        sleep(2)
         self.assertTrue("org.gnome.Nautilus" in [x.name for x in root.applications()])
         os.system("killall nautilus > /dev/null 2>&1")
         press_key("Esc")
@@ -102,9 +103,11 @@ class TestGnomeShellOverviewRawinput(unittest.TestCase):
         drag_with_trajectory(
             (start_run_button_x, start_run_button_y),
             (end_run_button_x, end_run_button_y),
-            mouse_delay=0.02
+            press_delay=0.01,
+            mouse_delay=0.01,
         )
 
+        sleep(2)
         self.assertTrue("org.gnome.Nautilus" in [x.name for x in root.applications()])
         os.system("killall nautilus > /dev/null 2>&1")
         press_key("Esc")

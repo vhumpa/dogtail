@@ -1,73 +1,119 @@
 # dogtail
 
-**dogtail** is a GUI test tool and UI automation framework written in Python. It uses Accessibility (AT-SPI) technologies to communicate with desktop applications. **dogtail** scripts are written in Python and executed like any other Python program.
+**dogtail** is a GUI testing and UI automation framework written in Python. It uses Accessibility (AT-SPI) technologies to interact with desktop applications, allowing you to automate real user workflows reliably.
 
-Dogtail works great in combination with behave and qecore (expands on behave and dogtail), but you can use it alone as well. If you're interested in using it with modern wayland-based GNOME. Please see this article for more details on how we mainly use it: https://fedoramagazine.org/automation-through-accessibility/
+Dogtail scripts are standard Python programs and can be run like any other Python code.
 
-Other than that, dogtail should work with any desktop environment that still runs Atspi with Xorg.
+It works especially well with:
 
+* **behave** (BDD testing)
+* **qecore** (extends behave + dogtail)
 
-# News
+Dogtail supports both **Xorg** and **Wayland GNOME** environments.
 
-## Release of dogtail-2.x
+> For Wayland usage details, see: [https://fedoramagazine.org/automation-through-accessibility/](https://fedoramagazine.org/automation-through-accessibility/)
 
-Detailed information can be found in issue https://gitlab.com/dogtail/dogtail/-/issues/29.
+---
 
-To shortly summarize, there were a few reasons for this project to be rewritten.
+## Table of Contents
 
- - Dogtail's code base was not in a best state as years of workarounds and patches have left their mark.
- - Possibility of a new Accessibility architecture - AccessKit/Newton. The idea of this project was quite appealing as it could possibly solve many issues we have with AT-SPI.
+* [News](#news)
+* [FAQ](#faq)
+* [Installation](#installation)
+* [Dependencies](#dependencies)
+* [Wayland Support](#wayland-support)
+* [GTK4 Notes](#gtk4-notes)
+* [Usage](#usage)
+* [API References](#api-references)
+* [Bugs & Support](#bugs--support)
+* [Contributing](#contributing)
 
-I started to look into it and what it would take to make all necessary changes so we could work with Newton as well as Atspi. Changing dogtail-1.x to include Newton would be a challenge and changes would be required all over the place. Even if done well, once there would be another change it the future, the work required would once again be massive.
+---
 
-The easiest solution seemed to redo the project from the scratch. Thoughts were to create a new project altogether but we settled on doing the changes in the dogtail project and provide improvements for others as well, in the spirit of open source.
+## News
 
-I believe we now have a dogtail with a refactored code base that is more approachable, readable and maintainable. If another Accessibility architecture would be created in the future, including it in dogtail would be simple.
+### dogtail 2.x.y
 
+Details: [https://gitlab.com/dogtail/dogtail/-/issues/29](https://gitlab.com/dogtail/dogtail/-/issues/29)
 
-## Version dogtail-1.x
+The project was fully refactored to:
 
-The [dogtail-1.x](https://gitlab.com/dogtail/dogtail/-/tree/dogtail-1.x) is still available and if required will be updated and new versions will be released.
+* Clean up years of technical debt
+* Improve maintainability and readability
+* Prepare for future accessibility backends (e.g., AccessKit/Newton)
 
-# Installation
+Rather than continuing to patch dogtail 1.x, the codebase was rebuilt to make future evolution easier and safer.
 
-## Installation from GitLab, clone and install:
-```
+### dogtail 1.x.y
+
+The legacy branch is still maintained as needed:
+
+[https://gitlab.com/dogtail/dogtail/-/tree/dogtail-1.x](https://gitlab.com/dogtail/dogtail/-/tree/dogtail-1.x)
+
+## FAQ
+
+[https://gitlab.com/dogtail/dogtail/-/tree/FAQ](https://gitlab.com/dogtail/dogtail/-/tree/FAQ)
+
+---
+
+## Installation
+
+### From GitLab (build locally)
+
+```bash
 git clone https://gitlab.com/dogtail/dogtail.git
 cd dogtail
 python3 -m build
 sudo pip3 install dist/dogtail-2.*-py3-none-any.whl
 ```
 
-## Installation from GitLab, pip install:
-```
+### From GitLab (pip)
+
+```bash
 sudo dnf install python3-pip
 sudo python3 -m pip install git+https://gitlab.com/dogtail/dogtail@master
 ```
 
-## Installation from pypi:
+### From PyPI
 
+```bash
+sudo python3 -m pip install dogtail
 ```
-sudo python3 -m pip install dogtail.
+
+### From GitLab Package Registry
+
+Packages are built automatically by CI:
+
+[https://gitlab.com/dogtail/dogtail/-/packages/](https://gitlab.com/dogtail/dogtail/-/packages/)
+
+---
+
+## Dependencies
+
+Core requirements:
+
+* Python bindings for your distro (e.g., `python-apt`, `rpm-python`)
+* GNOME Python libraries
+
+Test targets typically include GNOME applications:
+
+[https://www.gnome.org/](https://www.gnome.org/)
+
+### Wayland-specific dependency
+
+To run on Wayland GNOME, install **gnome-ponytail-daemon**:
+
+[https://gitlab.gnome.org/ofourdan/gnome-ponytail-daemon](https://gitlab.gnome.org/ofourdan/gnome-ponytail-daemon)
+
+The `gnome-ponytail-daemon` is packaged in Fedora distribution:
+```
+dnf install -y gnome-ponytail-daemon
+dnf install -y python3-gnome-ponytail-daemon
 ```
 
-## Installation from Package Registry:
+Building from source:
 
-You can install this package from GitLab Package Registry. Visit https://gitlab.com/dogtail/dogtail/-/packages/, download the file and install it. These are built automatically with CI.
-
-
-# Dependencies
-
-Python bindings for your distribution, e.g. python-apt or rpm-python. PyGObject and GNOME-Python.
-
-Applications to test, e.g. from the GNOME desktop:
-- http://gnome.org/
-
-If you'd like to use it with Wayland GNOME, you also need to get the gnome-ponytail-daemon:
-- https://gitlab.gnome.org/ofourdan/gnome-ponytail-daemon.
-
-We do not have that as a dependency in pip as it compiles C code. Install from source, if your distribution does not have the gnome-ponytail-daemon in the repositories.
-```
+```bash
 sudo dnf install meson gcc glib2-devel
 git clone https://gitlab.gnome.org/ofourdan/gnome-ponytail-daemon.git
 cd gnome-ponytail-daemon
@@ -76,99 +122,120 @@ sudo ninja -C build
 sudo ninja -C build install
 ```
 
-# Something is missing in dogtail-2.x that was present in 1.x?
+---
 
-In a quest for a better and maintainable code I went over everything and removed what I deemed not useful or redundant. A lot of what I removed can be replaced with other parts, no longer works or was never observed in use by our team.
+## Wayland Support
 
-I am not perfect. If something I have removed is useful to you, let me know in the [Issues](https://gitlab.com/dogtail/dogtail/issues). While a lot of stuff was removed deliberately, and I can show you how to do things with what is present, something could have slipped through, and I could have removed a very useful part.
+Wayland input automation is enabled through **gnome-ponytail-daemon**, which uses:
 
-I have chosen the approach to remove what I can, and return it on request if it is valid enough as apposed to dragging a code with us that I have never seen in use.
+* Screen Cast API
+* Remote Desktop API
+* GNOME Shell Introspection
 
+This allows Dogtail to:
 
-# Wayland
+* Connect to specific windows
+* Translate local UI coordinates to global screen positions
+* Simulate keyboard and mouse input reliably
 
-Usage on Wayland was made possible by the `gnome-ponytail-daemon`, originally crafted by Olivier Fourdan: https://gitlab.gnome.org/ofourdan/gnome-ponytail-daemon. This tool allows us to perform actions in a Wayland GNOME session in a similar way to how we have been doing with X functions.
+### What this means in practice
 
-## How does it work?
+Dogtail handles the complexity internally. Most test scripts run identically on:
 
-The core functionality relies on the Screen Cast and Remote Desktop API, enabling us to "connect" to either a specific window or the entire screen to simulate user input actions like key presses, typing, and **most importantly** mouse actions on specific coordinates. Ponytail uses the window list from `org.gnome.Shell.Introspect` to identify windows. Dogtail then ensures the correct window is connected via the Remote Desktop API, allowing input actions to be accurately executed within it.
+* Xorg sessions
+* Wayland GNOME sessions
 
-On the AT-SPI tree and accessibility's "introspection" side, not much has changed - input has primarily been the challenge on Wayland. The main difference is that only "local" window coordinates are known for UI items. To address this, we always connect to the specific window we're working with, and Ponytail's `connectWindow` ensures these local coordinates are translated to global ones internally.
+On Xorg, traditional X input APIs are used automatically.
 
-## What does this mean for users?
+---
 
-Dogtail handles all of this logic seamlessly, so in practical use, the user doesn't need to worry about coordinate types or window connections. In fact, the vast majority of our tests work identically in both X and Wayland sessions using the Dogtail API. When running on an X session, Dogtail will use the traditional X functions to handle input and operate as it always has.
+## GTK4 Notes
 
+For GTK4 applications, **window shadows must be disabled** for accurate coordinate handling.
 
-# Important: Handling GTK4 Application Windows in Dogtail
+Add the following to:
 
-For GTK4 applications, disabling window shadows is essential to ensure accurate positioning by Dogtail. With shadows disabled, we encounter a consistent coordinate offset, which we've pre-configured as `dogtail.config.offset`. In case of working with full screen windows, the offset is 0, and we manage to detect that on-the-fly both in x11 and wayland sessions. However, this process requires `python-xlib`, even for Wayland sessions, leveraging Xwayland to ascertain resolution information, as no more direct method we've found currently available for Wayland.
-
-When window shadows are active, the perceived offset can vary significantly, influenced by factors such as the specific application, window size, and scaling settings. To ensure consistent behavior across applications, disabling shadows is recommended.
-
-Disabling Shadows in GTK4:
-
-To disable window shadows, add the following CSS to your GTK4 configuration (`~/.config/gtk-4.0/gtk.css`):
-
+```text
+~/.config/gtk-4.0/gtk.css
 ```
+
+```css
 window, .popover, .tooltip {
     box-shadow: none;
 }
 ```
 
-# Using
+### Why this is necessary
 
-Currently GNOME and GTK+ applications are supported. Both Xorg and Wayland sessions.
+* Shadows introduce variable coordinate offsets
+* Offsets differ per application, size, and scaling
+* Disabling shadows ensures consistent automation behavior
 
-See examples for direct dogtail use or check: https://fedoramagazine.org/automation-through-accessibility/
+Dogtail automatically manages known offsets using `dogtail.config.gtk4_offset`.
 
-Thanks to qt-at-spi KDE4 and QT applications are now available too, feel free to try, but it's no longer supported from us, might be better to check KDE's native solutions.
+---
 
-First, enable accessibility support in your GNOME session with:
-```
+## Usage
+
+Currently supported:
+
+* GNOME and GTK applications
+* Xorg and Wayland sessions
+* Limited Qt support via qt-at-spi (not officially maintained)
+
+### Enable accessibility
+
+```bash
 gsettings set org.gnome.desktop.interface toolkit-accessibility true
 ```
 
-This only affects newly-started applications, so you may want to log out and log back in again.
+Restart applications (or log out/in) after enabling.
 
-Should you use 'dogtail-headless' or 'qecore-headless' scripts to handle your sessions, the accessibility will be auto enabled for you.
+Headless environments using `dogtail-headless` or `qecore-headless` enable this automatically.
 
+---
 
-## Atspi API references
- - http://lazka.github.io/pgi-docs/#Atspi-2.0
- - https://docs.gtk.org/atspi2/index.html
+## API References
 
+* [https://lazka.github.io/pgi-docs/#Atspi-2.0](https://lazka.github.io/pgi-docs/#Atspi-2.0)
+* [https://docs.gtk.org/atspi2/index.html](https://docs.gtk.org/atspi2/index.html)
 
-# Bugs
-Please report any bugs at:
-    https://gitlab.com/dogtail/dogtail/issues
+---
 
+## Bugs & Support
 
-# Contact
-Website:
-- https://gitlab.com/dogtail/dogtail/
+Report issues here:
 
-Issue tracker:
-- https://gitlab.com/dogtail/dogtail/issues
+[https://gitlab.com/dogtail/dogtail/issues](https://gitlab.com/dogtail/dogtail/issues)
 
-API Documentation:
-- http://fedorapeople.org/~vhumpa/dogtail/epydoc/ # TODO, documentation is not finished for dogtail-2.x
+Project home:
 
-We have deprecated our mailing lists as well as IRC channel. Please use our GitLab for issues and merge requests! (Or possibly https://github.com/vhumpa/dogtail perhaps for your pull requests should you prefer to use github, but gitlab.com is preferred)
+[https://gitlab.com/dogtail/dogtail/](https://gitlab.com/dogtail/dogtail/)
 
+API docs (incomplete for both versions, in progress for 2.x):
 
-# Contributing
+[http://fedorapeople.org/~vhumpa/dogtail/epydoc/](http://fedorapeople.org/~vhumpa/dogtail/epydoc/)
 
-- **Bug Reports**: If you find a bug, check if an [issue](https://gitlab.com/dogtail/dogtail/issues) already exists. If not, please open one with a clear description and steps to reproduce it.
+Mailing lists and IRC are deprecated — please use GitLab.
 
-- **Feature Ideas**: Have a great idea? Open an [issue](https://gitlab.com/dogtail/dogtail/issues) to discuss it. This helps us align on the goal before you write any code.
+---
 
-- **Ready to Help**? Look for existing [issues](https://gitlab.com/dogtail/dogtail/issues). If you see one you'd like to work on, just leave a comment to let us know!
+## Contributing
 
-There are a few ways I would like to preserve the readability of the code.
+### Bug reports
 
-- For functions and methods, use docstring to explain what it does, this way we can be sure it gets in the documentation.
-- Use correct casing for classes, methods and variables. Most of the code base uses *snake_case*.
-- Use full names for variables where possible. Single letter variables are not acceptable.
-- Comments are sentences, they start with a capital letter and end with a dot.
+* Search existing issues first
+* Include steps to reproduce and environment details
 
+### Feature ideas
+
+* Open an issue to discuss before coding
+
+### Code style guidelines
+
+* Use docstrings for all public functions and methods
+* Follow `snake_case` naming
+* Prefer descriptive variable names
+* Write full-sentence comments with proper punctuation
+
+Your contributions are welcome! 🚀

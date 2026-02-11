@@ -184,7 +184,7 @@ class TestGtk4DogtailNode(Gtk4DemoTest):
         scroll_bar = self.demo.find_child(lambda x: x.role_name=="scroll bar" and x.showing)
 
         for _ in range(50):
-            scroll_bar.value += 50
+            scroll_bar.value += 100
             sleep(1)
             try:
                 clipboard_button = self.demo.child("Dialogs", retry=False)
@@ -197,7 +197,7 @@ class TestGtk4DogtailNode(Gtk4DemoTest):
                 )[-1]
 
                 break
-            except (RuntimeError, SearchError):
+            except (RuntimeError, SearchError, IndexError):
                 pass
 
         self.assertIsNotNone(window)
@@ -220,18 +220,20 @@ class TestGtk4DogtailNode(Gtk4DemoTest):
         # Weird way to do this but it works as a unit test.
         scroll_bar = self.demo.child(role_name="scroll bar")
         for _ in range(50):
-            scroll_bar.value += 50
+            scroll_bar.value += 100
             try:
                 clipboard_button = self.demo.child("Dialogs", retry=False)
                 clipboard_button.double_click()
+
+                window = self.demo.find_children(
+                    lambda x: x.name == "Dialogs" and
+                    x.role_name == "frame"
+                )[-1]
+
                 break
-            except (RuntimeError, SearchError):
+            except (RuntimeError, SearchError, IndexError):
                 pass
 
-        window = self.demo.find_children(
-            lambda x: x.name == "Dialogs" and
-            x.role_name == "frame"
-        )[-1]
 
         entry_one = window.child(name="Entry 1", role_name="text")
         entry_two = window.child(name="", role_name="text")
@@ -286,18 +288,20 @@ class TestGtk4DogtailNode(Gtk4DemoTest):
         # Weird way to do this but it works as a unit test.
         scroll_bar = self.demo.child(role_name="scroll bar")
         for _ in range(50):
-            scroll_bar.value += 50
+            scroll_bar.value += 100
             try:
                 clipboard_button = self.demo.child("Dialogs", retry=False)
                 clipboard_button.double_click()
+
+                window = self.demo.find_children(
+                    lambda x: x.name == "Dialogs" and
+                    x.role_name == "frame"
+                )[-1]
+
                 break
-            except (RuntimeError, SearchError):
+            except (RuntimeError, SearchError, IndexError):
                 pass
 
-        window = self.demo.find_children(
-            lambda x: x.name == "Dialogs" and
-            x.role_name == "frame"
-        )[-1]
 
         entry_one = window.child(name="Entry 1", role_name="label")
         self.assertEqual(entry_one.labelee.role_name, "text")
@@ -323,7 +327,7 @@ class TestGtk4DogtailNode(Gtk4DemoTest):
         # Weird way to do this but it works as a unit test.
         scroll_bar = self.demo.child(role_name="scroll bar")
         for _ in range(50):
-            scroll_bar.value += 50
+            scroll_bar.value += 100
             try:
                 clipboard_button = self.demo.child("Dialogs", retry=False)
                 clipboard_button.double_click()
@@ -335,7 +339,7 @@ class TestGtk4DogtailNode(Gtk4DemoTest):
                 )[-1]
 
                 break
-            except (RuntimeError, SearchError):
+            except (RuntimeError, SearchError, IndexError):
                 pass
 
 

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Experimental dogtail changes for 2.0 release.
+Utility module to represent the application structure as a tree.
 """
 
 # pylint: disable=line-too-long

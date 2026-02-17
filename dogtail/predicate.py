@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Experimental dogtail changes for 2.0 release. Simple Predicate
+The predicate module for dogtail.
 """
 
 # pylint: disable=broad-exception-caught

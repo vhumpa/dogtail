@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Class for Atspi.Image.
+Handling for Accessible Image.
 """
 
 # pylint: disable=broad-exception-caught

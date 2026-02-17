@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Experimental dogtail changes for 2.0 release.
+Handling for Accessibles, extending with automation specific use cases, in this case handling root object.
 """
 
 # pylint: disable=import-error

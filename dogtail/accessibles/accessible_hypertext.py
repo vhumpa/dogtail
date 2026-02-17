@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Class for Atspi.Hypertext.
+Handling for Accessible Hypertext.
 """
 
 # pylint: disable=import-error

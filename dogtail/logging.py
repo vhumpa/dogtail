@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-This file provides loggers.
+The logging module for dogtail.
 """
 
 # pylint: disable=broad-exception-caught

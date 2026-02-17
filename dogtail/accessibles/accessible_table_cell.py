@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Class for Atspi.TableCell.
+Handling for Accessible TableCell.
 """
 
 # pylint: disable=broad-exception-caught

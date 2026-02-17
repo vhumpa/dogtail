@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """
-Experimental dogtail changes for 2.0 release.
 Handles General exceptions, not overly module-specific.
+Leftover from dogtail-1.x.
 """
 
 # pylint: disable=line-too-long

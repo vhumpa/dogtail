@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Experimental dogtail changes for 2.0 release.
+Handling for Accessible State.
 """
 
 # pylint: disable=broad-exception-caught

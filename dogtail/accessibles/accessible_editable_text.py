@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Class for Atspi.EditableText.
+Handling for Accessible EditableText.
 """
 
 # pylint: disable=broad-exception-caught

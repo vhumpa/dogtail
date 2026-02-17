@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Experimental dogtail changes for 2.0 release. raw input.
+The raw input module for dogtail.
 """
 
 # pylint: disable=broad-exception-caught

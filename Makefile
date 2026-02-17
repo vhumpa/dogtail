@@ -1,28 +1,20 @@
 # dogtail *development* Makefile # TODO
 
-all: install3 install2
+all: install3
 
 install: clean
 	python setup.py build
 	python setup.py install --root=$(DESTDIR)
 
-
 install3: clean3
 	python3 setup.py build
 	python3 setup.py install --root=$(DESTDIR)
-
-install2: clean2
-	python2 setup.py build
-	python2 setup.py install --root=$(DESTDIR)
 
 clean:
 	rm -rf api_docs/
 	rm -f MANIFEST
 	rm -rf build dist
 	find . -name '*.pyc' -exec rm {} \;
-
-clean2: clean
-	python2 setup.py clean
 
 clean3: clean
 	python3 setup.py clean

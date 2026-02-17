@@ -4,8 +4,8 @@
 
 Summary: GUI test tool and automation framework
 Name: dogtail
-Version: 2.0.dev0
-Release: 2%{?dist}
+Version: 2.0.0
+Release: %autorelease
 License: GPLv2
 URL: https://gitlab.com/dogtail/dogtail/
 Source0: https://gitlab.com/dogtail/dogtail/raw/released/%{name}-%{version}.tar.gz
@@ -58,7 +58,7 @@ Requires: python3-gobject
 Requires: python3-cairo
 #Requires: xorg-x11-xinit
 Requires: hicolor-icon-theme
-Requires: python3-dogtail >= 2.0
+Requires: python3-dogtail >= 2.0.0
 
 %description -n python3-dogtail-scripts
 GUI test tool and automation framework that uses assistive technologies to
@@ -144,6 +144,9 @@ fi
 %endif # with_python3
 
 %changelog
+* Tue Feb 17 2026 Michal Odehnal <modehnal@redhat.com> - 2.0.0
+- Update to upstream version 2.0.0
+
 * Fri Nov 09 2018 Vitezslav Humpa <vhumpa@redhat.com> - 0.9.11-1
 - Update to upstream version 0.9.10
 

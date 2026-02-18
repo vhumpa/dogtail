@@ -52,7 +52,7 @@ The legacy branch is still maintained as needed:
 
 ## FAQ
 
-[https://gitlab.com/dogtail/dogtail/-/tree/FAQ](https://gitlab.com/dogtail/dogtail/-/tree/FAQ.md)
+[https://gitlab.com/dogtail/dogtail/-/blob/master/FAQ.md](https://gitlab.com/dogtail/dogtail/-/blob/master/FAQ.md)
 
 ---
 

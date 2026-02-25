@@ -192,7 +192,8 @@ class Logging(metaclass=Singleton):
                 bound = sig.bind(*args, **kwargs)
                 bound.apply_defaults()
                 params = [ f"{key}={value!r}" if key != "self" else "self" for key, value in bound.arguments.items() ]
-                output_message = f"({", ".join(params)})"
+                formatted_message = ", ".join(params)
+                output_message = f"({formatted_message})"
             except ValueError:
                 output_message = "(args/kwargs binding failed)"
 

@@ -4,11 +4,12 @@ GUI test tool and automation framework that uses Accessibility (a11y) technologi
 to communicate with desktop applications.
 """
 
-__author__ = """Zack Cerza <zcerza@redhat.com>,
+__author__ = """
+Michal Odehnal <modehnal@redhat.com>,
+Vita Humpa <vhumpa@redhat.com>,
+Zack Cerza <zcerza@redhat.com>,
 Ed Rousseau <rousseau@redhat.com>,
 David Malcolm <dmalcolm@redhat.com>,
-Vita Humpa <vhumpa@redhat.com>,
-Michal Odehnal <modehnal@redhat.com>
 """
 
 try:

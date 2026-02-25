@@ -11,6 +11,9 @@ The logging module for dogtail.
 import os
 import sys
 import logging
+import inspect
+from functools import wraps
+
 
 # Singleton solution provided by https://stackoverflow.com/a/54209647
 
@@ -174,6 +177,56 @@ class Logging(metaclass=Singleton):
             )
             # Close the file descriptor.
             os.close(descriptor)
+
+    def generate_log_for_method(self, func):
+        @wraps(func)
+        def wrapped(*args, **kwargs):
+
+            # 1. Get definition metadata
+            def_line = func.__code__.co_firstlineno
+            def_file = os.path.basename(inspect.getsourcefile(func) or "unknown")
+
+            # 2. Parse arguments
+            sig = inspect.signature(func)
+            try:
+                bound = sig.bind(*args, **kwargs)
+                bound.apply_defaults()
+                params = [ f"{key}={value!r}" if key != "self" else "self" for key, value in bound.arguments.items() ]
+                output_message = f"({", ".join(params)})"
+            except ValueError:
+                output_message = "(args/kwargs binding failed)"
+
+            # 3. Log with definition info
+            # We construct the prefix manually to show exactly where the method lives
+            self.logger.debug(
+                f"defined at [{def_file}:{def_line}] {func.__name__}: {output_message}", stacklevel=2
+            )
+
+            return func(*args, **kwargs)
+        return wrapped
+
+    def log_a_class(self, cls):
+        """
+        Go over a class and replace local functions with wrapped versions.
+        """
+
+        # vars(cls) focuses on methods defined in THIS class, not inherited ones
+        for name, attr in vars(cls).items():
+            # Check if it's a function and doesn't have the "no_log" flag
+            if (inspect.isfunction(attr) or inspect.ismethod(attr)) and \
+               not getattr(attr, "_no_log", False):
+                print(f"DEBUGGING: working with: '{name}' '{attr}'")
+                setattr(cls, name, self.generate_log_for_method(attr))
+        return cls
+
+    def no_log(self, fnc):
+        """
+        Flag a method to be skipped by the class logger.
+        """
+
+        fnc._no_log = True
+        return fnc
+
 
 class FuncFilter(logging.Filter):
     """

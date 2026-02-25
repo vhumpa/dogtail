@@ -253,7 +253,7 @@ class _Config:
         return string_in_snake_case
 
 
-    @logging_class.no_log
+    @logging_class.do_not_log
     def __setattr__(self, option_id, value_to_set):
 
         # Set a variable to use for the setter logic.
@@ -315,7 +315,7 @@ class _Config:
                 logging_class.disable_debug_to_console()
 
 
-    @logging_class.no_log
+    @logging_class.do_not_log
     def __getattr__(self, option_id):
         # Set a variable to use for the getter logic.
         get_option_id = option_id

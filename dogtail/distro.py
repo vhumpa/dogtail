@@ -78,8 +78,6 @@ class PackageDb:
         specific locale.
         """
 
-        LOGGING.debug(f"get_mo_files(self, locale={str(locale)})")
-
         mo_files = {}
 
         def append_if_mo_file(mo_files, dir_name, f_names):
@@ -371,8 +369,6 @@ class JhBuildPackageDb(PackageDb):
 
 
     def get_dependencies(self, package_name):
-        LOGGING.debug(f"get_dependencies(self, package_name={str(package_name)})")
-
         result = {}
         lines = os.popen("jhbuild list " + package_name).readlines()
         for line in lines:

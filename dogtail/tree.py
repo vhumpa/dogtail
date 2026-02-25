@@ -61,6 +61,7 @@ from dogtail.rawinput import click, point, double_click
 from dogtail.utils import do_delay
 
 
+@logging_class.log_a_class
 class Node(object):
     """
     Main dogtail API definition.
@@ -121,8 +122,6 @@ class Node(object):
         In this case it will print what event was fired and what source was the cause.
         """
 
-        LOGGING.debug("Dummy callback.")
-
         # The Atspi object.
         source = event.source
 
@@ -146,8 +145,6 @@ class Node(object):
         Invoke the action indicated by index on the object implementing Atspi.Action.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleActions.do_action(self, index)
 
 
@@ -155,8 +152,6 @@ class Node(object):
         """
         Get the description of the index-th Action on the object implementing Atspi.Action.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleActions.get_action_description(self, index)
 
@@ -166,8 +161,6 @@ class Node(object):
         Get the name of the index-th Action on the object implementing Atspi.Action.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleActions.get_action_description(self, index)
 
 
@@ -176,8 +169,6 @@ class Node(object):
         Get the keybindings of the index-th Action on the object implementing Atspi.Action.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleActions.get_key_binding(self, index)
 
 
@@ -185,8 +176,6 @@ class Node(object):
         """
         Get the localized name of the index-th Action on the object implementing Atspi.Action.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleActions.get_localized_name(self, index)
 
@@ -197,8 +186,6 @@ class Node(object):
         Get dictionary of actions.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleActions.get_actions(self)
 
 
@@ -206,8 +193,6 @@ class Node(object):
         """
         Invoke the action indicated by its name on the object implementing Atspi.Action.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleActions.do_action_named(self, named_action)
 
@@ -217,8 +202,6 @@ class Node(object):
         Queries whether a given Atspi.Component contains a particular point.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleComponent.contains(self, x_coordinate, y_coordinate, coordinate_type)
 
 
@@ -226,8 +209,6 @@ class Node(object):
         """
         Gets the accessible child at a given coordinate within an Atspi.Component.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleComponent.get_accessible_at_point(self, x_coordinate, y_coordinate, coordinate_type)
 
@@ -237,8 +218,6 @@ class Node(object):
         Gets the opacity/alpha value of a component, if alpha blending is in use.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleComponent.get_alpha(self)
 
 
@@ -247,8 +226,6 @@ class Node(object):
         Gets the bounding box of the specified Atspi.Component. The returned values are
         meaningful only if the Component has both STATE_VISIBLE and STATE_SHOWING.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleComponent.get_extents(self)
 
@@ -260,8 +237,6 @@ class Node(object):
         meaningful only if the Component has both STATE_VISIBLE and STATE_SHOWING.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return self.get_extents()
 
 
@@ -270,8 +245,6 @@ class Node(object):
         Queries which layer the component is painted into, to help determine its
         visibility in terms of stacking order.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleComponent.get_layer(self)
 
@@ -282,8 +255,6 @@ class Node(object):
         (Bigger z-order numbers mean nearer the top)
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleComponent.get_mdi_z_order(self)
 
 
@@ -291,8 +262,6 @@ class Node(object):
         """
         A tuple containing the position of the Accessible: (x, y).
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleComponent.get_position(self)
 
@@ -303,8 +272,6 @@ class Node(object):
         A tuple containing the position of the Accessible: (x, y).
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return self.get_position()
 
 
@@ -312,8 +279,6 @@ class Node(object):
         """
         A tuple containing the size of the Accessible: (w, h)
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleComponent.get_size(self)
 
@@ -324,8 +289,6 @@ class Node(object):
         A tuple containing the size of the Accessible: (w, h).
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return self.get_size()
 
 
@@ -333,8 +296,6 @@ class Node(object):
         """
         Grab focus.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleComponent.grab_focus(self)
 
@@ -353,8 +314,6 @@ class Node(object):
         Atspi.ScrollType.ANYWHERE  = 6
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleComponent.scroll_to(self, scroll_type)
 
 
@@ -367,8 +326,6 @@ class Node(object):
         Atspi.CoordType.WINDOW = 1
         Atspi.CoordType.PARENT = 2
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleComponent.scroll_to_point(
             self,
@@ -386,8 +343,6 @@ class Node(object):
         Atspi.CoordType.WINDOW = 1
         Atspi.CoordType.PARENT = 2
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleComponent.set_extents(
             self,
@@ -408,8 +363,6 @@ class Node(object):
         Atspi.CoordType.PARENT = 2
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleComponent.set_position(
             self,
             x_coordinate,
@@ -423,8 +376,6 @@ class Node(object):
         Resizes the specified component to the given pixel dimensions.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleComponent.set_size(self, width, height)
 
 
@@ -432,8 +383,6 @@ class Node(object):
         """
         A tuple containing the center of the Accessible: (x, y).
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleComponent.get_center(self)
 
@@ -444,8 +393,6 @@ class Node(object):
         A tuple containing the center of the Accessible: (x, y).
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return self.get_center()
 
 
@@ -453,8 +400,6 @@ class Node(object):
         """
         Copies text from an Atspi.EditableText object into the system clipboard.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleEditableText.copy_text(self, start_position, end_position)
 
@@ -465,8 +410,6 @@ class Node(object):
         the system clipboard.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleEditableText.cut_text(self, start_position, end_position)
 
 
@@ -475,8 +418,6 @@ class Node(object):
         Deletes text from an Atspi.EditableText object, without copying the excised
         portion into the system clipboard.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleEditableText.delete_text(self, start_position, end_position)
 
@@ -490,8 +431,6 @@ class Node(object):
         Deliberately moving parameters around so that the text is first.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleEditableText.insert_text(self, text, position, length)
 
 
@@ -502,8 +441,6 @@ class Node(object):
         resulting byte offset, since the text is in a variable-width encoding.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleEditableText.paste_text(self, position)
 
 
@@ -511,8 +448,6 @@ class Node(object):
         """
         Replace the entire text contents of an Atspi.EditableText object.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleEditableText.set_text_contents(self, new_contents)
 
@@ -522,8 +457,6 @@ class Node(object):
         Gets the Atspi.Hyperlink object at a specified index.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleHypertext.get_link(self, link_index)
 
 
@@ -531,8 +464,6 @@ class Node(object):
         """
         Gets the index of the Atspi.Hyperlink object at a specified character offset.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleHypertext.get_link_index(self, character_offset)
 
@@ -543,8 +474,6 @@ class Node(object):
         implementor has.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleHypertext.get_n_links(self)
 
 
@@ -552,8 +481,6 @@ class Node(object):
         """
         Gets the description of the image displayed in an Atspi.Image object.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleImage.get_image_description(self)
 
@@ -565,8 +492,6 @@ class Node(object):
         STATE_VISIBLE and STATE_SHOWING.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleImage.get_image_extents(self, coordinate_type)
 
 
@@ -574,8 +499,6 @@ class Node(object):
         """
         Gets the locale associated with an image and its textual representation.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleImage.get_image_locale(self)
 
@@ -587,8 +510,6 @@ class Node(object):
         has both STATE_VISIBLE and STATE_SHOWING.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleImage.get_image_position(self, coordinate_type)
 
 
@@ -599,8 +520,6 @@ class Node(object):
         STATE_SHOWING.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleImage.get_image_size(self)
 
 
@@ -610,8 +529,6 @@ class Node(object):
         Atspi.Selection implementor's selection list.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleSelection.clear_selection(self)
 
 
@@ -619,8 +536,6 @@ class Node(object):
         """
         Deselects all children.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return self.clear_selection()
 
@@ -630,8 +545,6 @@ class Node(object):
         Deselects a specific child of an Atspi.Selection. Note that child_index is the
         index of the child in the parent container.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleSelection.deselect_child(self, child_index)
 
@@ -644,8 +557,6 @@ class Node(object):
         Atspi.Selection.select_child are asymmetric.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleSelection.deselect_selected_child(self, child_index)
 
 
@@ -654,8 +565,6 @@ class Node(object):
         Gets the number of children of an Atspi.Selection implementor which are
         currently selected.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleSelection.get_n_selected_children(self)
 
@@ -669,8 +578,6 @@ class Node(object):
         between 0 and Atspi.Selection.get_n_selected_children - 1, inclusive.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleSelection.get_selected_child(self, selected_child_index)
 
 
@@ -681,8 +588,6 @@ class Node(object):
         Atspi.Accessible container's list of children.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleSelection.is_child_selected(self, child_index)
 
 
@@ -691,8 +596,6 @@ class Node(object):
         Attempts to select all of the children of an Atspi.Selection implementor. Not
         all Atspi.Selection implementors support this operation.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleSelection.select_all(self)
 
@@ -704,8 +607,6 @@ class Node(object):
         the (single) current selection.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleSelection.select_child(self, child_index)
 
 
@@ -714,8 +615,6 @@ class Node(object):
         Selects a child.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleSelection.select(self)
 
 
@@ -723,8 +622,6 @@ class Node(object):
         """
         Deselects a child.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleSelection.deselect(self)
 
@@ -737,8 +634,6 @@ class Node(object):
         focus.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleState.get_active(self)
 
 
@@ -750,8 +645,6 @@ class Node(object):
         focus.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleState.get_focusable(self)
 
 
@@ -760,8 +653,6 @@ class Node(object):
         """
         Indicates this object currently has the keyboard focus.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleState.get_focused(self)
 
@@ -772,8 +663,6 @@ class Node(object):
         Indicates this object is currently pressed.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleState.get_pressed(self)
 
 
@@ -782,8 +671,6 @@ class Node(object):
         """
         Indicates the size of this object's size is not fixed.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleState.get_resizable(self)
 
@@ -794,8 +681,6 @@ class Node(object):
         Indicates this object is selected..
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleState.get_selected(self)
 
 
@@ -805,8 +690,6 @@ class Node(object):
         Indicates this object is selected..
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleState.get_selectable(self)
 
 
@@ -815,8 +698,6 @@ class Node(object):
         """
         Indicates this object is sensitive, e.g. to user interaction.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleState.get_sensitive(self)
 
@@ -830,8 +711,6 @@ class Node(object):
         window stack.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleState.get_showing(self)
 
 
@@ -842,8 +721,6 @@ class Node(object):
         to the user.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleState.get_visible(self)
 
 
@@ -852,8 +729,6 @@ class Node(object):
         """
         Indicates this object is currently checked.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleState.get_checked(self)
 
@@ -865,8 +740,6 @@ class Node(object):
         toggle-able table cell.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleState.get_checkable(self)
 
 
@@ -877,8 +750,6 @@ class Node(object):
         read, but not modified, by the user.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleState.get_read_only(self)
 
 
@@ -887,8 +758,6 @@ class Node(object):
         """
         Indicates this object is collapsed.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleState.get_collapsed(self)
 
@@ -899,8 +768,6 @@ class Node(object):
         Indicates the user can change the contents of this object.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleState.get_editable(self)
 
 
@@ -909,8 +776,6 @@ class Node(object):
         """
         Indicates that the object is armed.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleState.get_armed(self)
 
@@ -921,8 +786,6 @@ class Node(object):
         Indicates that the object is invalid.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleState.get_invalid(self)
 
 
@@ -931,8 +794,6 @@ class Node(object):
         """
         Get states.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleState.get_accessible_states(self)
 
@@ -943,8 +804,6 @@ class Node(object):
         all tables support column selection.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleTable.add_column_selection(self, column)
 
 
@@ -953,8 +812,6 @@ class Node(object):
         Selects the specified row, adding it to the current row selection. Not all
         tables support row selection.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleTable.add_row_selection(self, row)
 
@@ -966,8 +823,6 @@ class Node(object):
         Atspi.Component.get_accessible_at_point.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleTable.get_accessible_at(self, row, column)
 
 
@@ -975,8 +830,6 @@ class Node(object):
         """
         Gets an accessible representation of the caption for an Atspi.Table.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleTable.get_caption(self)
 
@@ -987,8 +840,6 @@ class Node(object):
         index. See Atspi.Table.get_index_at, Atspi.Table.get_row_at_index.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleTable.get_column_at_index(self, index)
 
 
@@ -997,8 +848,6 @@ class Node(object):
         Gets a text description of a particular table column. This differs from
         Atspi.Table.get_column_header, which returns an #Accessible.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleTable.get_column_description(self, column)
 
@@ -1011,8 +860,6 @@ class Node(object):
         STATE_SHOWING.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleTable.get_column_extent_at(self, row, column)
 
 
@@ -1021,8 +868,6 @@ class Node(object):
         Gets the header associated with a table column, if available. This differs from
         Atspi.Table.get_column_description, which returns a string.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleTable.get_column_header(self, column)
 
@@ -1035,8 +880,6 @@ class Node(object):
         Atspi.Table.get_column_at_index
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleTable.get_index_at(self, row, column)
 
 
@@ -1046,8 +889,6 @@ class Node(object):
         programmatically hidden, but inclusive of columns that may be outside of the
         current scrolling window or viewport.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleTable.get_n_columns(self)
 
@@ -1059,8 +900,6 @@ class Node(object):
         current scrolling window or viewport.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleTable.get_n_rows(self)
 
 
@@ -1069,8 +908,6 @@ class Node(object):
         Queries a table to find out how many columns are currently selected. Not all
         tables support column selection.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleTable.get_n_selected_columns(self)
 
@@ -1081,8 +918,6 @@ class Node(object):
         support row selection.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleTable.get_n_selected_rows(self)
 
 
@@ -1091,8 +926,6 @@ class Node(object):
         Gets the table row index occupied by the child at a particular 1-D child index.
         See Atspi.Table.get_index_at, Atspi.Table.get_column_at_index.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleTable.get_row_at_index(self, index)
 
@@ -1119,8 +952,6 @@ class Node(object):
         is_selected will contain 2, 5, 1, 2, and True, respectively.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleTable.get_row_column_extents_at_index(self, index)
 
 
@@ -1129,8 +960,6 @@ class Node(object):
         Gets a text description of a particular table row. This differs from
         Atspi.Table.get_row_header, which returns an Atspi.Accessible.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleTable.get_row_description(self, row)
 
@@ -1143,8 +972,6 @@ class Node(object):
         STATE_SHOWING.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleTable.get_row_extent_at(self, row, column)
 
 
@@ -1154,8 +981,6 @@ class Node(object):
         Atspi.Table.get_row_description, which returns a string.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleTable.get_row_header(self, row)
 
 
@@ -1163,8 +988,6 @@ class Node(object):
         """
         Queries a table for a list of indices of columns which are currently selected.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleTable.get_selected_columns(self)
 
@@ -1174,8 +997,6 @@ class Node(object):
         Queries a table for a list of indices of rows which are currently selected.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleTable.get_selected_rows(self)
 
 
@@ -1183,8 +1004,6 @@ class Node(object):
         """
         Gets an accessible object which summarizes the contents of an Atspi.Table.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleTable.get_summary(self)
 
@@ -1195,8 +1014,6 @@ class Node(object):
         column selection.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleTable.is_column_selected(self, column)
 
 
@@ -1206,8 +1023,6 @@ class Node(object):
         selection.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleTable.is_row_selected(self, row)
 
 
@@ -1215,8 +1030,6 @@ class Node(object):
         """
         Determines whether the cell at a specific row and column is selected.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleTable.is_selected(self, row, column)
 
@@ -1227,8 +1040,6 @@ class Node(object):
         Not all tables support column selection.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleTable.remove_column_selection(self, column)
 
 
@@ -1238,8 +1049,6 @@ class Node(object):
         all tables support row selection.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleTable.remove_row_selection(self, row)
 
 
@@ -1248,8 +1057,6 @@ class Node(object):
         Returns the column headers as an array of cell accessibles.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleTableCell.get_column_header_cells(self)
 
 
@@ -1257,8 +1064,6 @@ class Node(object):
         """
         Returns the column index.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleTableCell.get_column_index(self)
 
@@ -1270,8 +1075,6 @@ class Node(object):
         STATE_SHOWING.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleTableCell.get_column_span(self)
 
 
@@ -1279,8 +1082,6 @@ class Node(object):
         """
         Retrieves the tabular position of this cell.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleTableCell.get_position(self)
 
@@ -1292,8 +1093,6 @@ class Node(object):
         and STATE_SHOWING.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleTableCell.get_row_column_span(self)
 
 
@@ -1301,8 +1100,6 @@ class Node(object):
         """
         Returns the row headers as an array of cell accessibles.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleTableCell.get_row_header_cells(self)
 
@@ -1313,8 +1110,6 @@ class Node(object):
         are meaningful only if the table cell has both STATE_VISIBLE and STATE_SHOWING.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleTableCell.get_row_span(self)
 
 
@@ -1323,8 +1118,6 @@ class Node(object):
         Returns a reference to the accessible of the containing table.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleTableCell.get_table(self)
 
 
@@ -1332,8 +1125,6 @@ class Node(object):
         """
         Selects some text (adds a text selection) in an Atspi.Text object.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleText.add_selection(self, start_offset, end_offset)
 
@@ -1344,8 +1135,6 @@ class Node(object):
         optionally including its 'default' attributes.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleText.get_attribute_run(self, offset, include_defaults)
 
 
@@ -1354,8 +1143,6 @@ class Node(object):
         Gets the ranges of text from an Atspi.Text object which lie within the bounds
         defined by (x, y) and (x+'width', y+'height').
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleText.get_bounded_ranges(
             self,
@@ -1374,8 +1161,6 @@ class Node(object):
         Gets the current offset of the text caret in an Atspi.Text object.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleText.get_caret_offset(self)
 
 
@@ -1384,8 +1169,6 @@ class Node(object):
         Gets the character at a given offset for an Atspi.Text object.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleText.get_character_at_offset(self, offset)
 
 
@@ -1393,8 +1176,6 @@ class Node(object):
         """
         Gets the character count of an #AccessibleText object.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleText.get_character_count(self)
 
@@ -1405,8 +1186,6 @@ class Node(object):
         particular text offset. The returned values are meaningful only if the Text has
         both STATE_VISIBLE and STATE_SHOWING.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleText.get_character_extents(self, offset, coord_type)
 
@@ -1419,8 +1198,6 @@ class Node(object):
         entire set of text attributes over a range.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleText.get_default_attributes(self)
 
 
@@ -1429,8 +1206,6 @@ class Node(object):
         Gets the number of active non-contiguous selections for an Atspi.Text object.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleText.get_n_selections(self)
 
 
@@ -1438,8 +1213,6 @@ class Node(object):
         """
         Gets the character offset into the text at a given point.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleText.get_offset_at_point(self, x, y, coord_type)
 
@@ -1451,8 +1224,6 @@ class Node(object):
         STATE_SHOWING.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleText.get_range_extents(self, start_offset, end_offset, coord_type)
 
 
@@ -1461,8 +1232,6 @@ class Node(object):
         Gets the bounds of the selection_num-th active text selection for an Atspi.Text
         object.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleText.get_selection(self, selection_num)
 
@@ -1476,8 +1245,6 @@ class Node(object):
         New in version Atspi 2.9.90.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleText.get_string_at_offset(self, offset, granularity)
 
 
@@ -1488,8 +1255,6 @@ class Node(object):
         variable-width encoding.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleText.get_text(self, start_offset, end_offset)
 
 
@@ -1497,8 +1262,6 @@ class Node(object):
         """
         Gets delimited text from an Atspi.Text object which follows a given text offset.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleText.get_text_after_offset(self, offset, coord_type)
 
@@ -1511,8 +1274,6 @@ class Node(object):
         Deprecated since version 2.10. Use Atspi.Text.get_string_at_offset.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleText.get_text_at_offset(self, offset, coord_type)
 
 
@@ -1524,8 +1285,6 @@ class Node(object):
 
         Note: The deprecation note what to use seems wrong.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleText.get_text_attribute_value(self, offset, attribute_name)
 
@@ -1540,8 +1299,6 @@ class Node(object):
         Note: The deprecation note what to use seems wrong.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleText.get_text_attributes(self, offset)
 
 
@@ -1551,8 +1308,6 @@ class Node(object):
         offset.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleText.get_text_before_offset(self, offset, coord_type)
 
 
@@ -1560,8 +1315,6 @@ class Node(object):
         """
         De-selects a text selection.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleText.remove_selection(self, selection_num)
 
@@ -1572,8 +1325,6 @@ class Node(object):
         on the screen.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleText.scroll_substring_to(self, start_offset, end_offset, coord_type)
 
 
@@ -1582,8 +1333,6 @@ class Node(object):
         Scrolls whatever container of the Atspi.Text text range so it becomes visible
         on the screen at a given position.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleText.scroll_substring_to_point(
             self,
@@ -1600,8 +1349,6 @@ class Node(object):
         Moves the text caret to a given position.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleText.set_caret_offset(self, new_offset)
 
 
@@ -1610,19 +1357,15 @@ class Node(object):
         Changes the bounds of an existing Atspi.Text text selection.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleText.set_selection(self, selection_num, start_offset, end_offset)
 
 
     @property
+    @logging_class.do_not_log
     def text(self):
         """
         Define a 'text' property for Atspi object.
         """
-
-        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
-        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleText.get_all_text(self)
 
@@ -1633,8 +1376,6 @@ class Node(object):
         Define a 'text' setter for Atspi.Text object.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleEditableText.set_text_contents(self, content)
 
 
@@ -1642,8 +1383,6 @@ class Node(object):
         """
         Gets the current value for an Atspi.Value.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleValue.get_current_value(self)
 
@@ -1654,8 +1393,6 @@ class Node(object):
         Gets the current value for an Atspi.Value.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return self.get_current_value()
 
 
@@ -1665,8 +1402,6 @@ class Node(object):
         Gets the current value for an Atspi.Value.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleValue.set_current_value(self, new_value)
 
 
@@ -1674,8 +1409,6 @@ class Node(object):
         """
         Gets the maximum allowed value for an Atspi.Value.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleValue.get_maximum_value(self)
 
@@ -1686,8 +1419,6 @@ class Node(object):
         Gets the maximum allowed value for an Atspi.Value.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return self.get_maximum_value()
 
 
@@ -1695,8 +1426,6 @@ class Node(object):
         """
         Gets the minimum increment by which an Atspi.Value can be adjusted.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleValue.get_minimum_increment(self)
 
@@ -1707,8 +1436,6 @@ class Node(object):
         Gets the minimum increment by which an Atspi.Value can be adjusted.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return self.get_minimum_increment()
 
 
@@ -1716,8 +1443,6 @@ class Node(object):
         """
         Gets the minimum allowed value for an Atspi.Value.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleValue.get_minimum_value(self)
 
@@ -1728,19 +1453,14 @@ class Node(object):
         Gets the minimum allowed value for an Atspi.Value.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return self.get_minimum_value()
 
-
     @property
+    @logging_class.do_not_log
     def toolkit(self):
         """
         Return string description of the toolkit we are using.
         """
-
-        # TODO revisit, this will flood logs on position query.
-        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleUtilities.get_toolkit(self)
 
@@ -1751,8 +1471,6 @@ class Node(object):
         Return window_id of a node.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return ponytail_helper.get_window_id(self)
 
 
@@ -1761,8 +1479,6 @@ class Node(object):
         """
         Check if window is focused.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if self.session_type != "wayland":
             LOGGING.info("Ponytail is not used in non Wayland session.")
@@ -1777,8 +1493,6 @@ class Node(object):
         Define a 'id' property for Atspi object.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleObject.get_id(self)
 
 
@@ -1788,78 +1502,65 @@ class Node(object):
         Define a 'accessible_id' property for Atspi object.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleObject.get_accessible_id(self)
 
 
     @property
+    @logging_class.do_not_log
     def name(self):
         """
         Define a 'name' property for Atspi object.
         """
 
-        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
-        #LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleObject.get_name(self)
 
 
     @property
+    @logging_class.do_not_log
     def role(self):
         """
         Define a 'role property for Atspi object.
         """
 
-        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
-        #LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleObject.get_role(self)
 
 
     @property
+    @logging_class.do_not_log
     def role_name(self):
         """
         Define a 'role_name' property for Atspi object.
         """
-        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
-        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleObject.get_role_name(self)
 
 
     @property
+    @logging_class.do_not_log
     def description(self):
         """
         Define a 'description' property for Atspi object.
         """
 
-        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
-        #LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleObject.get_description(self)
 
 
     @property
+    @logging_class.do_not_log
     def parent(self):
         """
         Define a 'parent' property for Atspi object.
         """
 
-        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
-        #LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleObject.get_parent(self)
 
 
     @property
+    @logging_class.do_not_log
     def index_in_parent(self):
         """
         Define a 'index_in_parent' property for Atspi object.
         """
-
-        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
-        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleObject.get_index_in_parent(self)
 
@@ -1883,13 +1584,11 @@ class Node(object):
 
 
     @property
+    @logging_class.do_not_log
     def children(self):
         """
         Creating children easy navigation when required.
         """
-
-        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
-        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleObject.get_children(self)
 
@@ -1900,8 +1599,6 @@ class Node(object):
         Is the node dead (defunct)?
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleObject.is_dead(self)
 
 
@@ -1909,8 +1606,6 @@ class Node(object):
         """
         Find a single child satisfying the name role_name or description.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         using_identifier = None
         using_role_name = role_name
@@ -1944,8 +1639,6 @@ class Node(object):
         """
         Determines whether a child satisfying the given criteria exists.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         using_identifier = None
         using_role_name = role_name
@@ -1986,8 +1679,6 @@ class Node(object):
         Find a single ancestor satisfying the predicate.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleObject.find_ancestor(self, predicate, **kwargs)
 
 
@@ -1996,8 +1687,6 @@ class Node(object):
         Find a single child satisfying the predicate.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleObject.find_descendant(self, predicate, **kwargs)
 
 
@@ -2005,8 +1694,6 @@ class Node(object):
         """
         Find a all children satisfying the predicate.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleObject.find_all_descendants(self, predicate, **kwargs)
 
@@ -2017,8 +1704,6 @@ class Node(object):
         Is this Accessible Node the last child in parent node?
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleObject.is_last_child(self)
 
 
@@ -2027,8 +1712,6 @@ class Node(object):
         """
         Get how many children Accessible Node has.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleObject.get_child_count(self)
 
@@ -2040,8 +1723,6 @@ class Node(object):
         The node(s) that is/are a label for this node. Generated from 'relations'.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleObject.get_labeler(self)
 
 
@@ -2051,8 +1732,6 @@ class Node(object):
         'labelee' (read-only list of Node instances):
         The node(s) that this node is a label for. Generated from 'relations'.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleObject.get_labelee(self)
 
@@ -2064,8 +1743,6 @@ class Node(object):
         - 2 is middle,
         - 3 is right.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         click_x = int(self.position[0] + self.size[0] / 2) + offset_x
         click_y = int(self.position[1] + self.size[1] / 2) + offset_y
@@ -2081,8 +1758,6 @@ class Node(object):
         Generates a raw mouse double-click event, using the specified button.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         click_x = int(self.position[0] + self.size[0] / 2) + offset_x
         click_y = int(self.position[1] + self.size[1] / 2) + offset_y
 
@@ -2097,8 +1772,6 @@ class Node(object):
         Move mouse cursor to the center of the widget.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         point_x = int(self.position[0] + self.size[0] / 2) + offset_x
         point_y = int(self.position[1] + self.size[1] / 2) + offset_y
 
@@ -2112,8 +1785,6 @@ class Node(object):
         """
         Dumping a structure representation.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         from dogtail.dump import AccessibleStructureRepresentation
 
@@ -2136,8 +1807,6 @@ class Node(object):
         Dumping a tree structure of the node in tree like representation.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         from dogtail.dump import AccessibleStructureRepresentation
 
         print(AccessibleStructureRepresentation(self, "tree", file_name=file_name, labels=labels))
@@ -2147,8 +1816,6 @@ class Node(object):
         """
         Blink will highlight the current node on the screen. Using Blinker from utility.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not self.extents:
             return False
@@ -2166,8 +1833,6 @@ class Node(object):
         exception.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleRoot.application(application_name)
 
 
@@ -2176,8 +1841,6 @@ class Node(object):
         """
         Get all applications.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         return AccessibleRoot.applications()
 
@@ -2221,8 +1884,6 @@ class Node(object):
         The value (as a string) currently selected in the combo box.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return self.name
 
 
@@ -2231,8 +1892,6 @@ class Node(object):
         """
         Set the value (as a string) in the combo box.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         self.childNamed(childName=value).doActionNamed("click")
         do_delay()
@@ -2523,8 +2182,6 @@ class Node(object):
         Get Link Anchor from HyperLink object.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         try:
             if AccessibleObject.is_newton(self):
                 # TODO
@@ -2544,8 +2201,6 @@ class Node(object):
         Does this node satisfy the given predicate?
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         assert isinstance(pred, GenericPredicate)
         return pred.satisfied_by_node(self)
 
@@ -2563,11 +2218,12 @@ class Node(object):
     # End of backwards compatibility definitions. #
     ###############################################
 
-
+    @logging_class.do_not_log
     def __len__(self):
         return AccessibleObject.get_child_count(self)
 
 
+    @logging_class.do_not_log
     def __getitem__(self, index):
         length = len(self)
 
@@ -2580,14 +2236,17 @@ class Node(object):
         return AccessibleObject.get_child_at_index(self, index)
 
 
+    @logging_class.do_not_log
     def __bool__(self):
         return self is not None
 
 
+    @logging_class.do_not_log
     def __nonzero__(self):
         return self is not None
 
 
+    @logging_class.do_not_log
     def __str__(self):
         try:
             return f"[ '{self.name}' | '{self.role_name}' | '{self.description}' ]"

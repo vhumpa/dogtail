@@ -21,6 +21,7 @@ LOGGING = logging_class.logger
 from dogtail.accessibles.accessible_object import AccessibleObject
 
 
+@logging_class.log_a_class
 class AccessibleTable:
     """
     Table class.
@@ -33,8 +34,6 @@ class AccessibleTable:
         Selects the specified column, adding it to the current column selection. Not
         all tables support column selection.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
@@ -51,8 +50,6 @@ class AccessibleTable:
         Selects the specified row, adding it to the current row selection. Not all
         tables support row selection.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
@@ -71,8 +68,6 @@ class AccessibleTable:
         Atspi.Component.get_accessible_at_point.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
 
@@ -87,8 +82,6 @@ class AccessibleTable:
         """
         Gets an accessible representation of the caption for an Atspi.Table.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
@@ -106,8 +99,6 @@ class AccessibleTable:
         index. See Atspi.Table.get_index_at, Atspi.Table.get_row_at_index.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
 
@@ -123,8 +114,6 @@ class AccessibleTable:
         Gets a text description of a particular table column. This differs from
         Atspi.Table.get_column_header, which returns an #Accessible.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
@@ -144,8 +133,6 @@ class AccessibleTable:
         STATE_SHOWING.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
 
@@ -161,8 +148,6 @@ class AccessibleTable:
         Gets the header associated with a table column, if available. This differs from
         Atspi.Table.get_column_description, which returns a string.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
@@ -182,8 +167,6 @@ class AccessibleTable:
         Atspi.Table.get_column_at_index
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
 
@@ -200,8 +183,6 @@ class AccessibleTable:
         programmatically hidden, but inclusive of columns that may be outside of the
         current scrolling window or viewport.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
@@ -220,8 +201,6 @@ class AccessibleTable:
         current scrolling window or viewport.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
 
@@ -237,8 +216,6 @@ class AccessibleTable:
         Queries a table to find out how many columns are currently selected. Not all
         tables support column selection.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
@@ -256,8 +233,6 @@ class AccessibleTable:
         support row selection.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
 
@@ -273,8 +248,6 @@ class AccessibleTable:
         Gets the table row index occupied by the child at a particular 1-D child index.
         See Atspi.Table.get_index_at, Atspi.Table.get_column_at_index.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
@@ -308,8 +281,6 @@ class AccessibleTable:
         is_selected will contain 2, 5, 1, 2, and True, respectively.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
 
@@ -325,8 +296,6 @@ class AccessibleTable:
         Gets a text description of a particular table row. This differs from
         Atspi.Table.get_row_header, which returns an Atspi.Accessible.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
@@ -346,8 +315,6 @@ class AccessibleTable:
         STATE_SHOWING.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
 
@@ -364,8 +331,6 @@ class AccessibleTable:
         Atspi.Table.get_row_description, which returns a string.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
 
@@ -380,8 +345,6 @@ class AccessibleTable:
         """
         Queries a table for a list of indices of columns which are currently selected.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
@@ -398,8 +361,6 @@ class AccessibleTable:
         Queries a table for a list of indices of rows which are currently selected.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
 
@@ -414,8 +375,6 @@ class AccessibleTable:
         """
         Gets an accessible object which summarizes the contents of an Atspi.Table.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
@@ -433,8 +392,6 @@ class AccessibleTable:
         column selection.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
 
@@ -451,8 +408,6 @@ class AccessibleTable:
         selection.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
 
@@ -467,8 +422,6 @@ class AccessibleTable:
         """
         Determines whether the cell at a specific row and column is selected.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
@@ -486,8 +439,6 @@ class AccessibleTable:
         Not all tables support column selection.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
 
@@ -503,8 +454,6 @@ class AccessibleTable:
         De-selects the specified row, removing it from the current row selection. Not
         all tables support row selection.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")

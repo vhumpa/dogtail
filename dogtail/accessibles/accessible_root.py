@@ -16,6 +16,7 @@ LOGGING = logging_class.logger
 from dogtail.accessibles.accessible_utilities import AccessibleUtilities
 
 
+@logging_class.log_a_class
 class AccessibleRoot:
     """
     Root class.
@@ -28,8 +29,6 @@ class AccessibleRoot:
         Get all applications.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         return AccessibleUtilities.get_all_applications()
 
 
@@ -39,8 +38,6 @@ class AccessibleRoot:
         Gets an application by name, returning an Application instance or raising an
         exception.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         validated_retry = True
         validated_application_name = application_name

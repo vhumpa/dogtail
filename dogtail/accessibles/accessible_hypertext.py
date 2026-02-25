@@ -21,6 +21,7 @@ LOGGING = logging_class.logger
 from dogtail.accessibles.accessible_object import AccessibleObject
 
 
+@logging_class.log_a_class
 class AccessibleHypertext:
     """
     Hypertext class.
@@ -32,8 +33,6 @@ class AccessibleHypertext:
         """
         Gets the Atspi.Hyperlink object at a specified index.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_hypertext(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
@@ -51,8 +50,6 @@ class AccessibleHypertext:
         Gets the index of the Atspi.Hyperlink object at a specified character offset.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_hypertext(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
             return False
@@ -69,8 +66,6 @@ class AccessibleHypertext:
         Gets the total number of Atspi.Hyperlink objects that an Atspi.Hypertext
         implementor has.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_hypertext(acc_object):
             LOGGING.debug("Object is not valid Accessible.")

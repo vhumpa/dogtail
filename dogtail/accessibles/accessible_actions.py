@@ -24,6 +24,8 @@ from dogtail.utils import do_delay
 
 from dogtail.accessibles.accessible_object import AccessibleObject
 
+
+@logging_class.log_a_class
 class AccessibleActions:
     """
     Action class.
@@ -35,8 +37,6 @@ class AccessibleActions:
         """
         Invoke the action indicated by index on the object implementing Atspi.Action.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_action(acc_object):
             LOGGING.debug("Accessible object does not have an Action interface.")
@@ -57,8 +57,6 @@ class AccessibleActions:
         """
         Get the description of the index-th Action on the object implementing Atspi.Action.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_action(acc_object):
             LOGGING.debug("Accessible object does not have an Action interface.")
@@ -83,8 +81,6 @@ class AccessibleActions:
         Get the name of the index-th Action on the object implementing Atspi.Action.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_action(acc_object):
             LOGGING.debug("Accessible object does not have an Action interface.")
             return 0
@@ -107,8 +103,6 @@ class AccessibleActions:
         """
         Get the keybindings of the index-th Action on the object implementing Atspi.Action.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_action(acc_object):
             LOGGING.debug("Accessible object does not have an Action interface.")
@@ -133,8 +127,6 @@ class AccessibleActions:
         Get the localized name of the index-th Action on the object implementing Atspi.Action.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_action(acc_object):
             LOGGING.debug("Accessible object does not have an Action interface.")
             return 0
@@ -158,8 +150,6 @@ class AccessibleActions:
         Get the number of the actions invocable on the object implementing Atspi.Action.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_action(acc_object):
             LOGGING.debug("Accessible object does not have an Action interface.")
             return 0
@@ -182,8 +172,6 @@ class AccessibleActions:
         Get dictionary of actions.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         actions = {}
 
         try:
@@ -201,8 +189,6 @@ class AccessibleActions:
         """
         Invoke the action indicated by its name on the object implementing Atspi.Action.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not isinstance(named_action, str):
             LOGGING.debug("This function expects action name string.")

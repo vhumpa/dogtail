@@ -210,21 +210,32 @@ class Logging(metaclass=Singleton):
         Go over a class and replace local functions with wrapped versions.
         """
 
-        # vars(cls) focuses on methods defined in THIS class, not inherited ones
         for name, attr in vars(cls).items():
-            # Check if it's a function and doesn't have the "no_log" flag
-            if (inspect.isfunction(attr) or inspect.ismethod(attr)) and \
-               not getattr(attr, "_no_log", False):
-                print(f"DEBUGGING: working with: '{name}' '{attr}'")
-                setattr(cls, name, self.generate_log_for_method(attr))
+            # 1. Handle Static Methods.
+            if isinstance(attr, staticmethod):
+                if not getattr(attr.__func__, "_do_not_log", False):
+                    wrapped_func = self.generate_log_for_method(attr.__func__)
+                    setattr(cls, name, staticmethod(wrapped_func))
+
+            # 2. Handle Properties.
+            elif isinstance(attr, property) and attr.fget:
+                if not getattr(attr.fget, "_do_not_log", False):
+                    new_getter = self.generate_log_for_method(attr.fget)
+                    setattr(cls, name, property(new_getter, attr.fset, attr.fdel, attr.__doc__))
+
+            # 3. Handle Standard Methods / Functions.
+            elif (inspect.isfunction(attr) or inspect.ismethod(attr)):
+                if not getattr(attr, "_do_not_log", False):
+                    setattr(cls, name, self.generate_log_for_method(attr))
+
         return cls
 
-    def no_log(self, fnc):
+    def do_not_log(self, fnc):
         """
         Flag a method to be skipped by the class logger.
         """
 
-        fnc._no_log = True
+        fnc._do_not_log = True
         return fnc
 
 

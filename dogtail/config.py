@@ -206,6 +206,7 @@ def load_and_validate_config(path: str, schema: dict):
     return validated
 
 
+@logging_class.log_a_class
 class _Config:
     """
     Config class to keep backwards compatibility and to have getters and setters.
@@ -228,8 +229,6 @@ class _Config:
         Reset configuration to default values.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         self.validated_config.update(self._default_values_storage)
 
 
@@ -244,8 +243,6 @@ class _Config:
         :rtype: str
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         string_in_snake_case = ""
         for character in string_to_fix:
             if character.isalpha and character.isupper():
@@ -256,8 +253,8 @@ class _Config:
         return string_in_snake_case
 
 
+    @logging_class.no_log
     def __setattr__(self, option_id, value_to_set):
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         # Set a variable to use for the setter logic.
         set_option_id = option_id
@@ -318,6 +315,7 @@ class _Config:
                 logging_class.disable_debug_to_console()
 
 
+    @logging_class.no_log
     def __getattr__(self, option_id):
         # Set a variable to use for the getter logic.
         get_option_id = option_id

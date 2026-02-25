@@ -20,6 +20,7 @@ LOGGING = logging_class.logger
 from dogtail.accessibles.accessible_object import AccessibleObject
 
 
+@logging_class.log_a_class
 class AccessibleSelection:
     """
     Selection class.
@@ -32,8 +33,6 @@ class AccessibleSelection:
         Clears the current selection, removing all selected children from the specified
         Atspi.Selection implementor's selection list.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_selection(acc_object):
             LOGGING.debug("This object does not have Atspi.Selection interface.")
@@ -50,8 +49,6 @@ class AccessibleSelection:
         Deselects a specific child of an Atspi.Selection. Note that child_index is the
         index of the child in the parent container.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_selection(acc_object):
             LOGGING.debug("This object does not have Atspi.Selection interface.")
@@ -71,8 +68,6 @@ class AccessibleSelection:
         Atspi.Selection.select_child are asymmetric.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_selection(acc_object):
             LOGGING.debug("This object does not have Atspi.Selection interface.")
 
@@ -88,8 +83,6 @@ class AccessibleSelection:
         Gets the number of children of an Atspi.Selection implementor which are
         currently selected.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_selection(acc_object):
             LOGGING.debug("This object does not have Atspi.Selection interface.")
@@ -110,8 +103,6 @@ class AccessibleSelection:
         between 0 and Atspi.Selection.get_n_selected_children - 1, inclusive.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_selection(acc_object):
             LOGGING.debug("This object does not have Atspi.Selection interface.")
 
@@ -129,8 +120,6 @@ class AccessibleSelection:
         Atspi.Accessible container's list of children.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_selection(acc_object):
             LOGGING.debug("This object does not have Atspi.Selection interface.")
 
@@ -146,8 +135,6 @@ class AccessibleSelection:
         Attempts to select all of the children of an Atspi.Selection implementor. Not
         all Atspi.Selection implementors support this operation.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_selection(acc_object):
             LOGGING.debug("This object does not have Atspi.Selection interface.")
@@ -166,8 +153,6 @@ class AccessibleSelection:
         the (single) current selection.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_selection(acc_object):
             LOGGING.debug("This object does not have Atspi.Selection interface.")
 
@@ -182,8 +167,6 @@ class AccessibleSelection:
         """
         Selects a child.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_selection(acc_object):
             LOGGING.debug("This object does not have Atspi.Selection interface.")
@@ -201,8 +184,6 @@ class AccessibleSelection:
         """
         Deselects a child.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_selection(acc_object):
             LOGGING.debug("This object does not have Atspi.Selection interface.")

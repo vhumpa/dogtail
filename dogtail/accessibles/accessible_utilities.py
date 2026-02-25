@@ -24,6 +24,7 @@ LOGGING = logging_class.logger
 from dogtail.accessibles.accessible_object import AccessibleObject, SearchError
 
 
+@logging_class.log_a_class
 class AccessibleUtilities:
     """
     Utility class.
@@ -35,8 +36,6 @@ class AccessibleUtilities:
         """
         Returns the application object of an Accessible.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         try:
             if AccessibleObject.is_newton(acc_object):
@@ -57,8 +56,6 @@ class AccessibleUtilities:
         Return string description of the toolkit we are using.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         toolkit = {}
         application_object = AccessibleUtilities.get_application(acc_object)
         toolkit_name = AccessibleUtilities.get_toolkit_name(application_object)
@@ -74,8 +71,6 @@ class AccessibleUtilities:
         """
         Returns the name of the toolkit.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         try:
             if AccessibleObject.is_newton(acc_object):
@@ -96,8 +91,6 @@ class AccessibleUtilities:
         Returns the name of the toolkit.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         try:
             if AccessibleObject.is_newton(acc_object):
                 toolkit_version = acc_object.get_toolkit_version()
@@ -116,8 +109,6 @@ class AccessibleUtilities:
         """
         Returns the accessible desktop.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         try:
             # TODO, figure out how to tell if Newton is to be used.
@@ -141,8 +132,6 @@ class AccessibleUtilities:
         Returns a list of applications known to Atspi.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         desktop = AccessibleUtilities.get_desktop()
         if desktop is None:
             return []
@@ -155,8 +144,6 @@ class AccessibleUtilities:
         """
         Returns a list of applications known to Atspi.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         for number_of_attempts in range(config.search_cut_off_limit):
             if number_of_attempts >= config.search_warning_threshold:
@@ -180,8 +167,6 @@ class AccessibleUtilities:
         Returns true if app is known to Atspi.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         for child in AccessibleUtilities.get_all_applications():
             if child.get_name() == application:
                 return True
@@ -195,8 +180,6 @@ class AccessibleUtilities:
         """
         Returns the accessible application with the specified pid.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         for application_object in AccessibleUtilities.get_all_applications():
             if AccessibleObject.is_newton(application_object):

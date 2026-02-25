@@ -22,6 +22,7 @@ LOGGING = logging_class.logger
 from dogtail.accessibles.accessible_object import AccessibleObject
 
 
+@logging_class.log_a_class
 class AccessibleText:
     """
     Text class.
@@ -33,8 +34,6 @@ class AccessibleText:
         """
         Selects some text (adds a text selection) in an Atspi.Text object.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
@@ -52,8 +51,6 @@ class AccessibleText:
         optionally including its 'default' attributes.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
 
@@ -69,8 +66,6 @@ class AccessibleText:
         Gets the ranges of text from an Atspi.Text object which lie within the bounds
         defined by (x, y) and (x+'width', y+'height').
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
@@ -104,8 +99,6 @@ class AccessibleText:
         Gets the current offset of the text caret in an Atspi.Text object.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
 
@@ -121,8 +114,6 @@ class AccessibleText:
         Gets the character at a given offset for an Atspi.Text object.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
 
@@ -137,8 +128,6 @@ class AccessibleText:
         """
         Gets the character count of an #AccessibleText object.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
@@ -156,8 +145,6 @@ class AccessibleText:
         particular text offset. The returned values are meaningful only if the Text has
         both STATE_VISIBLE and STATE_SHOWING.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
@@ -177,8 +164,6 @@ class AccessibleText:
         entire set of text attributes over a range.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
 
@@ -194,8 +179,6 @@ class AccessibleText:
         Gets the number of active non-contiguous selections for an Atspi.Text object.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
 
@@ -210,8 +193,6 @@ class AccessibleText:
         """
         Gets the character offset into the text at a given point.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
@@ -230,8 +211,6 @@ class AccessibleText:
         STATE_SHOWING.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
 
@@ -247,8 +226,6 @@ class AccessibleText:
         Gets the bounds of the selection_num-th active text selection for an Atspi.Text
         object.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
@@ -294,8 +271,6 @@ class AccessibleText:
         New in version 2.9.90.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
 
@@ -313,8 +288,6 @@ class AccessibleText:
         variable-width encoding.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
             return None
@@ -330,8 +303,6 @@ class AccessibleText:
         """
         Gets delimited text from an Atspi.Text object which follows a given text offset.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
@@ -352,8 +323,6 @@ class AccessibleText:
         Deprecated since version 2.10. Use Atspi.Text.get_string_at_offset.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
             return None
@@ -373,8 +342,6 @@ class AccessibleText:
 
         Note: The deprecation note what to use seems wrong.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
@@ -397,8 +364,6 @@ class AccessibleText:
         Note: The deprecation note what to use seems wrong.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
             return None
@@ -416,8 +381,6 @@ class AccessibleText:
         offset.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
             return None
@@ -433,8 +396,6 @@ class AccessibleText:
         """
         De-selects a text selection.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
@@ -453,8 +414,6 @@ class AccessibleText:
         on the screen.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
             return None
@@ -471,8 +430,6 @@ class AccessibleText:
         Scrolls whatever container of the Atspi.Text text range so it becomes visible
         on the screen at a given position.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
@@ -503,8 +460,6 @@ class AccessibleText:
         Moves the text caret to a given position.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
             return None
@@ -521,8 +476,6 @@ class AccessibleText:
         Changes the bounds of an existing Atspi.Text text selection.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")
             return None
@@ -538,8 +491,6 @@ class AccessibleText:
         """
         Get a text from Atspi.Text object without a need to specify range.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_text(acc_object):
             LOGGING.debug("This object does not have Atspi.Text interface.")

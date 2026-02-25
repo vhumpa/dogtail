@@ -22,6 +22,7 @@ LOGGING = logging_class.logger
 from dogtail.accessibles.accessible_object import AccessibleObject
 
 
+@logging_class.log_a_class
 class AccessibleState:
     """
     State class.
@@ -33,8 +34,6 @@ class AccessibleState:
         """
         Get active state.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
@@ -52,8 +51,6 @@ class AccessibleState:
         """
         Get focusable state.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
@@ -73,8 +70,6 @@ class AccessibleState:
         Get focused state.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
             return False
@@ -93,8 +88,6 @@ class AccessibleState:
         Get pressed state.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
             return False
@@ -111,8 +104,6 @@ class AccessibleState:
         """
         Get resizable state.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
@@ -131,8 +122,6 @@ class AccessibleState:
         Get selected state.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
             return False
@@ -149,8 +138,6 @@ class AccessibleState:
         """
         Get selectable state.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
@@ -169,8 +156,6 @@ class AccessibleState:
         Get sensitive state.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
             return False
@@ -187,8 +172,6 @@ class AccessibleState:
         """
         Get showing state.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
@@ -207,8 +190,6 @@ class AccessibleState:
         Get visible state.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
             return False
@@ -225,8 +206,6 @@ class AccessibleState:
         """
         Get checked state.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
@@ -245,8 +224,6 @@ class AccessibleState:
         Get checkable state.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
             return False
@@ -263,8 +240,6 @@ class AccessibleState:
         """
         Get read_only state.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
@@ -283,8 +258,6 @@ class AccessibleState:
         Get collapsed state.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
             return False
@@ -301,8 +274,6 @@ class AccessibleState:
         """
         Get editable state.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
@@ -321,8 +292,6 @@ class AccessibleState:
         Get armed state.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
             return False
@@ -340,7 +309,6 @@ class AccessibleState:
         Get invalid state.
         """
 
-        #LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
@@ -359,8 +327,6 @@ class AccessibleState:
         Get states as Accessible objects.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
             return False
@@ -377,8 +343,6 @@ class AccessibleState:
         """
         Get states as strings.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")

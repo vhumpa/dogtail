@@ -22,6 +22,7 @@ LOGGING = logging_class.logger
 from dogtail.accessibles.accessible_object import AccessibleObject
 
 
+@logging_class.log_a_class
 class AccessibleEditableText:
     """
     Editable Text class.
@@ -33,8 +34,6 @@ class AccessibleEditableText:
         """
         Copies text from an Atspi.EditableText object into the system clipboard.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return False
@@ -77,8 +76,6 @@ class AccessibleEditableText:
         the system clipboard.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_valid(acc_object):
             return False
 
@@ -119,8 +116,6 @@ class AccessibleEditableText:
         Deletes text from an Atspi.EditableText object, without copying the excised
         portion into the system clipboard.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return False
@@ -166,8 +161,6 @@ class AccessibleEditableText:
         Deliberately moving parameters around so that the text is first.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_valid(acc_object):
             return False
 
@@ -188,8 +181,6 @@ class AccessibleEditableText:
         with all character offsets, the specified position may not be the same as the
         resulting byte offset, since the text is in a variable-width encoding.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return False
@@ -214,8 +205,6 @@ class AccessibleEditableText:
         """
         Replace the entire text contents of an Atspi.EditableText object.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return False

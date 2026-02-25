@@ -30,6 +30,8 @@ COORD_TYPE_SCREEN = 0
 COORD_TYPE_WINDOW = 1
 COORD_TYPE_PARENT = 2
 
+
+@logging_class.log_a_class
 class AccessibleImage:
     """
     Image class.
@@ -41,8 +43,6 @@ class AccessibleImage:
         """
         Gets the description of the image displayed in an Atspi.Image object.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return None
@@ -64,8 +64,6 @@ class AccessibleImage:
         implementor. The returned values are meaningful only if the Image has both
         STATE_VISIBLE and STATE_SHOWING.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return None
@@ -101,8 +99,6 @@ class AccessibleImage:
         Gets the locale associated with an image and its textual representation.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_valid(acc_object):
             return None
 
@@ -123,8 +119,6 @@ class AccessibleImage:
         Atspi.Image implementor. The returned values are meaningful only if the Image
         has both STATE_VISIBLE and STATE_SHOWING.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return None
@@ -161,8 +155,6 @@ class AccessibleImage:
         The returned values are meaningful only if the Image has both STATE_VISIBLE and
         STATE_SHOWING.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             return None

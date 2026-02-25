@@ -202,8 +202,6 @@ class Lock:
     when script process exits to avoid having to unlock manually.
     """
 
-    LOGGING.debug(logging_class.get_func_params_and_values())
-
     def __init__(
         self,
         location="/tmp",

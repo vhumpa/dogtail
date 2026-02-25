@@ -37,6 +37,7 @@ class Singleton(type):
         return cls._instances[cls]
 
 
+@logging_class.log_a_class
 class PonytailHelper(metaclass=Singleton):
     """
     Simple Ponytail wrapper class to initiate ponytail and keep one instance of it.
@@ -69,7 +70,6 @@ class PonytailHelper(metaclass=Singleton):
 
 
     def __init__(self):
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         # Only makes sense when running under Wayland.
         if self.session_type != "wayland":
@@ -98,8 +98,6 @@ class PonytailHelper(metaclass=Singleton):
         Get ponytail interface.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not self._ponytail_dbus_interface:
             raise RuntimeError(self.error_message)
 
@@ -110,8 +108,6 @@ class PonytailHelper(metaclass=Singleton):
         """
         Detect Xwayland windows in order to use globals and recordMonitor.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         ponytail_interface = self.get_ponytail_interface()
 
@@ -148,8 +144,6 @@ class PonytailHelper(metaclass=Singleton):
         """
         Check ponytail connection.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         ponytail_interface = self.get_ponytail_interface()
 
@@ -266,8 +260,6 @@ class PonytailHelper(metaclass=Singleton):
         Get window_id.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         LOGGING.debug(" ===== Verbose window_id handling ===== ")
 
         window_id_return_value = ""
@@ -363,8 +355,6 @@ class PonytailHelper(metaclass=Singleton):
         """
         Check if window is focused.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         #Get current window_id.
         window_id = self._window_id

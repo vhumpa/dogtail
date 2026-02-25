@@ -20,6 +20,7 @@ LOGGING = logging_class.logger
 from dogtail.accessibles.accessible_object import AccessibleObject
 
 
+@logging_class.log_a_class
 class AccessibleValue:
     """
     Value class.
@@ -31,8 +32,6 @@ class AccessibleValue:
         """
         Gets the current value for an Atspi.Value.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
@@ -54,8 +53,6 @@ class AccessibleValue:
         Gets the maximum allowed value for an Atspi.Value.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
             return False
@@ -75,8 +72,6 @@ class AccessibleValue:
         """
         Gets the minimum increment by which an Atspi.Value can be adjusted.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
@@ -98,8 +93,6 @@ class AccessibleValue:
         Gets the minimum allowed value for an Atspi.Value.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")
             return False
@@ -119,8 +112,6 @@ class AccessibleValue:
         """
         Set a value to an Accessible Value object.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_valid(acc_object):
             LOGGING.debug("Object is not valid Accessible.")

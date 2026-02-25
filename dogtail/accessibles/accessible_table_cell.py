@@ -21,6 +21,7 @@ LOGGING = logging_class.logger
 from dogtail.accessibles.accessible_object import AccessibleObject
 
 
+@logging_class.log_a_class
 class AccessibleTableCell:
     """
     TableCell class.
@@ -32,8 +33,6 @@ class AccessibleTableCell:
         """
         Returns the column headers as an array of cell accessibles.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
@@ -49,8 +48,6 @@ class AccessibleTableCell:
         """
         Returns the column index.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
@@ -69,8 +66,6 @@ class AccessibleTableCell:
         STATE_SHOWING.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
 
@@ -85,8 +80,6 @@ class AccessibleTableCell:
         """
         Retrieves the tabular position of this cell.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
@@ -105,8 +98,6 @@ class AccessibleTableCell:
         and STATE_SHOWING.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
 
@@ -121,8 +112,6 @@ class AccessibleTableCell:
         """
         Returns the row headers as an array of cell accessibles.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
@@ -140,8 +129,6 @@ class AccessibleTableCell:
         are meaningful only if the table cell has both STATE_VISIBLE and STATE_SHOWING.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")
 
@@ -156,8 +143,6 @@ class AccessibleTableCell:
         """
         Returns a reference to the accessible of the containing table.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_table(acc_object):
             LOGGING.debug("This object does not have Atspi.Table interface.")

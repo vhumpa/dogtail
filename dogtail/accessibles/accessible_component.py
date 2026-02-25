@@ -34,6 +34,8 @@ COORD_TYPE_SCREEN = 0
 COORD_TYPE_WINDOW = 1
 COORD_TYPE_PARENT = 2
 
+
+@logging_class.log_a_class
 class AccessibleComponent:
     """
     Component class.
@@ -49,8 +51,6 @@ class AccessibleComponent:
         Atspi.CoordType.WINDOW = 1
         Atspi.CoordType.PARENT = 2
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_component(acc_object):
             LOGGING.debug("Accessible object does not have a Component interface.")
@@ -103,8 +103,6 @@ class AccessibleComponent:
         Atspi.CoordType.PARENT = 2
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_component(acc_object):
             LOGGING.debug("Accessible object does not have a Component interface.")
             return False
@@ -152,8 +150,6 @@ class AccessibleComponent:
         Gets the opacity/alpha value of a component, if alpha blending is in use.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_component(acc_object):
             LOGGING.debug("Accessible object does not have a Component interface.")
             return False
@@ -170,8 +166,6 @@ class AccessibleComponent:
         Gets the bounding box of the specified Atspi.Component. The returned values are
         meaningful only if the Component has both STATE_VISIBLE and STATE_SHOWING.
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_component(acc_object):
             return None
@@ -209,8 +203,6 @@ class AccessibleComponent:
         visibility in terms of stacking order.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_component(acc_object):
             LOGGING.debug("Accessible object does not have a Component interface.")
             return False
@@ -228,8 +220,6 @@ class AccessibleComponent:
         (Bigger z-order numbers mean nearer the top)
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_component(acc_object):
             LOGGING.debug("Accessible object does not have a Component interface.")
             return False
@@ -246,8 +236,7 @@ class AccessibleComponent:
         A tuple containing the position of the Accessible: (x, y)
         """
 
-        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
-        LOGGING.debug(logging_class.get_func_params_and_values())
+        # TODO verbose logging? This will flood logs, perhaps too much even for verbose
 
         if not AccessibleObject.is_component(acc_object):
             LOGGING.debug("Accessible object does not have a Component interface.")
@@ -331,9 +320,6 @@ class AccessibleComponent:
         A tuple containing the size of the Accessible: (w, h)
         """
 
-        # TODO verbose logging? This will flood logs, perhaps too much even for verbose.
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_component(acc_object):
             LOGGING.debug("Accessible object does not have a Component interface.")
             return (-1, -1)
@@ -366,8 +352,6 @@ class AccessibleComponent:
         Grab focus.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_component(acc_object):
             LOGGING.debug("Accessible object does not have a Component interface.")
             return False
@@ -398,8 +382,6 @@ class AccessibleComponent:
         Atspi.ScrollType.ANYWHERE  = 6
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_component(acc_object):
             LOGGING.debug("Accessible object does not have a Component interface.")
             return False
@@ -425,8 +407,6 @@ class AccessibleComponent:
         Atspi.CoordType.PARENT = 2
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_component(acc_object):
             LOGGING.debug("Accessible object does not have a Component interface.")
             return False
@@ -450,8 +430,6 @@ class AccessibleComponent:
         Atspi.CoordType.WINDOW = 1
         Atspi.CoordType.PARENT = 2
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_component(acc_object):
             LOGGING.debug("Accessible object does not have a Component interface.")
@@ -490,8 +468,6 @@ class AccessibleComponent:
         Atspi.CoordType.PARENT = 2
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_component(acc_object):
             LOGGING.debug("Accessible object does not have a Component interface.")
             return False
@@ -521,8 +497,6 @@ class AccessibleComponent:
         Resizes the specified component to the given pixel dimensions.
         """
 
-        LOGGING.debug(logging_class.get_func_params_and_values())
-
         if not AccessibleObject.is_component(acc_object):
             LOGGING.debug("Accessible object does not have a Component interface.")
             return False
@@ -538,8 +512,6 @@ class AccessibleComponent:
         """
         A tuple containing the the center of the Accessible: (x, y)
         """
-
-        LOGGING.debug(logging_class.get_func_params_and_values())
 
         if not AccessibleObject.is_component(acc_object):
             LOGGING.debug("Accessible object does not have a Component interface.")

@@ -72,6 +72,7 @@ def do_typing_delay():
     """
     Execute a typing delay.
     """
+
     do_delay(float(config.typing_delay))
 
 

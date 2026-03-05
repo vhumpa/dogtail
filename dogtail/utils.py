@@ -139,6 +139,8 @@ def run(string, timeout=config.runTimeout, interval=config.runInterval, desktop=
                                 return pid
             except AttributeError:  # pragma: no cover
                 pass
+            except gi.repository.GLib.GError:  # pragma: no cover
+                pass
 
             doDelay(interval)
 

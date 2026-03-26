@@ -56,6 +56,12 @@ and /etc/dogtail/config.json
 - Added configurable compatibility override for at-spi2-core changes from "push button" to "button"
 roleName in version 2.53 (disabled by default, when enabled, "button" gets overriden back to "push button")
 
+### dogtail 1.0.8
+
+March 26 2026
+- Fix test_set_role to also accept AttributeError for compatibility with at-spi2-core 2.57 (thx to Samuel Thibault)
+- utils.run: Also ignore gi.repository.GLib.GError exceptions when waiting for applications to start (thx to Samuel Thibault)
+
 ## How does it work in brief?
 
 The core functionality relies on the Screen Cast and Remote Desktop API, enabling us to "connect" to either a specific window or the entire screen to simulate user input actions like key presses, typing, and—most importantly—mouse actions on specific coordinates. Ponytail uses the window list from `org.gnome.Shell.Introspect` to identify windows. Dogtail then ensures the correct window is connected via the Remote Desktop API, allowing input actions to be accurately executed within it.

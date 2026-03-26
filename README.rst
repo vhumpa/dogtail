@@ -16,6 +16,10 @@ dogtail 1.0
 
 After more than five years of continuous experimentation and development, we are excited to finally release Dogtail 1.0—a Wayland-enabled version of Dogtail! How did we achieve this? It was made possible by the `gnome-ponytail-daemon <https://gitlab.gnome.org/ofourdan/gnome-ponytail-daemon>`_, originally crafted by Olivier Fourdan. This tool allows us to perform actions in a Wayland GNOME session in a similar way to how we have been doing so with X functions.
 
+Dogtail 1.0.8 / March 26 2026
+- Fix test_set_role to also accept AttributeError for compatibility with at-spi2-core 2.57 (thx to Samuel Thibault)
+- utils.run: Also ignore gi.repository.GLib.GError exceptions when waiting for applications to start (thx to Samuel Thibault)
+
 Dogtail 1.0.7 / July 17 2025
 - Add support for retrieving name‑value attribute arrays from AtspiAccessible objects (thx to Andreï Basdereff)
 - Added system-wide configuration file support. Support for loading config from /etc/dogtail/config

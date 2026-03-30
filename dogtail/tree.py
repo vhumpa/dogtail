@@ -48,8 +48,6 @@ from dogtail.predicate import (
     IsAMenuNamed,
     IsAMenuItemNamed,
     IsATextEntryNamed,
-    IsAButtonNamed,
-    IsAPushButtonNamed,
     IsLabelledAs,
     IsNamed,
     IsATabNamed,
@@ -2047,7 +2045,7 @@ class Node(object):
         """
 
         return self.find_child(
-            IsAButtonNamed(name=buttonName) or IsAPushButtonNamed(name=buttonName),
+            lambda x: x.name == buttonName and x.roleName in ("button", "push button"),
             recursive=recursive,
             showing_only=showingOnly
         )

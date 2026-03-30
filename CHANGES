@@ -1,3 +1,13 @@
+2026-03-30 Michal Odehnal <modehnal@redhat.com>
+
+	dogtail 2.0.2
+	=============
+	Handling older config values and letting users know they have no effect. Fixing Issue #50
+	Handling forward compatibility. If user uses "button" let it match "push button" as well.
+	Remove workaround to change user wanted query for push button to button.
+	Use tree.button method to match both, instead of having workaround in predicate.
+
+
 2026-02-25 Michal Odehnal <modehnal@redhat.com>
 
 	dogtail 2.0.1

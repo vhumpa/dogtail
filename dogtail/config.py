@@ -50,6 +50,38 @@ CONFIG_SCHEMA = {
     },
 }
 
+COMPATIBILITY_CONFIG_SCHEMA = {
+    "config": {
+        "scratchDir": (object, None),
+        "dataDir": (object, None),
+        "logDir": (object, None),
+        "scriptName": (object, None),
+        "encoding": (object, None),
+        "configFile": (object, None),
+        "baseFile": (object, None),
+        "searchBackoffDuration": (object, None),
+        "searchCutoffCount": (object, None),
+        "logDebugToStdOut": (object, None),
+        "debugTranslation": (object, None),
+        "blinkOnActions": (object, None),
+        "buttonRoleCompat": (object, None),
+        "logDebugToFile": (object, None),
+        "scratch_dir": (object, None),
+        "data_dir": (object, None),
+        "log_dir": (object, None),
+        "script_name": (object, None),
+        "config_file": (object, None),
+        "base_file": (object, None),
+        "search_backoff_duration": (object, None),
+        "search_cutoff_count": (object, None),
+        "log_debug_to_std_out": (object, None),
+        "debug_translation": (object, None),
+        "blink_on_actions": (object, None),
+        "button_role_compat": (object, None),
+        "log_debug_to_file": (object, None),
+    }
+}
+
 
 class ConfigValidationError(Exception):
     pass
@@ -183,9 +215,7 @@ def load_and_validate_config(path: str, schema: dict):
                 try:
                     value = cast_value(raw_value, expected_type)
                 except Exception as error:
-                    raise ConfigValidationError(
-                        f"Type error in [{section}].{key}: {error}"
-                    )
+                    raise ConfigValidationError(f"Type error in [{section}].{key}: {error}")
 
                 validated[key] = value
                 LOGGING.debug(f"Set Validated key '{key}' to value '{value}'")
@@ -213,6 +243,8 @@ class _Config:
     """
 
     validated_config = load_and_validate_config("dogtail_config.ini", CONFIG_SCHEMA)
+    validated_compatibility_config = load_and_validate_config("dogtail_config.ini", COMPATIBILITY_CONFIG_SCHEMA)
+
     LOGGING.debug(f"Validated config: '{validated_config}'")
 
     # Create a deep copy instead of shallow copy to keep values for reset method.
@@ -258,6 +290,13 @@ class _Config:
 
         # Set a variable to use for the setter logic.
         set_option_id = option_id
+        compatibility_option_id = option_id
+
+        # Make sure compatibility is kept somewhat to dogtail-1.x, ignore the previously allowed values.
+        if compatibility_option_id in self.validated_compatibility_config:
+            LOGGING.info(f"Attempt to use __setattr__ option '{compatibility_option_id}'.")
+            LOGGING.info("This option is kept only for compatibility purposes and has no effect.")
+            return
 
         # Attempt to have some backwards compatibility and support camelCase.
         if any(char.isupper() for char in set_option_id):
@@ -319,6 +358,13 @@ class _Config:
     def __getattr__(self, option_id):
         # Set a variable to use for the getter logic.
         get_option_id = option_id
+        compatibility_get_option_id = option_id
+
+        # Handling compatibility values in getter.
+        if compatibility_get_option_id in self.validated_compatibility_config:
+            LOGGING.info(f"Attempt to use __getattr__ option '{compatibility_get_option_id}'.")
+            LOGGING.info("This option is kept only for compatibility purposes and has no effect.")
+            return
 
         # Attempt to have some backwards compatibility and support camelCase.
         if any(char.isupper() for char in get_option_id):
@@ -326,6 +372,7 @@ class _Config:
             LOGGING.debug(f"Config variable was transformed to '{get_option_id}'.")
             LOGGING.debug(f"Its value is '{self.validated_config[get_option_id]}'.")
 
+        # Handling proper values.
         try:
             return self.validated_config[get_option_id]
         except KeyError as error:

@@ -113,6 +113,24 @@ class TestPredicate(unittest.TestCase):
         self.assertTrue(predicate.satisfied_by_node(dummy_application))
 
 
+    def test_predicate_button_push_button(self):
+        """
+        Test Predicate IsAButtonNamed and IsAPushButtonNamed.
+        """
+
+        dummy_button = DummyNode(name="dummy", role_name="button")
+        dummy_push_button = DummyNode(name="dummy", role_name="push button")
+
+        predicate_button = dogtail.predicate.IsAButtonNamed(dummy_button.name)
+        predicate_push_button = dogtail.predicate.IsAPushButtonNamed(dummy_push_button.name)
+
+        self.assertTrue(predicate_button.satisfied_by_node(dummy_button))
+        self.assertFalse(predicate_button.satisfied_by_node(dummy_push_button))
+
+        self.assertTrue(predicate_push_button.satisfied_by_node(dummy_push_button))
+        self.assertFalse(predicate_push_button.satisfied_by_node(dummy_button))
+
+
     def test_predicate_button_negation(self):
         """
         Test Predicate IsAButtonNamed False Result.

@@ -2043,6 +2043,7 @@ class Node(object):
     def button(self, buttonName, recursive=True, showingOnly=None): # pylint: disable=invalid-name
         """
         Search below this node for a button with the given name.
+        The 'button' and 'push button' are represented by the same integer, no need to separate them.
         """
 
         return self.find_child(

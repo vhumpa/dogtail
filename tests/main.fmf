@@ -8,10 +8,10 @@
         # url: https://gitlab.com/dogtail/dogtail.git
         # ref: <branch>
 
-    provision:
-        how: virtual
-        hw:
-          memory: ">= 4 GB"
+    # provision:
+        # how: virtual
+        # hw:
+        #   memory: ">= 4 GB"
 
         # Specify usage of rhel-10 and api token
         # api-key: ${TESTING_FARM_API_TOKEN} # Use a secure CI/CD variable

@@ -40,7 +40,7 @@ class TestGnomeShellOverviewRawinput(unittest.TestCase):
         os.system("gsettings set org.gnome.shell favorite-apps \"['org.gnome.Nautilus.desktop']\"")
         sleep(1)
         print("Checking value for favorite apps.")
-        print(subprocess.check_output("gsettings set org.gnome.shell favorite-apps", shell=True).decode())
+        print(subprocess.check_output("gsettings get org.gnome.shell favorite-apps", shell=True).decode())
         sleep(1)
 
         press_key("Esc")
@@ -87,7 +87,7 @@ class TestGnomeShellOverviewRawinput(unittest.TestCase):
         os.system("gsettings set org.gnome.shell favorite-apps \"['org.gnome.Nautilus.desktop']\"")
         sleep(1)
         print("Checking value for favorite apps.")
-        print(subprocess.check_output("gsettings set org.gnome.shell favorite-apps", shell=True).decode())
+        print(subprocess.check_output("gsettings get org.gnome.shell favorite-apps", shell=True).decode())
         sleep(1)
 
         press_key("Esc")

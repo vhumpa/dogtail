@@ -1,7 +1,6 @@
 jobs:
 
 - job: tests
-  packit_instances: ["stg"]
   use_internal_tf: true
   trigger: pull_request
   targets:

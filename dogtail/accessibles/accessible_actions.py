@@ -25,6 +25,19 @@ from dogtail.utils import do_delay
 from dogtail.accessibles.accessible_object import AccessibleObject
 
 
+class ActionNotSupported(Exception):
+    """
+    The widget does not support the requested action.
+    """
+
+    def __init__(self, message=None):
+        LOGGING.debug("Action Not Supported Exception")
+        self.message = message
+
+    def __str__(self):
+        return self.message
+
+
 @logging_class.log_a_class
 class AccessibleActions:
     """
@@ -60,7 +73,7 @@ class AccessibleActions:
 
         if not AccessibleObject.is_action(acc_object):
             LOGGING.debug("Accessible object does not have an Action interface.")
-            return 0
+            return None
 
         try:
             if AccessibleObject.is_newton(acc_object):
@@ -70,7 +83,7 @@ class AccessibleActions:
 
         except Exception as error:
             LOGGING.debug(f"Exception getting actions: '{error}'")
-            return 0
+            raise ActionNotSupported(f"Issue with get_action_description on object '{acc_object}'")
 
         return invocable_actions
 
@@ -83,7 +96,7 @@ class AccessibleActions:
 
         if not AccessibleObject.is_action(acc_object):
             LOGGING.debug("Accessible object does not have an Action interface.")
-            return 0
+            return None
 
         try:
             if AccessibleObject.is_newton(acc_object):
@@ -93,7 +106,7 @@ class AccessibleActions:
 
         except Exception as error:
             LOGGING.debug(f"Exception getting actions: '{error}'")
-            return 0
+            raise ActionNotSupported(f"Issue with get_action_name on object '{acc_object}'")
 
         return invocable_actions
 
@@ -116,7 +129,7 @@ class AccessibleActions:
 
         except Exception as error:
             LOGGING.debug(f"Exception getting action key bind: '{error}'")
-            return None
+            raise ActionNotSupported(f"Issue with get_key_binding on object '{acc_object}'")
 
         return action_key_bind
 
@@ -129,7 +142,7 @@ class AccessibleActions:
 
         if not AccessibleObject.is_action(acc_object):
             LOGGING.debug("Accessible object does not have an Action interface.")
-            return 0
+            return None
 
         try:
             if AccessibleObject.is_newton(acc_object):
@@ -139,7 +152,7 @@ class AccessibleActions:
 
         except Exception as error:
             LOGGING.debug(f"Exception getting actions: '{error}'")
-            return 0
+            raise ActionNotSupported(f"Issue with get_localized_name on object '{acc_object}'")
 
         return invocable_actions
 
@@ -152,7 +165,7 @@ class AccessibleActions:
 
         if not AccessibleObject.is_action(acc_object):
             LOGGING.debug("Accessible object does not have an Action interface.")
-            return 0
+            return None
 
         try:
             if AccessibleObject.is_newton(acc_object):
@@ -161,7 +174,7 @@ class AccessibleActions:
                 invocable_actions = Atspi.Action.get_n_actions(acc_object)
         except Exception as error:
             LOGGING.debug(f"Exception getting actions: '{error}'")
-            return 0
+            raise ActionNotSupported(f"Issue with get_n_actions on object '{acc_object}'")
 
         return invocable_actions
 
@@ -199,8 +212,7 @@ class AccessibleActions:
             return False
 
         if named_action not in AccessibleActions.get_actions(acc_object):
-            LOGGING.debug("Wanted action is not supported on wanted object.")
-            return False
+            raise ActionNotSupported(f"Wanted action '{named_action}' is not supported on object '{acc_object}'.")
 
         try:
             action_to_do = AccessibleActions.get_actions(acc_object)[named_action]
@@ -215,5 +227,4 @@ class AccessibleActions:
             return action_result
 
         except Exception as error:
-            LOGGING.debug(f"Exception when executing a named action: '{error}'")
-            return False
+            raise ActionNotSupported(f"Exception when executing a named action: '{error}'")

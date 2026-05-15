@@ -1,3 +1,11 @@
+2026-05-15 Michal Odehnal <modehnal@redhat.com>
+
+	dogtail 2.0.3
+	=============
+	Reimplementing ActionNotSupported, kind of, it has its uses.
+	Fixing AccessibleAction to not suppress valid issues. Raising ActionNotSupported.
+
+
 2026-03-30 Michal Odehnal <modehnal@redhat.com>
 
 	dogtail 2.0.2

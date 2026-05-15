@@ -3,6 +3,7 @@
 import os
 import unittest
 from time import sleep
+import subprocess
 
 from dogtail.tree import root
 from dogtail.rawinput import (
@@ -37,6 +38,9 @@ class TestGnomeShellOverviewRawinput(unittest.TestCase):
 
         print("This test assumes Nautilus - Files to be Pinned")
         os.system("gsettings set org.gnome.shell favorite-apps \"['org.gnome.Nautilus.desktop']\"")
+        sleep(1)
+        print("Checking value for favorite apps.")
+        print(subprocess.check_output("gsettings set org.gnome.shell favorite-apps", shell=True).decode())
         sleep(1)
 
         press_key("Esc")
@@ -81,6 +85,9 @@ class TestGnomeShellOverviewRawinput(unittest.TestCase):
 
         print("This test assumes Nautilus - Files to be Pinned")
         os.system("gsettings set org.gnome.shell favorite-apps \"['org.gnome.Nautilus.desktop']\"")
+        sleep(1)
+        print("Checking value for favorite apps.")
+        print(subprocess.check_output("gsettings set org.gnome.shell favorite-apps", shell=True).decode())
         sleep(1)
 
         press_key("Esc")

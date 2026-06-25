@@ -1,3 +1,10 @@
+2026-06-25 Michal Odehnal <modehnal@redhat.com>
+
+	dogtail 2.0.4
+	=============
+	Fixing bug with recursive option for find_all_descendants method. Fixing Issue #51
+
+
 2026-05-15 Michal Odehnal <modehnal@redhat.com>
 
 	dogtail 2.0.3

@@ -354,10 +354,11 @@ class AccessibleObject:
 
         matches = []
         if not validated_recursive:
-            list(filter(predicate, acc_object.children))
+            matches = list(filter(predicate, acc_object.children))
 
         else:
             AccessibleObject._find_all_descendants(acc_object, predicate, matches)
+
         return matches
 
 

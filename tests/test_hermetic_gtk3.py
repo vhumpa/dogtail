@@ -6,7 +6,8 @@ One session serves the whole class, since libatspi will not let a process have
 two. The application can be restarted though, so each test gets a fresh one.
 
 The application is fullscreen on purpose: AT-SPI coordinates are window-local
-while injection is screen-global, and only fullscreen makes the two agree.
+while injection is screen-global, and only fullscreen makes the two agree. That
+is also why doActionNamed is the default here and clicking by coordinates is not.
 """
 
 # pylint: disable=import-outside-toplevel
@@ -21,7 +22,7 @@ from time import sleep
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from dogtail.hermetic.session import HermeticSession, dump_tree
+from dogtail.hermetic.session import CoordinatesUnavailable, HermeticSession, dump_tree
 
 APPLICATION_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "hermetic_app_gtk3.py"
@@ -61,18 +62,39 @@ class TestHermeticGtk3(unittest.TestCase):
         Start a fresh application per test, as the session is shared and cannot be.
         """
 
-        self.process = self.session.launch([sys.executable, APPLICATION_PATH])
-        self.addCleanup(self._stop_application)
-        self.application = self.session.wait_for_app("hermetic_app_gtk3")
+        self.application = self._launch()
 
 
-    def _stop_application(self):
+    def _launch(self, *arguments, application_name="hermetic_app_gtk3"):
         """
-        Stop the test application.
+        Start the test application and wait for it on the a11y bus.
+
+        :param arguments: Extra arguments for the application.
+        :type arguments: str
+
+        :param application_name: Name to wait for, defaults to "hermetic_app_gtk3"
+        :type application_name: str, optional
+
+        :return: The application node.
+        :rtype: dogtail.tree.Node
         """
 
-        self.process.terminate()
-        self.process.wait(timeout=5)
+        process = self.session.launch([sys.executable, APPLICATION_PATH, *arguments])
+        self.addCleanup(self._stop_application, process)
+
+        return self.session.wait_for_app(application_name)
+
+
+    def _stop_application(self, process):
+        """
+        Stop a test application.
+
+        :param process: The application to stop.
+        :type process: subprocess.Popen
+        """
+
+        process.terminate()
+        process.wait(timeout=5)
 
 
     def _label_says(self, text):
@@ -128,16 +150,14 @@ class TestHermeticGtk3(unittest.TestCase):
         Testing that injected pointer events actually land.
 
         Worth having because do_action passes just fine with injection totally
-        broken.
+        broken. This is also the canary for mutter dropping more startup events
+        than WARM_UP_EVENTS covers.
         """
 
-        from dogtail.hermetic.mutter import install
-        from dogtail.rawinput import click
-
-        install(bus_address=self.session.environment["DBUS_SESSION_BUS_ADDRESS"])
+        self.session.install_input()
         self.assertTrue(self._label_says("not clicked"))
 
-        click(*self.application.child("click me").center)
+        self.application.child("click me").click()
         sleep(1)
 
         self.assertTrue(
@@ -146,18 +166,34 @@ class TestHermeticGtk3(unittest.TestCase):
         )
 
 
+    def test_coordinate_guard_refuses_windowed_app(self):
+        """
+        Testing that the same click is refused when the application is not fullscreen.
+
+        Refusing beats clicking whatever happens to be at those screen coordinates.
+        """
+
+        self.session.install_input()
+        application = self._launch("--windowed", application_name="hermetic_app_windowed")
+
+        with self.assertRaises(CoordinatesUnavailable) as caught:
+            application.child("click me").click()
+
+        self.assertIn("window-local", str(caught.exception))
+        self.assertTrue(self._label_says("not clicked"))
+
+
     def test_real_keyboard_input(self):
         """
         Testing that keystrokes land, and that the -8 keycode offset is right.
         """
 
-        from dogtail.hermetic.mutter import install
-        from dogtail.rawinput import click, type_text
+        from dogtail.rawinput import type_text
 
-        install(bus_address=self.session.environment["DBUS_SESSION_BUS_ADDRESS"])
+        self.session.install_input()
 
         entry = self.application.child(roleName="text")
-        click(*entry.center)
+        entry.click()
         sleep(0.5)
 
         type_text("hermetic")

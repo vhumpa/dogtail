@@ -6,17 +6,26 @@ A button, a label that says whether it got clicked, and an entry to type into.
 That is it.
 """
 
+import sys
+
 import gi
 
 gi.require_version("Gtk", "3.0")
 
-from gi.repository import Gtk  # noqa: E402  pylint: disable=wrong-import-position
+from gi.repository import GLib, Gtk  # noqa: E402  pylint: disable=wrong-import-position
 
 
 def main():
     """
     Build and run the test window.
     """
+
+    windowed = "--windowed" in sys.argv
+
+    # At-spi names the application after prgname, so the windowed variant needs
+    # its own to be told apart.
+    if windowed:
+        GLib.set_prgname("hermetic_app_windowed")
 
     window = Gtk.Window(title="dogtail hermetic test app")
     window.set_default_size(400, 200)
@@ -37,8 +46,11 @@ def main():
 
     window.connect("destroy", Gtk.main_quit)
 
-    # Fullscreen, so that window coordinates equal screen coordinates.
-    window.fullscreen()
+    # Fullscreen, so that window coordinates equal screen coordinates. The
+    # --windowed flag is for the test that checks the guard refuses the rest.
+    if not windowed:
+        window.fullscreen()
+
     window.show_all()
     Gtk.main()
 

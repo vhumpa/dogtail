@@ -33,6 +33,9 @@
           - python3-pip
           - python3-psutil
           - python3-devel
+          # hermetic tests boot their own compositor and a11y bus
+          - mutter
+          - at-spi2-core
 
     # Debugging logind issues.
     #  - name: logind_debug_setup
@@ -301,5 +304,16 @@
         environment:
             TEST: dogtail_test_rawinput_mouse_buttons_gtk4
         order: 260
+        duration: 10m
+        tty: true
+
+    # no dogtail-headless wrapper here on purpose -> this one boots its own
+    # dbus, a11y bus and mutter, so a desktop session is exactly what it must
+    # not have. skips itself if mutter is missing.
+    /test_hermetic_gtk3:
+        test: sudo -u test python3 -m unittest tests.test_hermetic_gtk3 -v
+        environment:
+            TEST: dogtail_test_hermetic_gtk3
+        order: 270
         duration: 10m
         tty: true

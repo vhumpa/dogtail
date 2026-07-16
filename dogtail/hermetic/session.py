@@ -16,6 +16,9 @@ import subprocess
 import tempfile
 import time
 
+from dogtail.config import config
+from dogtail.utils import do_delay
+
 
 REGISTRY_NAME = "org.a11y.atspi.Registry"
 REMOTE_DESKTOP_NAME = "org.gnome.Mutter.RemoteDesktop"
@@ -28,11 +31,43 @@ REGISTRYD_PATHS = (
 
 PR_SET_PDEATHSIG = 1
 
+# Libatspi caches the desktop connection in C on first use, so only the first
+# session in a process is ever real, see _check_first_session.
+_booted_in_this_process = False
+
 
 class HermeticSessionError(RuntimeError):
     """
     Raised for every failure a hermetic session can produce.
     """
+
+
+class CoordinatesUnavailable(HermeticSessionError):
+    """
+    Raised when a click by coordinates would land somewhere else.
+    """
+
+
+def _check_first_session():
+    """
+    Refuse a second session in the same process.
+
+    Libatspi hands back the first session's dead objects and reports
+    childCount=-1 rather than raising, so the test sees an empty desktop and no
+    reason why. Only a session that came up counts, a failed boot never touched
+    libatspi.
+
+    :raises HermeticSessionError: A session already booted in this process.
+    """
+
+    if _booted_in_this_process:
+        raise HermeticSessionError(
+            "a HermeticSession already booted in this process. libatspi caches "
+            "its desktop connection in C on first use, so a second session "
+            "silently talks to the first one's dead bus (childCount=-1, no "
+            "exception). Run one session per process - unittest and pytest both "
+            "give you that for free with one session per module."
+        )
 
 
 def _find_registryd():
@@ -153,6 +188,7 @@ class HermeticSession:
         :rtype: dict(str, str)
         """
 
+        _check_first_session()
         self._saved_environment = dict(os.environ)
         self.temporary_root = tempfile.mkdtemp(prefix="dogtail-hermetic-")
         for name in ("config", "data", "cache", "state"):
@@ -180,6 +216,9 @@ class HermeticSession:
             "NO_AT_BRIDGE": "0",
         }
         os.environ.update(self.environment)
+
+        global _booted_in_this_process  # pylint: disable=global-statement
+        _booted_in_this_process = True
 
         return self.environment
 
@@ -365,7 +404,8 @@ class HermeticSession:
         :param timeout: Seconds to wait, defaults to 30
         :type timeout: float, optional
 
-        :raises HermeticSessionError: The application never registered.
+        :raises HermeticSessionError: The application never registered, or
+            registered with an empty tree.
 
         :return: The application node.
         :rtype: dogtail.tree.Node
@@ -375,11 +415,24 @@ class HermeticSession:
 
         needle = name.lower()
         deadline = time.time() + timeout
+        application = None
         while time.time() < deadline:
             for child in dogtail.tree.root.children:
                 if needle in (child.name or "").lower():
-                    return child
+                    application = child
+                    break
+            # An empty tree is usually a dead atk bridge, but give it the
+            # timeout before saying so.
+            if application is not None and application.children:
+                return application
             time.sleep(0.3)
+
+        if application is not None:
+            raise HermeticSessionError(
+                f"app {name!r} registered but its tree is empty. that's the atk "
+                f"bridge disabled, not a slow app - check NO_AT_BRIDGE isn't set "
+                f"to 1 in the app's environment, and that at-spi2-atk is installed"
+            )
 
         seen = [child.name for child in dogtail.tree.root.children]
         raise HermeticSessionError(
@@ -419,6 +472,96 @@ class HermeticSession:
             os.environ.update(self._saved_environment)
             self._saved_environment = None
 
+        # A mutter surviving one test per run is how a CI machine ends up with
+        # two hundred of them, so do not just trust SIGTERM.
+        leaked = [
+            name for name, process in (("mutter", self._mutter_process),
+                                       ("registryd", self._registryd_process))
+            if process is not None and process.poll() is None
+        ]
+        if leaked:
+            raise HermeticSessionError(f"survived teardown: {', '.join(leaked)}")
+
+    def monitor_size(self):
+        """
+        Report the size of the virtual monitor the session booted.
+
+        :return: Width and height in pixels.
+        :rtype: tuple(int, int)
+        """
+
+        width, _, height = self.virtual_monitor.partition("@")[0].partition("x")
+
+        return int(width), int(height)
+
+    def install_input(self):
+        """
+        Point dogtail's input at this session, with the coordinate guard armed.
+
+        :return: The installed input backend.
+        :rtype: dogtail.hermetic.mutter.MutterInputBackend
+        """
+
+        from dogtail.hermetic.mutter import install  # noqa: PLC0415 - circular
+
+        import gi
+        gi.require_version("Gdk", "3.0")
+        from gi.repository import Gdk  # noqa: PLC0415 - keep the Gdk 3.0 pin local
+
+        if Gdk.Display.get_default() is None:
+            # Keysym lookups in rawinput need an open display, and a headless
+            # runner never opens one by itself.
+            Gdk.Display.open(self.wayland_display)
+
+        return install(bus_address=self.bus_address, monitor_size=self.monitor_size())
+
+    def fullscreen(self, application_node, menu="View", item="Fullscreen"):
+        """
+        Drive the application's own fullscreen menu item and wait for the frame.
+
+        Fullscreen is the only state where at-spi's window-local coordinates
+        equal the screen coordinates injection wants. Anything else and click()
+        refuses, see mutter.install. It goes through the application's own menu
+        because nothing can fullscreen a window from outside without
+        gnome-shell, so applications with no such item do not get coordinate
+        clicking at all.
+
+        :param application_node: The application to fullscreen.
+        :type application_node: dogtail.tree.Node
+
+        :param menu: Menu holding the fullscreen item, defaults to "View"
+        :type menu: str, optional
+
+        :param item: The fullscreen item itself, defaults to "Fullscreen"
+        :type item: str, optional
+
+        :raises HermeticSessionError: The window never filled the monitor.
+
+        :return: The now fullscreen frame.
+        :rtype: dogtail.tree.Node
+        """
+
+        target = self.monitor_size()
+        frame = application_node.child(roleName="frame")
+        if frame.extents[2:] == target:
+            return frame
+
+        application_node.child(menu, roleName="menu").doActionNamed("click")
+        do_delay(config.action_delay)
+        application_node.child(item).doActionNamed("click")
+
+        deadline = time.time() + 10
+        while time.time() < deadline:
+            frame = application_node.child(roleName="frame")
+            if frame.extents[2:] == target:
+                return frame
+            time.sleep(0.2)
+
+        raise HermeticSessionError(
+            f"{menu} > {item} didn't fullscreen the window: frame is "
+            f"{frame.extents[2:]}, monitor is {target}"
+        )
+
 
 def dump_tree(node, max_depth=6, _depth=0, _output=None):
     """
@@ -457,16 +600,11 @@ def dump_tree(node, max_depth=6, _depth=0, _output=None):
 
 def demo():
     """
-    Boot, check the socket is there, check a failed boot does not strand mutter.
+    Check the lifecycle rules that have no other coverage.
 
+    The failed boot goes first, as it does not burn the one-per-process budget.
     The real checks live in tests/.
     """
-
-    with HermeticSession() as environment:
-        assert os.path.exists(
-            os.path.join(environment["XDG_RUNTIME_DIR"], environment["WAYLAND_DISPLAY"])
-        )
-        assert os.environ["AT_SPI_BUS_ADDRESS"] == environment["AT_SPI_BUS_ADDRESS"]
 
     failed = HermeticSession(boot_timeout=0.5)
     failed.virtual_monitor = "not-a-resolution"
@@ -476,6 +614,18 @@ def demo():
     except HermeticSessionError as error:
         assert "mutter" in str(error), error
         assert failed._mutter_process.poll() is not None, "mutter left running after failed boot"
+
+    with HermeticSession() as environment:
+        assert os.path.exists(
+            os.path.join(environment["XDG_RUNTIME_DIR"], environment["WAYLAND_DISPLAY"])
+        )
+        assert os.environ["AT_SPI_BUS_ADDRESS"] == environment["AT_SPI_BUS_ADDRESS"]
+
+    try:
+        HermeticSession().boot()
+        raise AssertionError("expected the second session to be refused")
+    except HermeticSessionError as error:
+        assert "already booted" in str(error), error
 
     print("HermeticSession demo: OK")
 

@@ -280,7 +280,58 @@ class MutterInputBackend:
             )
 
 
-def install(bus_address=None):
+def _toplevel_of(node):
+    """
+    Walk up to the window a node lives in.
+
+    :param node: Node to start from.
+    :type node: dogtail.tree.Node
+
+    :return: The topmost node below the application.
+    :rtype: dogtail.tree.Node
+    """
+
+    toplevel = node
+    while toplevel.parent is not None and toplevel.parent.roleName != "application":
+        toplevel = toplevel.parent
+
+    return toplevel
+
+
+def _guard_coordinates(node, monitor_size):
+    """
+    Refuse a click that would land somewhere other than where the caller thinks.
+
+    A wayland client is never told where it got placed, so at-spi reports every
+    window at (0, 0) and its widgets relative to that, while injection is
+    screen-global. The two only line up when the window fills the monitor.
+
+    :param node: Node that is about to be clicked.
+    :type node: dogtail.tree.Node
+
+    :param monitor_size: Width and height of the virtual monitor.
+    :type monitor_size: tuple(int, int)
+
+    :raises CoordinatesUnavailable: The window does not fill the monitor.
+    """
+
+    from dogtail.hermetic.session import CoordinatesUnavailable
+
+    toplevel = _toplevel_of(node)
+    size = toplevel.extents[2:]
+    if toplevel.extents[:2] == (0, 0) and size == tuple(monitor_size):
+        return
+
+    raise CoordinatesUnavailable(
+        f"{node.name or node.roleName!r} sits in a {size[0]}x{size[1]} window, "
+        f"the monitor is {monitor_size[0]}x{monitor_size[1]}. at-spi coords are "
+        f"window-local on wayland and injection is screen-global, so this click "
+        f"would land somewhere else entirely. use doActionNamed(), or fullscreen "
+        f"the window first with session.fullscreen(app)."
+    )
+
+
+def install(bus_address=None, monitor_size=None):
     """
     Swap this backend in as the ponytail interface.
 
@@ -288,8 +339,16 @@ def install(bus_address=None):
     PonytailHelper singleton, so patching that beats touching the dozen-odd
     inline branches in rawinput.py.
 
+    Pass monitor_size to arm the coordinate guard. It hangs off get_window_id
+    because that is the one place on the click path still holding the node. A
+    bare rawinput.click(x, y) skips it, and has nothing to check anyway.
+
     :param bus_address: Private bus to connect to, defaults to the session bus
     :type bus_address: str, optional
+
+    :param monitor_size: Width and height of the virtual monitor, defaults to
+        None, which leaves the coordinate guard disarmed
+    :type monitor_size: tuple(int, int), optional
 
     :return: The installed backend.
     :rtype: MutterInputBackend
@@ -300,6 +359,17 @@ def install(bus_address=None):
     backend = MutterInputBackend(bus_address=bus_address)
     ponytail_helper._ponytail_dbus_interface = backend
     ponytail_helper._already_initiated = True
+
+    if monitor_size is not None:
+        def get_window_id(accessible_object):
+            _guard_coordinates(accessible_object, monitor_size)
+
+            # None, not "". An empty string skips the disconnect and settle
+            # that ponytail_check_connection does for None, and that settle
+            # time turned out to matter.
+            return None
+
+        ponytail_helper.get_window_id = get_window_id
 
     return backend
 

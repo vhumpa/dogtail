@@ -54,6 +54,7 @@ class MutterInputBackend:
         self._session = None
         self.connected = None
         self.window_list = []  # Needs Shell.Introspect, which we do not have.
+        self._last_position = None
 
     # -- session lifecycle -------------------------------------------------
 
@@ -133,7 +134,7 @@ class MutterInputBackend:
 
     def disconnect(self):
         """
-        Stop the RemoteDesktop session.
+        Stop the RemoteDesktop session and forget where the pointer was.
         """
 
         if self._session is not None:
@@ -145,6 +146,7 @@ class MutterInputBackend:
         self._session = None
         self._session_path = None
         self.connected = None
+        self._last_position = None
 
     # -- pointer -----------------------------------------------------------
 
@@ -154,7 +156,8 @@ class MutterInputBackend:
 
         Absolute motion needs a ScreenCast stream, and so PipeWire, so this
         fakes it: slam into the top-left corner, which clamps to (0, 0), then
-        move relative from there.
+        move relative from there. Only the first move of a session needs the
+        slam. Doing it again mid-drag would paint a stroke through the corner.
 
         :param x: Target horizontal coordinate.
         :type x: int
@@ -164,8 +167,15 @@ class MutterInputBackend:
         """
 
         self._ensure_session()
-        self._notify_motion_relative(-100000.0, -100000.0)
-        self._notify_motion_relative(float(x), float(y))
+
+        if self._last_position is None:
+            self._notify_motion_relative(-100000.0, -100000.0)
+            self._notify_motion_relative(float(x), float(y))
+        else:
+            last_x, last_y = self._last_position
+            self._notify_motion_relative(float(x) - last_x, float(y) - last_y)
+
+        self._last_position = (x, y)
 
     def generateButtonPress(self, button):
         """

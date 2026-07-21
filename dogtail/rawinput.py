@@ -671,7 +671,7 @@ def release_key(key_name):
     else:
         ponytail_helper.ponytail_check_connection(input_source="keyboard")
         ponytail_interface = ponytail_helper.get_ponytail_interface()
-        ponytail_interface.generateKeycodePress(key_code)
+        ponytail_interface.generateKeycodeRelease(key_code)
 
     do_delay(config.action_delay)
 

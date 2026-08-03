@@ -1,5 +1,5 @@
 """
-Private a11y bus and a bare mutter, per test. No gnome-shell, no display manager.
+Private a11y bus and a bare mutter, per test, with no desktop session involved.
 
 One session per process. Libatspi caches its desktop connection in C on first
 use, so a second session hands back the first one's dead objects instead of
@@ -15,6 +15,7 @@ import signal
 import subprocess
 import tempfile
 import time
+import warnings
 
 from dogtail.config import config
 from dogtail.utils import do_delay
@@ -22,6 +23,9 @@ from dogtail.utils import do_delay
 
 REGISTRY_NAME = "org.a11y.atspi.Registry"
 REMOTE_DESKTOP_NAME = "org.gnome.Mutter.RemoteDesktop"
+
+# Registryd is not on $PATH, it gets found by REGISTRYD_PATHS below.
+REQUIRED_BINARIES = ("dbus-daemon", "dbus-send", "mutter")
 
 REGISTRYD_PATHS = (
     "/usr/lib/at-spi2-registryd",                # Arch.
@@ -31,8 +35,13 @@ REGISTRYD_PATHS = (
 
 PR_SET_PDEATHSIG = 1
 
-# Libatspi caches the desktop connection in C on first use, so only the first
-# session in a process is ever real, see _check_first_session.
+# Seconds. A loaded CI runner blows through anything tighter. Wait_for_app gets 3x this.
+DEFAULT_TIMEOUT = float(os.environ.get("DOGTAIL_HERMETIC_TIMEOUT", "10.0"))
+
+# Resolved at import, not in the child: after fork() only async-signal-safe
+# calls are allowed, and dlopen is not one. See _die_with_parent.
+_LIBC = ctypes.CDLL("libc.so.6", use_errno=True)
+
 _booted_in_this_process = False
 
 
@@ -46,28 +55,6 @@ class CoordinatesUnavailable(HermeticSessionError):
     """
     Raised when a click by coordinates would land somewhere else.
     """
-
-
-def _check_first_session():
-    """
-    Refuse a second session in the same process.
-
-    Libatspi hands back the first session's dead objects and reports
-    childCount=-1 rather than raising, so the test sees an empty desktop and no
-    reason why. Only a session that came up counts, a failed boot never touched
-    libatspi.
-
-    :raises HermeticSessionError: A session already booted in this process.
-    """
-
-    if _booted_in_this_process:
-        raise HermeticSessionError(
-            "a HermeticSession already booted in this process. libatspi caches "
-            "its desktop connection in C on first use, so a second session "
-            "silently talks to the first one's dead bus (childCount=-1, no "
-            "exception). Run one session per process - unittest and pytest both "
-            "give you that for free with one session per module."
-        )
 
 
 def _find_registryd():
@@ -94,14 +81,81 @@ def _find_registryd():
     )
 
 
+def missing_binaries():
+    """
+    List what a session needs and cannot find.
+
+    Public so that tests can hang a skipIf on it.
+
+    :return: Names of the binaries that are not installed.
+    :rtype: list(str)
+    """
+
+    missing = [name for name in REQUIRED_BINARIES if shutil.which(name) is None]
+    try:
+        _find_registryd()
+    except HermeticSessionError:
+        missing.append("at-spi2-registryd")
+
+    return missing
+
+
+def _check_binaries():
+    """
+    Say what is missing up front, rather than letting subprocess raise later.
+
+    :raises HermeticSessionError: At least one required binary is missing.
+    """
+
+    missing = missing_binaries()
+    if not missing:
+        return
+
+    raise HermeticSessionError(
+        f"a hermetic session needs {', '.join(missing)}, and can't find "
+        f"{'them' if len(missing) > 1 else 'it'}. dbus-daemon and dbus-send "
+        f"ship as dbus and dbus-tools, at-spi2-registryd as at-spi2-core "
+        f"(set $DOGTAIL_REGISTRYD if your distro puts it somewhere else than "
+        f"{REGISTRYD_PATHS})."
+    )
+
+
 def _die_with_parent():
     """
     Ask the kernel to terminate this child once its parent is gone.
 
     SIGKILL the test runner and teardown never runs, which leaves mutter behind.
+
+    This is the preexec_fn of subprocess, which Python's own documentation calls
+    unsafe with threads. The hazard is cut down to size: the libc handle is
+    resolved at import time, so all that happens here is one already-resolved
+    syscall. A pidfd does not cover this case, it tells a parent about a dead
+    child rather than the other way round.
     """
 
-    ctypes.CDLL("libc.so.6", use_errno=True).prctl(PR_SET_PDEATHSIG, signal.SIGTERM)
+    _LIBC.prctl(PR_SET_PDEATHSIG, signal.SIGTERM)
+
+
+def _check_first_session():
+    """
+    Refuse a second session in the same process.
+
+    Libatspi hands back the first session's dead objects and reports
+    childCount=-1 rather than raising, so the test sees an empty desktop and no
+    reason why. Only a session that came up counts, a failed boot never touched
+    libatspi.
+
+    :raises HermeticSessionError: A session already booted in this process.
+    """
+
+    if _booted_in_this_process:
+        raise HermeticSessionError(
+            "a HermeticSession already booted in this process. libatspi caches "
+            "its desktop connection in C on first use, so a second session "
+            "silently talks to the first one's dead bus (childCount=-1, no "
+            "exception). Run one session per process: setUpClass in unittest, "
+            "or the session-scoped fixture in dogtail.hermetic.fixtures."
+        )
 
 
 class HermeticSession:
@@ -116,26 +170,27 @@ class HermeticSession:
     One bus carries both a11y and mutter. Split it if anything else ever joins.
     """
 
-    def __init__(self, virtual_monitor="1280x1024", boot_timeout=10.0):
+    def __init__(self, virtual_monitor="1280x1024", boot_timeout=None):
         """
         Prepare a session. Nothing is started until boot() is called.
 
         :param virtual_monitor: Resolution to give mutter, defaults to "1280x1024"
         :type virtual_monitor: str, optional
 
-        :param boot_timeout: Seconds to wait for each service, defaults to 10.0
+        :param boot_timeout: Seconds to wait for each service, defaults to
+            $DOGTAIL_HERMETIC_TIMEOUT or 10.0
         :type boot_timeout: float, optional
         """
 
         self.virtual_monitor = virtual_monitor
-        self.boot_timeout = boot_timeout
+        self.boot_timeout = DEFAULT_TIMEOUT if boot_timeout is None else boot_timeout
 
         self.temporary_root = None
         self.bus_address = None
         self.wayland_display = "wayland-0"
         self.environment = None
 
-        self._dbus_pid = None
+        self._dbus_process = None
         self._registryd_process = None
         self._mutter_process = None
         self._logs = {}
@@ -177,7 +232,11 @@ class HermeticSession:
             return self._boot()
         except Exception:
             # __exit__ never runs if __enter__ raises, so clean up here.
-            self.teardown()
+            try:
+                self.teardown()
+            except Exception as cleanup_error:  # noqa: BLE001  pylint: disable=broad-exception-caught
+                # The boot failure is the one worth reading, keep it.
+                warnings.warn(f"teardown after a failed boot: {cleanup_error}")
             raise
 
     def _boot(self):
@@ -189,6 +248,8 @@ class HermeticSession:
         """
 
         _check_first_session()
+        _check_binaries()
+
         self._saved_environment = dict(os.environ)
         self.temporary_root = tempfile.mkdtemp(prefix="dogtail-hermetic-")
         for name in ("config", "data", "cache", "state"):
@@ -246,7 +307,7 @@ class HermeticSession:
         with open(log_path, "wb") as log:
             return subprocess.Popen(
                 command, env=environment, stdout=log, stderr=subprocess.STDOUT,
-                preexec_fn=_die_with_parent,
+                preexec_fn=_die_with_parent,  # noqa: PLW1509 - see _die_with_parent
             )
 
     def _log_tail(self, name, lines=20):
@@ -274,14 +335,35 @@ class HermeticSession:
 
     def _boot_bus(self):
         """
-        Start a private session bus and read the address and pid it prints.
+        Start a private session bus and read the address it prints.
+
+        :raises HermeticSessionError: The bus died or never printed an address.
         """
 
-        output = subprocess.check_output(
-            ["dbus-daemon", "--session", "--fork", "--print-address", "--print-pid"],
-            text=True,
-        ).strip().splitlines()
-        self.bus_address, self._dbus_pid = output[0], int(output[1])
+        # Not --fork: a forked daemon is orphaned onto pid 1, and a pid 1 that
+        # does not reap leaves it a zombie that os.kill(pid, 0) calls alive.
+        self._dbus_process = self._spawn(
+            "dbus", ["dbus-daemon", "--session", "--print-address=1"], os.environ,
+        )
+
+        deadline = time.time() + self.boot_timeout
+        while time.time() < deadline:
+            with open(self._logs["dbus"], errors="replace") as handle:
+                line = handle.readline()
+            if line.endswith("\n"):
+                self.bus_address = line.strip()
+                return
+            if self._dbus_process.poll() is not None:
+                raise HermeticSessionError(
+                    f"dbus-daemon exited during boot\n"
+                    f"--- dbus log ---\n{self._log_tail('dbus')}"
+                )
+            time.sleep(0.05)
+
+        raise HermeticSessionError(
+            f"timed out waiting for the session bus address\n"
+            f"--- dbus log ---\n{self._log_tail('dbus')}"
+        )
 
     def _boot_registryd(self):
         """
@@ -339,6 +421,10 @@ class HermeticSession:
         :raises HermeticSessionError: Mutter died or never came up in time.
         """
 
+        from dogtail.hermetic.mutter import check_mutter_version
+
+        check_mutter_version()
+
         environment = {
             **os.environ,
             "DBUS_SESSION_BUS_ADDRESS": self.bus_address,
@@ -383,16 +469,24 @@ class HermeticSession:
             defaults to None
         :type extra_environment: dict(str, str), optional
 
+        :raises HermeticSessionError: The session has not booted yet.
+
         :return: The running application process.
         :rtype: subprocess.Popen
         """
 
+        if self.environment is None:
+            raise HermeticSessionError("launch() before boot(), nothing to launch into")
+
         environment = {**self.environment, "GDK_BACKEND": "wayland",
                        **(extra_environment or {})}
 
-        return subprocess.Popen(command, env=environment, preexec_fn=_die_with_parent)
+        return subprocess.Popen(
+            command, env=environment,
+            preexec_fn=_die_with_parent,  # noqa: PLW1509 - see _die_with_parent
+        )
 
-    def wait_for_app(self, name, timeout=30):
+    def wait_for_app(self, name, timeout=None):
         """
         Block until the application shows up on the a11y bus.
 
@@ -401,7 +495,7 @@ class HermeticSession:
         :param name: Name of the application to wait for.
         :type name: str
 
-        :param timeout: Seconds to wait, defaults to 30
+        :param timeout: Seconds to wait, defaults to three times the boot timeout
         :type timeout: float, optional
 
         :raises HermeticSessionError: The application never registered, or
@@ -411,8 +505,9 @@ class HermeticSession:
         :rtype: dogtail.tree.Node
         """
 
-        import dogtail.tree  # noqa: PLC0415 - only safe once boot() has set the environment
+        import dogtail.tree  # Only safe once boot() has set the environment.
 
+        timeout = 3 * self.boot_timeout if timeout is None else timeout
         needle = name.lower()
         deadline = time.time() + timeout
         application = None
@@ -439,29 +534,52 @@ class HermeticSession:
             f"app {name!r} never registered on the a11y bus; saw: {seen}"
         )
 
-    def teardown(self):
+    def _stop(self, processes):
         """
-        Stop every service, remove the temporary directory, restore the environment.
+        Terminate the given processes, then reap them.
+
+        A mutter surviving one test per run is how a CI machine ends up with two
+        hundred of them, so do not just trust SIGTERM.
+
+        :param processes: Pairs of name and process, where the process may be None.
+        :type processes: tuple(tuple(str, subprocess.Popen))
+
+        :return: Names of the processes still running after a SIGKILL.
+        :rtype: list(str)
         """
 
-        for process in (self._mutter_process, self._registryd_process):
-            if process is None:
-                continue
+        processes = [(name, process) for name, process in processes if process is not None]
+        leaked = []
+
+        for _, process in processes:
             process.send_signal(signal.SIGTERM)
 
-        for process in (self._mutter_process, self._registryd_process):
-            if process is None:
-                continue
+        for name, process in processes:
             try:
                 process.wait(timeout=5)
             except subprocess.TimeoutExpired:
+                warnings.warn(f"{name} ignored SIGTERM, killing it")
                 process.kill()
+                try:
+                    # SIGKILL is asynchronous, so wait or a good teardown
+                    # reports a leak that is merely still dying.
+                    process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    leaked.append(name)
 
-        if self._dbus_pid:
-            try:
-                os.kill(self._dbus_pid, signal.SIGTERM)
-            except ProcessLookupError:
-                pass
+        return leaked
+
+    def teardown(self):
+        """
+        Stop every service, remove the temporary directory, restore the environment.
+
+        :raises HermeticSessionError: Something survived a SIGKILL.
+        """
+
+        # The bus goes last, the other two want it alive to shut down cleanly.
+        leaked = self._stop((("mutter", self._mutter_process),
+                             ("registryd", self._registryd_process)))
+        leaked += self._stop((("dbus-daemon", self._dbus_process),))
 
         if self.temporary_root and os.path.isdir(self.temporary_root):
             shutil.rmtree(self.temporary_root, ignore_errors=True)
@@ -472,15 +590,8 @@ class HermeticSession:
             os.environ.update(self._saved_environment)
             self._saved_environment = None
 
-        # A mutter surviving one test per run is how a CI machine ends up with
-        # two hundred of them, so do not just trust SIGTERM.
-        leaked = [
-            name for name, process in (("mutter", self._mutter_process),
-                                       ("registryd", self._registryd_process))
-            if process is not None and process.poll() is None
-        ]
         if leaked:
-            raise HermeticSessionError(f"survived teardown: {', '.join(leaked)}")
+            raise HermeticSessionError(f"survived SIGKILL: {', '.join(leaked)}")
 
     def monitor_size(self):
         """
@@ -502,11 +613,11 @@ class HermeticSession:
         :rtype: dogtail.hermetic.mutter.MutterInputBackend
         """
 
-        from dogtail.hermetic.mutter import install  # noqa: PLC0415 - circular
+        from dogtail.hermetic.mutter import install  # noqa: I001 - gi imports below
 
         import gi
         gi.require_version("Gdk", "3.0")
-        from gi.repository import Gdk  # noqa: PLC0415 - keep the Gdk 3.0 pin local
+        from gi.repository import Gdk  # Keep the Gdk 3.0 pin local.
 
         if Gdk.Display.get_default() is None:
             # Keysym lookups in rawinput need an open display, and a headless
@@ -550,7 +661,7 @@ class HermeticSession:
         do_delay(config.action_delay)
         application_node.child(item).doActionNamed("click")
 
-        deadline = time.time() + 10
+        deadline = time.time() + self.boot_timeout
         while time.time() < deadline:
             frame = application_node.child(roleName="frame")
             if frame.extents[2:] == target:
@@ -583,7 +694,7 @@ def dump_tree(node, max_depth=6, _depth=0, _output=None):
 
     try:
         output.append("  " * _depth + f"{node.roleName}: {node.name!r}")
-    except Exception as error:  # pylint: disable=broad-exception-caught
+    except Exception as error:  # noqa: BLE001  pylint: disable=broad-exception-caught
         output.append("  " * _depth + f"<unreadable node: {error}>")
 
         return "\n".join(output)
@@ -592,7 +703,7 @@ def dump_tree(node, max_depth=6, _depth=0, _output=None):
         try:
             for child in node.children:
                 dump_tree(child, max_depth, _depth + 1, output)
-        except Exception as error:  # pylint: disable=broad-exception-caught
+        except Exception as error:  # noqa: BLE001  pylint: disable=broad-exception-caught
             output.append("  " * (_depth + 1) + f"<unreadable children: {error}>")
 
     return "\n".join(output)

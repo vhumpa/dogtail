@@ -1,7 +1,13 @@
 """
 Input injection over org.gnome.Mutter.RemoteDesktop, shaped like the ponytail
-interface that rawinput.py already expects. No ScreenCast, no PipeWire, no libei.
+interface that rawinput.py already expects, without ScreenCast, PipeWire or
+libei.
 """
+
+import os  # noqa: I001 - require_version has to run between the two gi imports
+import re
+import subprocess
+import warnings
 
 import gi
 gi.require_version("Gio", "2.0")
@@ -18,8 +24,64 @@ BUTTON_MAP = {1: 272, 2: 274, 3: 273}
 
 KEYSYM_SHIFT_L = 0xFFE1
 
-# Mutter 50.2 eats the first three pointer events, six leaves headroom.
-WARM_UP_EVENTS = 6
+# Mutter 50.2 and 50.3 eat the first three pointer events, six leaves headroom.
+WARM_UP_EVENTS = int(os.environ.get("DOGTAIL_WARM_UP_EVENTS", "6"))
+
+# Major versions the count above was measured against.
+TESTED_MUTTER_MAJORS = (50,)
+
+
+def _parse_mutter_version(text):
+    """
+    Pull a version out of the output of `mutter --version`.
+
+    Recent versions say "mutter 50.3", older ones say "mutter 3.38.6".
+
+    :param text: Output to parse.
+    :type text: str
+
+    :return: Major and minor version, or None if there is no version in there.
+    :rtype: tuple(int, int) or None
+    """
+
+    match = re.search(r"mutter\s+(\d+)\.(\d+)", text)
+
+    return (int(match.group(1)), int(match.group(2))) if match else None
+
+
+def check_mutter_version():
+    """
+    Warn when the warm-up count has never been measured against this mutter.
+
+    WARM_UP_EVENTS is a fixed count with no handshake behind it, because mutter
+    offers no readiness signal. Undercounting it does not raise, the first click
+    of the session just vanishes.
+
+    :return: Major and minor version of the installed mutter, or None if it
+        could not be run or its output held no version.
+    :rtype: tuple(int, int) or None
+    """
+
+    try:
+        output = subprocess.check_output(
+            ["mutter", "--version"], text=True, stderr=subprocess.STDOUT, timeout=10,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+    version = _parse_mutter_version(output)
+    if version is None or version[0] in TESTED_MUTTER_MAJORS:
+        return version
+
+    warnings.warn(
+        f"mutter {version[0]}.{version[1]} has not been tested with dogtail's "
+        f"hermetic input warm-up (measured on {TESTED_MUTTER_MAJORS[0]}.x). "
+        f"mutter drops pointer events while its virtual devices come up and "
+        f"says nothing when it does, so if the first click of a session goes "
+        f"missing, raise $DOGTAIL_WARM_UP_EVENTS above {WARM_UP_EVENTS}."
+    )
+
+    return version
 
 
 class MutterInputBackend:
@@ -86,7 +148,8 @@ class MutterInputBackend:
         overridden by the next move, a lone Shift_L changes nothing.
 
         The count is fixed rather than a handshake, so it undercounts silently
-        if some mutter drops more. The test_real_pointer_input test is the canary.
+        if some mutter drops more. The test_real_pointer_input test is the
+        canary and $DOGTAIL_WARM_UP_EVENTS is the way out.
         """
 
         for _ in range(WARM_UP_EVENTS):
@@ -377,22 +440,123 @@ def install(bus_address=None, monitor_size=None):
             # None, not "". An empty string skips the disconnect and settle
             # that ponytail_check_connection does for None, and that settle
             # time turned out to matter.
-            return None
+            return None  # noqa: RET501, PLR1711 - see the comment above
 
         ponytail_helper.get_window_id = get_window_id
 
     return backend
 
 
+class _RecordingSession:
+    """
+    Stands in for the RemoteDesktop session proxy and records what got sent.
+    """
+
+    def __init__(self):
+        self.calls = []
+
+    def call_sync(self, method, arguments, *_rest):
+        """
+        Record a call instead of putting it on the bus.
+        """
+
+        self.calls.append((method, arguments.unpack() if arguments is not None else None))
+
+    def motions(self):
+        """
+        Report the pointer motions recorded so far.
+
+        :return: The deltas that were sent.
+        :rtype: list(tuple(float, float))
+        """
+
+        return [arguments for method, arguments in self.calls
+                if method == "NotifyPointerMotionRelative"]
+
+
+class _Node:
+    """
+    Enough of a tree.Node for _guard_coordinates.
+    """
+
+    def __init__(self, extents, parent=None):
+        self.extents = extents
+        self.parent = parent
+        self.name = "click me"
+        self.roleName = "push button"  # pylint: disable=invalid-name
+
+
 def demo():
     """
-    Say where the real coverage is.
+    Check the two things that go wrong quietly, without needing mutter.
 
-    RemoteDesktop only exists once mutter is up, so there is nothing to check
-    standalone. The tests/test_hermetic_gtk3.py module drives this for real.
+    The relative-motion bookkeeping and the coordinate guard. Real end-to-end
+    coverage is in tests/test_hermetic_gtk3.py.
     """
 
-    print("mutter.MutterInputBackend: see tests/test_hermetic_gtk3.py")
+    from dogtail.hermetic.session import CoordinatesUnavailable
+
+    backend = MutterInputBackend.__new__(MutterInputBackend)  # No bus needed.
+    backend._session = _RecordingSession()
+    backend._last_position = None
+
+    # The first move anchors: slam into the corner, then go to (x, y).
+    backend.generateMotionEvent(300, 200)
+    assert backend._session.motions() == [(-100000.0, -100000.0), (300.0, 200.0)], \
+        backend._session.motions()
+
+    # Every move after is a plain delta. Re-slamming here is the corner paint bug.
+    backend._session = _RecordingSession()
+    backend.generateMotionEvent(310, 205)
+    backend.generateMotionEvent(310, 205)
+    assert backend._session.motions() == [(10.0, 5.0), (0.0, 0.0)], \
+        backend._session.motions()
+
+    # A new session has to anchor again.
+    backend.disconnect()
+    assert backend._last_position is None
+    backend._session = _RecordingSession()
+    backend.generateMotionEvent(40, 50)
+    assert backend._session.motions()[0] == (-100000.0, -100000.0), \
+        backend._session.motions()
+
+    monitor = (1280, 1024)
+    _guard_coordinates(_Node((0, 0, 1280, 1024)), monitor)  # Fullscreen, allowed.
+
+    for extents in ((0, 0, 400, 200), (100, 100, 1280, 1024)):
+        try:
+            _guard_coordinates(_Node(extents), monitor)
+            raise AssertionError(f"guard let {extents} through")
+        except CoordinatesUnavailable as error:
+            assert "window-local" in str(error), error
+
+    # The guard checks the toplevel, not the widget you clicked.
+    frame = _Node((0, 0, 400, 200))
+    try:
+        _guard_coordinates(_Node((10, 10, 80, 30), parent=frame), monitor)
+        raise AssertionError("guard read the widget instead of its window")
+    except CoordinatesUnavailable:
+        pass
+
+    assert _parse_mutter_version("mutter 50.3\n") == (50, 3)
+    assert _parse_mutter_version("mutter 3.38.6\n") == (3, 38)
+    assert _parse_mutter_version("bash: mutter: command not found") is None
+
+    # An untested mutter has to warn rather than fail quietly.
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        check_mutter_version()
+
+    installed = _parse_mutter_version(
+        subprocess.run(["mutter", "--version"], capture_output=True, text=True,
+                       check=False).stdout
+    )
+    if installed is not None and installed[0] not in TESTED_MUTTER_MAJORS:
+        assert caught, f"mutter {installed} is untested and nobody said so"
+    else:
+        assert not caught, [str(warning.message) for warning in caught]
+
+    print("mutter.MutterInputBackend demo: OK")
 
 
 if __name__ == "__main__":

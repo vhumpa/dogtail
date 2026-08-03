@@ -6,30 +6,33 @@ One session serves the whole class, since libatspi will not let a process have
 two. The application can be restarted though, so each test gets a fresh one.
 
 The application is fullscreen on purpose: AT-SPI coordinates are window-local
-while injection is screen-global, and only fullscreen makes the two agree. That
-is also why doActionNamed is the default here and clicking by coordinates is not.
+while injection is screen-global, and only fullscreen makes the two agree.
 """
 
 # pylint: disable=import-outside-toplevel
 # pylint: disable=wrong-import-position
 
 import os
-import shutil
 import sys
 import unittest
-
 from time import sleep
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from dogtail.hermetic.session import CoordinatesUnavailable, HermeticSession, dump_tree
+from dogtail.hermetic.session import (
+    CoordinatesUnavailable,
+    HermeticSession,
+    dump_tree,
+    missing_binaries,
+)
 
 APPLICATION_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "hermetic_app_gtk3.py"
 )
+MISSING_BINARIES = missing_binaries()
 
 
-@unittest.skipIf(not shutil.which("mutter"), "Skipping, no mutter.")
+@unittest.skipIf(MISSING_BINARIES, f"Skipping, missing: {', '.join(MISSING_BINARIES)}.")
 class TestHermeticGtk3(unittest.TestCase):
     """
     Class to test dogtail's hermetic session against a real GTK3 application.
@@ -97,22 +100,25 @@ class TestHermeticGtk3(unittest.TestCase):
         process.wait(timeout=5)
 
 
-    def _label_says(self, text):
+    def _label_says(self, text, application=None):
         """
         Report whether any label in the application carries the given text.
 
         :param text: Text to look for.
         :type text: str
 
+        :param application: Application to search, defaults to the one under test
+        :type application: dogtail.tree.Node, optional
+
         :return: True if a label matches.
         :rtype: bool
         """
 
+        application = self.application if application is None else application
+
         return any(
             child.name == text
-            for child in self.application.findChildren(
-                lambda node: node.roleName == "label"
-            )
+            for child in application.findChildren(lambda node: node.roleName == "label")
         )
 
 
@@ -180,7 +186,7 @@ class TestHermeticGtk3(unittest.TestCase):
             application.child("click me").click()
 
         self.assertIn("window-local", str(caught.exception))
-        self.assertTrue(self._label_says("not clicked"))
+        self.assertTrue(self._label_says("not clicked", application=application))
 
 
     def test_real_keyboard_input(self):

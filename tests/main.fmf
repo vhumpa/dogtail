@@ -307,13 +307,23 @@
         duration: 10m
         tty: true
 
-    # no dogtail-headless wrapper here on purpose -> this one boots its own
-    # dbus, a11y bus and mutter, so a desktop session is exactly what it must
-    # not have. skips itself if mutter is missing.
+    # no dogtail-headless wrapper on these two on purpose -> they boot their own
+    # dbus, a11y bus and mutter, so a desktop session is exactly what they must
+    # not have. they skip themselves if anything they need is missing.
+    # separate entries, not one: each boots a session and libatspi allows one
+    # per process.
     /test_hermetic_gtk3:
         test: sudo -u test python3 -m unittest tests.test_hermetic_gtk3 -v
         environment:
             TEST: dogtail_test_hermetic_gtk3
         order: 270
+        duration: 10m
+        tty: true
+
+    /test_hermetic_gtk4:
+        test: sudo -u test python3 -m unittest tests.test_hermetic_gtk4 -v
+        environment:
+            TEST: dogtail_test_hermetic_gtk4
+        order: 271
         duration: 10m
         tty: true

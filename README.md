@@ -22,6 +22,7 @@ Dogtail supports both **Xorg** and **Wayland GNOME** environments.
 * [Installation](#installation)
 * [Dependencies](#dependencies)
 * [Wayland Support](#wayland-support)
+* [Hermetic Sessions](#hermetic-sessions)
 * [GTK4 Notes](#gtk4-notes)
 * [Usage](#usage)
 * [API References](#api-references)
@@ -146,6 +147,35 @@ Dogtail handles the complexity internally. Most test scripts run identically on:
 * Wayland GNOME sessions
 
 On Xorg, traditional X input APIs are used automatically.
+
+---
+
+## Hermetic Sessions
+
+The above needs a logged-in GNOME session. `dogtail.hermetic` does not. It boots
+a private D-Bus, a private a11y bus and a bare `mutter` with a virtual monitor,
+runs the test against those, and throws them away. Input injection goes over the
+Mutter RemoteDesktop D-Bus API instead of gnome-ponytail-daemon, so a CI
+container with no graphics session is enough.
+
+`dogtail-headless` logs a real desktop in through gdm. `HermeticSession`
+boots a compositor instead.
+
+```python
+session = HermeticSession()
+session.boot()
+session.launch(["myapp"])
+app = session.wait_for_app("myapp")
+app.child("click me").doActionNamed("click")
+session.teardown()
+```
+
+One limitation is worth knowing up front: a Wayland client is never told where
+it was placed, so AT-SPI coordinates are window-local while injection is
+screen-global. They only agree on a fullscreen window, and `node.click()` raises
+`CoordinatesUnavailable` anywhere else rather than clicking the wrong thing.
+
+Requirements, a pytest fixture, and the rest: [HERMETIC.md](HERMETIC.md).
 
 ---
 

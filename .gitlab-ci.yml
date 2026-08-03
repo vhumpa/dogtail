@@ -2,6 +2,7 @@ image: python:3
 
 stages:
   - lint
+  - test
   - check_version
   - build
   # - upload_testpypi
@@ -18,6 +19,28 @@ lint_code:
     - pip install ruff
     - ruff check .
     - python -m compileall dogtail/
+  only:
+    - tags
+    - branches
+
+# The point of this job is that there is no desktop session in the container:
+# no gnome-shell, no display manager, no PipeWire, no X. HermeticSession brings
+# up its own dbus, a11y bus and mutter, so if these pass here they prove the
+# claim. Nothing else in this file needs a graphics stack, hence the own image.
+hermetic_tests:
+  stage: test
+  image: fedora:latest
+  before_script:
+    - >
+      dnf install -y --setopt=install_weak_deps=False
+      python3 python3-gobject gtk3 gtk4 mutter at-spi2-core at-spi2-atk
+      dbus-daemon dbus-tools
+  script:
+    - python3 -m dogtail.hermetic.mutter
+    # separate invocations on purpose: one session per process is a libatspi
+    # limit, and each module boots its own
+    - python3 -m unittest tests.test_hermetic_gtk3 -v
+    - python3 -m unittest tests.test_hermetic_gtk4 -v
   only:
     - tags
     - branches

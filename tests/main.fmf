@@ -33,9 +33,12 @@
           - python3-pip
           - python3-psutil
           - python3-devel
-          # hermetic tests boot their own compositor and a11y bus
+          # hermetic tests boot their own compositor and a11y bus. all four are
+          # needed or the suite skips itself instead of running
           - mutter
           - at-spi2-core
+          - dbus-daemon
+          - dbus-tools
 
     # Debugging logind issues.
     #  - name: logind_debug_setup

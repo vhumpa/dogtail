@@ -19,7 +19,7 @@ authors = [
 urls = { "Homepage" = "https://gitlab.com/dogtail/dogtail" }
 
 [tool.setuptools.packages.find]
-include = ["dogtail", "dogtail.accessibles", "dogtail.scripts", "tests"]
+include = ["dogtail", "dogtail.accessibles", "dogtail.hermetic", "dogtail.scripts", "tests"]
 
 [project.scripts]
 dogtail-create-config = "dogtail.scripts.dogtail_create_config:main"

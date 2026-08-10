@@ -10,20 +10,25 @@ Handling for Accessible Component.
 # pylint: disable=invalid-name
 # pylint: disable=import-error
 # pylint: disable=no-name-in-module
+
+# ruff: noqa: BLE001
 # ruff: noqa: E402
 # ruff: noqa: E501
+# ruff: noqa: S110
 
 import os
+
 import gi
+
 gi.require_version("Atspi", "2.0")
 from gi.repository import Atspi
 
 from dogtail.config import config
 from dogtail.logging import logging_class
+
 LOGGING = logging_class.logger
 
 from dogtail.accessibles.accessible_object import AccessibleObject
-
 from dogtail.ponytail_helper import ponytail_helper
 
 SESSION_TYPE = "x11"
@@ -325,16 +330,15 @@ class AccessibleComponent:
             return (-1, -1)
 
 
-        if SESSION_TYPE == "wayland":
-            if acc_object.role_name in ("window", "dialog", "frame"):
-                ponytail_interface = ponytail_helper.get_ponytail_interface()
+        if SESSION_TYPE == "wayland" and acc_object.role_name in ("window", "dialog", "frame"):
+            ponytail_interface = ponytail_helper.get_ponytail_interface()
 
-                window_list = ponytail_interface.window_list
-                window_id = acc_object.window_id
+            window_list = ponytail_interface.window_list
+            window_id = acc_object.window_id
 
-                for window in window_list:
-                    if window["id"] == window_id:
-                        return (int(window["width"]), int(window["height"]))
+            for window in window_list:
+                if window["id"] == window_id:
+                    return (int(window["width"]), int(window["height"]))
 
 
         if AccessibleObject.is_newton(acc_object):

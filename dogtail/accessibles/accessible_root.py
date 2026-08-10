@@ -7,10 +7,12 @@ Handling for Accessibles, extending with automation specific use cases, in this 
 # pylint: disable=wrong-import-position
 # pylint: disable=wrong-import-order
 # pylint: disable=no-name-in-module
-# ruff: noqa: E402
 
+# ruff: noqa: E402
+# ruff: noqa: E501
 
 from dogtail.logging import logging_class
+
 LOGGING = logging_class.logger
 
 from dogtail.accessibles.accessible_utilities import AccessibleUtilities

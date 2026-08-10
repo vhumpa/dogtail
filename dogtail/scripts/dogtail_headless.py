@@ -3,26 +3,29 @@
 A dogtail "headless" script that takes care of starting the session in wanted configuration.
 """
 
-# ruff: noqa: E501
 
 # pylint: disable=broad-exception-caught
 # pylint: disable=import-outside-toplevel
 # pylint: disable=line-too-long
 
+# ruff: noqa: B003
+# ruff: noqa: BLE001
+# ruff: noqa: E501
+# ruff: noqa: S110
 
-import os
-import errno
-import signal
-import subprocess
-import traceback
-from subprocess import check_output, STDOUT, CalledProcessError
-import time
 import argparse
 import configparser
-import shutil
-import sys
+import errno
+import os
 import re
-
+import shutil
+import signal
+import subprocess
+import sys
+import time
+import traceback
+from subprocess import STDOUT, CalledProcessError, check_output
+from typing import ClassVar
 
 ENVIRONMENT_VARIABLES_TO_PRESERVE = [
     "PYTHONPATH",
@@ -106,7 +109,7 @@ def get_environment_dictionary(binary="gnome-session-binary", verbose=True, term
                     if "=" in item:
                         key, value = item.split("=", 1)
                         environment_dictionary[key] = value
-        except IOError as error:
+        except OSError as error:
             if verbose:
                 print_info(f"Environment file manipulation failed on: '{error}'")
 
@@ -173,15 +176,13 @@ def is_binary_existing_and_executable(path) -> bool:
     """
 
     if (
-        path.startswith(os.path.sep)
-        or path.startswith(os.path.join(".", ""))
-        or path.startswith(os.path.join("..", ""))
+        path.startswith((os.path.sep, os.path.join(".", ""), os.path.join("..", "")))
     ):
         if not os.path.exists(path):
-            raise IOError(errno.ENOENT, "No such file", path)
+            raise OSError(errno.ENOENT, "No such file", path)
 
         if not os.access(path, os.X_OK):
-            raise IOError(errno.ENOEXEC, "Permission denied", path)
+            raise OSError(errno.ENOEXEC, "Permission denied", path)
 
     return True
 
@@ -229,10 +230,8 @@ def parse():
     parser.add_argument(
         "--session",
         required=False,
-        help="\n".join((
-            "What session to use (e.g. 'gnome', 'kde-plasma', 'mate').",
-            "Comes from /usr/share/xsessions/ or /usr/share/wayland-sessions/."
-        ))
+        help="What session to use (e.g. 'gnome', 'kde-plasma', 'mate').\n"
+             "Comes from /usr/share/xsessions/ or /usr/share/wayland-sessions/."
     )
     parser.add_argument("--session-binary",
                         required=False,
@@ -240,10 +239,8 @@ def parse():
     )
     parser.add_argument("--dm",
                         required=False,
-                        help="\n".join((
-                            "What display manager to use for spawning session.",
-                            "Supported: 'gdm' (default), 'sddm', or 'lightdm'."
-                        ))
+                        help="What display manager to use for spawning session.\n"
+                             "Supported: 'gdm' (default), 'sddm', or 'lightdm'."
     )
     parser.add_argument(
         "--session-type",
@@ -349,14 +346,14 @@ class DisplayManager:
 
     # Display manager presets.
 
-    gdm_options = {
+    gdm_options: ClassVar[dict] = {
         "config": "/etc/gdm/custom.conf",
         "section": "daemon",
         "enable": "AutomaticLoginEnable",
         "user": "AutomaticLogin"
     }
 
-    sddm_options = {
+    sddm_options: ClassVar[dict] = {
         "config": "/etc/sddm.conf",
         "section": "Autologin",
         "relogin": "Relogin",
@@ -364,7 +361,7 @@ class DisplayManager:
         "user": "User"
     }
 
-    lightdm_options = {
+    lightdm_options: ClassVar[dict] = {
         "config": "/etc/lightdm/lightdm.conf",
         "section": "Seat:*",
         "user": "autologin-user",
@@ -936,10 +933,10 @@ class DisplayManager:
                 # If closing state was detected and it got to this point.
                 # The session is still closing, kill it.
                 if session_in_closing_state:
-                    print_info("".join((
-                        "Session detected in closing state ",
+                    print_info(
+                        "Session detected in closing state "
                         "which did not end after 100 seconds, sending SIGTERM."
-                    )))
+                    )
                     time.sleep(1)
 
                     # Extra log straight to journal if for some reason wrong session is killed.
@@ -1165,12 +1162,9 @@ class Headless:
 
         set_accessibility_value = "true" if enable_accessibility else "false"
 
-        gsetting_get_command = " ".join(
-            (
-                "dbus-run-session gsettings get",
-                "org.gnome.desktop.interface",
-                "toolkit-accessibility",
-            )
+        gsetting_get_command = (
+            "dbus-run-session gsettings get "
+            "org.gnome.desktop.interface toolkit-accessibility"
         )
 
         gsetting_set_command = " ".join(
@@ -1234,11 +1228,11 @@ class Headless:
         print_info(f"Troubleshooting '{self.session_binary}':")
         print(f"Target file for environment is '{self.session_binary}'")
         print(f"Search was done with 'pgrep -fAu {user_id} {self.session_binary}'.")
-        print(f"With result '{str(gnome_session_binary_pid)}'\n")
+        print(f"With result '{gnome_session_binary_pid!s}'\n")
 
         print_info("Actual running processes:")
         print(f"$ {ps_command}")
-        print(f"{str(ps_command_result)}\n")
+        print(f"{ps_command_result!s}\n")
 
         # Troubleshooting dbus upon failure.
         dbus_processes_command = "ps ax -o uid,gid,pid,tname,command | grep dbus"

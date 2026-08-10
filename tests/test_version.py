@@ -4,10 +4,11 @@ Unit tests for the dogtail.version module.
 """
 
 # pylint: disable=line-too-long
+
 # ruff: noqa: E501
 
-
 import unittest
+
 import dogtail.version
 
 

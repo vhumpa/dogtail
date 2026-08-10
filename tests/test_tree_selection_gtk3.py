@@ -6,16 +6,15 @@ Unit tests for the dogtail.tree Node Selection.
 # pylint: disable=import-outside-toplevel
 # pylint: disable=wrong-import-position
 # pylint: disable=wrong-import-order
-# ruff: noqa: E402
 
+# ruff: noqa: E501
 
 import os
 import unittest
-
 from time import sleep
 
-from dogtail.tree import SearchError
 from dogtail.rawinput import press_key
+from dogtail.tree import SearchError
 
 try:
     from tests.test_gtk_demo import Gtk3DemoTest

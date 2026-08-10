@@ -6,13 +6,14 @@ Unit tests for the dogtail.tree Node Search.
 # pylint: disable=import-outside-toplevel
 # pylint: disable=wrong-import-position
 # pylint: disable=wrong-import-order
-# ruff: noqa: E402
 
+# ruff: noqa: E402
 
 import os
 import unittest
 
 import gi
+
 gi.require_version("Atspi", "2.0")
 from gi.repository import Atspi
 

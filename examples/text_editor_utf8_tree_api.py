@@ -8,8 +8,10 @@ Example of opening an example UTF-8 file in Text Editor.
 
 import os
 from time import sleep
+
 from dogtail.tree import root
 from dogtail.utils import run
+
 
 def gnome_text_editor_text_tree_api_demo():
     """

@@ -9,10 +9,12 @@ The predicate module for dogtail.
 # pylint: disable=import-error
 # pylint: disable=line-too-long
 # pylint: disable=no-name-in-module
-# ruff: noqa: E402
+
+# ruff: noqa: BLE001
 # ruff: noqa: E501
 
 from dogtail.logging import logging_class
+
 LOGGER = logging_class.logger
 
 
@@ -77,39 +79,26 @@ class GenericPredicate:
                 return False
 
             try:
-                # Check if user wants to check name.
-                if self.name is not None:
-                    # Compare name of self with the given node.
-                    if self.name != node.name:
-                        return False
+                # Check if user wants to check name, and compare it with the given node.
+                if self.name is not None and self.name != node.name:
+                    return False
 
-                # Check if user wants to check role_name.
-                if self.role_name is not None:
-                    # Compare role_name of self with the given node.
-                    # If 'push button' is wanted, attempt to match also 'button'
-                    if self.role_name != node.role_name:
-                        return False
+                # Check if user wants to check role_name, and compare it with the given node.
+                # If 'push button' is wanted, attempt to match also 'button'
+                if self.role_name is not None and self.role_name != node.role_name:
+                    return False
 
-                # Check if user wants to check description.
-                if self.description is not None:
-                    # Compare description of self with the given node.
-                    if self.description != node.description:
-                        return False
+                # Check if user wants to check description, and compare it with the given node.
+                if self.description is not None and self.description != node.description:
+                    return False
 
-                # Check if user wants to check identifier.
-                if self.identifier is not None:
-                    # Compare identifier with the given node's "id" or "accessible_id".
-                    if self.identifier not in (node.id, node.accessible_id):
-                        return False
+                # Check if user wants to check identifier against the node's "id" or "accessible_id".
+                if self.identifier is not None and self.identifier not in (node.id, node.accessible_id):
+                    return False
 
-                # Check if user wants to match showing only.
-                if self.showing_only:
-                    # Compare description of self with the given node.
-                    if not node.showing:
-                        return False
-
-                # There are no conflicting parameters, match is a success.
-                return True
+                # There are no conflicting parameters, so the match is a success
+                # unless the user asked for showing only and the node is hidden.
+                return not self.showing_only or node.showing
 
             except Exception:
                 return False
@@ -133,8 +122,8 @@ class GenericPredicate:
 
         exclude_key = {"satisfied_by_node"}
 
-        self_dict = {key: self.__dict__[key] for key in set(list(self.__dict__.keys())) - set(exclude_key)}
-        other_dict = {key: other.__dict__[key] for key in set(list(other.__dict__.keys())) - set(exclude_key)}
+        self_dict = {key: self.__dict__[key] for key in set(self.__dict__.keys()) - set(exclude_key)}
+        other_dict = {key: other.__dict__[key] for key in set(other.__dict__.keys()) - set(exclude_key)}
 
         return self_dict == other_dict
 
@@ -145,12 +134,12 @@ class GenericPredicate:
         """
 
         string_to_represent_object = ""
-        string_to_represent_object += f"name:{repr(self.name)} "
-        string_to_represent_object += f"role_name:{repr(self.role_name)} "
-        string_to_represent_object += f"description:{repr(self.description)} "
-        string_to_represent_object += f"label:{repr(self.label)} "
-        string_to_represent_object += f"id:{repr(self.identifier)} "
-        string_to_represent_object += f"showing_only:{repr(self.showing_only)}"
+        string_to_represent_object += f"name:{self.name!r} "
+        string_to_represent_object += f"role_name:{self.role_name!r} "
+        string_to_represent_object += f"description:{self.description!r} "
+        string_to_represent_object += f"label:{self.label!r} "
+        string_to_represent_object += f"id:{self.identifier!r} "
+        string_to_represent_object += f"showing_only:{self.showing_only!r}"
         return string_to_represent_object
 
 

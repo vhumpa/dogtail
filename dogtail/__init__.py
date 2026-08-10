@@ -4,6 +4,8 @@ GUI test tool and automation framework that uses Accessibility (a11y) technologi
 to communicate with desktop applications.
 """
 
+# ruff: noqa: BLE001
+
 __author__ = """
 Michal Odehnal <modehnal@redhat.com>,
 Vita Humpa <vhumpa@redhat.com>,

@@ -6,7 +6,6 @@ Unit tests for the dogtail.tree Node Selection.
 # pylint: disable=import-outside-toplevel
 # pylint: disable=wrong-import-position
 # pylint: disable=wrong-import-order
-# ruff: noqa: E402
 
 
 import os

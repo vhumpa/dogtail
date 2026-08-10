@@ -7,7 +7,8 @@ Handling for Accessibles, extending with automation specific use cases.
 # pylint: disable=wrong-import-position
 # pylint: disable=import-error
 # pylint: disable=no-name-in-module
-# ruff: noqa: E501
+
+# ruff: noqa: BLE001
 # ruff: noqa: E402
 
 import gi
@@ -15,9 +16,9 @@ import gi
 gi.require_version("Atspi", "2.0")
 from gi.repository import Atspi
 
-from dogtail.utils import do_delay
 from dogtail.config import config
 from dogtail.logging import logging_class
+from dogtail.utils import do_delay
 
 LOGGING = logging_class.logger
 

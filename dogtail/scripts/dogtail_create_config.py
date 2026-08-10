@@ -7,14 +7,16 @@ Create configuration in your current directory.
 
 import os
 import sys
+
 from dogtail.config import CONFIG_SCHEMA as schema
+
 
 def main():
     directory = os.path.realpath(os.getcwd())
 
     configuration = ""
 
-    for section in schema.keys():
+    for section in schema:
         configuration += f"[{section}]\n"
         for key, scheme_value in schema[section].items():
             _, raw_value = scheme_value
@@ -33,8 +35,8 @@ def main():
             os.path.abspath(os.path.join(directory, "dogtail_config.ini")),
         )))
 
-    except IOError as error:
-        raise IOError("File creation of 'dogtail_config.ini' failed.") from error
+    except OSError as error:
+        raise OSError("File creation of 'dogtail_config.ini' failed.") from error
 
 if __name__ == "__main__":
     main()

@@ -9,19 +9,21 @@ The utility module for dogtail.
 # pylint: disable=import-error
 # pylint: disable=import-outside-toplevel
 # pylint: disable=no-name-in-module
+
+# ruff: noqa: BLE001
+# ruff: noqa: DTZ005
 # ruff: noqa: E402
 # ruff: noqa: E501
+# ruff: noqa: S110
 
-
-from time import sleep
-from pathlib import Path
-
-import os
-import sys
 import errno
+import functools
+import os
 import shlex
 import subprocess
-import functools
+import sys
+from pathlib import Path
+from time import sleep
 
 import gi
 
@@ -30,6 +32,7 @@ gi.require_version("Gdk", "3.0")
 from gi.repository import Gtk
 
 from dogtail.logging import logging_class
+
 LOGGING = logging_class.logger
 
 from dogtail.config import config
@@ -67,8 +70,9 @@ def screenshot(file="" , time_stamp=True, datetime_string = "%Y%m%d-%H:%M:%S"):
         raise TypeError("time_stamp must be True or False")
 
     try:
-        from dasbus.connection import SessionMessageBus
         import datetime
+
+        from dasbus.connection import SessionMessageBus
 
         if file:
             save_file_as = str(file)
@@ -238,7 +242,7 @@ class Lock:
 
         self.lockdir = os.path.join(os.path.normpath(location), lockname)
         if randomize:
-            self.lockdir = "".join((self.lockdir, self.__getPostfix()))
+            self.lockdir = f"{self.lockdir}{self.__getPostfix()}"
 
         self.unlock_on_exit = using_unlock_on_exit
 
@@ -262,10 +266,10 @@ class Lock:
         atomic on POSIX compliant systems.
         """
 
-        LOGGING.debug(" ".join((
+        LOGGING.debug(" ".join(
                 "Create a lock directory."
                 "Raising the exception if the lock is already present."
-            ))
+            )
         )
 
         locked_msg = "Dogtail lock: Already locked with the same lock."
@@ -392,12 +396,12 @@ def bail_because_accessibility_is_disabled():
         LOGGING.info(f"Exception caught, but the execution is ending anyway: '{error}'")
 
 
-    LOGGING.info("".join((
-        "Dogtail requires that Assistive Technology support to be enabled.",
-        "You can enable accessibility with sniff or by running:",
-        "'gsettings set org.gnome.desktop.interface toolkit-accessibility true'",
-        "Aborting...",
-    )))
+    LOGGING.info(
+        "Dogtail requires that Assistive Technology support to be enabled."
+        "You can enable accessibility with sniff or by running:"
+        "'gsettings set org.gnome.desktop.interface toolkit-accessibility true'"
+        "Aborting..."
+    )
 
     sys.exit(1)
 
@@ -571,8 +575,8 @@ def wait_for_window(name, timeout=30):
 
     LOGGING.debug(logging_class.get_func_params_and_values())
 
-    from dogtail.rawinput import SESSION_TYPE
     from dogtail.ponytail_helper import ponytail_helper
+    from dogtail.rawinput import SESSION_TYPE
 
     if SESSION_TYPE == "wayland":
         ponytail_interface = ponytail_helper.get_ponytail_interface()
@@ -602,12 +606,9 @@ def get_current_x_window_position():
         from Xlib import X, display
         from Xlib.error import XError
     except ModuleNotFoundError as error:
-        raise ImportError("".join(
-                (
-                    "python-xlib is required for this script to run.",
-                    "Please install it i.e. using 'pip3 install python-xlib'.",
-                )
-            )
+        raise ImportError(
+            "python-xlib is required for this script to run."
+            "Please install it i.e. using 'pip3 install python-xlib'."
         ) from error
 
     _display = display.Display()
@@ -671,7 +672,7 @@ def get_screen_resolution():
             if isinstance(value, (dbus.Array, list, tuple, dbus.Struct)):
                 return [unwrap(x) for x in value]
             if isinstance(value, (dbus.Dictionary, dict)):
-                return dict([(unwrap(x), unwrap(y)) for x, y in value.items()])
+                return {unwrap(x): unwrap(y) for x, y in value.items()}
             if isinstance(value, (dbus.Signature, dbus.String)):
                 return str(value)
             if isinstance(value, dbus.Boolean):

@@ -1,17 +1,20 @@
 # pylint: disable=import-outside-toplevel
 
+# ruff: noqa: E501
+
 import os
+import subprocess
 import unittest
 from time import sleep
-import subprocess
 
-from dogtail.tree import root
+from dogtail.logging import logging_class
 from dogtail.rawinput import (
     drag,
     drag_with_trajectory,
     press_key,
 )
-from dogtail.logging import logging_class
+from dogtail.tree import root
+
 LOGGING = logging_class.logger
 
 

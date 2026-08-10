@@ -15,13 +15,7 @@ try:
 except ImportError:
     from test_gtk_demo import Gtk4DemoTest
 
-from dogtail.rawinput import (
-    click,
-    double_click,
-    press,
-    release,
-    press_key
-)
+from dogtail.rawinput import click, double_click, press, press_key, release
 
 
 @unittest.skipIf(not os.path.isfile("/usr/bin/gtk4-demo"), "Skipping, no gtk4-demo.")

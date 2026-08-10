@@ -5,11 +5,11 @@ Leftover from dogtail-1.x.
 """
 
 # pylint: disable=line-too-long
-# ruff: noqa: E501
 
 import inspect
 
 from dogtail.logging import logging_class
+
 LOGGING = logging_class.logger
 
 __author__ = "Zack Cerza <zcerza@redhat.com>"

@@ -8,10 +8,10 @@ The raw input module for dogtail.
 # pylint: disable=wrong-import-order
 # pylint: disable=import-error
 # pylint: disable=no-name-in-module
+
+# ruff: noqa: BLE001
 # ruff: noqa: E402
 # ruff: noqa: E501
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
 
@@ -21,21 +21,22 @@ gi.require_version("Atspi", "2.0")
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
 
-from gi.repository import Gdk
-from gi.repository import Atspi
-
 import warnings
+
+from gi.repository import Atspi, Gdk
+
 warnings.filterwarnings("ignore", "g_object_unref")
 
 
 from dogtail.config import config
+from dogtail.ponytail_helper import ponytail_helper
 from dogtail.utils import do_delay
 
-from dogtail.ponytail_helper import ponytail_helper
 # To preserve API from dogtail-1.x lets provide ponytail here as well.
 ponytail = ponytail_helper._ponytail_dbus_interface # pylint: disable=protected-access
 
 from dogtail.logging import logging_class
+
 LOGGING = logging_class.logger
 
 SESSION_TYPE = "x11"
@@ -322,7 +323,7 @@ def absolute_motion_with_trajectory(
     act_x = float(source_x)
     act_y = float(source_y)
 
-    for _ in range(0, int(max_length)):
+    for _ in range(int(max_length)):
 
         act_x += difference_x
         act_y += difference_y
@@ -395,7 +396,7 @@ def drag_node_to_node(source_node, destination_node, button=1, check=True):
 
     LOGGING.debug(logging_class.get_func_params_and_values())
 
-    LOGGING.debug(f"Dragging from '{str(source_node)}' to '{str(destination_node)}'.")
+    LOGGING.debug(f"Dragging from '{source_node!s}' to '{destination_node!s}'.")
     LOGGING.debug(f"Dragging using button '{button}' and check '{check}'")
 
     x = int(source_node.position[0] + source_node.size[0] / 2)
@@ -719,9 +720,8 @@ def key_combo(combo_string):
 
     # Check that the keys to be pressed are defined.
     for key_name in keys_to_press:
-        if not hasattr(Gdk, key_name):
-            if not hasattr(Gdk, f"KEY_{key_name}"):
-                raise ValueError(f"Cannot find key '{key_name}'")
+        if not hasattr(Gdk, key_name) and not hasattr(Gdk, f"KEY_{key_name}"):
+            raise ValueError(f"Cannot find key '{key_name}'")
 
     # Get all keys leading up to the final key.
     modifiers = keys_to_press[:-1]

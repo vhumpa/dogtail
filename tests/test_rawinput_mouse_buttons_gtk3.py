@@ -8,7 +8,6 @@ Unit tests for the dogtail.rawinput mouse buttons.
 
 import os
 import unittest
-
 from time import sleep
 
 try:
@@ -16,13 +15,7 @@ try:
 except ImportError:
     from test_gtk_demo import Gtk3DemoTest
 
-from dogtail.rawinput import (
-    click,
-    double_click,
-    press,
-    release,
-    press_key
-)
+from dogtail.rawinput import click, double_click, press, press_key, release
 
 
 @unittest.skipIf(not os.path.isfile("/usr/bin/gtk3-demo"), "Skipping, no gtk3-demo.")

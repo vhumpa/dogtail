@@ -4,14 +4,16 @@ Handles differences between different distributions.
 """
 
 # pylint: disable=line-too-long
+
 # ruff: noqa: E501
 
 import os
 import re
-from subprocess import check_output, STDOUT
-from dogtail.version import Version
+from subprocess import STDOUT, check_output
 
 from dogtail.logging import logging_class
+from dogtail.version import Version
+
 LOGGING = logging_class.logger
 
 
@@ -157,7 +159,7 @@ class _RpmPackageDb(PackageDb):
     """
 
     def get_version(self, package_name):
-        import rpm   # pylint: disable=import-outside-toplevel,import-error
+        import rpm  # pylint: disable=import-outside-toplevel,import-error
         transaction_set = rpm.TransactionSet()
         for header in transaction_set.dbMatch("name", package_name):
             return Version.from_string(header["version"])
@@ -166,7 +168,7 @@ class _RpmPackageDb(PackageDb):
 
 
     def get_files(self, package_name):
-        import rpm   # pylint: disable=import-outside-toplevel,import-error
+        import rpm  # pylint: disable=import-outside-toplevel,import-error
         transaction_set = rpm.TransactionSet()
         for header in transaction_set.dbMatch("name", package_name):
             return header["filenames"]
@@ -175,7 +177,7 @@ class _RpmPackageDb(PackageDb):
 
 
     def get_dependencies(self, package_name):
-        import rpm   # pylint: disable=import-outside-toplevel,import-error
+        import rpm  # pylint: disable=import-outside-toplevel,import-error
         transaction_set = rpm.TransactionSet()
         for header in transaction_set.dbMatch("name", package_name):
             result = {}
@@ -329,7 +331,8 @@ class _ConaryPackageDb(PackageDb):
     """
 
     def get_version(self, package_name):
-        from conaryclient import ConaryClient  # pylint: disable=import-outside-toplevel,import-error
+        # pylint: disable=import-outside-toplevel,import-error
+        from conaryclient import ConaryClient
         client = ConaryClient()
         database_versions = client.db.getTroveVersionList(package_name)
         if not database_versions:
@@ -594,6 +597,21 @@ class Arch(Distro):  # pragma: no cover
         self.package_database = _ArchPackageDb()
 
 
+def _first_line(file_name):
+    """
+    Read the first line of a file.
+
+    :param file_name: File to read.
+    :type file_name: str
+
+    :return: The first line, newline included.
+    :rtype: str
+    """
+
+    with open(file_name, encoding="utf-8") as opened_file:
+        return opened_file.readline()
+
+
 def detect_distribution():
     """
     Detect Distribution.
@@ -630,11 +648,11 @@ def detect_distribution():
         distribution_detection = Arch()
 
     elif os.path.exists("/etc/release") and \
-            re.match(".*Solaris", open("/etc/release", encoding="utf-8").readline()):
+            re.match(".*Solaris", _first_line("/etc/release")):
         distribution_detection = Solaris()
 
     elif os.path.exists("/etc/os-release") and \
-            re.match(".*GNOME-Continuous", open("/etc/os-release",  encoding="utf-8").readline()):
+            re.match(".*GNOME-Continuous", _first_line("/etc/os-release")):
         distribution_detection = GnomeContinuous()
 
     else:

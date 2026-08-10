@@ -9,22 +9,25 @@ Handling for Accessibles, extending with automation specific use cases.
 # pylint: disable=import-error
 # pylint: disable=line-too-long
 # pylint: disable=no-name-in-module
+
+# ruff: noqa: BLE001
 # ruff: noqa: E402
 # ruff: noqa: E501
+# ruff: noqa: S110
 
 import gi
 
 gi.require_version("Atspi", "2.0")
-from gi.repository import Atspi
-from gi.repository import GLib
-
-from types import LambdaType
 import inspect
-from dogtail.predicate import GenericPredicate
+from types import LambdaType
+
+from gi.repository import Atspi, GLib
+
 from dogtail.config import config
+from dogtail.logging import logging_class
+from dogtail.predicate import GenericPredicate
 from dogtail.utils import do_delay
 
-from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 
 # TODO think about logging and how much of it we need to not get flooded.
@@ -70,10 +73,7 @@ class AccessibleObject:
         # Good indicator of dead object, no children and no parent.
         empty_children_list = AccessibleObject.get_children(acc_object) == []
         no_parent = AccessibleObject.get_parent(acc_object) is None
-        if empty_children_list and no_parent:
-            return True
-
-        return False
+        return bool(empty_children_list and no_parent)
 
 
     # Too verbose, do not log.
@@ -461,10 +461,10 @@ class AccessibleObject:
             except GLib.GError as error:
                 if number_of_attempts == config.search_cut_off_limit:
                     LOGGING.info(f"GLib Error caught from a11y tree: '{error}'")
-                    raise RuntimeError(" ".join((
-                        "Error: Session has probably broken a11y!",
-                        "Exiting allowing session re-runs",
-                    ))) from error
+                    raise RuntimeError(
+                        "Error: Session has probably broken a11y! "
+                        "Exiting allowing session re-runs"
+                    ) from error
 
                 do_delay(config.search_back_off_delay)
 
@@ -630,10 +630,10 @@ class AccessibleObject:
             except GLib.GError as error:
                 if number_of_attempts == config.search_cut_off_limit:
                     LOGGING.info(f"GLib Error caught from a11y tree: '{error}'")
-                    raise RuntimeError(" ".join((
-                        "Error: Session has probably broken a11y!",
-                        "Exiting allowing session re-runs",
-                    ))) from error
+                    raise RuntimeError(
+                        "Error: Session has probably broken a11y! "
+                        "Exiting allowing session re-runs"
+                    ) from error
 
                 do_delay(config.search_back_off_delay)
 

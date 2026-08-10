@@ -4,6 +4,7 @@ Utility module to represent the application structure as a tree.
 """
 
 # pylint: disable=line-too-long
+
 # ruff: noqa: E501
 
 class AccessibleStructureRepresentation:

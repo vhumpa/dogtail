@@ -4,13 +4,15 @@ Handles versioning of software packages.
 """
 
 # pylint: disable=line-too-long
-# ruff: noqa: E501
 
 __author__ = "Dave Malcolm <dmalcolm@redhat.com>"
+
+# ruff: noqa: E501
 
 from packaging import version
 
 from dogtail.logging import logging_class
+
 LOGGING = logging_class.logger
 
 
@@ -22,7 +24,7 @@ class Version:
     """
 
     def __init__(self, version_list = None, versionList = None): # pylint: disable=invalid-name
-        LOGGING.debug(f"Version class constructor: '{type(versionList)}':'{str(versionList)}'")
+        LOGGING.debug(f"Version class constructor: '{type(versionList)}':'{versionList!s}'")
 
         self.validate_version_to_use = None
 
@@ -32,7 +34,7 @@ class Version:
             self.api_version = ""
 
         elif version_list and versionList:
-            LOGGING.debug(f"Two versions provided. Using the '{str(version_list)}'.")
+            LOGGING.debug(f"Two versions provided. Using the '{version_list!s}'.")
             self.validate_version_to_use = version_list
 
         elif version_list:

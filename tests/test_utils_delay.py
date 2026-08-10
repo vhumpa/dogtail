@@ -5,12 +5,11 @@ Unit tests for the dogtail.utils delays.
 
 
 import os
+import unittest
 from time import time
 
-import unittest
-
-from dogtail.utils import do_delay
 from dogtail.config import config
+from dogtail.utils import do_delay
 
 
 class TestDelay(unittest.TestCase):

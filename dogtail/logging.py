@@ -7,13 +7,15 @@ The logging module for dogtail.
 # pylint: disable=protected-access
 # pylint: disable=import-outside-toplevel
 
+# ruff: noqa: BLE001
+# ruff: noqa: E501
 
+import inspect
+import logging
 import os
 import sys
-import logging
-import inspect
 from functools import wraps
-
+from typing import ClassVar
 
 # Singleton solution provided by https://stackoverflow.com/a/54209647
 
@@ -22,11 +24,11 @@ class Singleton(type):
     Singleton class used as metaclass by :py:class:`logger.Logging`.
     """
 
-    _instances = {}
+    _instances: ClassVar[dict] = {}
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+            cls._instances[cls] = super().__call__(*args, **kwargs)
         return cls._instances[cls]
 
 class Logging(metaclass=Singleton):
@@ -60,7 +62,7 @@ class Logging(metaclass=Singleton):
             fallback=False
         )
         # Validate the debug file persistence value.
-        self.debug_file_persistence = True if self.debug_file_persistence == "True" else False
+        self.debug_file_persistence = self.debug_file_persistence == "True"
 
         # Nulling the file based persistence config value.
         if not self.debug_file_persistence:
@@ -73,11 +75,7 @@ class Logging(metaclass=Singleton):
         self.logger.propagate = False
 
         formatter = logging.Formatter(
-            "".join((
-                "[%(levelname)s] %(asctime)s: ",
-                "[%(filename)s:%(lineno)d] ",
-                "%(func_name)s: %(message)s"
-            ))
+            "[%(levelname)s] %(asctime)s: [%(filename)s:%(lineno)d] %(func_name)s: %(message)s"
         )
 
         # Default umask is 0o022 which turns off permissions for groups and others.
@@ -225,9 +223,9 @@ class Logging(metaclass=Singleton):
                     setattr(cls, name, property(new_getter, attr.fset, attr.fdel, attr.__doc__))
 
             # 3. Handle Standard Methods / Functions.
-            elif (inspect.isfunction(attr) or inspect.ismethod(attr)):
-                if not getattr(attr, "_do_not_log", False):
-                    setattr(cls, name, self.generate_log_for_method(attr))
+            elif (inspect.isfunction(attr) or inspect.ismethod(attr)) \
+                    and not getattr(attr, "_do_not_log", False):
+                setattr(cls, name, self.generate_log_for_method(attr))
 
         return cls
 

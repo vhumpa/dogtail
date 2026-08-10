@@ -3,7 +3,10 @@
 Print default configuration.
 """
 
-from dogtail.config import config, CONFIG_SCHEMA
+# ruff: noqa: E501
+
+from dogtail.config import CONFIG_SCHEMA, config
+
 
 def main():
     # Print the retrieved values
@@ -18,7 +21,7 @@ def main():
     max_string_options_length = len(header_options)
     max_string_value_length = len(header_value)
 
-    for section, fields in CONFIG_SCHEMA.items():
+    for fields in CONFIG_SCHEMA.values():
         for key, (expected_type, default_value) in fields.items():
             expected_types[key] = (expected_type, default_value)
 
@@ -30,9 +33,9 @@ def main():
 
     for key, value in config.validated_config.items():
         expected_type = "object"
-        if key in expected_types.keys():
+        if key in expected_types:
             expected_type = str(expected_types[key][0])
-        print(f"{key:<{max_string_options_length + 1}}: {str(value):<{max_string_value_length + 1}} '{expected_type}'")
+        print(f"{key:<{max_string_options_length + 1}}: {value!s:<{max_string_value_length + 1}} '{expected_type}'")
 
 if __name__ == "__main__":
     main()

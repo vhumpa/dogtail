@@ -6,7 +6,6 @@ Unit tests for the dogtail.tree Node States.
 # pylint: disable=import-outside-toplevel
 # pylint: disable=wrong-import-position
 # pylint: disable=wrong-import-order
-# ruff: noqa: E402
 
 
 import os
@@ -18,7 +17,7 @@ try:
 except ImportError:
     from test_gtk_demo import Gtk3DemoTest
 
-from dogtail.tree import root, Node
+from dogtail.tree import Node, root
 
 
 @unittest.skipIf(not os.path.isfile("/usr/bin/gtk3-demo"), "Skipping, no gtk3-demo.")

@@ -9,15 +9,17 @@ Event listener demo.
 # pylint: disable=wrong-import-order
 # pylint: disable=broad-exception-caught
 
+# ruff: noqa: BLE001
 # ruff: noqa: E402
 # ruff: noqa: E501
+# ruff: noqa: S110
 
 import gi
-gi.require_version("Atspi", "2.0")
-from gi.repository import Atspi
-from gi.repository import GLib
 
+gi.require_version("Atspi", "2.0")
 from time import sleep
+
+from gi.repository import Atspi, GLib
 
 # Explicit list of selected events:
 # https://gitlab.gnome.org/GNOME/at-spi2-core/-/blob/HEAD/atspi/atspi-event-listener.c#L479

@@ -4,15 +4,17 @@ The configuration module for dogtail.
 """
 
 # pylint: disable=line-too-long
+
+# ruff: noqa: BLE001
 # ruff: noqa: E501
+# ruff: noqa: TRY004
 
 import configparser
-
-from typing import get_origin, get_args
-
 import copy
+from typing import get_args, get_origin
 
 from dogtail.logging import logging_class
+
 LOGGING = logging_class.logger
 
 
@@ -167,7 +169,10 @@ def cast_value(value, expected_type):
                 for i, item in enumerate(value):
                     if not isinstance(item, item_type):
                         LOGGING.debug(f"Element '{i}' in '{value}' is not of type '{item_type}'.")
-                        raise ValueError(f"Element '{i}' in '{value}' is not of type '{item_type}'.")
+                        # Every config error is a ValueError, TypeError would break callers.
+                        raise ValueError(
+                            f"Element '{i}' in '{value}' is not of type '{item_type}'."
+                        )
 
             LOGGING.debug(f"Returning value '{value}'.")
             return value
@@ -322,9 +327,9 @@ class _Config:
             validated_expected_type = None
 
             # First attempt to get defaults from the schema.
-            for section in CONFIG_SCHEMA.keys():
-                if set_option_id in CONFIG_SCHEMA[section]:
-                    validated_expected_type, default_value = CONFIG_SCHEMA[section][set_option_id]
+            for section_options in CONFIG_SCHEMA.values():
+                if set_option_id in section_options:
+                    validated_expected_type, default_value = section_options[set_option_id]
 
             # If unsuccessful mark the expected type as anything.
             if not validated_expected_type:

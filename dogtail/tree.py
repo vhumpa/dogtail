@@ -10,6 +10,8 @@ The tree module for dogtail.
 # pylint: disable=import-error
 # pylint: disable=import-outside-toplevel
 # pylint: disable=protected-access
+
+# ruff: noqa: BLE001
 # ruff: noqa: E402
 # ruff: noqa: E501
 
@@ -18,15 +20,32 @@ import os
 import gi
 
 gi.require_version("Atspi", "2.0")
-from gi.repository import Atspi
-
 import warnings
+from typing import ClassVar
+
+from gi.repository import Atspi
 
 warnings.filterwarnings("ignore", "g_object_unref")
 
 from .logging import logging_class
+
 LOGGING = logging_class.logger
 
+
+from dogtail.ponytail_helper import ponytail_helper
+from dogtail.predicate import (
+    GenericPredicate,
+    IsADialogNamed,
+    IsAMenuItemNamed,
+    IsAMenuNamed,
+    IsATabNamed,
+    IsATextEntryNamed,
+    IsAWindowNamed,
+    IsLabelledAs,
+    IsNamed,
+)
+from dogtail.rawinput import click, double_click, point
+from dogtail.utils import do_delay
 
 from .accessibles.accessible_actions import AccessibleActions
 from .accessibles.accessible_component import AccessibleComponent
@@ -43,32 +62,16 @@ from .accessibles.accessible_text import AccessibleText
 from .accessibles.accessible_utilities import AccessibleUtilities
 from .accessibles.accessible_value import AccessibleValue
 
-from dogtail.predicate import (
-    GenericPredicate,
-    IsAMenuNamed,
-    IsAMenuItemNamed,
-    IsATextEntryNamed,
-    IsLabelledAs,
-    IsNamed,
-    IsATabNamed,
-    IsAWindowNamed,
-    IsADialogNamed,
-)
-
-from dogtail.ponytail_helper import ponytail_helper
-from dogtail.rawinput import click, point, double_click
-from dogtail.utils import do_delay
-
 
 @logging_class.log_a_class
-class Node(object):
+class Node:
     """
     Main dogtail API definition.
     """
 
     LOGGING.debug("Initiating dogtail api.")
 
-    event_listeners = {}
+    event_listeners: ClassVar[dict] = {}
 
     # Keep session as a variable.
     session_type = "x11"
@@ -1816,13 +1819,10 @@ class Node(object):
         Blink will highlight the current node on the screen. Using Blinker from utility.
         """
 
-        if not self.extents:
-            return False
-
         #from dogtail.utils import Blinker
         #(x, y, w, h) = self.extents
         #Blinker(x, y, w, h)
-        return True
+        return bool(self.extents)
 
 
     @staticmethod

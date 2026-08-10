@@ -3,7 +3,10 @@
 Unit tests for the dogtail.config.
 """
 
+# ruff: noqa: E501
+
 import unittest
+
 from dogtail.config import config
 
 

@@ -6,12 +6,10 @@ Useful classes for in session manipulation with applications.
 
 import os
 import sys
-
+import unittest
 from io import StringIO
-
 from time import sleep
 
-import unittest
 import dogtail.utils
 
 

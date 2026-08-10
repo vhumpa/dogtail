@@ -7,9 +7,9 @@ Unit tests for the dogtail.utils accessibility.
 import unittest
 
 from dogtail.utils import (
+    bail_because_accessibility_is_disabled,
     enable_accessibility,
     is_accessibility_enabled,
-    bail_because_accessibility_is_disabled
 )
 
 

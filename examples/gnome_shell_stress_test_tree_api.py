@@ -6,6 +6,7 @@ Example of working with GNOME Shell, running clicks in loop.
 
 from dogtail.tree import root
 
+
 def gnome_shell_stress_test_tree_api():
     """
     Run click to GNOME Shell in loop.

@@ -3,9 +3,12 @@
 Unit tests for the dogtail.predicate.
 """
 
+# ruff: noqa: E501
+
 import unittest
-import dogtail.tree
+
 import dogtail.predicate
+import dogtail.tree
 
 
 class DummyNode:

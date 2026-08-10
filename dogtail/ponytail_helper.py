@@ -10,17 +10,18 @@ The ponytail helper module for dogtail.
 # pylint: disable=import-error
 # pylint: disable=protected-access
 # pylint: disable=no-name-in-module
-# ruff: noqa: E402
+
+# ruff: noqa: BLE001
 # ruff: noqa: E501
 
 import os
-
 from time import sleep
+from typing import ClassVar
 
 from dogtail.config import config
+from dogtail.logging import logging_class
 from dogtail.utils import do_delay
 
-from dogtail.logging import logging_class
 LOGGING = logging_class.logger
 
 
@@ -29,11 +30,11 @@ class Singleton(type):
     Singleton class used as metaclass by :py:class:`logger.Logging`.
     """
 
-    _instances = {}
+    _instances: ClassVar[dict] = {}
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+            cls._instances[cls] = super().__call__(*args, **kwargs)
         return cls._instances[cls]
 
 
@@ -49,7 +50,7 @@ class PonytailHelper(metaclass=Singleton):
     _ponytail_dbus_interface = None
     _already_initiated = False
 
-    expected_packages = [
+    expected_packages: ClassVar[list] = [
         "gnome-ponytail-daemon",
         "python3-gnome-ponytail-daemon"
     ]
@@ -57,7 +58,7 @@ class PonytailHelper(metaclass=Singleton):
     error_message = "\n".join((
         "\n",
         "Error in ponytail initiation might be cause by several reasons:",
-        f"\t1) Packages '{str(expected_packages)}' are not installed.",
+        f"\t1) Packages '{expected_packages!s}' are not installed.",
         "\t2) If installed, the gnome-ponytail-daemon process might not be running.",
         "\t3) You are on the system that does not have GNOME Shell Introspection.",
         "\n",
@@ -119,7 +120,7 @@ class PonytailHelper(metaclass=Singleton):
         if isinstance(window_id, int):
             LOGGING.debug("Return wanted window_id.")
             try:
-                _window_id = int([x["client-type"] for x in window_list if x["id"] == window_id][0])
+                _window_id = int(next(x["client-type"] for x in window_list if x["id"] == window_id))
                 LOGGING.debug(f"Returning: '{_window_id}'")
                 return _window_id
 
@@ -155,12 +156,12 @@ class PonytailHelper(metaclass=Singleton):
 
         LOGGING.debug("Checking if possibly connected window still exists.")
 
-        if ponytail_interface.connected and isinstance(ponytail_interface.connected, int):
-            if ponytail_interface.connected not in [x["id"] for x in window_list]:
-                LOGGING.debug("Disconnecting no longer open window.")
-                ponytail_interface.disconnect()
-                sleep(1)
-                LOGGING.debug("Done.")
+        if ponytail_interface.connected and isinstance(ponytail_interface.connected, int) \
+                and ponytail_interface.connected not in [x["id"] for x in window_list]:
+            LOGGING.debug("Disconnecting no longer open window.")
+            ponytail_interface.disconnect()
+            sleep(1)
+            LOGGING.debug("Done.")
 
         if input_source == "keyboard" and ponytail_interface.connected is None:
             LOGGING.debug("Keyboard event, connecting monitor.")
@@ -210,12 +211,12 @@ class PonytailHelper(metaclass=Singleton):
 
             elif ponytail_interface.connected is not None and window_id is None:
                 for window in window_list:
-                    if bool(window["has-focus"]) is True:
-                        if ponytail_interface.connected != window["id"]:
-                            ponytail_interface.disconnect()
-                            sleep(1)
-                            ponytail_interface.connectWindow(window["id"])
-                            LOGGING.debug("Re-connected active window.")
+                    if bool(window["has-focus"]) is True \
+                            and ponytail_interface.connected != window["id"]:
+                        ponytail_interface.disconnect()
+                        sleep(1)
+                        ponytail_interface.connectWindow(window["id"])
+                        LOGGING.debug("Re-connected active window.")
 
             elif ponytail_interface.connected is None:
                 if isinstance(window_id, int):
@@ -282,7 +283,7 @@ class PonytailHelper(metaclass=Singleton):
             LOGGING.debug("Window id event.")
 
             for window in window_list:
-                if "title" not in window.keys():
+                if "title" not in window:
                     window["title"] = ""
 
             node = accessible_object

@@ -7,6 +7,7 @@ Handling for Accessible Hypertext.
 # pylint: disable=wrong-import-position
 # pylint: disable=wrong-import-order
 # pylint: disable=no-name-in-module
+
 # ruff: noqa: E402
 
 import gi
@@ -14,8 +15,8 @@ import gi
 gi.require_version("Atspi", "2.0")
 from gi.repository import Atspi
 
-
 from dogtail.logging import logging_class
+
 LOGGING = logging_class.logger
 
 from dogtail.accessibles.accessible_object import AccessibleObject

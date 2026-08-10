@@ -6,6 +6,7 @@ Unit tests for the dogtail.rawinput.
 # pylint: disable=import-outside-toplevel
 
 import unittest
+
 from dogtail.rawinput import (
     absolute_motion,
     absolute_motion_with_trajectory,

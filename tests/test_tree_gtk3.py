@@ -6,8 +6,8 @@ Unit tests for the dogtail.tree Node.
 # pylint: disable=import-outside-toplevel
 # pylint: disable=wrong-import-position
 # pylint: disable=wrong-import-order
-# ruff: noqa: E402
 
+# ruff: noqa: E402
 
 import os
 import unittest
@@ -17,10 +17,11 @@ try:
 except ImportError:
     from test_gtk_demo import Gtk3DemoTest
 
-from dogtail.tree import root
-from dogtail.config import config
-
 import gi
+
+from dogtail.config import config
+from dogtail.tree import root
+
 gi.require_version("Atspi", "2.0")
 from gi.repository import Atspi
 

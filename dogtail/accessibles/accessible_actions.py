@@ -8,6 +8,8 @@ Handling for Accessible Action.
 # pylint: disable=wrong-import-order
 # pylint: disable=import-error
 # pylint: disable=no-name-in-module
+
+# ruff: noqa: BLE001
 # ruff: noqa: E402
 # ruff: noqa: E501
 
@@ -17,12 +19,12 @@ gi.require_version("Atspi", "2.0")
 from gi.repository import Atspi
 
 from dogtail.logging import logging_class
+
 LOGGING = logging_class.logger
 
+from dogtail.accessibles.accessible_object import AccessibleObject
 from dogtail.config import config
 from dogtail.utils import do_delay
-
-from dogtail.accessibles.accessible_object import AccessibleObject
 
 
 class ActionNotSupported(Exception):

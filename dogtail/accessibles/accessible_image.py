@@ -8,16 +8,19 @@ Handling for Accessible Image.
 # pylint: disable=wrong-import-order
 # pylint: disable=import-error
 # pylint: disable=no-name-in-module
+
 # ruff: noqa: E402
 # ruff: noqa: E501
 
 import os
+
 import gi
 
 gi.require_version("Atspi", "2.0")
 from gi.repository import Atspi
 
 from dogtail.logging import logging_class
+
 LOGGING = logging_class.logger
 
 from dogtail.accessibles.accessible_object import AccessibleObject

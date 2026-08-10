@@ -5,10 +5,8 @@ Unit tests for the dogtail.utils Lock.
 
 # ruff: noqa: E501
 
-
-import unittest
-
 import os
+import unittest
 
 from dogtail.utils import Lock
 

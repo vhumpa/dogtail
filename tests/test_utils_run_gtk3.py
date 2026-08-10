@@ -4,13 +4,12 @@ Unit tests for the dogtail.utils run.
 """
 
 
+import os
+import unittest
 from time import sleep
 
-import os
-
-import unittest
-from dogtail.utils import run
 from dogtail.tree import root
+from dogtail.utils import run
 
 
 @unittest.skipIf(not os.path.isfile("/usr/bin/gtk3-demo"), "Skipping, no gtk3-demo.")

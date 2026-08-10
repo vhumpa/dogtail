@@ -7,9 +7,8 @@ Unit tests for the dogtail.rawinput keyboard methods.
 
 
 import os
-from time import sleep
-
 import unittest
+from time import sleep
 
 try:
     from tests.test_gtk_demo import Gtk4DemoTest
@@ -17,8 +16,8 @@ except ImportError:
     from test_gtk_demo import Gtk4DemoTest
 
 from dogtail.rawinput import (
-    press_key,
     key_combo,
+    press_key,
     type_text,
 )
 

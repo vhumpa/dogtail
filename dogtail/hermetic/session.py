@@ -20,7 +20,6 @@ import warnings
 from dogtail.config import config
 from dogtail.utils import do_delay
 
-
 REGISTRY_NAME = "org.a11y.atspi.Registry"
 REMOTE_DESKTOP_NAME = "org.gnome.Mutter.RemoteDesktop"
 
@@ -653,17 +652,17 @@ class HermeticSession:
         """
 
         target = self.monitor_size()
-        frame = application_node.child(roleName="frame")
+        frame = application_node.child(role_name="frame")
         if frame.extents[2:] == target:
             return frame
 
-        application_node.child(menu, roleName="menu").doActionNamed("click")
+        application_node.child(menu, role_name="menu").do_action_named("click")
         do_delay(config.action_delay)
-        application_node.child(item).doActionNamed("click")
+        application_node.child(item).do_action_named("click")
 
         deadline = time.time() + self.boot_timeout
         while time.time() < deadline:
-            frame = application_node.child(roleName="frame")
+            frame = application_node.child(role_name="frame")
             if frame.extents[2:] == target:
                 return frame
             time.sleep(0.2)
@@ -693,7 +692,7 @@ def dump_tree(node, max_depth=6, _depth=0, _output=None):
     output = [] if _output is None else _output
 
     try:
-        output.append("  " * _depth + f"{node.roleName}: {node.name!r}")
+        output.append("  " * _depth + f"{node.role_name}: {node.name!r}")
     except Exception as error:  # noqa: BLE001  pylint: disable=broad-exception-caught
         output.append("  " * _depth + f"<unreadable node: {error}>")
 

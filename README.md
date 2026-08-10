@@ -165,8 +165,8 @@ boots a compositor instead.
 session = HermeticSession()
 session.boot()
 session.launch(["myapp"])
-app = session.wait_for_app("myapp")
-app.child("click me").doActionNamed("click")
+application = session.wait_for_app("myapp")
+application.child("click me").do_action_named("click")
 session.teardown()
 ```
 

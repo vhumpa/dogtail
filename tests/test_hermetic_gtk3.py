@@ -118,7 +118,7 @@ class TestHermeticGtk3(unittest.TestCase):
 
         return any(
             child.name == text
-            for child in application.findChildren(lambda node: node.roleName == "label")
+            for child in application.find_children(lambda node: node.role_name == "label")
         )
 
 
@@ -142,7 +142,7 @@ class TestHermeticGtk3(unittest.TestCase):
 
         self.assertTrue(self._label_says("not clicked"))
 
-        self.application.child("click me").doActionNamed("click")
+        self.application.child("click me").do_action_named("click")
         sleep(1)
 
         self.assertTrue(
@@ -198,7 +198,7 @@ class TestHermeticGtk3(unittest.TestCase):
 
         self.session.install_input()
 
-        entry = self.application.child(roleName="text")
+        entry = self.application.child(role_name="text")
         entry.click()
         sleep(0.5)
 

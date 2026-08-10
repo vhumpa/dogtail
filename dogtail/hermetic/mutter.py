@@ -13,7 +13,6 @@ import gi
 gi.require_version("Gio", "2.0")
 from gi.repository import Gio, GLib
 
-
 BUS_NAME = "org.gnome.Mutter.RemoteDesktop"
 OBJECT_PATH = "/org/gnome/Mutter/RemoteDesktop"
 INTERFACE = "org.gnome.Mutter.RemoteDesktop"
@@ -365,7 +364,7 @@ def _toplevel_of(node):
     """
 
     toplevel = node
-    while toplevel.parent is not None and toplevel.parent.roleName != "application":
+    while toplevel.parent is not None and toplevel.parent.role_name != "application":
         toplevel = toplevel.parent
 
     return toplevel
@@ -396,11 +395,11 @@ def _guard_coordinates(node, monitor_size):
         return
 
     raise CoordinatesUnavailable(
-        f"{node.name or node.roleName!r} sits in a {size[0]}x{size[1]} window, "
+        f"{node.name or node.role_name!r} sits in a {size[0]}x{size[1]} window, "
         f"the monitor is {monitor_size[0]}x{monitor_size[1]}. at-spi coords are "
         f"window-local on wayland and injection is screen-global, so this click "
-        f"would land somewhere else entirely. use doActionNamed(), or fullscreen "
-        f"the window first with session.fullscreen(app)."
+        f"would land somewhere else entirely. use do_action_named(), or fullscreen "
+        f"the window first with session.fullscreen(application)."
     )
 
 
@@ -483,7 +482,7 @@ class _Node:
         self.extents = extents
         self.parent = parent
         self.name = "click me"
-        self.roleName = "push button"  # pylint: disable=invalid-name
+        self.role_name = "button"
 
 
 def demo():

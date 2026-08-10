@@ -41,15 +41,16 @@ class TestMyApp(unittest.TestCase):
         process = self.session.launch([sys.executable, APPLICATION_PATH])
         self.addCleanup(process.wait, 5)      # cleanups run last-first, so this
         self.addCleanup(process.terminate)    # waits on the terminate below it
-        self.app = self.session.wait_for_app("hermetic_app_gtk3")
+        self.application = self.session.wait_for_app("hermetic_app_gtk3")
 
     def test_button_does_something(self):
-        self.app.child("click me").doActionNamed("click")
+        self.application.child("click me").do_action_named("click")
         sleep(1)
         self.assertTrue(
-            any(c.name == "clicked"
-                for c in self.app.findChildren(lambda n: n.roleName == "label")),
-            f"label never changed:\n{dump_tree(self.app)}",
+            any(child.name == "clicked"
+                for child in self.application.find_children(
+                    lambda node: node.role_name == "label")),
+            f"label never changed:\n{dump_tree(self.application)}",
         )
 ```
 
@@ -77,8 +78,8 @@ and take it as an argument:
 ```python
 def test_button_does_something(hermetic_session):
     hermetic_session.launch([sys.executable, APPLICATION_PATH])
-    app = hermetic_session.wait_for_app("hermetic_app_gtk3")
-    app.child("click me").doActionNamed("click")
+    application = hermetic_session.wait_for_app("hermetic_app_gtk3")
+    application.child("click me").do_action_named("click")
 ```
 
 It is session-scoped, and it has to be. pytest runs every module in one
@@ -106,11 +107,11 @@ GTK3   'click me'/button
 GTK4   'click me'/button, 'click me'/label
 ```
 
-So `app.child("click me")` is ambiguous on GTK4 and returns whichever the tree
-walk reaches first. Pin the role:
+So `application.child("click me")` is ambiguous on GTK4 and returns whichever the
+tree walk reaches first. Pin the role:
 
 ```python
-app.child("click me", roleName="button")
+application.child("click me", role_name="button")
 ```
 
 ## The rules
@@ -129,14 +130,14 @@ one session in `setUpClass` and restart the app between tests instead, that's
 cheap and it works. A second `boot()` now raises immediately instead of lying
 to you.
 
-### 2. `doActionNamed()` first, always
+### 2. `do_action_named()` first, always
 
 ```python
-node.doActionNamed("click")   # good, no coordinates involved
+node.do_action_named("click")   # good, no coordinates involved
 node.click()                  # needs coordinates. see rule 3.
 ```
 
-`doActionNamed` invokes the widget through AT-SPI, which skips the pointer,
+`do_action_named` invokes the widget through AT-SPI, which skips the pointer,
 the window placement and the coordinate math entirely. It's the default, and it
 covers menus, dialogs, buttons and checkboxes.
 
@@ -159,18 +160,18 @@ only way round it is to avoid the situation. Fullscreen the window and the two
 coordinate spaces become the same numbers:
 
 ```python
-self.session.install_input()          # arms the guard
-self.session.fullscreen(self.app)     # drives the app's View > Fullscreen
-self.app.child("click me").click()    # now lands where you think
+self.session.install_input()                  # arms the guard
+self.session.fullscreen(self.application)     # drives the app's View > Fullscreen
+self.application.child("click me").click()    # now lands where you think
 ```
 
 Click by coordinates on a window that isn't fullscreen and you get
 `CoordinatesUnavailable` instead of a click landing in the wrong place.
 Dialogs are their own windows and are never fullscreen, so use
-`doActionNamed` on those.
+`do_action_named` on those.
 
 An app with no fullscreen menu item doesn't get coordinate clicking at all.
-`doActionNamed` still works.
+`do_action_named` still works.
 
 ### 4. Real input needs `install_input()`
 
@@ -185,12 +186,12 @@ guard. Skip it and `click()`/`type_text()` go nowhere.
 
 | | |
 |---|---|
-| menus, dialogs, buttons, checkboxes | yes, via `doActionNamed` |
+| menus, dialogs, buttons, checkboxes | yes, via `do_action_named` |
 | reading state: titles, labels, text, tree | yes |
 | typing (`type_text`) | yes, after `install_input()` |
 | clicking by coordinate (`node.click()`) | only on a fullscreen window |
 | canvas / drag / click-by-position | only on a fullscreen window |
-| dialogs by coordinate | no, use `doActionNamed` |
+| dialogs by coordinate | no, use `do_action_named` |
 | screenshots | no, use `dump_tree(node)`, diffs better in CI anyway |
 | video, XPath, touch, scroll, KWin, sway | no |
 
@@ -202,7 +203,7 @@ Everything in this stack fails quietly, so match the symptom:
 |---|---|---|
 | `childCount=-1`, empty desktop | second session in one process | one session per process (rule 1) |
 | app registers, tree is empty | ATK bridge off | `NO_AT_BRIDGE=1` in the env, or `at-spi2-atk` missing |
-| `CoordinatesUnavailable` | window not fullscreen | `doActionNamed`, or `session.fullscreen(app)` (rule 3) |
+| `CoordinatesUnavailable` | window not fullscreen | `do_action_named`, or `session.fullscreen(application)` (rule 3) |
 | click does nothing, no error | injection not installed | `session.install_input()` (rule 4) |
 | first click of a session lost | mutter drops startup events | raise `$DOGTAIL_WARM_UP_EVENTS` above 6 |
 | `timed out waiting for ...` | slow box, or the process died | the error carries the log tail. if the box is just loaded, raise `$DOGTAIL_HERMETIC_TIMEOUT` |

@@ -118,7 +118,7 @@ class TestHermeticGtk4(unittest.TestCase):
 
         application = self.application if application is None else application
 
-        return application.child("click me", roleName="button")
+        return application.child("click me", role_name="button")
 
 
     def _label_says(self, text, application=None):
@@ -139,7 +139,7 @@ class TestHermeticGtk4(unittest.TestCase):
 
         return any(
             child.name == text
-            for child in application.findChildren(lambda node: node.roleName == "label")
+            for child in application.find_children(lambda node: node.role_name == "label")
         )
 
 
@@ -163,7 +163,7 @@ class TestHermeticGtk4(unittest.TestCase):
 
         self.assertTrue(self._label_says("not clicked"))
 
-        self._button().doActionNamed("click")
+        self._button().do_action_named("click")
         sleep(1)
 
         self.assertTrue(
@@ -221,7 +221,7 @@ class TestHermeticGtk4(unittest.TestCase):
 
         self.session.install_input()
 
-        entry = self.application.child(roleName="text")
+        entry = self.application.child(role_name="text")
         entry.click()
         sleep(0.5)
 

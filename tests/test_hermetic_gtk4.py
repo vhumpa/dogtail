@@ -32,9 +32,11 @@ APPLICATION_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "hermetic_app_gtk4.py"
 )
 MISSING_BINARIES = missing_binaries()
+DISPLAY_RUNNING = os.environ.get("WAYLAND_DISPLAY") or os.environ.get("DISPLAY")
 
 
 @unittest.skipIf(MISSING_BINARIES, f"Skipping, missing: {', '.join(MISSING_BINARIES)}.")
+@unittest.skipIf(DISPLAY_RUNNING, f"Skipping, display server already running: {DISPLAY_RUNNING!r}.")
 class TestHermeticGtk4(unittest.TestCase):
     """
     Class to test dogtail's hermetic session against a real GTK4 application.

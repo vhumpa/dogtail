@@ -12,6 +12,8 @@ while injection is screen-global, and only fullscreen makes the two agree.
 # pylint: disable=import-outside-toplevel
 # pylint: disable=wrong-import-position
 
+# ruff: noqa: E501
+
 import os
 import sys
 import unittest

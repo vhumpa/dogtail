@@ -14,6 +14,8 @@ application subprocess only, the same arrangement as test_tree_gtk4.py.
 # pylint: disable=import-outside-toplevel
 # pylint: disable=wrong-import-position
 
+# ruff: noqa: E501
+
 import os
 import sys
 import unittest

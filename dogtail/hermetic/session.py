@@ -8,6 +8,8 @@ raising.
 Boot order matters: a11y bus, registryd, wait for the name, mutter, app.
 """
 
+# ruff: noqa: E501
+
 import ctypes
 import os
 import shutil

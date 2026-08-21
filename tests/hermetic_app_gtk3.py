@@ -6,6 +6,8 @@ A button, a label that says whether it got clicked, and an entry to type into.
 That is it.
 """
 
+# ruff: noqa: E402
+
 import sys
 
 import gi

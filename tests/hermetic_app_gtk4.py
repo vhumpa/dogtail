@@ -6,6 +6,8 @@ The same three widgets as hermetic_app_gtk3.py, built with GTK4 so that the
 hermetic session gets tested against both toolkits.
 """
 
+# ruff: noqa: E402
+
 import sys
 
 import gi

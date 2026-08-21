@@ -4,6 +4,9 @@ interface that rawinput.py already expects, without ScreenCast, PipeWire or
 libei.
 """
 
+# ruff: noqa: E402
+# ruff: noqa: E501
+
 import os  # noqa: I001 - require_version has to run between the two gi imports
 import re
 import subprocess

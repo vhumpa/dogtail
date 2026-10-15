@@ -11,6 +11,7 @@ The configuration module for dogtail.
 
 import configparser
 import copy
+import os
 from typing import get_args, get_origin
 
 from dogtail.logging import logging_class
@@ -198,11 +199,23 @@ def cast_value(value, expected_type):
         return cast_basic(value, expected_type)
 
 
-def load_and_validate_config(path: str, schema: dict):
+def load_and_validate_config(path: str, schema: dict, keep_unknown: bool = True):
     LOGGING.debug(logging_class.get_func_params_and_values())
 
     config = configparser.ConfigParser()
-    config.read(path)
+
+    # Load the file if present, otherwise fall back to schema defaults only.
+    if os.path.isfile(path):
+        LOGGING.debug(f"Configuration file '{path}' found, loading values from it.")
+        try:
+            with open(path, encoding="utf-8") as config_file:
+                config.read_file(config_file)
+        except (OSError, configparser.Error) as error:
+            raise ConfigValidationError(
+                f"Failed to read configuration file '{path}': {error}"
+            ) from error
+    else:
+        LOGGING.debug(f"Configuration file '{path}' not found, using default values.")
 
     validated = {}
 
@@ -220,15 +233,26 @@ def load_and_validate_config(path: str, schema: dict):
                 try:
                     value = cast_value(raw_value, expected_type)
                 except Exception as error:
-                    raise ConfigValidationError(f"Type error in [{section}].{key}: {error}")
+                    raise ConfigValidationError(
+                        f"Invalid value for [{section}].{key} in '{path}': "
+                        f"could not cast '{raw_value}' to {expected_type} ({error})"
+                    ) from error
 
                 validated[key] = value
                 LOGGING.debug(f"Set Validated key '{key}' to value '{value}'")
 
-            else:
+            elif keep_unknown:
                 # Unknown key → keep raw value as string
                 validated[key] = raw_value
                 LOGGING.debug(f"Set Validated key '{key}' to raw value '{raw_value}'")
+
+            else:
+                # Unknown key for this schema → ignore it so it cannot leak into
+                # the result (e.g. real options polluting the compatibility set).
+                LOGGING.debug(
+                    f"Ignoring key '{key}' in [{section}] from '{path}': "
+                    "not defined in the schema for this load."
+                )
 
     LOGGING.debug("Process default variables.")
     # Step 2: Ensure missing schema sections & keys get default values.
@@ -248,7 +272,7 @@ class _Config:
     """
 
     validated_config = load_and_validate_config("dogtail_config.ini", CONFIG_SCHEMA)
-    validated_compatibility_config = load_and_validate_config("dogtail_config.ini", COMPATIBILITY_CONFIG_SCHEMA)
+    validated_compatibility_config = load_and_validate_config("dogtail_config.ini", COMPATIBILITY_CONFIG_SCHEMA, keep_unknown=False)
 
     LOGGING.debug(f"Validated config: '{validated_config}'")
 
@@ -325,6 +349,7 @@ class _Config:
         if self.validated_config[set_option_id] != value_to_set:
 
             validated_expected_type = None
+            default_value = None
 
             # First attempt to get defaults from the schema.
             for section_options in CONFIG_SCHEMA.values():

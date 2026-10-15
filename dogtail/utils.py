@@ -11,7 +11,6 @@ The utility module for dogtail.
 # pylint: disable=no-name-in-module
 
 # ruff: noqa: BLE001
-# ruff: noqa: DTZ005
 # ruff: noqa: E402
 # ruff: noqa: E501
 # ruff: noqa: S110

@@ -10,16 +10,22 @@ license = "GPL-2.0"
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [
-    {name = "Zack Cerza", email = "zcerza@redhat.com"},
-    {name = "Ed Rousseau", email = "rousseau@redhat.com"},
-    {name = "David Malcolm", email = "dmalcolm@redhat.com"},
-    {name = "Vitezslav Humpa", email = "vhumpa@redhat.com"},
-    {name = "Michal Odehnal", email = "modehnal@redhat.com"}
+    { name = "Zack Cerza", email = "zcerza@redhat.com" },
+    { name = "Ed Rousseau", email = "rousseau@redhat.com" },
+    { name = "David Malcolm", email = "dmalcolm@redhat.com" },
+    { name = "Vitezslav Humpa", email = "vhumpa@redhat.com" },
+    { name = "Michal Odehnal", email = "modehnal@redhat.com" },
 ]
 urls = { "Homepage" = "https://gitlab.com/dogtail/dogtail" }
 
 [tool.setuptools.packages.find]
-include = ["dogtail", "dogtail.accessibles", "dogtail.hermetic", "dogtail.scripts", "tests"]
+include = [
+    "dogtail",
+    "dogtail.accessibles",
+    "dogtail.hermetic",
+    "dogtail.scripts",
+    "tests",
+]
 
 [project.scripts]
 dogtail-create-config = "dogtail.scripts.dogtail_create_config:main"
@@ -37,3 +43,4 @@ write_to = "dogtail/_version.py"
 
 [tool.ruff.lint]
 extend-select = ["E402", "E501"]
+ignore = ["DTZ005"]
